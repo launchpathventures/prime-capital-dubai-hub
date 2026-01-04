@@ -1,0 +1,593 @@
+/**
+ * CATALYST - Global Styles
+ *
+ * TWO-LAYER ARCHITECTURE (applies to both colors and typography):
+ * 1. :root — Raw values. Easy for AI to generate and update.
+ * 2. @theme — Semantic tokens. Maps raw values to meanings.
+ *
+ * AI agents update values in :root. Semantic mappings stay stable in @theme.
+ * Components use semantic names (bg-primary, text-destructive, font-sans).
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Class-based dark mode allows JS theme switching */
+@custom-variant dark (&:is(.dark *));
+
+/* =============================================================================
+   COLOR SCALES (Raw Values)
+   Update these to change brand colors. AI can regenerate entire scales here.
+   ============================================================================= */
+
+:root {
+  /* --- Primary (blue) --- */
+  --primary-50: oklch(0.97 0.01 220);
+  --primary-100: oklch(0.93 0.03 220);
+  --primary-200: oklch(0.87 0.06 220);
+  --primary-300: oklch(0.78 0.10 220);
+  --primary-400: oklch(0.68 0.13 220);
+  --primary-500: oklch(0.61 0.11 222);
+  --primary-600: oklch(0.52 0.11 225);
+  --primary-700: oklch(0.45 0.10 228);
+  --primary-800: oklch(0.38 0.08 230);
+  --primary-900: oklch(0.30 0.05 232);
+
+  /* --- Secondary (teal) --- */
+  --secondary-50: oklch(0.97 0.02 180);
+  --secondary-100: oklch(0.93 0.04 180);
+  --secondary-200: oklch(0.87 0.07 180);
+  --secondary-300: oklch(0.78 0.10 180);
+  --secondary-400: oklch(0.68 0.12 180);
+  --secondary-500: oklch(0.58 0.12 180);
+  --secondary-600: oklch(0.48 0.10 180);
+  --secondary-700: oklch(0.40 0.08 180);
+  --secondary-800: oklch(0.32 0.06 180);
+  --secondary-900: oklch(0.25 0.04 180);
+
+  /* --- Tertiary (purple) --- */
+  --tertiary-50: oklch(0.97 0.02 285);
+  --tertiary-100: oklch(0.93 0.05 285);
+  --tertiary-200: oklch(0.87 0.09 285);
+  --tertiary-300: oklch(0.78 0.14 285);
+  --tertiary-400: oklch(0.68 0.18 285);
+  --tertiary-500: oklch(0.58 0.20 285);
+  --tertiary-600: oklch(0.48 0.18 285);
+  --tertiary-700: oklch(0.40 0.15 285);
+  --tertiary-800: oklch(0.32 0.11 285);
+  --tertiary-900: oklch(0.25 0.07 285);
+
+  /* --- Gray (neutral) --- */
+  --gray-base: oklch(1 0 0);
+  --gray-50: oklch(0.975 0 0);
+  --gray-100: oklch(0.96 0 0);
+  --gray-200: oklch(0.94 0 0);
+  --gray-300: oklch(0.87 0 0);
+  --gray-400: oklch(0.71 0 0);
+  --gray-500: oklch(0.55 0 0);
+  --gray-600: oklch(0.44 0 0);
+  --gray-700: oklch(0.37 0 0);
+  --gray-800: oklch(0.27 0 0);
+  --gray-900: oklch(0.15 0 0);
+
+  /* --- Destructive (red) --- */
+  --destructive-50: oklch(0.97 0.02 25);
+  --destructive-100: oklch(0.94 0.05 25);
+  --destructive-200: oklch(0.88 0.10 25);
+  --destructive-300: oklch(0.78 0.15 25);
+  --destructive-400: oklch(0.68 0.19 25);
+  --destructive-500: oklch(0.58 0.22 27);
+  --destructive-600: oklch(0.50 0.20 27);
+  --destructive-700: oklch(0.42 0.17 27);
+  --destructive-800: oklch(0.35 0.14 27);
+  --destructive-900: oklch(0.28 0.10 27);
+
+  /* --- Success (green) --- */
+  --success-50: oklch(0.98 0.02 145);
+  --success-100: oklch(0.95 0.05 145);
+  --success-200: oklch(0.90 0.09 145);
+  --success-300: oklch(0.82 0.13 145);
+  --success-400: oklch(0.72 0.15 145);
+  --success-500: oklch(0.62 0.16 145);
+  --success-600: oklch(0.52 0.14 145);
+  --success-700: oklch(0.44 0.12 145);
+  --success-800: oklch(0.36 0.09 145);
+  --success-900: oklch(0.28 0.06 145);
+
+  /* --- Warning (amber) --- */
+  --warning-50: oklch(0.98 0.03 85);
+  --warning-100: oklch(0.95 0.06 85);
+  --warning-200: oklch(0.90 0.10 80);
+  --warning-300: oklch(0.85 0.14 75);
+  --warning-400: oklch(0.80 0.16 70);
+  --warning-500: oklch(0.75 0.18 65);
+  --warning-600: oklch(0.65 0.17 60);
+  --warning-700: oklch(0.55 0.15 55);
+  --warning-800: oklch(0.45 0.12 50);
+  --warning-900: oklch(0.35 0.08 45);
+
+  /* --- Info (sky blue) --- */
+  --info-50: oklch(0.97 0.02 230);
+  --info-100: oklch(0.94 0.05 230);
+  --info-200: oklch(0.88 0.09 235);
+  --info-300: oklch(0.80 0.12 240);
+  --info-400: oklch(0.70 0.14 245);
+  --info-500: oklch(0.60 0.15 250);
+  --info-600: oklch(0.52 0.14 250);
+  --info-700: oklch(0.44 0.12 250);
+  --info-800: oklch(0.36 0.10 250);
+  --info-900: oklch(0.28 0.07 250);
+
+  /* ==========================================================================
+     STRUCTURAL TOKENS
+     Theme-level values that affect component appearance across the board.
+     Change these to shift the overall visual style (rounded vs sharp, etc.)
+     ========================================================================== */
+
+  /* --- Border radius --- */
+  --radius: 0.625rem; /* Base radius, components derive from this */
+
+  /* --- Border width --- */
+  --border-width: 1px; /* Default border thickness (1px = subtle, 2px = bold) */
+
+  /* --- Focus ring --- */
+  --ring-width: 3px;
+  --ring-offset: 0px;
+
+  /* ==========================================================================
+     ANIMATION TOKENS
+     ========================================================================== */
+
+  /* --- Transition timing --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* --- Easing curves (matches Tailwind defaults) --- */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ==========================================================================
+     STATE TOKENS
+     ========================================================================== */
+
+  /* --- Disabled state --- */
+  --opacity-disabled: 0.5;
+
+  /* ==========================================================================
+     TYPOGRAPHY CONVENTIONS (Reference Only)
+     We use Tailwind's built-in type utilities. This documents our conventions.
+     ========================================================================== */
+
+  /*
+   * FONT CONTEXTS:
+   * - Title: font-semibold (600), tracking-tight for large sizes
+   * - Body:  font-normal (400), leading-relaxed for long-form
+   * - UI:    font-medium (500), text-sm for buttons/labels
+   *
+   * RECOMMENDED PATTERNS:
+   * - Page title:     text-3xl font-semibold tracking-tight
+   * - Section head:   text-xl font-medium
+   * - Body text:      text-sm or text-base
+   * - Button/Label:   text-sm font-medium
+   * - Caption:        text-xs text-muted-foreground
+   */
+}
+
+/* =============================================================================
+   DARK MODE SCALES
+   ============================================================================= */
+
+.dark {
+  /* --- Primary (brighter for dark backgrounds) --- */
+  --primary-50: oklch(0.20 0.02 225);
+  --primary-100: oklch(0.25 0.04 225);
+  --primary-200: oklch(0.32 0.06 224);
+  --primary-300: oklch(0.42 0.09 222);
+  --primary-400: oklch(0.52 0.11 220);
+  --primary-500: oklch(0.65 0.12 218);
+  --primary-600: oklch(0.72 0.13 216);
+  --primary-700: oklch(0.80 0.11 214);
+  --primary-800: oklch(0.88 0.08 212);
+  --primary-900: oklch(0.95 0.03 210);
+
+  /* --- Secondary (teal - inverted) --- */
+  --secondary-50: oklch(0.18 0.03 180);
+  --secondary-100: oklch(0.24 0.05 180);
+  --secondary-200: oklch(0.32 0.07 180);
+  --secondary-300: oklch(0.42 0.09 180);
+  --secondary-400: oklch(0.54 0.11 180);
+  --secondary-500: oklch(0.65 0.12 180);
+  --secondary-600: oklch(0.74 0.10 180);
+  --secondary-700: oklch(0.82 0.08 180);
+  --secondary-800: oklch(0.90 0.05 180);
+  --secondary-900: oklch(0.96 0.02 180);
+
+  /* --- Tertiary (purple - inverted) --- */
+  --tertiary-50: oklch(0.18 0.04 285);
+  --tertiary-100: oklch(0.24 0.07 285);
+  --tertiary-200: oklch(0.32 0.10 285);
+  --tertiary-300: oklch(0.42 0.14 285);
+  --tertiary-400: oklch(0.54 0.17 285);
+  --tertiary-500: oklch(0.66 0.19 285);
+  --tertiary-600: oklch(0.76 0.16 285);
+  --tertiary-700: oklch(0.84 0.12 285);
+  --tertiary-800: oklch(0.91 0.07 285);
+  --tertiary-900: oklch(0.96 0.03 285);
+
+  /* --- Gray (inverted) --- */
+  --gray-base: oklch(0.23 0 0);
+  --gray-50: oklch(0.26 0 0);
+  --gray-100: oklch(0.30 0 0);
+  --gray-200: oklch(0.35 0 0);
+  --gray-300: oklch(0.42 0 0);
+  --gray-400: oklch(0.54 0 0);
+  --gray-500: oklch(0.70 0 0);
+  --gray-600: oklch(0.78 0 0);
+  --gray-700: oklch(0.85 0 0);
+  --gray-800: oklch(0.92 0 0);
+  --gray-900: oklch(0.97 0 0);
+
+  /* --- Destructive (brighter red) --- */
+  --destructive-50: oklch(0.22 0.04 25);
+  --destructive-100: oklch(0.28 0.08 25);
+  --destructive-200: oklch(0.36 0.12 25);
+  --destructive-300: oklch(0.46 0.16 25);
+  --destructive-400: oklch(0.56 0.19 25);
+  --destructive-500: oklch(0.66 0.20 25);
+  --destructive-600: oklch(0.74 0.18 25);
+  --destructive-700: oklch(0.82 0.14 25);
+  --destructive-800: oklch(0.90 0.08 25);
+  --destructive-900: oklch(0.96 0.03 25);
+
+  /* --- Success (brighter green) --- */
+  --success-50: oklch(0.18 0.03 145);
+  --success-100: oklch(0.24 0.06 145);
+  --success-200: oklch(0.32 0.09 145);
+  --success-300: oklch(0.42 0.12 145);
+  --success-400: oklch(0.52 0.14 145);
+  --success-500: oklch(0.64 0.15 145);
+  --success-600: oklch(0.74 0.13 145);
+  --success-700: oklch(0.82 0.10 145);
+  --success-800: oklch(0.90 0.06 145);
+  --success-900: oklch(0.96 0.03 145);
+
+  /* --- Warning (brighter amber) --- */
+  --warning-50: oklch(0.20 0.04 70);
+  --warning-100: oklch(0.28 0.08 70);
+  --warning-200: oklch(0.38 0.12 70);
+  --warning-300: oklch(0.50 0.15 70);
+  --warning-400: oklch(0.62 0.17 70);
+  --warning-500: oklch(0.74 0.18 70);
+  --warning-600: oklch(0.82 0.16 75);
+  --warning-700: oklch(0.88 0.12 80);
+  --warning-800: oklch(0.93 0.08 85);
+  --warning-900: oklch(0.97 0.04 85);
+
+  /* --- Info (brighter sky) --- */
+  --info-50: oklch(0.18 0.03 245);
+  --info-100: oklch(0.24 0.06 245);
+  --info-200: oklch(0.32 0.09 245);
+  --info-300: oklch(0.42 0.11 245);
+  --info-400: oklch(0.54 0.13 245);
+  --info-500: oklch(0.66 0.14 245);
+  --info-600: oklch(0.76 0.12 240);
+  --info-700: oklch(0.84 0.09 235);
+  --info-800: oklch(0.91 0.05 230);
+  --info-900: oklch(0.96 0.02 230);
+}
+
+/* =============================================================================
+   SEMANTIC TOKENS (@theme)
+   Maps raw values to semantic meanings. Components use these names.
+   ============================================================================= */
+
+@theme inline {
+  /* --- Typography --- */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* --- Responsive text sizes (clamp: min, fluid, max) ---
+     Smaller sizes (xs-2xl) stay fixed — they're already appropriate.
+     Larger sizes (3xl-9xl) scale fluidly for headings/hero text.
+     Formula: clamp(min-rem, calc(base + vw-scale), max-rem)
+  */
+  --text-3xl: clamp(1.5rem, calc(1.25rem + 1vw), 1.875rem);
+  --text-4xl: clamp(1.75rem, calc(1.5rem + 1.5vw), 2.25rem);
+  --text-5xl: clamp(2rem, calc(1.5rem + 2.5vw), 3rem);
+  --text-6xl: clamp(2.25rem, calc(1.5rem + 3.5vw), 3.75rem);
+  --text-7xl: clamp(2.5rem, calc(1.5rem + 5vw), 4.5rem);
+  --text-8xl: clamp(3rem, calc(1.5rem + 7vw), 6rem);
+  --text-9xl: clamp(3.5rem, calc(1.5rem + 10vw), 8rem);
+
+  /* --- Heading line-heights (tighter for large sizes) --- */
+  --text-3xl--line-height: 1.3;
+  --text-4xl--line-height: 1.25;
+  --text-5xl--line-height: 1.2;
+  --text-6xl--line-height: 1.15;
+  --text-7xl--line-height: 1.1;
+  --text-8xl--line-height: 1.1;
+  --text-9xl--line-height: 1.1;
+
+  /* --- Brand: Primary --- */
+  --color-primary: var(--primary-500);
+  --color-primary-foreground: var(--primary-50);
+  --color-primary-50: var(--primary-50);
+  --color-primary-100: var(--primary-100);
+  --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
+  --color-primary-400: var(--primary-400);
+  --color-primary-500: var(--primary-500);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
+  --color-primary-800: var(--primary-800);
+  --color-primary-900: var(--primary-900);
+
+  /* --- Brand: Secondary --- */
+  --color-secondary: var(--secondary-100);
+  --color-secondary-foreground: var(--secondary-900);
+  --color-secondary-50: var(--secondary-50);
+  --color-secondary-100: var(--secondary-100);
+  --color-secondary-200: var(--secondary-200);
+  --color-secondary-300: var(--secondary-300);
+  --color-secondary-400: var(--secondary-400);
+  --color-secondary-500: var(--secondary-500);
+  --color-secondary-600: var(--secondary-600);
+  --color-secondary-700: var(--secondary-700);
+  --color-secondary-800: var(--secondary-800);
+  --color-secondary-900: var(--secondary-900);
+
+  /* --- Brand: Tertiary --- */
+  --color-tertiary: var(--tertiary-500);
+  --color-tertiary-foreground: var(--tertiary-50);
+  --color-tertiary-50: var(--tertiary-50);
+  --color-tertiary-100: var(--tertiary-100);
+  --color-tertiary-200: var(--tertiary-200);
+  --color-tertiary-300: var(--tertiary-300);
+  --color-tertiary-400: var(--tertiary-400);
+  --color-tertiary-500: var(--tertiary-500);
+  --color-tertiary-600: var(--tertiary-600);
+  --color-tertiary-700: var(--tertiary-700);
+  --color-tertiary-800: var(--tertiary-800);
+  --color-tertiary-900: var(--tertiary-900);
+
+  /* --- Neutral: Gray --- */
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
+
+  /* --- Status: Destructive (shadcn standard) --- */
+  --color-destructive: var(--destructive-500);
+  --color-destructive-foreground: var(--destructive-50);
+  --color-destructive-50: var(--destructive-50);
+  --color-destructive-100: var(--destructive-100);
+  --color-destructive-200: var(--destructive-200);
+  --color-destructive-300: var(--destructive-300);
+  --color-destructive-400: var(--destructive-400);
+  --color-destructive-500: var(--destructive-500);
+  --color-destructive-600: var(--destructive-600);
+  --color-destructive-700: var(--destructive-700);
+  --color-destructive-800: var(--destructive-800);
+  --color-destructive-900: var(--destructive-900);
+
+  /* --- Status: Success --- */
+  --color-success: var(--success-500);
+  --color-success-foreground: var(--success-50);
+  --color-success-50: var(--success-50);
+  --color-success-100: var(--success-100);
+  --color-success-200: var(--success-200);
+  --color-success-300: var(--success-300);
+  --color-success-400: var(--success-400);
+  --color-success-500: var(--success-500);
+  --color-success-600: var(--success-600);
+  --color-success-700: var(--success-700);
+  --color-success-800: var(--success-800);
+  --color-success-900: var(--success-900);
+
+  /* --- Status: Warning --- */
+  --color-warning: var(--warning-500);
+  --color-warning-foreground: var(--warning-900);
+  --color-warning-50: var(--warning-50);
+  --color-warning-100: var(--warning-100);
+  --color-warning-200: var(--warning-200);
+  --color-warning-300: var(--warning-300);
+  --color-warning-400: var(--warning-400);
+  --color-warning-500: var(--warning-500);
+  --color-warning-600: var(--warning-600);
+  --color-warning-700: var(--warning-700);
+  --color-warning-800: var(--warning-800);
+  --color-warning-900: var(--warning-900);
+
+  /* --- Status: Info --- */
+  --color-info: var(--info-500);
+  --color-info-foreground: var(--info-50);
+  --color-info-50: var(--info-50);
+  --color-info-100: var(--info-100);
+  --color-info-200: var(--info-200);
+  --color-info-300: var(--info-300);
+  --color-info-400: var(--info-400);
+  --color-info-500: var(--info-500);
+  --color-info-600: var(--info-600);
+  --color-info-700: var(--info-700);
+  --color-info-800: var(--info-800);
+  --color-info-900: var(--info-900);
+
+  /* --- Surface tokens (from gray scale) --- */
+  --color-background: var(--gray-base);
+  --color-foreground: var(--gray-900);
+  --color-card: var(--gray-base);
+  --color-card-foreground: var(--gray-900);
+  --color-popover: var(--gray-base);
+  --color-popover-foreground: var(--gray-900);
+  --color-muted: var(--gray-100);
+  --color-muted-foreground: var(--gray-500);
+  --color-accent: var(--gray-50);
+  --color-accent-foreground: var(--gray-900);
+  --color-border: var(--gray-200);
+  --color-input: var(--gray-200);
+  --color-ring: var(--primary-500);
+
+  /* --- Chart palette --- */
+  --color-chart-1: var(--primary-200);
+  --color-chart-2: var(--primary-300);
+  --color-chart-3: var(--primary-400);
+  --color-chart-4: var(--primary-500);
+  --color-chart-5: var(--primary-600);
+
+  /* --- Sidebar (independent theming) --- */
+  --color-sidebar: var(--gray-50);
+  --color-sidebar-foreground: var(--gray-900);
+  --color-sidebar-primary: var(--primary-500);
+  --color-sidebar-primary-foreground: var(--primary-50);
+  --color-sidebar-accent: var(--gray-100);
+  --color-sidebar-accent-foreground: var(--gray-900);
+  --color-sidebar-border: var(--gray-200);
+  --color-sidebar-ring: var(--primary-500);
+
+  /* --- Typography --- */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* --- Border radius scale --- */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* =============================================================================
+   DENSITY SCALE
+   Adjusts root font-size to scale all rem-based spacing and typography.
+   Applied via class on <html> element, stored in localStorage.
+   ============================================================================= */
+
+html.density-compact {
+  font-size: 13px; /* ~81% — noticeably tighter spacing */
+}
+
+/* Compact: Tighter gaps and padding on common layout elements */
+.density-compact [data-slot="sidebar-body"] {
+  padding: 0.375rem;
+}
+
+.density-compact [data-slot="header"] {
+  height: 2.75rem; /* 44px instead of 56px */
+}
+
+.density-compact [data-slot="card"] {
+  padding: 0.625rem;
+}
+
+/* Optional: tighten the shell header wrapper when present */
+.density-compact [data-slot="shell-header"] {
+  padding: 0.5rem 1rem;
+}
+
+html.density-normal {
+  font-size: 16px; /* 100% — default browser size */
+}
+
+html.density-large {
+  font-size: 18px; /* 112.5% — more spacious, larger text */
+}
+
+/* Large: Taller header */
+.density-large [data-slot="header"] {
+  height: 4rem; /* 64px instead of 56px */
+}
+
+/*
+ * Density switching can look "animated" because many components use
+ * transition utilities (e.g. transition-all) that react to layout/font-size changes.
+ * This temporarily disables motion during the density class swap.
+ */
+html[data-density-changing],
+html[data-density-changing] *,
+html[data-density-changing] *::before,
+html[data-density-changing] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /*
+   * EMPHASIS IN MUTED TEXT
+   * When <strong> or <code> appears inside muted text, promote to foreground
+   * so emphasis is visible. Remove this block if you prefer manual control.
+   */
+  .text-muted-foreground strong,
+  .text-muted-foreground code {
+    @apply text-foreground;
+  }
+}
+
+/* =============================================================================
+   CATALYST - Presentation Float Animations
+   Used by: app/(present)/present/page.tsx (Slide 2 stacked cards)
+   ============================================================================= */
+
+@keyframes catalyst-float-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-6px, -10px, 0);
+  }
+}
+
+@keyframes catalyst-float-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6px, -8px, 0);
+  }
+}
+
+@keyframes catalyst-float-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+.catalyst-float-a {
+  animation: catalyst-float-a 7s ease-in-out infinite;
+}
+
+.catalyst-float-b {
+  animation: catalyst-float-b 8.5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+
+.catalyst-float-c {
+  animation: catalyst-float-c 9.5s ease-in-out infinite;
+  animation-delay: -3s;
+}

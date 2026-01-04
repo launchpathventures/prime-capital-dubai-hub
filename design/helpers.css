@@ -1,0 +1,317 @@
+/**
+ * CATALYST - Helper Utilities
+ *
+ * Reusable utility classes that extend Tailwind.
+ * These are structural/behavioral — not brand-specific.
+ *
+ * WHY THIS FILE EXISTS:
+ * - Utilities used across multiple contexts (app, docs, marketing)
+ * - Patterns that don't fit Tailwind's utility model
+ * - Overflow, scroll, and interaction helpers
+ *
+ * IMPORTED BY: app/layout.tsx (always loaded)
+ *
+ * NOTE: Animations are in animate.css, not here.
+ *
+ * RULES:
+ * - No brand colors here — use semantic tokens if color needed
+ * - Keep utilities generic and reusable
+ * - Document each section's purpose
+ */
+
+/* =============================================================================
+   GLOBAL ENHANCEMENTS
+   Modern CSS features that improve the baseline behavior.
+   ============================================================================= */
+
+:root {
+  /*
+   * interpolate-size: allow-keywords
+   * Enables smooth transitions between `height: auto` and fixed values.
+   * Without this, animating to/from auto requires JS.
+   * Browser support: Chrome 129+, Edge 129+. Degrades gracefully.
+   */
+  interpolate-size: allow-keywords;
+}
+
+/* =============================================================================
+   OVERFLOW & TEXT TRUNCATION
+   Robust patterns for text overflow that work in complex layouts.
+   ============================================================================= */
+
+/*
+ * Overflow parent container
+ * Apply to the parent when using .overflow-ellipsis on a child.
+ * Ensures the child respects container width.
+ */
+.overflow-parent {
+  width: 100%;
+  overflow: hidden;
+}
+
+/*
+ * Single-line ellipsis (more robust than Tailwind's .truncate)
+ * Works better in flex/grid contexts.
+ */
+.overflow-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Force block elements to respect parent width */
+.overflow-ellipsis:not(span) {
+  width: 100%;
+}
+
+/* Multi-line truncation with ellipsis */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Text balance for headings — prevents orphans */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Text pretty for body — better line breaks */
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* =============================================================================
+   MEDIA EMBEDS
+   Responsive containers for videos and iframes.
+   ============================================================================= */
+
+/*
+ * Responsive video container (16:9 aspect ratio)
+ * Usage: <div class="video-embed"><iframe src="..."></iframe></div>
+ */
+.video-embed {
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  position: relative;
+}
+
+.video-embed iframe,
+.video-embed video {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 4:3 aspect ratio variant */
+.video-embed-4x3 {
+  width: 100%;
+  padding-bottom: 75%; /* 4:3 aspect ratio */
+  position: relative;
+}
+
+.video-embed-4x3 iframe,
+.video-embed-4x3 video {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* =============================================================================
+   SCROLL UTILITIES
+   Custom scrollbar hiding and scroll snap helpers.
+   ============================================================================= */
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Horizontal scroll container */
+.scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scroll snap for carousels */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.scroll-snap-start {
+  scroll-snap-align: start;
+}
+
+.scroll-snap-center {
+  scroll-snap-align: center;
+}
+
+/* =============================================================================
+   ACCESSIBILITY UTILITIES
+   Screen reader and focus management helpers.
+   ============================================================================= */
+
+/*
+ * Visually hidden but accessible to screen readers.
+ * Use for labels, announcements, skip links.
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/*
+ * Becomes visible on focus (for skip links).
+ * Combine with sr-only for skip-to-content patterns.
+ */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-within {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/*
+ * Focus visible ring - enhanced keyboard focus.
+ * Use when you want a prominent focus indicator.
+ */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * Not sr-only - reset sr-only (for responsive patterns).
+ */
+.not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* =============================================================================
+   INTERACTION UTILITIES
+   Focus, hover, and interaction helpers.
+   ============================================================================= */
+
+/* Remove tap highlight on mobile */
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection (for UI elements) */
+.no-select {
+  user-select: none;
+}
+
+/* Allow text selection (override) */
+.select-text {
+  user-select: text;
+}
+
+/* =============================================================================
+   LOADING STATES
+   Skeleton and shimmer effects for loading content.
+   ============================================================================= */
+
+/*
+ * Skeleton loading placeholder.
+ * Apply to empty divs that represent loading content.
+ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 25%,
+    oklch(from var(--color-muted-foreground) l c h / 0.1) 50%,
+    var(--color-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.25rem;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Disable shimmer for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* =============================================================================
+   ASPECT RATIO HELPERS
+   Common aspect ratios beyond Tailwind defaults.
+   ============================================================================= */
+
+.aspect-4\/3 {
+  aspect-ratio: 4 / 3;
+}
+
+.aspect-3\/2 {
+  aspect-ratio: 3 / 2;
+}
+
+.aspect-21\/9 {
+  aspect-ratio: 21 / 9;
+}
+
+.aspect-9\/16 {
+  aspect-ratio: 9 / 16;
+}

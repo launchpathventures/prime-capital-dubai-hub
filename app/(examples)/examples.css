@@ -1,0 +1,140 @@
+/**
+ * CATALYST - Examples Surface Styles
+ *
+ * Surface-specific styles for the examples showcase.
+ *
+ * =============================================================================
+ * LAYOUT SYSTEM
+ * =============================================================================
+ *
+ * Two patterns, both explicit at the page's root:
+ *
+ * STANDARD PAGE (default — padding + max-width automatic):
+ *   export default function MyPage() {
+ *     return (
+ *       <article>
+ *         Content gets padding and max-width automatically
+ *       </article>
+ *     )
+ *   }
+ *
+ * BLEED PAGE (full-width sections):
+ *   export default function MyPage() {
+ *     return (
+ *       <div className="examples-bleed">
+ *         <section className="bg-muted/50">Full-width background</section>
+ *         <article className="examples-section">Standard width content</article>
+ *       </div>
+ *     )
+ *   }
+ *
+ * CLASSES:
+ *   .examples-content   Container from shell (sets variables, default padding)
+ *   .examples-bleed     Page root wrapper → triggers bleed mode (no padding)
+ *   .examples-section   Standard width + padding (use inside bleed pages)
+ */
+
+@import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   EXAMPLES CONTENT LAYOUT
+   ============================================================================= */
+
+/* Container: sets variables */
+.examples-content {
+  --examples-content-width: 80rem;
+  --examples-content-padding: 1rem;
+  --examples-content-padding-md: 1.5rem;
+}
+
+/* Default padding on container (low specificity) */
+:where(.examples-content) {
+  padding: var(--examples-content-padding);
+
+  @media (min-width: 768px) {
+    padding: var(--examples-content-padding-md);
+  }
+}
+
+/* Bleed mode: when page root has .examples-bleed, remove container padding */
+:where(.examples-content:has(> .examples-bleed)) {
+  padding: 0;
+}
+
+/* Default width constraint on direct children (low specificity) */
+:where(.examples-content > *) {
+  --_pad: var(--examples-content-padding);
+  max-width: var(--examples-content-width);
+  margin-inline: auto;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    --_pad: var(--examples-content-padding-md);
+  }
+}
+
+/* Section: standard width + padding (for use inside bleed pages) */
+.examples-section {
+  --_pad: var(--examples-content-padding);
+  max-width: calc(var(--examples-content-width) + var(--_pad) * 2);
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--_pad);
+
+  @media (min-width: 768px) {
+    --_pad: var(--examples-content-padding-md);
+  }
+}
+
+/* Bleed wrapper: signals bleed mode + makes children full-width by default */
+.examples-bleed {
+  max-width: none;
+  width: 100%;
+}
+
+/* Full-width children inside bleed wrapper */
+:where(.examples-bleed > *) {
+  max-width: none;
+  width: 100%;
+}
+
+/* =============================================================================
+   ANALYTICS EXAMPLE
+   ============================================================================= */
+
+/* Metric cards grid - responsive */
+.analytics-metrics {
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Metric cards - subtle animation on value */
+.analytics-metric [data-slot="title"] {
+  transition: transform 0.2s ease;
+}
+
+.analytics-metric:hover [data-slot="title"] {
+  transform: translateX(2px);
+}
+
+/* Supporting charts row - responsive */
+.analytics-supporting {
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Chart containers - ensure proper sizing */
+.analytics-trend .recharts-wrapper,
+.analytics-supporting .recharts-wrapper {
+  font-size: 12px;
+}
+
+/* Table hover effect */
+.analytics-table tbody tr {
+  transition: background-color 0.15s ease;
+}

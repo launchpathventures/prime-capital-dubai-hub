@@ -1,0 +1,16 @@
+/**
+ * CATALYST - Shared Styles
+ *
+ * Imports all component CSS and any global shared styles.
+ * This file is imported by app/layout.tsx (always loaded).
+ *
+ * ARCHITECTURE:
+ * - Component styles are in design/components/*.css
+ * - All component CSS uses @layer components
+ * - Tailwind utilities always override base styles
+ *
+ * SEE: design/DESIGN.md for full guidelines
+ */
+
+/* Import all component base styles */
+@import "./components/_index.css";

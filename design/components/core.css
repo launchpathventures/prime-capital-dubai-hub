@@ -1,0 +1,98 @@
+/**
+ * CATALYST - Core Component Base Styles
+ *
+ * Base structural styles for components in components/core/.
+ * 
+ * ARCHITECTURE:
+ * - @layer components: Ensures Tailwind utilities (@layer utilities) take precedence
+ * - :where(): Ensures zero specificity so any Tailwind class wins
+ * - Together: Tailwind ALWAYS overrides, regardless of source order or specificity
+ *
+ * NOTE: Core components are intentionally minimal.
+ * Most styling is handled by Tailwind variants in the component.
+ * Only add base CSS here for complex selectors or design tokens.
+ *
+ * SEE: design/DESIGN.md for full guidelines
+ */
+
+@layer components {
+
+/* =============================================================================
+   CORE-STACK / CORE-ROW / CORE-GRID
+   These are purely Tailwind-driven — no base CSS needed.
+   The display/flex/grid is set via CVA variants.
+   ============================================================================= */
+
+/* =============================================================================
+   CORE-TEXT / CORE-TITLE
+   No base styles needed — typography handled by Tailwind
+   ============================================================================= */
+
+/* =============================================================================
+   CORE-CONTAINER
+   ============================================================================= */
+
+:where(.core-container) {
+  width: 100%;
+  margin-inline: auto;
+}
+
+/* =============================================================================
+   CORE-SECTION
+   ============================================================================= */
+
+:where(.core-section) {
+  width: 100%;
+}
+
+/* =============================================================================
+   CORE-CENTER
+   ============================================================================= */
+
+:where(.core-center) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =============================================================================
+   CORE-SPACER / CORE-PROSE / CORE-LIST
+   No base styles needed — handled by Tailwind
+   ============================================================================= */
+
+/* =============================================================================
+   CORE-AVATAR
+   ============================================================================= */
+
+:where(.core-avatar) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* =============================================================================
+   CORE-DOT
+   ============================================================================= */
+
+:where(.core-dot) {
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+
+/* =============================================================================
+   CORE-COUNT
+   ============================================================================= */
+
+:where(.core-count) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+} /* End @layer components */

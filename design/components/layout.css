@@ -1,0 +1,108 @@
+/**
+ * CATALYST - Layout Component Base Styles
+ *
+ * Base structural styles for components in components/layout/.
+ * 
+ * ARCHITECTURE:
+ * - @layer components: Ensures Tailwind utilities (@layer utilities) take precedence
+ * - :where(): Ensures zero specificity so any Tailwind class wins
+ * - Together: Tailwind ALWAYS overrides, regardless of source order or specificity
+ *
+ * SEE: design/DESIGN.md for full guidelines
+ */
+
+@layer components {
+
+/* =============================================================================
+   LAYOUT-SHELL
+   ============================================================================= */
+
+:where(.layout-shell) {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+:where(.layout-shell__sidebar) {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+:where(.layout-shell__header) {
+  flex-shrink: 0;
+}
+
+:where(.layout-shell__content) {
+  flex: 1;
+  overflow: auto;
+  scroll-behavior: smooth;
+}
+
+/* =============================================================================
+   LAYOUT-SIDEBAR
+   ============================================================================= */
+
+:where(.layout-sidebar) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+:where(.layout-sidebar__header) {
+  flex-shrink: 0;
+}
+
+:where(.layout-sidebar__body) {
+  flex: 1;
+  overflow: auto;
+}
+
+:where(.layout-sidebar__footer) {
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   LAYOUT-SIDEBAR-NAV
+   ============================================================================= */
+
+:where(.layout-sidebar-nav) {
+  display: flex;
+  flex-direction: column;
+}
+
+:where(.layout-sidebar-nav__item) {
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+/* =============================================================================
+   LAYOUT-HEADER
+   ============================================================================= */
+
+:where(.layout-header) {
+  display: flex;
+  align-items: center;
+}
+
+/* =============================================================================
+   LAYOUT-MOBILE-SIDEBAR
+   ============================================================================= */
+
+/* Mobile sidebar uses Sheet component — styles come from UI */
+
+/* =============================================================================
+   LAYOUT-LOGO
+   ============================================================================= */
+
+:where(.layout-logo) {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+} /* End @layer components */

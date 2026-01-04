@@ -1,0 +1,182 @@
+/**
+ * CATALYST - Presentation Layout
+ *
+ * Core styles for presentation pages.
+ *
+ * =============================================================================
+ * LAYOUT SYSTEM
+ * =============================================================================
+ *
+ * Present is unique: pages are full-width by default (no container padding).
+ * Each page controls its own layout — landing page with sidebar, slides with
+ * snap-scroll, etc.
+ *
+ * CLASSES:
+ *   .present-content   Container from shell (sets variables, zero padding)
+ *   .present-section   Standard width + padding for centered content blocks
+ *
+ * USAGE:
+ *   // Landing page hero content (centered)
+ *   <div className="present-section">
+ *     <h1>Centered content with max-width</h1>
+ *   </div>
+ *
+ *   // Slide content (full-width is default, use present-section for centered)
+ *   <Slide>
+ *     <div className="present-section">Centered slide content</div>
+ *   </Slide>
+ */
+
+@import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   PRESENT CONTENT LAYOUT
+   ============================================================================= */
+
+/* Container: sets variables, zero padding (pages control their own layout) */
+.present-content {
+  --present-content-width: 64rem;
+  --present-content-padding: 1.5rem;
+  --present-content-padding-md: 2rem;
+}
+
+/* Section: standard width + padding for centered content blocks */
+.present-section {
+  --_pad: var(--present-content-padding);
+  max-width: calc(var(--present-content-width) + var(--_pad) * 2);
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--_pad);
+
+  @media (min-width: 768px) {
+    --_pad: var(--present-content-padding-md);
+  }
+}
+
+/* =============================================================================
+   NAVIGATION VARIABLES
+   ============================================================================= */
+
+/* --- Variables --- */
+:root {
+  --present-nav-width: 2.5rem;
+  --present-nav-offset: 1.0rem;
+  --present-content-inset: 3.5rem;
+}
+
+/* --- Layout Root --- */
+.layout-present {
+  min-height: 100dvh;
+  background: var(--color-background);
+}
+
+/* --- Slide Container --- */
+.layout-present__slides {
+  height: 100dvh;
+  width: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.layout-present__slides::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Inline Navigation --- */
+.present-nav-inline {
+  position: fixed;
+  right: var(--present-nav-offset);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 40;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .present-nav-inline {
+    display: flex;
+  }
+}
+
+/* --- Slide Structure --- */
+.present-slide {
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.present-slide__inner {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.present-slide__content {
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.present-slide__background {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+/* --- Content Safe Zones --- */
+@media (min-width: 640px) {
+  [data-has-inline-nav] .present-slide__inner {
+    padding-right: var(--present-content-inset);
+  }
+}
+
+/* --- Slide Animations --- */
+@keyframes slide-fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-fade-in {
+  animation: slide-fade-in 0.6s ease-out forwards;
+}
+
+.present-slide__inner > * {
+  animation: slide-fade-in 0.5s ease-out both;
+}
+
+.present-slide__inner > *:nth-child(1) { animation-delay: 0.1s; }
+.present-slide__inner > *:nth-child(2) { animation-delay: 0.2s; }
+.present-slide__inner > *:nth-child(3) { animation-delay: 0.3s; }
+.present-slide__inner > *:nth-child(4) { animation-delay: 0.4s; }
+.present-slide__inner > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* --- Typography (Optional) --- */
+.present-slide__title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.present-slide__subtitle {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  line-height: 1.5;
+  text-wrap: balance;
+}
+
+.present-slide__body {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  line-height: 1.6;
+}
+

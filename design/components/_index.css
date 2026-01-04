@@ -1,0 +1,17 @@
+/**
+ * CATALYST - Component Base Styles Index
+ *
+ * Imports all component CSS files. This is imported by design/shared.css.
+ *
+ * ARCHITECTURE:
+ * - All CSS is wrapped in @layer components
+ * - Tailwind utilities (@layer utilities) always override
+ * - Each file corresponds to a component folder
+ *
+ * SEE: design/DESIGN.md for styling guidelines
+ */
+
+@import "./ui.css";
+@import "./core.css";
+@import "./layout.css";
+@import "./shared.css";

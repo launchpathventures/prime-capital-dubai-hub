@@ -1,0 +1,274 @@
+/**
+ * CATALYST - Auth Surface Styles
+ *
+ * Polished authentication pages with centered layout,
+ * subtle background patterns, and smooth animations.
+ *
+ * =============================================================================
+ * LAYOUT SYSTEM
+ * =============================================================================
+ *
+ * Auth uses a simple centered layout with no sidebar.
+ * The shell provides the background, header, and centering.
+ * The container constrains content width.
+ *
+ * CLASSES:
+ *   .auth-shell       Root container (full viewport, centering, backgrounds)
+ *   .auth-content     Sets CSS variables for consistent sizing
+ *   .auth-container   Centered content area (uses variables)
+ *   .auth-card        Card wrapper for forms
+ *
+ * CSS VARIABLES:
+ *   --auth-content-width      Form/card max-width (default: 420px)
+ *   --auth-content-padding    Horizontal padding (default: 1.5rem)
+ */
+
+@import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   AUTH CONTENT LAYOUT
+   ============================================================================= */
+
+/* Container: sets variables for consistent sizing */
+.auth-content {
+  --auth-content-width: 420px;
+  --auth-content-padding: 1.5rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * Shell Layout
+ * -------------------------------------------------------------------------- */
+
+.auth-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--auth-content-padding, 1.5rem);
+  padding-top: 3rem;
+  background: var(--color-background);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+@media (min-height: 700px) {
+  .auth-shell {
+    justify-content: center;
+    padding-top: var(--auth-content-padding, 1.5rem);
+  }
+}
+
+/* Gradient orb background */
+.auth-shell::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    oklch(from var(--color-primary) l c h / 0.08) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 70% 80%,
+    oklch(from var(--color-primary) l c h / 0.05) 0%,
+    transparent 40%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle grid pattern overlay */
+.auth-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--color-muted-foreground) 1px,
+    transparent 0
+  );
+  background-size: 32px 32px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* -----------------------------------------------------------------------------
+ * Floating Header (auto-hide, matches presentation header)
+ * -------------------------------------------------------------------------- */
+
+.auth-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.5rem;
+  padding: 0 1rem;
+  background: oklch(from var(--color-background) l c h / 0.6);
+  backdrop-filter: blur(2px);
+  border-bottom: 1px solid oklch(from var(--color-border) l c h / 0.5);
+}
+
+.auth-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * Container & Cards
+ * -------------------------------------------------------------------------- */
+
+.auth-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--auth-content-width, 420px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: auth-fade-in 0.4s ease-out;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Logo section */
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Main auth card */
+.auth-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 
+    0 1px 3px oklch(from var(--color-foreground) l c h / 0.04),
+    0 6px 16px oklch(from var(--color-foreground) l c h / 0.04),
+    0 12px 32px oklch(from var(--color-foreground) l c h / 0.02);
+  overflow: hidden;
+}
+
+/* Logo inside card */
+.auth-card-logo {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 2rem 0;
+}
+
+/* Main content area */
+.auth-card-content {
+  padding: 1.5rem 2rem 2rem;
+}
+
+/* Footer with gray background (matches settings cards) */
+.auth-card-footer {
+  background: oklch(from var(--color-muted) l c h / 0.3);
+  border-top: 1px solid var(--color-border);
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .auth-card-logo {
+    padding: 1.5rem 1.5rem 0;
+  }
+  
+  .auth-card-content {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+  
+  .auth-card-footer {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ * Form Enhancements
+ * -------------------------------------------------------------------------- */
+
+/* Social login divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-muted-foreground);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Social buttons row */
+.auth-social-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.auth-social-buttons > * {
+  flex: 1;
+}
+
+/* Success state styling */
+.auth-success-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: oklch(from var(--color-primary) l c h / 0.1);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: auth-success-pop 0.3s ease-out;
+}
+
+@keyframes auth-success-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

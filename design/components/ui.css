@@ -1,0 +1,1158 @@
+/**
+ * CATALYST - UI Component Base Styles
+ *
+ * Base structural styles for components in components/ui/.
+ * 
+ * ARCHITECTURE:
+ * - @layer components: Ensures Tailwind utilities (@layer utilities) take precedence
+ * - :where(): Ensures zero specificity so any Tailwind class wins
+ * - Together: Tailwind ALWAYS overrides, regardless of source order or specificity
+ *
+ * WHAT GOES HERE:
+ * - Display, position, cursor (structural)
+ * - Sizing (height, padding, gap) — as defaults
+ * - Border radius, border width (using theme tokens)
+ * - Transitions using design tokens
+ * - Focus ring and disabled states
+ * - Child element selectors (e.g., > svg)
+ *
+ * WHAT STAYS IN TAILWIND (CVA):
+ * - Colors (bg-primary, text-foreground)
+ * - Hover colors (hover:bg-primary/80)
+ * - Variant-specific overrides
+ *
+ * CRITICAL: @keyframes must be OUTSIDE @layer blocks
+ * CRITICAL: .dark overrides must be OUTSIDE @layer for proper specificity
+ *
+ * SEE: design/DESIGN.md for full guidelines
+ */
+
+@layer components {
+
+/* =============================================================================
+   UI-BUTTON
+   
+   Structural styles only. Colors are handled by Tailwind in button.tsx.
+   Uses theme tokens from globals.css for consistent theming.
+   ============================================================================= */
+
+:where(.ui-button) {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* Sizing — default (md) */
+  height: 2.25rem; /* 36px / h-9 */
+  padding-inline: 0.625rem; /* 10px / px-2.5 */
+  gap: 0.375rem; /* 6px / gap-1.5 */
+
+  /* Typography */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  font-weight: 500;
+
+  /* Border — uses theme token */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-md);
+  background-clip: padding-box;
+
+  /* Behavior */
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  outline: none;
+
+  /* Animation — uses theme tokens */
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+/* -----------------------------------------------------------------------------
+   Focus Ring — uses theme tokens
+   ----------------------------------------------------------------------------- */
+:where(.ui-button:focus-visible) {
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+/* Destructive variant — override focus ring color */
+:where(.ui-button.ui-button--destructive:focus-visible) {
+  border-color: oklch(from var(--color-destructive) l c h / 0.4);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.2);
+}
+
+/* -----------------------------------------------------------------------------
+   Invalid State (aria-invalid)
+   ----------------------------------------------------------------------------- */
+:where(.ui-button[aria-invalid="true"]) {
+  border-color: var(--color-destructive);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.2);
+}
+
+/* -----------------------------------------------------------------------------
+   Disabled State
+   ----------------------------------------------------------------------------- */
+:where(.ui-button:disabled),
+:where(.ui-button[data-disabled]) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------------
+   Expanded State (dropdowns, menus)
+   ----------------------------------------------------------------------------- */
+:where(.ui-button[aria-expanded="true"]) {
+  background-color: var(--color-muted);
+  color: var(--color-foreground);
+}
+
+:where(.ui-button.ui-button--secondary[aria-expanded="true"]) {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+}
+
+/* -----------------------------------------------------------------------------
+   Size Variants
+   ----------------------------------------------------------------------------- */
+
+/* XS — compact */
+:where(.ui-button.ui-button--xs) {
+  height: 1.5rem; /* 24px / h-6 */
+  padding-inline: 0.5rem; /* 8px / px-2 */
+  gap: 0.25rem; /* 4px / gap-1 */
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  border-radius: var(--radius-sm);
+}
+
+/* SM — small */
+:where(.ui-button.ui-button--sm) {
+  height: 2rem; /* 32px / h-8 */
+  padding-inline: 0.625rem; /* 10px / px-2.5 */
+  gap: 0.25rem; /* 4px / gap-1 */
+}
+
+/* LG — large */
+:where(.ui-button.ui-button--lg) {
+  height: 2.5rem; /* 40px / h-10 */
+  padding-inline: 0.75rem; /* 12px / px-3 */
+}
+
+/* Icon buttons — square */
+:where(.ui-button.ui-button--icon) {
+  width: 2.25rem; /* 36px */
+  height: 2.25rem;
+  padding: 0;
+}
+
+:where(.ui-button.ui-button--icon-xs) {
+  width: 1.5rem; /* 24px */
+  height: 1.5rem;
+  padding: 0;
+  border-radius: var(--radius-sm);
+}
+
+:where(.ui-button.ui-button--icon-sm) {
+  width: 2rem; /* 32px */
+  height: 2rem;
+  padding: 0;
+}
+
+:where(.ui-button.ui-button--icon-lg) {
+  width: 2.5rem; /* 40px */
+  height: 2.5rem;
+  padding: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Variant-specific: Outline gets border + shadow
+   ----------------------------------------------------------------------------- */
+:where(.ui-button.ui-button--outline) {
+  border-color: var(--color-border);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* -----------------------------------------------------------------------------
+   Variant-specific: Underline
+   ----------------------------------------------------------------------------- */
+:where(.ui-button.ui-button--underline) {
+  text-underline-offset: 4px;
+}
+
+/* -----------------------------------------------------------------------------
+   SVG Children
+   ----------------------------------------------------------------------------- */
+:where(.ui-button > svg) {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+:where(.ui-button > svg:not([class*="size-"])) {
+  width: 1rem;
+  height: 1rem;
+}
+
+:where(.ui-button.ui-button--xs > svg:not([class*="size-"])),
+:where(.ui-button.ui-button--icon-xs > svg:not([class*="size-"])) {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* =============================================================================
+   UI-CARD
+   
+   Container component with header, content, footer sections.
+   Supports size variants via data-size attribute.
+   ============================================================================= */
+
+:where(.ui-card) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-width: var(--border-width);
+  border-style: solid;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  gap: 1rem; /* gap-4 */
+  padding-block: 1rem; /* py-4 */
+}
+
+/* Small size */
+:where(.ui-card[data-size="sm"]) {
+  gap: 0.75rem; /* gap-3 */
+  padding-block: 0.75rem; /* py-3 */
+}
+
+/* Image handling */
+:where(.ui-card:has(> img:first-child)) {
+  padding-top: 0;
+}
+
+:where(.ui-card > img:first-child) {
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+:where(.ui-card > img:last-child) {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+/* Header */
+:where(.ui-card__header) {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-items: start;
+  gap: 0.25rem; /* gap-1 */
+  padding-inline: 1.5rem; /* px-6 */
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__header) {
+  padding-inline: 1rem; /* px-4 */
+}
+
+:where(.ui-card__header:has([data-slot="card-action"])) {
+  grid-template-columns: 1fr auto;
+}
+
+:where(.ui-card__header:has([data-slot="card-description"])) {
+  grid-template-rows: auto auto;
+}
+
+/* Border-b padding adjustment */
+:where(.ui-card__header.border-b) {
+  padding-bottom: 1rem;
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__header.border-b) {
+  padding-bottom: 0.75rem;
+}
+
+/* Title */
+:where(.ui-card__title) {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__title) {
+  font-size: 0.875rem;
+}
+
+/* Description */
+:where(.ui-card__description) {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Action */
+:where(.ui-card__action) {
+  grid-column-start: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: end;
+}
+
+/* Content */
+:where(.ui-card__content) {
+  flex: 1;
+  padding-inline: 1.5rem; /* px-6 */
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__content) {
+  padding-inline: 1rem; /* px-4 */
+}
+
+/* Footer */
+:where(.ui-card__footer) {
+  display: flex;
+  align-items: center;
+  padding-inline: 1.5rem; /* px-6 */
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__footer) {
+  padding-inline: 1rem; /* px-4 */
+}
+
+/* Border-t padding adjustment */
+:where(.ui-card__footer.border-t) {
+  padding-top: 1.5rem;
+}
+
+:where(.ui-card[data-size="sm"] .ui-card__footer.border-t) {
+  padding-top: 1rem;
+}
+
+/* =============================================================================
+   UI-BADGE
+   ============================================================================= */
+
+:where(.ui-badge) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  gap: 0.25rem;
+  height: 1.5rem; /* h-6 */
+  padding-inline: 0.625rem; /* px-2.5 */
+  padding-block: 0.25rem; /* py-1 */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1rem;
+  font-weight: 500;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-badge:focus-visible) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-badge[aria-invalid="true"]) {
+  border-color: var(--color-destructive);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.2);
+}
+
+:where(.ui-badge.ui-badge--destructive:focus-visible) {
+  border-color: oklch(from var(--color-destructive) l c h / 0.4);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.2);
+}
+
+:where(.ui-badge[aria-disabled="true"]),
+:where(.ui-badge[data-disabled]) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size variants */
+:where(.ui-badge.ui-badge--sm) {
+  height: 1.25rem; /* h-5 */
+  padding-inline: 0.5rem; /* px-2 */
+  padding-block: 0.125rem; /* py-0.5 */
+  gap: 0.125rem;
+  font-size: 0.625rem; /* text-[10px] */
+  line-height: 1rem;
+}
+
+:where(.ui-badge.ui-badge--lg) {
+  height: 1.75rem; /* h-7 */
+  padding-inline: 0.75rem; /* px-3 */
+  padding-block: 0.375rem; /* py-1.5 */
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+/* SVG children */
+:where(.ui-badge > svg) {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* Size variants — SVG sizing */
+:where(.ui-badge.ui-badge--sm > svg:not([class*="size-"])) {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
+:where(.ui-badge.ui-badge--md > svg:not([class*="size-"])),
+:where(.ui-badge:not([class*="ui-badge--"]) > svg:not([class*="size-"])) {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+:where(.ui-badge.ui-badge--lg > svg:not([class*="size-"])) {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* =============================================================================
+   UI-INPUT
+   ============================================================================= */
+
+:where(.ui-input) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 2.25rem; /* h-9 */
+  padding-inline: 0.625rem; /* px-2.5 */
+  padding-block: 0.25rem; /* py-1 */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-md);
+  background-clip: padding-box;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-input:focus-visible) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-input:disabled) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+:where(.ui-input.ui-input--frameless) {
+  border-width: 0;
+  padding: 0;
+  height: 100%;
+  box-shadow: none;
+}
+
+:where(.ui-input__wrapper) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding-inline: 0.625rem;
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-md);
+  background-clip: padding-box;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-input__wrapper:focus-within) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-input__wrapper:has(input:disabled)) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   UI-CHECKBOX
+   ============================================================================= */
+
+:where(.ui-checkbox) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  background-clip: padding-box;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-checkbox:focus-visible) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-checkbox:disabled),
+:where(.ui-checkbox[data-disabled]) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+:where(.ui-checkbox::after) {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -0.75rem;
+}
+
+/* =============================================================================
+   UI-RADIO-GROUP
+   ============================================================================= */
+
+:where(.ui-radio-group) {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+:where(.ui-radio-group__item) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-radio-group__item:focus-visible) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-radio-group__item:disabled),
+:where(.ui-radio-group__item[data-disabled]) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+:where(.ui-radio-group__item::after) {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -0.75rem;
+}
+
+/* =============================================================================
+   UI-SWITCH
+   ============================================================================= */
+
+:where(.ui-switch) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: 9999px;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  outline: none;
+  cursor: pointer;
+}
+
+:where(.ui-switch[data-size="default"]) {
+  width: 2rem; /* 32px */
+  height: 1.15rem; /* 18.4px */
+}
+
+:where(.ui-switch[data-size="sm"]) {
+  width: 1.5rem; /* 24px */
+  height: 0.875rem; /* 14px */
+}
+
+:where(.ui-switch:focus-visible) {
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-switch[data-disabled]),
+:where(.ui-switch:disabled) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+:where(.ui-switch::after) {
+  content: "";
+  position: absolute;
+  inset: -0.5rem -0.75rem;
+}
+
+:where(.ui-switch__thumb) {
+  position: absolute;
+  top: 50%;
+  left: 1px;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  transition: transform var(--duration-fast) var(--ease-out);
+  pointer-events: none;
+  transform: translate(0, -50%);
+}
+
+:where(.ui-switch[data-size="sm"] .ui-switch__thumb) {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+:where(.ui-switch[data-checked] .ui-switch__thumb) {
+  /* 100% = thumb width (16px), minus 4px = 12px travel for 2px padding on each side */
+  transform: translate(calc(100% - 4px), -50%);
+}
+
+/* =============================================================================
+   UI-SLIDER
+   ============================================================================= */
+
+:where(.ui-slider) {
+  position: relative;
+  display: block;
+}
+
+:where(.ui-slider__control) {
+  position: relative;
+  display: flex;
+  width: 100%;
+  touch-action: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:where(.ui-slider__track) {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+:where(.ui-slider__range) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+:where(.ui-slider__thumb) {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  border-width: var(--border-width);
+  border-style: solid;
+  background-clip: padding-box;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+:where(.ui-slider__thumb:focus-visible) {
+  outline: none;
+  box-shadow:
+    0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.35),
+    0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+:where(.ui-slider__thumb:disabled) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* =============================================================================
+   UI-TEXTAREA
+   ============================================================================= */
+
+:where(.ui-textarea) {
+  width: 100%;
+  min-height: 4rem; /* min-h-16 */
+  min-width: 0;
+  padding-inline: 0.625rem; /* px-2.5 */
+  padding-block: 0.5rem; /* py-2 */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-md);
+  background-clip: padding-box;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-textarea:focus-visible) {
+  outline: none;
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-textarea:disabled) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   UI-DIALOG / UI-SHEET
+   ============================================================================= */
+
+:where(.ui-dialog__overlay),
+:where(.ui-sheet__overlay),
+:where(.ui-alert-dialog__overlay) {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+:where(.ui-dialog__content),
+:where(.ui-alert-dialog__content) {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 50;
+  transform: translate(-50%, -50%);
+  outline: none;
+}
+
+:where(.ui-sheet__content) {
+  position: fixed;
+  z-index: 50;
+  outline: none;
+}
+
+:where(.ui-dialog__header),
+:where(.ui-sheet__header) {
+  display: flex;
+  flex-direction: column;
+}
+
+:where(.ui-dialog__footer),
+:where(.ui-sheet__footer) {
+  display: flex;
+  align-items: center;
+}
+
+/* =============================================================================
+   UI-ALERT
+   
+   Feedback component with icon, title, description, optional action.
+   Colors handled by Tailwind CVA variants.
+   ============================================================================= */
+
+:where(.ui-alert) {
+  position: relative;
+  display: grid;
+  width: 100%;
+  gap: 0.125rem; /* gap-0.5 */
+  padding: 0.75rem 1rem; /* py-3 px-4 */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: left;
+}
+
+/* With action button */
+:where(.ui-alert:has([data-slot="alert-action"])) {
+  padding-right: 4.5rem; /* pr-18 */
+}
+
+/* With icon */
+:where(.ui-alert:has(> svg)) {
+  grid-template-columns: auto 1fr;
+  column-gap: 0.625rem; /* gap-x-2.5 */
+}
+
+/* Icon styling */
+:where(.ui-alert > svg) {
+  grid-row: 1 / span 2;
+  color: currentColor;
+  transform: translateY(0.125rem); /* translate-y-0.5 */
+}
+
+:where(.ui-alert > svg:not([class*="size-"])) {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Title */
+:where(.ui-alert__title) {
+  font-weight: 500;
+}
+
+:where(.ui-alert:has(> svg) .ui-alert__title) {
+  grid-column-start: 2;
+}
+
+:where(.ui-alert__title a) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:where(.ui-alert__title a:hover) {
+  color: var(--color-foreground);
+}
+
+/* Description */
+:where(.ui-alert__description) {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  :where(.ui-alert__description) {
+    text-wrap: pretty;
+  }
+}
+
+:where(.ui-alert__description p:not(:last-child)) {
+  margin-bottom: 1rem;
+}
+
+:where(.ui-alert__description a) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:where(.ui-alert__description a:hover) {
+  color: var(--color-foreground);
+}
+
+/* Action */
+:where(.ui-alert__action) {
+  position: absolute;
+  top: 0.625rem; /* top-2.5 */
+  right: 0.75rem; /* right-3 */
+}
+
+/* =============================================================================
+   UI-TABS
+   
+   Tab navigation with list, triggers, and content panels.
+   Supports horizontal/vertical orientation and line/default variants.
+   ============================================================================= */
+
+:where(.ui-tabs) {
+  display: flex;
+  gap: 0.5rem; /* gap-2 */
+}
+
+:where(.ui-tabs[data-orientation="horizontal"]) {
+  flex-direction: column;
+}
+
+/* List */
+:where(.ui-tabs__list) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 3px;
+  border-radius: var(--radius-md);
+}
+
+:where(.ui-tabs[data-orientation="horizontal"] .ui-tabs__list) {
+  height: 2.25rem; /* h-9 */
+}
+
+:where(.ui-tabs[data-orientation="vertical"] .ui-tabs__list) {
+  height: fit-content;
+  flex-direction: column;
+}
+
+/* List variants */
+:where(.ui-tabs__list[data-variant="line"]) {
+  gap: 0.25rem;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Trigger */
+:where(.ui-tabs__trigger) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 0.375rem; /* gap-1.5 */
+  height: calc(100% - 1px);
+  padding: 0.25rem 0.5rem; /* py-1 px-2 */
+  border-width: var(--border-width);
+  border-style: solid;
+  border-color: transparent;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-tabs[data-orientation="vertical"] .ui-tabs__trigger) {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* Focus ring */
+:where(.ui-tabs__trigger:focus-visible) {
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+/* Disabled */
+:where(.ui-tabs__trigger:disabled),
+:where(.ui-tabs__trigger[data-disabled]) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* SVG children */
+:where(.ui-tabs__trigger > svg) {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+:where(.ui-tabs__trigger > svg:not([class*="size-"])) {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Line variant underline indicator */
+:where(.ui-tabs__trigger::after) {
+  content: "";
+  position: absolute;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-tabs[data-orientation="horizontal"] .ui-tabs__trigger::after) {
+  inset-inline: 0;
+  bottom: -5px;
+  height: 2px;
+}
+
+:where(.ui-tabs[data-orientation="vertical"] .ui-tabs__trigger::after) {
+  inset-block: 0;
+  right: -4px;
+  width: 2px;
+}
+
+:where(.ui-tabs__list[data-variant="line"] .ui-tabs__trigger[data-active]::after) {
+  opacity: 1;
+}
+
+/* Content */
+:where(.ui-tabs__content) {
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  outline: none;
+}
+
+/* =============================================================================
+   UI-TOGGLE
+   ============================================================================= */
+
+:where(.ui-toggle) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-toggle:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-ring) l c h / 0.5);
+}
+
+:where(.ui-toggle:disabled) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+:where(.ui-toggle > svg) {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   UI-SKELETON
+   ============================================================================= */
+
+:where(.ui-skeleton) {
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+/* =============================================================================
+   UI-SEPARATOR
+   ============================================================================= */
+
+:where(.ui-separator) {
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   UI-PROGRESS
+   ============================================================================= */
+
+:where(.ui-progress) {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+:where(.ui-progress__track) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 9999px;
+}
+
+:where(.ui-progress__indicator) {
+  display: block;
+  height: 100%;
+  transition: width var(--duration-fast) var(--ease-out);
+}
+
+:where(.ui-progress__label) {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+:where(.ui-progress__value) {
+  margin-left: auto;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+} /* End @layer components */
+
+/* =============================================================================
+   DARK MODE OVERRIDES
+   Must be OUTSIDE @layer for proper specificity — these need to win over base
+   ============================================================================= */
+
+/* Button */
+.dark .ui-button.ui-button--destructive:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.4);
+}
+
+.dark .ui-button[aria-invalid="true"] {
+  border-color: oklch(from var(--color-destructive) l c h / 0.5);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.4);
+}
+
+.dark .ui-button.ui-button--outline {
+  border-color: var(--color-input);
+}
+
+/* Badge */
+.dark .ui-badge[aria-invalid="true"] {
+  border-color: oklch(from var(--color-destructive) l c h / 0.5);
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.4);
+}
+
+.dark .ui-badge.ui-badge--destructive:focus-visible {
+  box-shadow: 0 0 0 var(--ring-width) oklch(from var(--color-destructive) l c h / 0.4);
+}
+
+/* Keyframes must be outside @layer — CSS parsers don't allow keyframes inside layer blocks */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

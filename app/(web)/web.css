@@ -1,0 +1,406 @@
+/**
+ * CATALYST - Web/Marketing Styles
+ *
+ * Styles specific to the public website and marketing pages.
+ * This file is ONLY imported by the (web) layout.
+ *
+ * WHY THIS FILE EXISTS:
+ * - Marketing pages need "loud" visual effects not suited for app UI
+ * - Keeps globals.css clean for core design tokens
+ * - Can be safely removed if building an app-only project
+ *
+ * IMPORTED BY: app/(web)/layout.tsx
+ * SAFE TO DELETE: Yes — if building an app without a marketing site
+ *
+ * NOTE: @apply requires Tailwind context. This file is processed after
+ * globals.css imports Tailwind, so @apply works at build time.
+ */
+
+/* =============================================================================
+   LAYOUT SYSTEM
+   CSS variables for centralized layout control.
+   ============================================================================= */
+
+:root {
+  --web-content-width: 80rem;
+  --web-content-padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --web-content-padding: 1.5rem;
+  }
+}
+
+/* Shell layout */
+.web-shell {
+  /* Header needs relative positioning for mobile menu */
+  & .layout-header {
+    position: relative;
+    padding-inline: var(--web-content-padding);
+  }
+}
+
+/* Desktop navigation links (exclude the Docs button which has its own styling) */
+.web-shell [data-slot="header-nav"] > a:not([class*="bg-primary"]) {
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  transition: color 0.15s;
+}
+
+.web-shell [data-slot="header-nav"] > a:not([class*="bg-primary"]):hover {
+  color: var(--color-foreground);
+}
+
+/* =============================================================================
+   MOBILE NAVIGATION
+   Full-screen panel with header and nav links.
+   ============================================================================= */
+
+/* Dark backdrop overlay */
+.web-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.5);
+  animation: web-backdrop-fade-in 0.2s ease-out;
+}
+
+@keyframes web-backdrop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Mobile panel - contains header + menu, scrolls as one unit */
+.web-mobile-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--color-background);
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  animation: web-panel-slide-down 0.2s ease-out;
+}
+
+@keyframes web-panel-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile header - matches desktop header height */
+.web-mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 3.5rem;
+  padding-inline: var(--web-content-padding);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.web-mobile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Mobile menu nav section */
+.web-mobile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem var(--web-content-padding);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.web-mobile-menu a,
+.web-mobile-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.web-mobile-menu a:hover,
+.web-mobile-menu button:hover {
+  background: var(--color-muted);
+  color: var(--color-foreground);
+}
+
+/* Primary action button in mobile menu (higher specificity to override base styles) */
+.web-mobile-menu .web-mobile-menu-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  margin-top: 0.5rem;
+}
+
+.web-mobile-menu .web-mobile-menu-primary:hover {
+  background: oklch(from var(--color-primary) l c h / 0.9);
+  color: var(--color-primary-foreground);
+}
+
+.web-mobile-menu-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 0.5rem 0;
+}
+
+/* =============================================================================
+   HERO BACKGROUNDS
+   Gradient and glow effects for hero sections.
+   ============================================================================= */
+
+.hero-gradient {
+  background: radial-gradient(
+    ellipse at top,
+    oklch(from var(--color-primary) l c h / 0.15) 0%,
+    transparent 50%
+  );
+}
+
+.hero-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 500px;
+  width: 1000px;
+  background: oklch(from var(--color-primary) l c h / 0.1);
+  filter: blur(100px);
+  border-radius: 50%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* =============================================================================
+   BENTO GRID
+   Card layouts for value propositions and feature grids.
+   ============================================================================= */
+
+.bento-card {
+  border-radius: 1.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.bento-card:hover {
+  border-color: oklch(from var(--color-primary) l c h / 0.5);
+}
+
+.bento-card-icon {
+  position: absolute;
+  opacity: 0.2;
+  transition: opacity 0.3s;
+}
+
+.bento-card:hover .bento-card-icon {
+  opacity: 0.3;
+}
+
+/* =============================================================================
+   TOGGLE SWITCH
+   Custom toggle for Chaos/Order style comparisons.
+   ============================================================================= */
+
+.toggle-track {
+  background: var(--color-muted);
+  padding: 0.25rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  position: relative;
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  border-radius: 9999px;
+  background: var(--color-background);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: all 0.5s;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); /* spring effect */
+}
+
+.toggle-option {
+  position: relative;
+  z-index: 10;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  transition: color 0.15s;
+}
+
+/* =============================================================================
+   PIPELINE / TIMELINE
+   Step indicators and connecting lines for "How It Works" sections.
+   ============================================================================= */
+
+.pipeline-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 0.25rem;
+  background: var(--color-border);
+  transform: translateY(-50%);
+}
+
+.pipeline-step {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: var(--color-background);
+  border: 2px solid oklch(from var(--color-muted-foreground) l c h / 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--color-muted-foreground);
+  transition: all 0.3s;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.pipeline-step:hover,
+.group:hover .pipeline-step {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+/* =============================================================================
+   TERMINAL PREVIEW
+   Fake terminal windows for CLI demos.
+   ============================================================================= */
+
+.terminal-window {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: oklch(from var(--color-card) l c h / 0.5);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: oklch(from var(--color-muted) l c h / 0.5);
+  padding: 0.75rem 1rem;
+}
+
+.terminal-dot {
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+}
+
+.terminal-dot-red {
+  background: oklch(0.637 0.237 25.331 / 0.8); /* red-500 */
+}
+
+.terminal-dot-yellow {
+  background: oklch(0.795 0.184 86.047 / 0.8); /* yellow-500 */
+}
+
+.terminal-dot-green {
+  background: oklch(0.723 0.219 149.579 / 0.8); /* green-500 */
+}
+
+.terminal-body {
+  padding: 1.5rem;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  overflow-x: auto;
+}
+
+@media (min-width: 640px) {
+  .terminal-body {
+    font-size: 1rem;
+  }
+}
+
+/* =============================================================================
+   SOCIAL PROOF
+   Logo ticker and trust badges.
+   ============================================================================= */
+
+.logo-ticker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  opacity: 0.7;
+  filter: grayscale(1);
+  transition: all 0.5s;
+}
+
+@media (min-width: 640px) {
+  .logo-ticker {
+    gap: 4rem;
+  }
+}
+
+.logo-ticker:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+/* =============================================================================
+   CARD EFFECTS
+   Hover effects and depth for marketing cards.
+   ============================================================================= */
+
+.card-hover-lift {
+  transition: all 0.3s;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: linear-gradient(
+    135deg,
+    oklch(from var(--color-primary) l c h / 0.2),
+    oklch(from var(--color-secondary) l c h / 0.2)
+  );
+  z-index: -1;
+}
+
+.card-glow:hover::before {
+  opacity: 1;
+}

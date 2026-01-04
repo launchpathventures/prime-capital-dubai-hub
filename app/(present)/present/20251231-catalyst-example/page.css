@@ -1,0 +1,155 @@
+/**
+ * CATALYST - Example Presentation Styles
+ *
+ * Styles for the example presentation.
+ * DELETE THIS FILE when creating your own presentations.
+ *
+ * These are opinionated visual styles — your presentations
+ * can use completely different approaches.
+ */
+
+/* Badge pill — labels sections at top of slides */
+.present-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklch, var(--color-primary), transparent 80%);
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  backdrop-filter: blur(8px);
+}
+
+.present-badge.destructive {
+  border-color: color-mix(in oklch, var(--color-destructive), transparent 80%);
+  background: color-mix(in oklch, var(--color-destructive), transparent 95%);
+  color: var(--color-destructive);
+}
+
+:is(.dark, [data-theme="dark"]) .present-badge {
+  border-color: color-mix(in oklch, white, transparent 80%);
+  background: color-mix(in oklch, white, transparent 90%);
+  color: white;
+}
+
+/* Glass card — frosted glass effect */
+.present-card-glass {
+  background: color-mix(in oklch, var(--color-background), transparent 50%);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklch, var(--color-primary), transparent 90%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease-out;
+}
+
+.present-card-glass:hover {
+  background: color-mix(in oklch, var(--color-background), transparent 20%);
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px -10px color-mix(in oklch, var(--color-primary), transparent 90%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glass {
+  background: color-mix(in oklch, white, transparent 95%);
+  border-color: color-mix(in oklch, white, transparent 90%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glass:hover {
+  background: color-mix(in oklch, white, transparent 90%);
+}
+
+/* Glow card — elevated card with ambient glow */
+.present-card-glow {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 0 30px -10px color-mix(in oklch, var(--color-primary), transparent 90%);
+  transition: all 0.3s ease-out;
+}
+
+.present-card-glow:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  box-shadow: 0 0 40px -10px color-mix(in oklch, var(--color-primary), transparent 70%);
+  transform: translateY(-4px);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glow {
+  background: #111;
+  border-color: color-mix(in oklch, white, transparent 90%);
+  box-shadow: 0 0 40px -10px color-mix(in oklch, var(--color-primary), transparent 50%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glow:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+}
+
+/* Icon wrapper — circular icon container */
+.present-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  color: var(--color-primary);
+  transition: transform 0.2s ease-out;
+}
+
+.present-icon.sm { width: 2.5rem; height: 2.5rem; }
+.present-icon.md { width: 3rem; height: 3rem; }
+.present-icon.lg { width: 3.5rem; height: 3.5rem; }
+
+:is(.dark, [data-theme="dark"]) .present-icon {
+  background: color-mix(in oklch, white, transparent 90%);
+  color: white;
+}
+
+.group:hover .present-icon {
+  transform: scale(1.1);
+}
+
+/* Tinted slide background */
+.present-slide--tinted {
+  background: color-mix(in oklch, var(--color-primary), transparent 95%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-slide--tinted {
+  background: #0f0f12;
+}
+
+/* Decorative floating blob */
+.present-blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  filter: blur(64px);
+}
+
+:is(.dark, [data-theme="dark"]) .present-blob {
+  background: color-mix(in oklch, var(--color-primary), transparent 80%);
+}
+
+/* Section header pattern */
+.present-section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.present-section-header h2 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-wrap: balance;
+}
+
+.present-section-header p {
+  font-size: 1.25rem;
+  color: var(--color-muted-foreground);
+}
+
+:is(.dark, [data-theme="dark"]) .present-section-header p {
+  color: color-mix(in oklch, white, transparent 20%);
+}

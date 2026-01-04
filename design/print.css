@@ -1,0 +1,169 @@
+/**
+ * CATALYST - Print Styles
+ *
+ * Styles for printing pages. Common client requirement for reports,
+ * invoices, documentation, and other printable content.
+ *
+ * IMPORTED BY: app/layout.tsx (always loaded, but only applies in print)
+ *
+ * USAGE:
+ * - .print-only: Only visible when printing
+ * - .print-hidden: Hidden when printing
+ * - .print-break-before: Force page break before element
+ * - .print-break-after: Force page break after element
+ * - .print-avoid-break: Try to keep element together (no break inside)
+ */
+
+/* =============================================================================
+   VISIBILITY UTILITIES
+   Control what shows/hides when printing.
+   ============================================================================= */
+
+/* Hide elements when printing */
+@media print {
+  .print-hidden,
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Show elements only when printing */
+.print-only {
+  display: none !important;
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* =============================================================================
+   PAGE BREAK CONTROL
+   Force or prevent page breaks for better print layout.
+   ============================================================================= */
+
+/* Force page break before element */
+.print-break-before {
+  page-break-before: always;
+}
+
+/* Force page break after element */
+.print-break-after {
+  page-break-after: always;
+}
+
+/* Avoid breaking inside element (keep together) */
+.print-avoid-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* In normal view, print breaks are invisible */
+.print-break-before,
+.print-break-after {
+  /* No visual effect on screen */
+}
+
+/* Optional: show where breaks will occur (for debugging) */
+.print\:page-break {
+  page-break-before: always;
+}
+
+@media not print {
+  .print\:page-break {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   PAGE SETUP
+   Configure print page size and margins.
+   ============================================================================= */
+
+@media print {
+  /* Page size and margins */
+  @page {
+    /* A4 portrait - adjust as needed */
+    size: A4 portrait;
+    margin: 18mm 14mm;
+  }
+
+  /* First page can have different margins */
+  @page :first {
+    margin-top: 25mm;
+  }
+
+  /* Optimize for print */
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Remove backgrounds by default (saves ink) */
+  * {
+    background: transparent !important;
+  }
+
+  /* But allow explicit backgrounds */
+  .print-bg {
+    background: inherit !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Ensure text is black for readability */
+  body {
+    color: black !important;
+  }
+
+  /* Links: show URL in print */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Don't show URL for buttons styled as links */
+  a.no-print-url:after {
+    content: none;
+  }
+}
+
+/* =============================================================================
+   LAYOUT ADJUSTMENTS
+   Adjust layout for print media.
+   ============================================================================= */
+
+@media print {
+  /* Full width containers */
+  .print-full-width {
+    width: 100% !important;
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Remove fixed/sticky positioning (causes issues in print) */
+  .fixed,
+  .sticky,
+  [class*="fixed"],
+  [class*="sticky"] {
+    position: static !important;
+  }
+
+  /* Hide navigation, headers, footers typically */
+  nav,
+  header,
+  footer,
+  aside,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* But allow explicit print headers/footers */
+  .print-header,
+  .print-footer {
+    display: block !important;
+  }
+}

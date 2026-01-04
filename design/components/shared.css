@@ -1,0 +1,138 @@
+/**
+ * CATALYST - Shared Component Base Styles
+ *
+ * Base structural styles for components in components/shared/.
+ * 
+ * ARCHITECTURE:
+ * - @layer components: Ensures Tailwind utilities (@layer utilities) take precedence
+ * - :where(): Ensures zero specificity so any Tailwind class wins
+ * - Together: Tailwind ALWAYS overrides, regardless of source order or specificity
+ *
+ * NOTE: Shared components use semantic prefixes based on domain,
+ * not folder-based prefixes (e.g., "stat-card" not "shared-stat-card").
+ *
+ * SEE: design/DESIGN.md for full guidelines
+ */
+
+@layer components {
+
+/* =============================================================================
+   DEV-CARD - Development helper cards
+   Clean, flat design with amber accent colors
+   ============================================================================= */
+
+:where(.dev-card) {
+  background: oklch(0.987 0.022 95.28); /* amber-50 */
+  border: 1px solid oklch(0.879 0.169 91.61); /* amber-200 */
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  overflow: hidden;
+}
+
+:where(.dev-card__header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: oklch(0.962 0.059 95.26); /* amber-100 */
+  border-bottom: 1px solid oklch(0.879 0.169 91.61 / 0.6); /* amber-200 */
+  color: oklch(0.555 0.163 48.998); /* amber-700 */
+}
+
+:where(.dev-card__header) svg {
+  color: oklch(0.666 0.179 58.31); /* amber-500 */
+}
+
+:where(.dev-card__pill) {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  background: oklch(0.666 0.179 58.31); /* amber-500 */
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+}
+
+:where(.dev-card__content) {
+  padding: 0.75rem;
+  color: oklch(0.555 0.163 48.998); /* amber-700 */
+}
+
+:where(.dev-card__footer) {
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid oklch(0.879 0.169 91.61 / 0.4); /* amber-200 */
+  background: oklch(0.962 0.059 95.26); /* amber-100 */
+  color: oklch(0.412 0.118 46.26); /* amber-800 */
+}
+
+/* =============================================================================
+   STAT-CARD - Dashboard metric cards
+   ============================================================================= */
+
+:where(.stat-card) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================================================
+   LABEL-VALUE - Label-value pairs
+   ============================================================================= */
+
+:where(.label-value) {
+  display: flex;
+}
+
+:where(.label-value--vertical) {
+  flex-direction: column;
+}
+
+:where(.label-value--inline),
+:where(.label-value--fixed) {
+  flex-direction: row;
+  align-items: baseline;
+}
+
+/* =============================================================================
+   THEME-TOGGLE, USER-MENU, SURFACE-SWITCHER, COPY-BUTTON
+   These use Button/DropdownMenu components — no additional base styles needed
+   ============================================================================= */
+
+} /* End @layer components */
+
+/* =============================================================================
+   DARK MODE OVERRIDES
+   Must be outside @layer for proper specificity with :root.dark
+   ============================================================================= */
+
+:root.dark .dev-card {
+  background: oklch(0.279 0.077 45.635 / 0.4); /* amber-950/40 */
+  border-color: oklch(0.432 0.119 46.01 / 0.6); /* amber-800/60 */
+}
+
+:root.dark .dev-card__header {
+  background: oklch(0.32 0.08 50 / 0.5);
+  border-color: oklch(0.432 0.119 46.01 / 0.4);
+  color: oklch(0.821 0.121 86.02); /* amber-300 */
+}
+
+:root.dark .dev-card__header svg {
+  color: oklch(0.821 0.121 86.02);
+}
+
+:root.dark .dev-card__pill {
+  background: oklch(0.666 0.179 58.31);
+}
+
+:root.dark .dev-card__content {
+  background: transparent;
+  color: oklch(0.821 0.121 86.02);
+}
+
+:root.dark .dev-card__footer {
+  background: oklch(0.32 0.08 50 / 0.3);
+  border-color: oklch(0.432 0.119 46.01 / 0.3);
+  color: oklch(0.769 0.188 70.08); /* amber-400 */
+}
