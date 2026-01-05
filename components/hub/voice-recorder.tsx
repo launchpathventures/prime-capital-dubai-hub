@@ -47,7 +47,6 @@ function formatDuration(seconds: number): string {
 
 export function VoiceRecorder({
   onRecordingComplete,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   questionId,
   maxDuration = 300,
   className,
@@ -107,8 +106,16 @@ export function VoiceRecorder({
         const url = URL.createObjectURL(blob)
         setAudioUrl(url)
         
-        // In production, upload to Supabase Storage here
-        // For now, use the local URL
+        // TODO: In production, upload to Supabase Storage
+        // const filename = questionId ? `${questionId}/${Date.now()}.webm` : `${Date.now()}.webm`
+        // const { data, error } = await supabase.storage.from('voice-recordings').upload(filename, blob)
+        // if (data) {
+        //   const { data: { publicUrl } } = supabase.storage.from('voice-recordings').getPublicUrl(filename)
+        //   onRecordingComplete(publicUrl, duration)
+        // }
+        
+        // For now, use the local URL (questionId reserved for future upload organization)
+        void questionId // Used for organizing uploads when Supabase Storage is connected
         setState("recorded")
         onRecordingComplete(url, duration)
       }

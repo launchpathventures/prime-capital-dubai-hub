@@ -192,19 +192,46 @@ CREATE TRIGGER update_hub_questions_updated_at
 -- =============================================================================
 -- Storage Bucket for Voice Recordings
 -- =============================================================================
+-- 
+-- IMPORTANT: Storage buckets cannot be created via SQL migrations.
+-- You MUST manually create the voice-recordings bucket in Supabase:
+--
+-- Option 1: Supabase Dashboard
+--   1. Go to Storage in your Supabase dashboard
+--   2. Click "New bucket"
+--   3. Name: "voice-recordings"
+--   4. Enable "Public bucket" for public access to recordings
+--
+-- Option 2: Supabase CLI
+--   supabase storage create voice-recordings --public
+--
+-- Option 3: JavaScript API (run once in your app initialization)
+--   const { data, error } = await supabase.storage.createBucket('voice-recordings', {
+--     public: true,
+--     allowedMimeTypes: ['audio/webm', 'audio/mp4', 'audio/mpeg'],
+--     fileSizeLimit: 52428800, // 50MB
+--   })
+--
+-- After creating the bucket, apply these policies via SQL:
+-- =============================================================================
 
--- Run this separately in Supabase dashboard or via API:
--- INSERT INTO storage.buckets (id, name, public)
--- VALUES ('voice-recordings', 'voice-recordings', true);
+-- Policy: Authenticated users can upload voice recordings
+CREATE POLICY "Authenticated users can upload voice recordings"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'voice-recordings' AND
+    auth.role() = 'authenticated'
+  );
 
--- Storage policies for voice recordings:
--- CREATE POLICY "Authenticated users can upload voice recordings"
---   ON storage.objects FOR INSERT
---   WITH CHECK (
---     bucket_id = 'voice-recordings' AND
---     auth.role() = 'authenticated'
---   );
+-- Policy: Anyone can read voice recordings (public bucket)
+CREATE POLICY "Anyone can read voice recordings"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'voice-recordings');
 
--- CREATE POLICY "Anyone can read voice recordings"
---   ON storage.objects FOR SELECT
---   USING (bucket_id = 'voice-recordings');
+-- Policy: Users can delete their own recordings
+CREATE POLICY "Users can delete their own voice recordings"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'voice-recordings' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
