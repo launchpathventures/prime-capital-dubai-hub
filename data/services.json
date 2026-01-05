@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "slug": "investment-advisory",
+    "title": "Investment Advisory",
+    "description": "Strategic guidance for building and optimizing your Dubai property portfolio, aligned with your financial goals and risk profile.",
+    "features": [
+      "Market analysis and timing",
+      "Portfolio diversification strategy",
+      "Risk assessment and mitigation",
+      "Exit strategy planning"
+    ],
+    "icon": "target",
+    "displayOrder": 1
+  },
+  {
+    "id": "2",
+    "slug": "acquisition-support",
+    "title": "Acquisition Support",
+    "description": "End-to-end support for property purchases, from identification to completion, ensuring every detail is managed with precision.",
+    "features": [
+      "Property sourcing and due diligence",
+      "Developer relationships and access",
+      "Negotiation and transaction management",
+      "Legal and regulatory coordination"
+    ],
+    "icon": "building",
+    "displayOrder": 2
+  },
+  {
+    "id": "3",
+    "slug": "golden-visa-advisory",
+    "title": "Golden Visa Advisory",
+    "description": "Navigate the UAE Golden Visa process with confidence, from qualifying investments to application submission.",
+    "features": [
+      "Eligibility assessment",
+      "Qualifying property identification",
+      "Documentation preparation",
+      "Application coordination"
+    ],
+    "icon": "passport",
+    "displayOrder": 3
+  },
+  {
+    "id": "4",
+    "slug": "asset-management",
+    "title": "Asset Management",
+    "description": "Ongoing management and optimization of your Dubai property investments, maximizing returns while minimizing your involvement.",
+    "features": [
+      "Tenant sourcing and management",
+      "Property maintenance coordination",
+      "Financial reporting",
+      "Market monitoring and advice"
+    ],
+    "icon": "chart",
+    "displayOrder": 4
+  }
+]

@@ -30,6 +30,10 @@ import {
   RocketIcon,
   MapPinIcon,
   CalendarIcon,
+  BuildingIcon,
+  MessageSquareQuoteIcon,
+  TrendingUpIcon,
+  GraduationCapIcon,
 } from "lucide-react"
 import { type NavItem, type NavGroup } from "@/components/layout/collapsible-sidebar-nav"
 
@@ -68,15 +72,16 @@ export function getPresentationByPath(path: string): Presentation | undefined {
 // -----------------------------------------------------------------------------
 
 export const webNavItems: NavItem[] = [
-  { label: "Build Web", href: "/web" },
-  { label: "Build Apps", href: "/app" },
-  { label: "Present", href: "/present" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
+  { label: "Properties", href: "/properties" },
+  { label: "Team", href: "/team" },
 ]
 
 /** "More" dropdown items for web navigation */
 export const webMoreItems: NavItem[] = [
-  { label: "Examples", href: "/examples" },
-  { label: "Authentication", href: "/auth/login" },
+  { label: "Strategy Kit", href: "/strategy-kit" },
+  { label: "Contact", href: "/contact" },
 ]
 
 // -----------------------------------------------------------------------------
@@ -92,18 +97,29 @@ export const appNavItems: NavGroup[] = [
     ],
   },
   {
-    label: "Learn",
-    icon: TargetIcon,
+    label: "Website Content",
+    icon: LayersIcon,
     items: [
-      { label: "Approach", href: "/app/approach" },
-      { label: "Components", href: "/app/components" },
+      { label: "Properties", href: "/app/properties" },
+      { label: "Team", href: "/app/team" },
+      { label: "Testimonials", href: "/app/testimonials" },
+      { label: "Stats", href: "/app/stats" },
     ],
   },
   {
-    label: "Manage",
+    label: "Learning",
+    icon: GraduationCapIcon,
+    items: [
+      { label: "Modules", href: "/app/learning/modules" },
+      { label: "Users", href: "/app/learning/users" },
+      { label: "Progress", href: "/app/learning/progress" },
+    ],
+  },
+  {
+    label: "Settings",
     icon: SettingsIcon,
     items: [
-      { label: "Settings", href: "/app/settings" },
+      { label: "Site Settings", href: "/app/site-settings" },
       { label: "Profile", href: "/app/profile" },
     ],
   },

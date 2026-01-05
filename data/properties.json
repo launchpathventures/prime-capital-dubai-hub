@@ -1,0 +1,98 @@
+[
+  {
+    "id": "1",
+    "slug": "palm-jumeirah-signature-villa",
+    "title": "Signature Villa at Palm Jumeirah",
+    "type": "villa",
+    "location": "Palm Jumeirah, Dubai",
+    "developer": "Nakheel",
+    "priceFrom": 15000000,
+    "priceTo": 25000000,
+    "currency": "AED",
+    "bedroomsFrom": 5,
+    "bedroomsTo": 7,
+    "sizeFrom": 8000,
+    "sizeTo": 15000,
+    "sizeUnit": "sqft",
+    "completionDate": null,
+    "completionStatus": "ready",
+    "description": "An exceptional waterfront villa offering unparalleled luxury and privacy on the iconic Palm Jumeirah. Features include private beach access, infinity pool, and panoramic views of the Arabian Gulf.",
+    "features": [
+      "Private beach",
+      "Infinity pool",
+      "Smart home technology",
+      "Sea views",
+      "Private garden"
+    ],
+    "images": [
+      "/images/properties/palm-villa-1.jpg",
+      "/images/properties/palm-villa-2.jpg"
+    ],
+    "published": true,
+    "displayOrder": 1
+  },
+  {
+    "id": "2",
+    "slug": "downtown-sky-collection",
+    "title": "Sky Collection Penthouse",
+    "type": "penthouse",
+    "location": "Downtown Dubai",
+    "developer": "Emaar",
+    "priceFrom": 35000000,
+    "priceTo": 50000000,
+    "currency": "AED",
+    "bedroomsFrom": 4,
+    "bedroomsTo": 5,
+    "sizeFrom": 12000,
+    "sizeTo": 18000,
+    "sizeUnit": "sqft",
+    "completionDate": null,
+    "completionStatus": "ready",
+    "description": "A rare opportunity to own one of Downtown Dubai's most prestigious penthouses, with direct Burj Khalifa views and bespoke interiors by world-renowned designers.",
+    "features": [
+      "Burj Khalifa views",
+      "Private elevator",
+      "Rooftop terrace",
+      "Wine cellar",
+      "Concierge service"
+    ],
+    "images": [
+      "/images/properties/downtown-penthouse-1.jpg",
+      "/images/properties/downtown-penthouse-2.jpg"
+    ],
+    "published": true,
+    "displayOrder": 2
+  },
+  {
+    "id": "3",
+    "slug": "dubai-hills-mansion",
+    "title": "Contemporary Mansion",
+    "type": "villa",
+    "location": "Dubai Hills Estate",
+    "developer": "Emaar",
+    "priceFrom": 20000000,
+    "priceTo": 30000000,
+    "currency": "AED",
+    "bedroomsFrom": 6,
+    "bedroomsTo": 8,
+    "sizeFrom": 15000,
+    "sizeTo": 22000,
+    "sizeUnit": "sqft",
+    "completionDate": "2025-06-01",
+    "completionStatus": "off-plan",
+    "description": "A masterfully designed mansion overlooking the championship golf course. Contemporary architecture meets Middle Eastern hospitality in this exceptional family residence.",
+    "features": [
+      "Golf course views",
+      "Home cinema",
+      "Staff quarters",
+      "Temperature-controlled garage",
+      "Landscaped gardens"
+    ],
+    "images": [
+      "/images/properties/hills-mansion-1.jpg",
+      "/images/properties/hills-mansion-2.jpg"
+    ],
+    "published": true,
+    "displayOrder": 3
+  }
+]
