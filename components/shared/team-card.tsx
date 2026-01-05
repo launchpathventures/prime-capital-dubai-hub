@@ -5,6 +5,8 @@
  * Used on the team page and homepage featured team section.
  */
 
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
