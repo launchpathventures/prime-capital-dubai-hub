@@ -1,0 +1,24 @@
+{
+  "features": {
+    "properties": true,
+    "team": true,
+    "testimonials": true,
+    "blog": false
+  },
+  "site": {
+    "name": "Prime Capital Dubai",
+    "tagline": "We move complexity out of sight",
+    "description": "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
+    "email": "hello@primecapitaldubai.com",
+    "phone": "+971 4 XXX XXXX",
+    "address": "Office XXX, DIFC, Dubai, UAE"
+  },
+  "social": {
+    "linkedin": "https://linkedin.com/company/prime-capital-dubai",
+    "instagram": "https://instagram.com/primecapitaldubai"
+  },
+  "forms": {
+    "contact": "contactFormId",
+    "strategyKit": "strategyKitFormId"
+  }
+}
