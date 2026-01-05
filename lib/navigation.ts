@@ -24,7 +24,6 @@ import {
   BarChart3Icon,
   SettingsIcon,
   CreditCardIcon,
-  GripIcon,
   GridIcon,
   LayersIcon,
   RocketIcon,

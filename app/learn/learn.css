@@ -1,0 +1,124 @@
+/**
+ * CATALYST - Learn Styles
+ *
+ * Styles specific to the learning portal pages.
+ *
+ * =============================================================================
+ * LAYOUT SYSTEM
+ * =============================================================================
+ *
+ * The learn surface uses a simple, content-focused layout:
+ * - Fixed header that hides on scroll
+ * - Full-width content area with max-width constraint
+ * - Generous padding for readability
+ */
+
+@import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   LEARN CONTENT LAYOUT
+   ============================================================================= */
+
+.learn-content {
+  --learn-content-width: 72rem;
+  --learn-content-padding: 1rem;
+  --learn-content-padding-md: 2rem;
+}
+
+/* Default content constraints */
+:where(.learn-content > *) {
+  max-width: var(--learn-content-width);
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--learn-content-padding);
+
+  @media (min-width: 768px) {
+    padding-inline: var(--learn-content-padding-md);
+  }
+}
+
+/* =============================================================================
+   COMPETENCY CARDS
+   ============================================================================= */
+
+.competency-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.competency-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px oklch(from var(--color-foreground) l c h / 0.1);
+}
+
+/* =============================================================================
+   PROGRESS INDICATORS
+   ============================================================================= */
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring__circle {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* =============================================================================
+   MODULE CONTENT
+   ============================================================================= */
+
+.module-content {
+  /* Typography optimizations for reading */
+  max-width: 65ch;
+  line-height: 1.7;
+}
+
+.module-content h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.module-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.module-content p {
+  margin-bottom: 1rem;
+}
+
+.module-content ul,
+.module-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.module-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* =============================================================================
+   QUIZ INTERFACE
+   ============================================================================= */
+
+.quiz-option {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.quiz-option:hover:not(:disabled) {
+  background-color: oklch(from var(--color-muted) l c h / 0.5);
+}
+
+.quiz-option[data-selected="true"] {
+  border-color: var(--color-primary);
+  background-color: oklch(from var(--color-primary) l c h / 0.1);
+}
+
+.quiz-option[data-correct="true"] {
+  border-color: var(--color-success);
+  background-color: oklch(from var(--color-success) l c h / 0.1);
+}
+
+.quiz-option[data-incorrect="true"] {
+  border-color: var(--color-destructive);
+  background-color: oklch(from var(--color-destructive) l c h / 0.1);
+}
