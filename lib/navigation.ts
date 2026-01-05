@@ -33,7 +33,6 @@ import {
   BuildingIcon,
   MessageSquareQuoteIcon,
   TrendingUpIcon,
-  WrenchIcon,
 } from "lucide-react"
 import { type NavItem, type NavGroup } from "@/components/layout/collapsible-sidebar-nav"
 
