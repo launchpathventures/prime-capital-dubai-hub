@@ -92,6 +92,16 @@ export const appNavItems: NavGroup[] = [
     ],
   },
   {
+    label: "Hub",
+    icon: InboxIcon,
+    items: [
+      { label: "Overview", href: "/app/hub" },
+      { label: "Projects", href: "/app/hub/projects" },
+      { label: "Tasks", href: "/app/hub/tasks" },
+      { label: "Questions", href: "/app/hub/questions" },
+    ],
+  },
+  {
     label: "Learn",
     icon: TargetIcon,
     items: [
