@@ -1,0 +1,30 @@
+[
+  {
+    "id": "1",
+    "label": "Transaction Volume",
+    "value": "AED 500M+",
+    "description": "Total value of transactions completed",
+    "displayOrder": 1
+  },
+  {
+    "id": "2",
+    "label": "Client Retention",
+    "value": "94%",
+    "description": "Clients who return for additional investments",
+    "displayOrder": 2
+  },
+  {
+    "id": "3",
+    "label": "Average ROI",
+    "value": "12%+",
+    "description": "Average annual return on client portfolios",
+    "displayOrder": 3
+  },
+  {
+    "id": "4",
+    "label": "Years Experience",
+    "value": "15+",
+    "description": "Combined team experience in Dubai real estate",
+    "displayOrder": 4
+  }
+]

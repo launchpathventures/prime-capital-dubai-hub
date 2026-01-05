@@ -22,6 +22,14 @@ export const config = {
      * Controlled by NEXT_PUBLIC_DOCS_ENABLED env var.
      */
     showDocsInProduction: process.env.NEXT_PUBLIC_DOCS_ENABLED !== "false",
+
+    /**
+     * Website section toggles (can be overridden by JSON config)
+     */
+    properties: process.env.NEXT_PUBLIC_PROPERTIES_ENABLED !== "false",
+    team: process.env.NEXT_PUBLIC_TEAM_ENABLED !== "false",
+    testimonials: process.env.NEXT_PUBLIC_TESTIMONIALS_ENABLED !== "false",
+    blog: process.env.NEXT_PUBLIC_BLOG_ENABLED === "true",
   },
 
   /**
@@ -41,9 +49,10 @@ export const config = {
    * Used in layouts, SEO, and branding.
    */
   app: {
-    name: "Catalyst",
+    name: "Prime Capital Dubai",
+    tagline: "We move complexity out of sight",
     description:
-      "AI-first delivery system that turns messy discovery into confident delivery with proof-led alignment and a managed path to production.",
+      "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   },
 
@@ -52,8 +61,8 @@ export const config = {
    * The organization that created and maintains this kit.
    */
   vendor: {
-    name: "RIVER Group",
-    url: "https://www.weareriver.nz",
+    name: "Launch Path Ventures",
+    url: "https://www.launchpath.ventures",
   },
 
   /**
@@ -66,16 +75,43 @@ export const config = {
   },
 
   /**
+   * Contact Information
+   */
+  contact: {
+    email: "hello@primecapitaldubai.com",
+    phone: "+971 4 XXX XXXX",
+    address: "Office XXX, DIFC, Dubai, UAE",
+  },
+
+  /**
+   * Social Links
+   */
+  social: {
+    linkedin: "https://linkedin.com/company/prime-capital-dubai",
+    instagram: "https://instagram.com/primecapitaldubai",
+  },
+
+  /**
    * External Links
    * URLs for external resources, repositories, and services.
    */
   links: {
     /** GitHub repository for the starter kit */
-    github: "https://github.com/WEARERIVER/catalyst-ai-dev-kit",
+    github: "https://github.com/launchpathventures/prime-capital-dubai-hub",
     /** Documentation site (if separate from app) */
     docs: null as string | null,
     /** Support or contact link */
     support: null as string | null,
+    /** Strategy Kit PDF download */
+    strategyKit: "/downloads/strategy-kit.pdf",
+  },
+
+  /**
+   * Form IDs (Fillout.com)
+   */
+  forms: {
+    contact: process.env.NEXT_PUBLIC_CONTACT_FORM_ID || "",
+    strategyKit: process.env.NEXT_PUBLIC_STRATEGY_KIT_FORM_ID || "",
   },
 
   /**
