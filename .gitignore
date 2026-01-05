@@ -43,4 +43,7 @@ next-env.d.ts
 
 # temporary reference
 /REF
+
+# Package manager lockfiles (we use pnpm)
 package-lock.json
+yarn.lock

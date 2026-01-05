@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "slug": "faisal-almahmoud",
+    "name": "Faisal Al Mahmoud",
+    "role": "Founding Partner",
+    "bio": "With over 15 years of experience in Dubai real estate, Faisal has advised HNW clients from Europe, Asia, and the Middle East on strategic property investments. His approach combines deep market knowledge with a commitment to client success.",
+    "expertise": [
+      "Off-plan investments",
+      "Portfolio strategy",
+      "Golden Visa advisory"
+    ],
+    "imageUrl": "/images/team/faisal.jpg",
+    "email": "faisal@primecapitaldubai.com",
+    "phone": "+971 50 XXX XXXX",
+    "linkedinUrl": "https://linkedin.com/in/faisalalmahmoud",
+    "published": true,
+    "displayOrder": 1
+  },
+  {
+    "id": "2",
+    "slug": "sarah-chen",
+    "name": "Sarah Chen",
+    "role": "Senior Investment Advisor",
+    "bio": "Sarah brings a decade of experience from Singapore's family office sector, specializing in cross-border real estate transactions. She leads our relationships with Asian investors seeking Dubai diversification.",
+    "expertise": [
+      "Family office advisory",
+      "Cross-border transactions",
+      "Market analysis"
+    ],
+    "imageUrl": "/images/team/sarah.jpg",
+    "email": "sarah@primecapitaldubai.com",
+    "phone": "+971 50 XXX XXXX",
+    "linkedinUrl": "https://linkedin.com/in/sarahchen",
+    "published": true,
+    "displayOrder": 2
+  },
+  {
+    "id": "3",
+    "slug": "james-morrison",
+    "name": "James Morrison",
+    "role": "Director of Operations",
+    "bio": "James oversees client experience and ensures seamless transaction management. His background in luxury hospitality brings a service-first approach to every client interaction.",
+    "expertise": [
+      "Transaction management",
+      "Client experience",
+      "Due diligence coordination"
+    ],
+    "imageUrl": "/images/team/james.jpg",
+    "email": "james@primecapitaldubai.com",
+    "phone": "+971 50 XXX XXXX",
+    "linkedinUrl": "https://linkedin.com/in/jamesmorrison",
+    "published": true,
+    "displayOrder": 3
+  }
+]

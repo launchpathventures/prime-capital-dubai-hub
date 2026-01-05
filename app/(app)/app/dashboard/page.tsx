@@ -1,118 +1,89 @@
 /**
  * CATALYST - Dashboard Page
  *
- * Main dashboard showing overview metrics, recent activity, and quick actions.
+ * Admin dashboard showing content overview and quick actions.
  * This is the default landing page after authentication.
  */
 
-"use client"
-
+import Link from "next/link"
 import { config } from "@/lib/config"
+import { getProperties, getTeamMembers, getTestimonials, getStats } from "@/lib/content"
 import { Container, Stack, Grid, Row, Text, Title } from "@/components/core"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import {
-  TrendingUpIcon,
-  TrendingDownIcon,
+  BuildingIcon,
   UsersIcon,
-  ActivityIcon,
-  DollarSignIcon,
-  TargetIcon,
+  MessageSquareQuoteIcon,
+  TrendingUpIcon,
   ArrowRightIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  AlertCircleIcon,
+  ExternalLinkIcon,
+  SettingsIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "lucide-react"
-import Link from "next/link"
 
 export default function DashboardPage() {
+  const properties = getProperties()
+  const team = getTeamMembers()
+  const testimonials = getTestimonials()
+  const stats = getStats()
+
   return (
     <Container size="lg" className="py-6">
       <Stack gap="xl">
         {/* Page Header */}
-        <Stack gap="xs">
-          <Title size="h3">Dashboard</Title>
-          <Text variant="muted">
-            Welcome back! Here&apos;s an overview of your application.
-          </Text>
-        </Stack>
+        <Row justify="between" align="center">
+          <Stack gap="xs">
+            <Title size="h3">Dashboard</Title>
+            <Text variant="muted">
+              Welcome to the {config.app.name} admin panel
+            </Text>
+          </Stack>
+          <Button
+            nativeButton={false}
+            variant="outline"
+            render={<Link href="/" target="_blank" />}
+          >
+            <ExternalLinkIcon className="h-4 w-4 mr-2" />
+            View Website
+          </Button>
+        </Row>
 
-        {/* Metrics Grid */}
+        {/* Content Overview */}
         <Grid cols={4} gap="md">
-          <MetricCard
-            title="Total Users"
-            value="2,847"
-            change="+12.5%"
-            trend="up"
+          <ContentCard
+            title="Properties"
+            count={properties.length}
+            href="/app/properties"
+            icon={BuildingIcon}
+            enabled={config.features.properties}
+          />
+          <ContentCard
+            title="Team Members"
+            count={team.length}
+            href="/app/team"
             icon={UsersIcon}
+            enabled={config.features.team}
           />
-          <MetricCard
-            title="Active Sessions"
-            value="1,234"
-            change="+8.2%"
-            trend="up"
-            icon={ActivityIcon}
+          <ContentCard
+            title="Testimonials"
+            count={testimonials.length}
+            href="/app/testimonials"
+            icon={MessageSquareQuoteIcon}
+            enabled={config.features.testimonials}
           />
-          <MetricCard
-            title="Revenue"
-            value="$45,231"
-            change="-2.4%"
-            trend="down"
-            icon={DollarSignIcon}
-          />
-          <MetricCard
-            title="Conversion"
-            value="3.24%"
-            change="+0.8%"
-            trend="up"
-            icon={TargetIcon}
+          <ContentCard
+            title="Statistics"
+            count={stats.length}
+            href="/app/stats"
+            icon={TrendingUpIcon}
+            enabled={true}
           />
         </Grid>
 
-        {/* Main Content Grid */}
-        <Grid cols={3} gap="md">
-          {/* Recent Activity - spans 2 columns */}
-          <Card className="col-span-2">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates from your application</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Stack gap="sm">
-                <ActivityItem
-                  icon={CheckCircleIcon}
-                  iconColor="text-success"
-                  title="New user registered"
-                  description="john.doe@example.com joined the platform"
-                  time="2 minutes ago"
-                />
-                <ActivityItem
-                  icon={ClockIcon}
-                  iconColor="text-warning"
-                  title="Scheduled maintenance"
-                  description="System maintenance planned for tomorrow"
-                  time="1 hour ago"
-                />
-                <ActivityItem
-                  icon={AlertCircleIcon}
-                  iconColor="text-destructive"
-                  title="Payment failed"
-                  description="Subscription renewal failed for user #1234"
-                  time="3 hours ago"
-                />
-                <ActivityItem
-                  icon={CheckCircleIcon}
-                  iconColor="text-success"
-                  title="Feature deployed"
-                  description="New dashboard analytics released"
-                  time="5 hours ago"
-                />
-              </Stack>
-            </CardContent>
-          </Card>
-
+        <Grid cols={2} gap="md">
           {/* Quick Actions */}
           <Card>
             <CardHeader>
@@ -121,58 +92,134 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <Stack gap="sm">
-                <Button variant="outline" className="justify-start w-full" nativeButton={false} render={<Link href="/app/approach" />}>
-                  <TargetIcon className="h-4 w-4" />
-                  Learn Approach
+                <Button 
+                  variant="outline" 
+                  className="justify-start w-full" 
+                  nativeButton={false} 
+                  render={<Link href="/app/properties" />}
+                >
+                  <BuildingIcon className="h-4 w-4" />
+                  Manage Properties
+                  <ArrowRightIcon className="h-4 w-4 ml-auto" />
                 </Button>
-                <Button variant="outline" className="justify-start w-full" nativeButton={false} render={<Link href="/app/components" />}>
-                  <ActivityIcon className="h-4 w-4" />
-                  Explore Components
-                </Button>
-                <Button variant="outline" className="justify-start w-full" nativeButton={false} render={<Link href="/app/settings" />}>
+                <Button 
+                  variant="outline" 
+                  className="justify-start w-full" 
+                  nativeButton={false} 
+                  render={<Link href="/app/team" />}
+                >
                   <UsersIcon className="h-4 w-4" />
-                  Manage Settings
+                  Manage Team
+                  <ArrowRightIcon className="h-4 w-4 ml-auto" />
                 </Button>
-                <Button variant="outline" className="justify-start w-full" nativeButton={false} render={<Link href="/docs" />}>
-                  <ArrowRightIcon className="h-4 w-4" />
-                  View Documentation
+                <Button 
+                  variant="outline" 
+                  className="justify-start w-full" 
+                  nativeButton={false} 
+                  render={<Link href="/app/testimonials" />}
+                >
+                  <MessageSquareQuoteIcon className="h-4 w-4" />
+                  Manage Testimonials
+                  <ArrowRightIcon className="h-4 w-4 ml-auto" />
                 </Button>
+                <Button 
+                  variant="outline" 
+                  className="justify-start w-full" 
+                  nativeButton={false} 
+                  render={<Link href="/app/site-settings" />}
+                >
+                  <SettingsIcon className="h-4 w-4" />
+                  Site Settings
+                  <ArrowRightIcon className="h-4 w-4 ml-auto" />
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Feature Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Feature Status</CardTitle>
+              <CardDescription>Website section visibility</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Stack gap="sm">
+                <FeatureStatus 
+                  label="Properties" 
+                  enabled={config.features.properties} 
+                />
+                <FeatureStatus 
+                  label="Team Profiles" 
+                  enabled={config.features.team} 
+                />
+                <FeatureStatus 
+                  label="Testimonials" 
+                  enabled={config.features.testimonials} 
+                />
+                <FeatureStatus 
+                  label="Blog" 
+                  enabled={config.features.blog} 
+                />
               </Stack>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Project Progress */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Progress</CardTitle>
-            <CardDescription>Track the status of ongoing initiatives</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Stack gap="lg">
-              <ProjectProgress
-                name="Authentication System"
-                progress={100}
-                status="completed"
-              />
-              <ProjectProgress
-                name="Dashboard Analytics"
-                progress={75}
-                status="in-progress"
-              />
-              <ProjectProgress
-                name="API Integration"
-                progress={45}
-                status="in-progress"
-              />
-              <ProjectProgress
-                name="Mobile Optimization"
-                progress={20}
-                status="in-progress"
-              />
-            </Stack>
-          </CardContent>
-        </Card>
+        {/* Recent Properties */}
+        {properties.length > 0 && (
+          <Card>
+            <CardHeader>
+              <Row justify="between" align="center">
+                <div>
+                  <CardTitle>Recent Properties</CardTitle>
+                  <CardDescription>Latest property listings</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  nativeButton={false} 
+                  render={<Link href="/app/properties" />}
+                >
+                  View All
+                </Button>
+              </Row>
+            </CardHeader>
+            <CardContent>
+              <Stack gap="sm">
+                {properties.slice(0, 3).map((property) => (
+                  <Row 
+                    key={property.id} 
+                    justify="between" 
+                    align="center" 
+                    className="py-2 border-b last:border-0"
+                  >
+                    <Stack gap="none">
+                      <Text weight="medium">{property.title}</Text>
+                      <Text size="xs" variant="muted">
+                        {property.location} • {property.type}
+                      </Text>
+                    </Stack>
+                    <Row gap="sm" align="center">
+                      {property.published ? (
+                        <Badge>Published</Badge>
+                      ) : (
+                        <Badge variant="secondary">Draft</Badge>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="icon-sm"
+                        nativeButton={false}
+                        render={<Link href={`/properties/${property.slug}`} target="_blank" />}
+                      >
+                        <ExternalLinkIcon className="h-4 w-4" />
+                      </Button>
+                    </Row>
+                  </Row>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
       </Stack>
     </Container>
   )
@@ -182,99 +229,65 @@ export default function DashboardPage() {
 // Helper Components
 // =============================================================================
 
-function MetricCard({
+function ContentCard({
   title,
-  value,
-  change,
-  trend,
+  count,
+  href,
   icon: Icon,
+  enabled,
 }: {
   title: string
-  value: string
-  change: string
-  trend: "up" | "down"
+  count: number
+  href: string
   icon: React.ElementType
+  enabled: boolean
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <Row gap="xs" className="items-center mt-1">
-          {trend === "up" ? (
-            <TrendingUpIcon className="h-3 w-3 text-success" />
-          ) : (
-            <TrendingDownIcon className="h-3 w-3 text-destructive" />
-          )}
-          <Text
-            size="xs"
-            className={trend === "up" ? "text-success" : "text-destructive"}
-          >
-            {change}
-          </Text>
-          <Text size="xs" variant="muted">from last month</Text>
-        </Row>
-      </CardContent>
-    </Card>
+    <Link href={href}>
+      <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            {title}
+          </CardTitle>
+          <Icon className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <Row justify="between" align="end">
+            <div className="text-2xl font-bold">{count}</div>
+            {!enabled && (
+              <Badge variant="secondary" className="text-xs">
+                <EyeOffIcon className="h-3 w-3 mr-1" />
+                Hidden
+              </Badge>
+            )}
+          </Row>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 
-function ActivityItem({
-  icon: Icon,
-  iconColor,
-  title,
-  description,
-  time,
+function FeatureStatus({
+  label,
+  enabled,
 }: {
-  icon: React.ElementType
-  iconColor: string
-  title: string
-  description: string
-  time: string
+  label: string
+  enabled: boolean
 }) {
   return (
-    <Row gap="sm" className="items-start py-2 border-b last:border-0">
-      <div className="mt-0.5">
-        <Icon className={`h-4 w-4 ${iconColor}`} />
-      </div>
-      <Stack gap="none" className="flex-1 min-w-0">
-        <Text size="sm" weight="medium">{title}</Text>
-        <Text size="xs" variant="muted" className="truncate">{description}</Text>
-      </Stack>
-      <Text size="xs" variant="muted" className="shrink-0">{time}</Text>
+    <Row justify="between" align="center" className="py-2 border-b last:border-0">
+      <Text size="sm">{label}</Text>
+      {enabled ? (
+        <Badge variant="default" className="text-xs">
+          <EyeIcon className="h-3 w-3 mr-1" />
+          Visible
+        </Badge>
+      ) : (
+        <Badge variant="secondary" className="text-xs">
+          <EyeOffIcon className="h-3 w-3 mr-1" />
+          Hidden
+        </Badge>
+      )}
     </Row>
-  )
-}
-
-function ProjectProgress({
-  name,
-  progress,
-  status,
-}: {
-  name: string
-  progress: number
-  status: "completed" | "in-progress" | "not-started"
-}) {
-  const statusConfig = {
-    completed: { label: "Completed", variant: "default" as const },
-    "in-progress": { label: "In Progress", variant: "secondary" as const },
-    "not-started": { label: "Not Started", variant: "outline" as const },
-  }
-
-  const { label, variant } = statusConfig[status]
-
-  return (
-    <Stack gap="sm">
-      <Row className="justify-between items-center">
-        <Text size="sm" weight="medium">{name}</Text>
-        <Badge variant={variant}>{label}</Badge>
-      </Row>
-      <Progress value={progress} className="h-2" />
-    </Stack>
   )
 }

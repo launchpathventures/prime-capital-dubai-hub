@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { webNavItems, webMoreItems } from "@/lib/navigation"
-import { BookOpenIcon, ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
+import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle, SurfaceSwitcher } from "@/components/shared"
 import { HeaderPopoverProvider } from "@/components/shared/header-popover-context"
@@ -155,9 +155,8 @@ export function WebNav() {
                 </>
               )}
 
-              <Link href="/docs" className="web-mobile-menu-primary">
-                <BookOpenIcon className="h-4 w-4" />
-                Docs
+              <Link href="/contact" className="web-mobile-menu-primary">
+                Get In Touch
               </Link>
             </nav>
           </div>
@@ -209,11 +208,10 @@ function MoreDropdown() {
 function DocsButton() {
   return (
     <Link
-      href="/docs"
+      href="/contact"
       className="bg-primary text-primary-foreground hover:bg-primary/80 inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-all"
     >
-      <BookOpenIcon className="h-3.5 w-3.5" />
-      Docs
+      Get In Touch
     </Link>
   )
 }

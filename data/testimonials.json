@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "quote": "Prime Capital's approach was refreshingly different. No pressure, no hype—just honest guidance that helped us make a confident decision.",
+    "authorName": "Private Client",
+    "authorTitle": null,
+    "authorLocation": "London, UK",
+    "published": true,
+    "displayOrder": 1
+  },
+  {
+    "id": "2",
+    "quote": "Working with Prime Capital gave us the confidence to invest in Dubai's property market. Their expertise and discretion made a complex process remarkably straightforward.",
+    "authorName": "Family Office Principal",
+    "authorTitle": null,
+    "authorLocation": "Singapore",
+    "published": true,
+    "displayOrder": 2
+  },
+  {
+    "id": "3",
+    "quote": "What sets Prime Capital apart is their willingness to say no. They turned down deals that didn't fit our criteria, which told us everything we needed to know about their integrity.",
+    "authorName": "Private Investor",
+    "authorTitle": null,
+    "authorLocation": "Geneva, Switzerland",
+    "published": true,
+    "displayOrder": 3
+  }
+]
