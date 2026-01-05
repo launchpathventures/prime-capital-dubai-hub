@@ -33,6 +33,7 @@ import {
   BuildingIcon,
   MessageSquareQuoteIcon,
   TrendingUpIcon,
+  GraduationCapIcon,
 } from "lucide-react"
 import { type NavItem, type NavGroup } from "@/components/layout/collapsible-sidebar-nav"
 
@@ -103,6 +104,15 @@ export const appNavItems: NavGroup[] = [
       { label: "Team", href: "/app/team" },
       { label: "Testimonials", href: "/app/testimonials" },
       { label: "Stats", href: "/app/stats" },
+    ],
+  },
+  {
+    label: "Learning",
+    icon: GraduationCapIcon,
+    items: [
+      { label: "Modules", href: "/app/learning/modules" },
+      { label: "Users", href: "/app/learning/users" },
+      { label: "Progress", href: "/app/learning/progress" },
     ],
   },
   {
