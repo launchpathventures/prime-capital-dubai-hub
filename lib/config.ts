@@ -88,6 +88,24 @@ export const config = {
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   },
+
+  /**
+   * Learning Management System Configuration
+   * Settings for the LMS/learning portal.
+   */
+  learning: {
+    /** Quiz pass threshold (percentage as decimal, e.g., 0.8 = 80%) */
+    quizPassThreshold: 0.8,
+    /** Core competency slugs in display order */
+    competencies: [
+      "market-intelligence",
+      "client-discovery",
+      "property-matching",
+      "transaction-management",
+      "objection-navigation",
+      "relationship-stewardship",
+    ],
+  },
 } as const
 
 /**

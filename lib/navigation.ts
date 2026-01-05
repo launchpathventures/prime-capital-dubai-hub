@@ -24,12 +24,12 @@ import {
   BarChart3Icon,
   SettingsIcon,
   CreditCardIcon,
-  GripIcon,
   GridIcon,
   LayersIcon,
   RocketIcon,
   MapPinIcon,
   CalendarIcon,
+  GraduationCapIcon,
 } from "lucide-react"
 import { type NavItem, type NavGroup } from "@/components/layout/collapsible-sidebar-nav"
 
@@ -89,6 +89,15 @@ export const appNavItems: NavGroup[] = [
     icon: LayoutDashboardIcon,
     items: [
       { label: "Dashboard", href: "/app/dashboard" },
+    ],
+  },
+  {
+    label: "Learning",
+    icon: GraduationCapIcon,
+    items: [
+      { label: "Modules", href: "/app/learning" },
+      { label: "Users", href: "/app/users" },
+      { label: "Progress", href: "/app/progress" },
     ],
   },
   {
