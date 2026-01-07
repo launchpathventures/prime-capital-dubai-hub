@@ -1,26 +1,24 @@
 /**
  * CATALYST - Team Member Detail Page
  *
- * Individual team member profile with sophisticated layout.
- * Features: Hero with dark overlay, expertise card, credentials, contact CTA.
+ * Individual team member profile with brand styling.
+ * Features: Hero with photo, expertise card, credentials, contact CTA.
  */
 
 import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import { getTeamMemberBySlug, getTeamMemberSlugs } from "@/lib/content"
-import { Container, Section, Stack, Row, Grid, Text, Title } from "@/components/core"
+import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  CheckCircleIcon,
+  CheckIcon,
   LinkedinIcon,
   MailIcon,
   PhoneIcon,
   UserIcon,
-  CalendarIcon,
 } from "lucide-react"
 
 interface PageProps {
@@ -60,228 +58,223 @@ export default async function TeamMemberPage({ params }: PageProps) {
   const hasBackground = member.background && member.background.length > 0
 
   return (
-    <Stack gap="none">
-      {/* Hero Section with Dark Overlay */}
-      <Section padding="none" className="relative">
-        <div className="relative min-h-[400px] md:min-h-[500px] bg-slate-900">
-          {/* Background with gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-primary/20" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/70 to-transparent" />
-          
-          {/* Back Button */}
-          <div className="absolute top-6 left-6 z-10">
-            <Link
-              href="/team"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg text-white hover:bg-white/20 transition-colors"
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-              Back to Team
-            </Link>
-          </div>
-
-          {/* Hero Content */}
-          <Container size="xl" className="relative z-10 h-full">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 pt-24 pb-12 md:py-24">
-              {/* Profile Photo */}
-              <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/30 to-slate-700 shadow-2xl ring-4 ring-white/10">
-                {member.photo ? (
-                  <Image
-                    src={member.photo}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <UserIcon className="h-24 w-24 text-white/30" />
-                  </div>
-                )}
-              </div>
-
-              {/* Name, Role, Short Bio */}
-              <Stack gap="md" className="text-center md:text-left">
-                {member.isFounder && (
-                  <Text size="sm" className="uppercase tracking-widest text-primary font-medium">
-                    Founder
-                  </Text>
-                )}
-                <Title as="h1" size="h1" className="font-headline text-white">
-                  {member.name}
-                </Title>
-                <Text size="xl" className="text-slate-300">
-                  {member.role}
-                </Text>
-                {member.shortBio && (
-                  <Text className="text-slate-400 max-w-xl leading-relaxed">
-                    {member.shortBio}
-                  </Text>
-                )}
-                
-                {/* Email Button */}
-                {member.email && (
-                  <div className="pt-2">
-                    <Button
-                      nativeButton={false}
-                      variant="outline"
-                      className="border-white/30 text-white hover:bg-white/10 hover:text-white"
-                      render={<a href={`mailto:${member.email}`} />}
-                    >
-                      <MailIcon className="mr-2 h-4 w-4" />
-                      EMAIL
-                    </Button>
-                  </div>
-                )}
-              </Stack>
-            </div>
-          </Container>
+    <div className="web-team-member">
+      {/* Hero Section */}
+      <section
+        className="relative min-h-[50vh] flex flex-col justify-center"
+        style={{
+          backgroundImage: `linear-gradient(to right, rgba(63,65,66,0.98) 0%, rgba(63,65,66,0.85) 50%, rgba(63,65,66,0.7) 100%)`,
+          backgroundColor: "var(--web-ash)",
+        }}
+      >
+        {/* Back Button */}
+        <div className="absolute top-24 left-6 z-10">
+          <Link
+            href="/team"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-[2px] text-white text-[13px] hover:bg-white/20 transition-colors"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to Team
+          </Link>
         </div>
-      </Section>
+
+        <Container size="xl" className="py-20">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            {/* Profile Photo */}
+            <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0 rounded-[2px] overflow-hidden bg-[var(--web-spruce)]">
+              {member.photo ? (
+                <Image
+                  src={member.photo}
+                  alt={member.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <UserIcon className="h-24 w-24 text-[var(--web-serenity)]/50" />
+                </div>
+              )}
+            </div>
+
+            {/* Name, Role, Short Bio */}
+            <Stack gap="md" className="text-center md:text-left">
+              {member.isFounder && (
+                <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.2em]">
+                  Founder
+                </span>
+              )}
+              <h1 className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5vw,48px)] font-normal leading-[1.1]">
+                {member.name}
+              </h1>
+              <div className="text-[var(--web-serenity)] text-[18px] font-light">
+                {member.role}
+              </div>
+              {member.shortBio && (
+                <Text className="text-white/70 text-[15px] font-light leading-relaxed max-w-xl">
+                  {member.shortBio}
+                </Text>
+              )}
+              
+              {/* Contact Button */}
+              {member.email && (
+                <div className="pt-2">
+                  <a
+                    href={`mailto:${member.email}`}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-[var(--web-off-white)] border border-[var(--web-off-white)]/50 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] transition-colors"
+                  >
+                    <MailIcon className="h-4 w-4" />
+                    Email
+                  </a>
+                </div>
+              )}
+            </Stack>
+          </div>
+        </Container>
+      </section>
 
       {/* Content Section */}
-      <Section padding="xl">
+      <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
         <Container size="xl">
-          <Grid cols={3} gap="xl">
+          <Grid cols={1} className="lg:grid-cols-[2fr_1fr] gap-12">
             {/* Left Column: About + Credentials */}
-            <Stack gap="xl" className="col-span-2">
+            <Stack gap="xl">
               {/* Background & Experience */}
-              <Stack gap="md">
-                <Text size="sm" className="uppercase tracking-widest text-primary font-medium">
+              <div>
+                <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
                   About
-                </Text>
-                <Title as="h2" size="h2" className="font-headline">
+                </span>
+                <Title as="h2" className="font-headline text-[var(--web-ash)] text-[clamp(24px,3vw,32px)] font-normal mb-6">
                   Background & Experience
                 </Title>
-                <Text className="leading-relaxed whitespace-pre-line text-muted-foreground">
+                <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-relaxed whitespace-pre-line">
                   {bioContent}
                 </Text>
-              </Stack>
+              </div>
 
-              {/* Credentials Card */}
+              {/* Credentials */}
               {hasBackground && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-headline">Credentials</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Stack gap="sm">
-                      {member.background.map((item, index) => (
-                        <Row key={index} gap="sm" align="start">
-                          <CheckCircleIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                          <Text>{item}</Text>
-                        </Row>
-                      ))}
-                    </Stack>
-                  </CardContent>
-                </Card>
+                <div className="bg-white rounded-[2px] p-6 shadow-sm">
+                  <Title as="h3" className="font-headline text-[var(--web-ash)] text-lg font-normal mb-6">
+                    Credentials
+                  </Title>
+                  <Stack gap="sm">
+                    {member.background.map((item, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <CheckIcon className="h-5 w-5 text-[var(--web-spruce)] shrink-0 mt-0.5" />
+                        <Text className="text-[var(--web-spruce)] text-[14px] font-light">{item}</Text>
+                      </div>
+                    ))}
+                  </Stack>
+                </div>
               )}
             </Stack>
 
             {/* Right Column: Expertise + Contact */}
             <Stack gap="lg">
-              {/* Areas of Expertise Card (Dark) */}
+              {/* Areas of Expertise Card */}
               {hasExpertise && (
-                <Card className="bg-slate-800 dark:bg-slate-900 text-white border-0">
-                  <CardHeader>
-                    <CardTitle className="text-white font-headline">
-                      Areas of Expertise
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Stack gap="sm">
-                      {member.expertise.map((skill, index) => (
-                        <Row key={index} gap="sm" align="center">
-                          <CheckCircleIcon className="h-5 w-5 text-emerald-400 shrink-0" />
-                          <Text className="text-slate-200">{skill}</Text>
-                        </Row>
-                      ))}
-                    </Stack>
-                  </CardContent>
-                </Card>
+                <div className="bg-[var(--web-ash)] rounded-[2px] p-6">
+                  <Title as="h3" className="font-headline text-[var(--web-off-white)] text-lg font-normal mb-6">
+                    Areas of Expertise
+                  </Title>
+                  <Stack gap="sm">
+                    {member.expertise.map((skill, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <CheckIcon className="h-5 w-5 text-[var(--web-serenity)] shrink-0" />
+                        <Text className="text-white/80 text-[14px] font-light">{skill}</Text>
+                      </div>
+                    ))}
+                  </Stack>
+                </div>
               )}
 
               {/* Get in Touch Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline">Get in Touch</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Stack gap="md">
-                    <Text size="sm" variant="muted">
-                      Ready to discuss your investment goals? Connect with {member.name.split(" ")[0]} today.
-                    </Text>
-                    
-                    {member.email && (
-                      <a
-                        href={`mailto:${member.email}`}
-                        className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                      >
-                        <MailIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{member.email}</span>
-                      </a>
-                    )}
-                    
-                    {member.phone && (
-                      <a
-                        href={`tel:${member.phone.replace(/\s/g, "")}`}
-                        className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                      >
-                        <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{member.phone}</span>
-                      </a>
-                    )}
-                    
-                    {member.linkedin && (
-                      <a
-                        href={member.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-                      >
-                        <LinkedinIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>LinkedIn Profile</span>
-                      </a>
-                    )}
+              <div className="bg-white rounded-[2px] p-6 shadow-sm">
+                <Title as="h3" className="font-headline text-[var(--web-ash)] text-lg font-normal mb-4">
+                  Get in Touch
+                </Title>
+                <Text className="text-[var(--web-spruce)] text-[13px] font-light mb-6">
+                  Ready to discuss your investment goals? Connect with {member.name.split(" ")[0]} today.
+                </Text>
+                
+                <Stack gap="md">
+                  {member.email && (
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="flex items-center gap-3 text-[var(--web-spruce)] text-[14px] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <MailIcon className="h-4 w-4" />
+                      <span>{member.email}</span>
+                    </a>
+                  )}
+                  
+                  {member.phone && (
+                    <a
+                      href={`tel:${member.phone.replace(/\s/g, "")}`}
+                      className="flex items-center gap-3 text-[var(--web-spruce)] text-[14px] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <PhoneIcon className="h-4 w-4" />
+                      <span>{member.phone}</span>
+                    </a>
+                  )}
+                  
+                  {member.linkedin && (
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-[var(--web-spruce)] text-[14px] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <LinkedinIcon className="h-4 w-4" />
+                      <span>LinkedIn Profile</span>
+                    </a>
+                  )}
 
-                    <div className="pt-2">
-                      <Button
-                        nativeButton={false}
-                        className="w-full"
-                        render={<Link href="/contact" />}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        SCHEDULE CONSULTATION
-                      </Button>
-                    </div>
-                  </Stack>
-                </CardContent>
-              </Card>
+                  <div className="pt-4">
+                    <Button
+                      nativeButton={false}
+                      className="w-full h-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+                      render={<Link href="/contact" />}
+                    >
+                      Schedule Consultation
+                    </Button>
+                  </div>
+                </Stack>
+              </div>
             </Stack>
           </Grid>
         </Container>
-      </Section>
-
-      {/* Full-width Accent Section */}
-      <Section padding="none" className="relative">
-        <div className="relative h-48 md:h-64 bg-gradient-to-br from-slate-800 via-slate-900 to-primary/30">
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-        </div>
-      </Section>
+      </section>
 
       {/* CTA Section */}
-      <Section padding="xl" className="bg-muted/30">
+      <section
+        className="py-[var(--web-section-gap)]"
+        style={{
+          backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.97) 0%, rgba(63,65,66,0.98) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <Container size="md">
           <Stack gap="lg" align="center" className="text-center">
-            <Title as="h2" size="h2" className="font-headline">
+            <Title
+              as="h2"
+              className="font-headline text-[var(--web-off-white)] text-[clamp(28px,4vw,40px)] font-normal leading-[1.3]"
+            >
               Ready to invest in Dubai real estate?
             </Title>
-            <Text variant="muted" className="max-w-xl">
-              Our team of expert advisors is here to guide you through every step 
+
+            <Text className="text-white/70 text-[15px] font-light leading-relaxed max-w-[480px]">
+              Our team of expert advisors is here to guide you through every step
               of your investment journey in the UAE property market.
             </Text>
-            <Row gap="md" className="flex-col sm:flex-row">
+
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
               <Button
                 nativeButton={false}
+                size="lg"
+                className="h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
                 render={<Link href="/contact" />}
               >
                 Get In Touch
@@ -289,15 +282,16 @@ export default async function TeamMemberPage({ params }: PageProps) {
               </Button>
               <Button
                 nativeButton={false}
-                variant="outline"
+                size="lg"
+                className="h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-white/10 border border-white/30 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
                 render={<Link href="/team" />}
               >
                 Meet the Team
               </Button>
-            </Row>
+            </div>
           </Stack>
         </Container>
-      </Section>
-    </Stack>
+      </section>
+    </div>
   )
 }
