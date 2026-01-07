@@ -15,7 +15,7 @@ import {
   formatPriceRange,
   formatBedroomRange,
   formatSizeRange,
-} from "@/lib/content"
+} from "@/lib/content-types"
 import { MapPinIcon, BedDoubleIcon, RulerIcon } from "lucide-react"
 
 interface PropertyCardProps {

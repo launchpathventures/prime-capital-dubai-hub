@@ -11,6 +11,7 @@
  */
 
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { getSupabasePublicConfig } from "@/lib/supabase/config"
 
@@ -48,4 +49,17 @@ export async function createClient() {
       },
     }
   )
+}
+
+/**
+ * Create a Supabase client for build-time use (no cookies required).
+ * 
+ * Use this in generateStaticParams and other build-time functions
+ * that don't have access to request cookies.
+ * 
+ * NOTE: This client can only read public data (respects RLS with anon role).
+ */
+export function createStaticClient() {
+  const { url, publicKey } = getSupabasePublicConfig()
+  return createSupabaseClient(url, publicKey)
 }

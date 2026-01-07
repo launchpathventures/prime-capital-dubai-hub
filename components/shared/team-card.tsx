@@ -12,7 +12,7 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { type TeamMember } from "@/lib/content"
+import { type TeamMember } from "@/lib/content-types"
 import { LinkedinIcon, MailIcon } from "lucide-react"
 
 interface TeamCardProps {

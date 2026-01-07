@@ -17,8 +17,8 @@ export const metadata = {
   description: "Meet the experienced advisors at Prime Capital Dubai.",
 }
 
-export default function TeamPage() {
-  const team = getTeamMembers()
+export default async function TeamPage() {
+  const team = await getTeamMembers()
 
   if (!config.features.team) {
     return (

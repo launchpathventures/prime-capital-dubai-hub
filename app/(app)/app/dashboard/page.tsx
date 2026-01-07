@@ -24,11 +24,13 @@ import {
   EyeOffIcon,
 } from "lucide-react"
 
-export default function DashboardPage() {
-  const properties = getProperties()
-  const team = getTeamMembers()
-  const testimonials = getTestimonials()
-  const stats = getStats()
+export default async function DashboardPage() {
+  const [properties, team, testimonials, stats] = await Promise.all([
+    getProperties(),
+    getTeamMembers(),
+    getTestimonials(),
+    getStats(),
+  ])
 
   return (
     <Container size="lg" className="py-6">
@@ -200,10 +202,10 @@ export default function DashboardPage() {
                       </Text>
                     </Stack>
                     <Row gap="sm" align="center">
-                      {property.published ? (
-                        <Badge>Published</Badge>
+                      {property.featured ? (
+                        <Badge>Featured</Badge>
                       ) : (
-                        <Badge variant="secondary">Draft</Badge>
+                        <Badge variant="secondary">{property.status}</Badge>
                       )}
                       <Button 
                         variant="ghost" 

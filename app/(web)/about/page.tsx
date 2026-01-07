@@ -23,9 +23,11 @@ export const metadata = {
   description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
 }
 
-export default function AboutPage() {
-  const stats = getStats()
-  const team = getTeamMembers()
+export default async function AboutPage() {
+  const [stats, team] = await Promise.all([
+    getStats(),
+    getTeamMembers(),
+  ])
 
   return (
     <Stack gap="none">

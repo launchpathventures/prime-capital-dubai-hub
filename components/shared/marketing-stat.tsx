@@ -6,7 +6,7 @@
  */
 
 import { cn } from "@/lib/utils"
-import { type Stat } from "@/lib/content"
+import { type Stat } from "@/lib/content-types"
 
 interface MarketingStatProps {
   stat: Stat

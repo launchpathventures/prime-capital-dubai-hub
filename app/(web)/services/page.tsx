@@ -30,8 +30,8 @@ const iconMap: Record<string, typeof TargetIcon> = {
   chart: TrendingUpIcon,
 }
 
-export default function ServicesPage() {
-  const services = getServices()
+export default async function ServicesPage() {
+  const services = await getServices()
 
   return (
     <Stack gap="none">
@@ -55,7 +55,7 @@ export default function ServicesPage() {
         <Container size="xl">
           <Grid cols={2} gap="lg">
             {services.map((service) => {
-              const Icon = iconMap[service.icon] || TargetIcon
+              const Icon = (service.icon && iconMap[service.icon]) || TargetIcon
               return (
                 <Card key={service.id} className="overflow-hidden">
                   <CardHeader className="bg-primary/5 pb-4">

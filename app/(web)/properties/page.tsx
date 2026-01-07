@@ -17,8 +17,8 @@ export const metadata = {
   description: "Curated selection of premium Dubai real estate opportunities.",
 }
 
-export default function PropertiesPage() {
-  const properties = getProperties()
+export default async function PropertiesPage() {
+  const properties = await getProperties()
 
   if (!config.features.properties) {
     return (

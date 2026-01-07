@@ -1,20 +1,19 @@
 /**
  * CATALYST - Logo Component
  *
- * Displays the Catalyst brand mark.
+ * Displays the Prime Capital brand mark.
  * Used in sidebar headers and web navigation.
+ * Supports light variant for transparent header overlays.
  *
  * @example
  * <Logo />
- * <Logo size="sm" />
- * <Logo showText={false} />
+ * <Logo variant="light" />
  */
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
-import { ZapIcon } from "lucide-react"
-import { Row, Text } from "@/components/core"
 
 // -----------------------------------------------------------------------------
 // Logo Component
@@ -22,57 +21,57 @@ import { Row, Text } from "@/components/core"
 
 interface LogoProps extends React.ComponentProps<"a"> {
   /**
+   * Visual variant of the logo.
+   * - "default": Dark logo for light backgrounds
+   * - "light": Light logo for dark/transparent backgrounds
+   * @default "default"
+   */
+  variant?: "default" | "light"
+  /**
    * Size variant of the logo.
    * @default "default"
    */
   size?: "sm" | "default" | "lg"
-  /**
-   * Whether to show the text beside the icon.
-   * @default true
-   */
-  showText?: boolean
 }
 
 function Logo({
+  variant = "default",
   size = "default",
-  showText = true,
   className,
   ...props
 }: LogoProps) {
+  const logoSrc = variant === "light" ? "/logo-light.svg" : "/logo.svg"
+  
+  const heights = {
+    sm: 40,
+    default: 56,
+    lg: 72,
+  }
+  
   return (
     <Link
       href="/"
       data-slot="logo"
       className={cn(
         "layout-logo",
-        "flex items-center gap-2 font-semibold",
-        size === "sm" && "text-sm",
-        size === "default" && "text-base",
-        size === "lg" && "text-lg",
+        "flex items-center",
         className
       )}
       {...props}
     >
-      {/* Icon mark */}
-      <div
-        className={cn(
-          "bg-primary text-primary-foreground flex items-center justify-center rounded-md",
-          size === "sm" && "h-6 w-6",
-          size === "default" && "h-7 w-7",
-          size === "lg" && "h-8 w-8"
-        )}
-      >
-        <ZapIcon
-          className={cn(
-            size === "sm" && "h-3.5 w-3.5",
-            size === "default" && "h-4 w-4",
-            size === "lg" && "h-5 w-5"
-          )}
-        />
-      </div>
-
-      {/* Text */}
-      {showText && <Text as="span" weight="semibold">Catalyst</Text>}
+      <Image
+        src={logoSrc}
+        alt="Prime Capital"
+        width={heights[size] * 2} // Approximate aspect ratio
+        height={heights[size]}
+        className="h-auto w-auto"
+        style={{ 
+          height: heights[size],
+          width: "auto",
+          transition: "all 0.3s cubic-bezier(0, 0, 0.2, 1)",
+        }}
+        priority
+      />
     </Link>
   )
 }

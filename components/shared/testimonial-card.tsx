@@ -7,7 +7,7 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { type Testimonial } from "@/lib/content"
+import { type Testimonial } from "@/lib/content-types"
 import { QuoteIcon } from "lucide-react"
 
 interface TestimonialCardProps {

@@ -12,6 +12,9 @@
 
 import { HubHeader } from "@/components/hub/hub-header"
 
+// Force dynamic rendering - hub is authenticated and data changes frequently
+export const dynamic = "force-dynamic"
+
 // -----------------------------------------------------------------------------
 // Layout
 // -----------------------------------------------------------------------------

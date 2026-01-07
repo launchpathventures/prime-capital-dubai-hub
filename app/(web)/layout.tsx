@@ -11,6 +11,9 @@
 import "./web.css"
 import { WebShell } from "./_surface/web-shell"
 
+// Force dynamic rendering to avoid SSG issues with base-ui components
+export const dynamic = "force-dynamic"
+
 export default function WebGroupLayout({
   children,
 }: {

@@ -71,17 +71,14 @@ export function getPresentationByPath(path: string): Presentation | undefined {
 // -----------------------------------------------------------------------------
 
 export const webNavItems: NavItem[] = [
-  { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
+  { label: "About", href: "/about" },
   { label: "Properties", href: "/properties" },
   { label: "Team", href: "/team" },
 ]
 
 /** "More" dropdown items for web navigation */
-export const webMoreItems: NavItem[] = [
-  { label: "Strategy Kit", href: "/strategy-kit" },
-  { label: "Contact", href: "/contact" },
-]
+export const webMoreItems: NavItem[] = []
 
 // -----------------------------------------------------------------------------
 // App Navigation (sidebar links for authenticated pages)

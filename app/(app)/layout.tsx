@@ -14,6 +14,9 @@ import "./app.css"
 import { AppShell } from "./_surface/app-shell"
 import { createClient } from "@/lib/supabase/server"
 
+// Force dynamic rendering - admin routes use auth and dynamic data
+export const dynamic = "force-dynamic"
+
 // -----------------------------------------------------------------------------
 // User Data Fetching
 // -----------------------------------------------------------------------------

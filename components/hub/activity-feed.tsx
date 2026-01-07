@@ -126,9 +126,9 @@ function ActivityItem({ activity, className }: ActivityItemProps) {
             {config?.label || activity.action}
           </Text>
         </Row>
-        {activity.metadata?.title && (
+        {typeof activity.metadata?.title === "string" && activity.metadata.title && (
           <Text size="sm" variant="muted" className="truncate">
-            &ldquo;{activity.metadata.title as string}&rdquo;
+            &ldquo;{activity.metadata.title}&rdquo;
           </Text>
         )}
       </Stack>

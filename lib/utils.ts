@@ -7,6 +7,22 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // -----------------------------------------------------------------------------
+// Slug Generation
+// -----------------------------------------------------------------------------
+
+/**
+ * Generate a URL-friendly slug from a title string.
+ * 
+ * @example generateSlug("Hello World!") → "hello-world"
+ */
+export function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+}
+
+// -----------------------------------------------------------------------------
 // HTML Comment Component
 // -----------------------------------------------------------------------------
 

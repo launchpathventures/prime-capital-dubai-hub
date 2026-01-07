@@ -3,6 +3,7 @@
  *
  * Navigation for web/marketing pages with mobile menu support.
  * Single source of truth for nav items — renders desktop inline, mobile dropdown.
+ * Supports scroll-aware styling (transparent vs solid header).
  *
  * Features:
  * - DRY: Nav items defined once, rendered for both viewports
@@ -18,23 +19,21 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { webNavItems, webMoreItems } from "@/lib/navigation"
-import { ChevronDownIcon, MenuIcon, XIcon } from "lucide-react"
+import { webNavItems } from "@/lib/navigation"
+import { MenuIcon, XIcon } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
-import { ThemeToggle, SurfaceSwitcher } from "@/components/shared"
-import { HeaderPopoverProvider } from "@/components/shared/header-popover-context"
+import { cn } from "@/lib/utils"
 
 // -----------------------------------------------------------------------------
 // WebNav Component
 // -----------------------------------------------------------------------------
 
-export function WebNav() {
+interface WebNavProps {
+  /** Whether the header is in scrolled (solid) state */
+  scrolled?: boolean
+}
+
+export function WebNav({ scrolled = false }: WebNavProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const pathname = usePathname()
 
@@ -86,16 +85,18 @@ export function WebNav() {
     <>
       {/* Desktop navigation */}
       <Header.Nav aria-label="Main navigation">
-        <NavItems />
-        <MoreDropdown />
-        <DocsButton />
+        <NavItems scrolled={scrolled} />
+        <ContactButton scrolled={scrolled} />
       </Header.Nav>
 
       {/* Mobile menu trigger */}
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden ml-auto"
+        className={cn(
+          "md:hidden ml-auto",
+          !scrolled && "text-white hover:bg-white/10"
+        )}
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label={mobileOpen ? "Close menu" : "Open menu"}
         aria-expanded={mobileOpen}
@@ -120,20 +121,14 @@ export function WebNav() {
             {/* Mobile header */}
             <div className="web-mobile-header">
               <Logo />
-              <HeaderPopoverProvider>
-                <div className="web-mobile-header-actions">
-                  <ThemeToggle />
-                  <SurfaceSwitcher />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={closeMenu}
-                    aria-label="Close menu"
-                  >
-                    <XIcon className="h-5 w-5" />
-                  </Button>
-                </div>
-              </HeaderPopoverProvider>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeMenu}
+                aria-label="Close menu"
+              >
+                <XIcon className="h-5 w-5" />
+              </Button>
             </div>
 
             {/* Navigation links */}
@@ -143,17 +138,6 @@ export function WebNav() {
               aria-label="Mobile navigation"
             >
               <NavItems />
-
-              {webMoreItems.length > 0 && (
-                <>
-                  <div className="web-mobile-menu-divider" aria-hidden="true" />
-                  {webMoreItems.map((item) => (
-                    <Link key={item.href} href={item.href}>
-                      {item.label}
-                    </Link>
-                  ))}
-                </>
-              )}
 
               <Link href="/contact" className="web-mobile-menu-primary">
                 Get In Touch
@@ -170,8 +154,12 @@ export function WebNav() {
 // Shared Components (used by both desktop and mobile)
 // -----------------------------------------------------------------------------
 
+interface NavItemsProps {
+  scrolled?: boolean
+}
+
 /** Renders the main navigation items — used in both desktop and mobile */
-function NavItems() {
+function NavItems({ scrolled }: NavItemsProps) {
   return (
     <>
       {webNavItems.map((item) => (
@@ -183,35 +171,23 @@ function NavItems() {
   )
 }
 
-/** More dropdown — desktop only */
-function MoreDropdown() {
-  if (webMoreItems.length === 0) return null
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="mt-px text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 cursor-pointer text-sm leading-normal">
-        More
-        <ChevronDownIcon className="h-3 w-3" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {webMoreItems.map((item) => (
-          <DropdownMenuItem key={item.href} render={<Link href={item.href} />}>
-            {item.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+interface ContactButtonProps {
+  scrolled?: boolean
 }
 
-/** Docs button — desktop only (mobile uses inline link) */
-function DocsButton() {
+/** Contact button — desktop only (mobile uses inline link) */
+function ContactButton({ scrolled }: ContactButtonProps) {
   return (
     <Link
       href="/contact"
-      className="bg-primary text-primary-foreground hover:bg-primary/80 inline-flex h-7 items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium transition-all"
+      className={cn(
+        "web-contact-btn inline-flex h-[42px] items-center justify-center rounded-[2px] px-6 text-xs font-normal uppercase tracking-[0.15em] transition-all",
+        scrolled
+          ? "border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
+          : "border border-white text-white hover:bg-white hover:text-[var(--web-ash)]"
+      )}
     >
-      Get In Touch
+      Contact
     </Link>
   )
 }
