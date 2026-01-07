@@ -277,7 +277,7 @@ function CTASection() {
 
           <a
             href="#download-form"
-            className="mt-4 h-12 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] inline-flex items-center justify-center"
+            className="btn-hover-lift mt-4 h-14 px-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] inline-flex items-center justify-center"
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             Download Free Guide

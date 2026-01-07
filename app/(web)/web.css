@@ -25,25 +25,36 @@
   --web-content-width: 80rem;
   --web-content-padding: 1rem;
   --web-header-height: 5rem;
-  --web-section-gap: 6rem;
+  --web-section-gap: 5rem;
   
   /* Brand colors (Prime Capital) */
   --web-spruce: #576C75;
   --web-ash: #3F4142;
   --web-off-white: #F2EFEA;
   --web-serenity: #A6B5B0;
+  
+  /* Animation tokens */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-moderate: 300ms;
+  --duration-slow: 400ms;
+  --duration-slower: 500ms;
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 @media (min-width: 640px) {
   :root {
     --web-content-padding: 1.5rem;
-    --web-section-gap: 7.5rem;
+    --web-section-gap: 5.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --web-section-gap: 9rem;
+    --web-section-gap: 6rem;
   }
 }
 
@@ -292,11 +303,6 @@
    HOMEPAGE STYLES
    Specific styles for the marketing homepage.
    ============================================================================= */
-
-/* Headline font */
-.font-headline {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-}
 
 /* Stats section - borders between items */
 .stats-grid .stat-item {
@@ -723,6 +729,182 @@
     opacity: 1;
     transform: none;
     animation: none;
+  }
+}
+
+/* =============================================================================
+   MICRO-INTERACTIONS
+   Button lifts, card hovers, and subtle interactive feedback.
+   ============================================================================= */
+
+/* Button hover lift effect */
+.btn-hover-lift {
+  position: relative;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.btn-hover-lift::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-out);
+  pointer-events: none;
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.btn-hover-lift:hover::after {
+  opacity: 1;
+}
+
+.btn-hover-lift:active {
+  transform: translateY(0);
+}
+
+/* Card hover lift effect - for property cards, team cards, etc. */
+.card-lift {
+  position: relative;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.card-lift::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+}
+
+.card-lift:hover::before {
+  opacity: 1;
+}
+
+/* Image zoom on hover (for cards with overflow:hidden parent) */
+.img-zoom {
+  transition: transform var(--duration-slower) var(--ease-out);
+}
+
+.card-lift:hover .img-zoom,
+.group:hover .img-zoom {
+  transform: scale(1.05);
+}
+
+/* Testimonial card subtle hover */
+.testimonial-card {
+  transition: border-color var(--duration-moderate) var(--ease-out),
+              background var(--duration-moderate) var(--ease-out);
+}
+
+.testimonial-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Area tile hover - intensify overlay */
+.area-tile {
+  cursor: pointer;
+}
+
+.area-tile .area-tile-overlay {
+  transition: background var(--duration-moderate) var(--ease-out);
+}
+
+.area-tile:hover .area-tile-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.2) 100%);
+}
+
+/* Footer link hover */
+.footer-link {
+  transition: color var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+  display: inline-block;
+}
+
+.footer-link:hover {
+  color: var(--web-off-white);
+  transform: translateX(2px);
+}
+
+/* =============================================================================
+   TYPOGRAPHY REFINEMENTS
+   Enhanced text styling for brand alignment.
+   ============================================================================= */
+
+/* Headline font with negative tracking */
+.font-headline {
+  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+/* Body text with proper line height */
+.text-body-relaxed {
+  line-height: 1.75;
+}
+
+/* Section labels */
+.section-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* =============================================================================
+   FORM STYLES
+   Consistent form inputs across the site.
+   ============================================================================= */
+
+.web-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(166, 181, 176, 0.4);
+  border-radius: 2px;
+  font-size: 14px;
+  color: var(--web-ash);
+  background: white;
+  transition: border-color var(--duration-normal) var(--ease-out);
+}
+
+.web-input::placeholder {
+  color: rgba(87, 108, 117, 0.5);
+}
+
+.web-input:focus {
+  outline: none;
+  border-color: var(--web-spruce);
+}
+
+/* =============================================================================
+   MOBILE OPTIMIZATIONS
+   Disable fixed backgrounds and reduce animation on mobile.
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  /* Disable fixed background on mobile - iOS doesn't support it */
+  .web-hero,
+  .parallax-hero {
+    background-attachment: scroll !important;
+  }
+  
+  /* Reduce animation durations for snappier feel */
+  :root {
+    --duration-normal: 150ms;
+    --duration-moderate: 225ms;
+    --duration-slow: 300ms;
+    --duration-slower: 375ms;
   }
 }
 

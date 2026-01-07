@@ -138,20 +138,20 @@ function StorySection() {
             </Text>
             
             <Stack gap="md" className="mb-10">
-              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-relaxed">
+              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-[1.8]">
                 Too often, Dubai real estate is sold with high-pressure tactics and surface-level analysis.
                 We saw an opportunity to do things differently—to bring the rigour of institutional
                 investment to private real estate advisory.
               </Text>
               
-              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-relaxed">
+              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-[1.8]">
                 Our team brings backgrounds in private banking, institutional investment, and family
                 office advisory. We understand that for our clients, a property purchase is rarely just
                 about the property—it's about portfolio diversification, tax efficiency, residency planning,
                 or generational wealth transfer.
               </Text>
               
-              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-relaxed">
+              <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-[1.8]">
                 We limit our client roster intentionally. This isn't a volume business. Every client receives
                 direct access to senior advisors and a level of attention that high-volume agencies simply
                 cannot provide.
@@ -439,7 +439,7 @@ function CTASection() {
           <Button
             nativeButton={false}
             size="lg"
-            className="mt-4 h-12 px-10 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+            className="btn-hover-lift mt-4 h-14 px-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
             render={<Link href="/contact" />}
           >
             Start a Conversation

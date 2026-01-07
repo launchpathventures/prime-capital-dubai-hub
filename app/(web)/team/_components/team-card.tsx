@@ -17,17 +17,17 @@ interface TeamMember {
   slug: string
   name: string
   role: string
-  photo?: string
-  shortBio?: string
-  email?: string
-  linkedin?: string
+  photo?: string | null
+  shortBio?: string | null
+  email?: string | null
+  linkedin?: string | null
   isFounder?: boolean
 }
 
 export function TeamCard({ member }: { member: TeamMember }) {
   return (
     <Link href={`/team/${member.slug}`} className="group block">
-      <div className="bg-white rounded-[2px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
         {/* Image */}
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--web-serenity)]/20">
           {member.photo ? (
@@ -35,7 +35,7 @@ export function TeamCard({ member }: { member: TeamMember }) {
               src={member.photo}
               alt={member.name}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="img-zoom object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (

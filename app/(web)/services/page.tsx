@@ -190,15 +190,15 @@ function ServicesSection() {
             return (
               <div
                 key={service.number}
-                className="bg-white rounded-[2px] overflow-hidden shadow-sm"
+                className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm"
               >
                 {/* Image */}
-                <div className="relative h-[200px]">
+                <div className="relative h-[200px] overflow-hidden">
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
-                    className="object-cover"
+                    className="img-zoom object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   {/* Number badge */}
@@ -442,7 +442,7 @@ function CTASection() {
           <Button
             nativeButton={false}
             size="lg"
-            className="mt-4 h-12 px-10 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+            className="btn-hover-lift mt-4 h-14 px-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
             render={<Link href="/contact" />}
           >
             Start a Conversation

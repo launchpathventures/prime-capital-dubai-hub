@@ -250,14 +250,14 @@ function PropertyCard({ property }: { property: Awaited<ReturnType<typeof getPro
 
   return (
     <Link href={`/properties/${property.slug}`} className="group block">
-      <div className="bg-white rounded-[2px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
         {/* Image */}
         <div className="relative h-[240px] overflow-hidden">
           <Image
             src={imageUrl}
             alt={property.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="img-zoom object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
           
@@ -367,7 +367,7 @@ function CTASection() {
             <Button
               nativeButton={false}
               size="lg"
-              className="w-full h-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+              className="btn-hover-lift w-full h-14 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/contact" />}
             >
               Discuss Your Requirements

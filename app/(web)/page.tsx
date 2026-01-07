@@ -106,7 +106,7 @@ function HeroSection() {
           </h1>
 
           <Text
-            className="text-white/80 text-[clamp(15px,1.8vw,18px)] font-light leading-relaxed max-w-[480px]"
+            className="text-white/90 text-[clamp(17px,2.2vw,22px)] font-light leading-relaxed max-w-[520px] mt-4"
             style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
           >
             Boutique real estate advisory for discerning investors.
@@ -115,7 +115,7 @@ function HeroSection() {
           <Button
             nativeButton={false}
             size="lg"
-            className="mt-4 h-12 px-10 bg-white/95 text-[var(--web-ash)] hover:bg-white border-none rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
+            className="btn-hover-lift mt-8 h-14 px-12 bg-white/95 text-[var(--web-ash)] hover:bg-white border-none rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
             render={<Link href="/contact" />}
           >
             Begin Your Journey
@@ -144,10 +144,10 @@ function StatsSection({ stats }: { stats: Stat[] }) {
     if (value.startsWith('AED ')) {
       const numPart = value.replace('AED ', '')
       return (
-        <>
-          <span className="text-[0.4em] align-middle mr-1">AED</span>
-          {numPart}
-        </>
+        <span className="flex items-baseline justify-center gap-1">
+          <span className="text-[clamp(12px,2vw,16px)] font-sans font-medium tracking-wide opacity-70">AED</span>
+          <span>{numPart}</span>
+        </span>
       )
     }
     return value
@@ -156,14 +156,14 @@ function StatsSection({ stats }: { stats: Stat[] }) {
   return (
     <section id="stats-section" className="bg-[var(--web-ash)]">
       <Container size="xl">
-        <div className="stats-grid grid grid-cols-2 md:grid-cols-4 gap-8 py-16 text-center">
+        <div className="stats-grid grid grid-cols-2 md:grid-cols-4 py-12 md:py-14 text-center">
           {stats.map((stat, index) => (
             <div
               key={stat.id}
-              className="stat-item px-4"
+              className="stat-item py-4 md:py-0 px-4"
               data-index={index}
             >
-              <div className="font-headline text-[var(--web-off-white)] text-[clamp(36px,6vw,64px)] font-normal leading-none mb-3">
+              <div className="font-headline text-[var(--web-off-white)] text-[clamp(28px,5vw,52px)] font-normal leading-none mb-2">
                 {renderStatValue(stat.value)}
               </div>
               <div className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.15em]">
@@ -197,7 +197,7 @@ function PositioningSection() {
             In a market saturated with noise, we chose a different path.
           </Title>
 
-          <Text className="text-[var(--web-spruce)] text-[17px] font-light leading-relaxed">
+          <Text className="text-[var(--web-spruce)] text-[17px] font-light leading-[1.8]">
             Prime Capital is not a high-volume agency. We're a boutique advisory
             built for investors who value substance over salesmanship, and
             relationships over transactions.
@@ -241,7 +241,7 @@ function PropertiesSection({ properties }: { properties: Property[] }) {
                 href={`/properties/${property.slug}`}
                 className="group"
               >
-                <div className="bg-white rounded-[2px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
                   {/* Property Image */}
                   <div className="relative h-[280px] overflow-hidden">
                     <Image
@@ -338,7 +338,7 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
             {testimonials.slice(0, 3).map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="flex flex-col h-full p-8 rounded-[2px]"
+                className="testimonial-card flex flex-col h-full p-8 rounded-[2px]"
                 style={{
                   backgroundColor: "rgba(255,255,255,0.03)",
                   border: "1px solid rgba(255,255,255,0.06)",
@@ -418,18 +418,18 @@ function AreasSection() {
             {areas.map((area) => (
               <div
                 key={area.name}
-                className="relative h-[200px] rounded-[2px] overflow-hidden cursor-pointer group"
+                className="area-tile relative h-[200px] rounded-[2px] overflow-hidden group"
               >
                 <Image
                   src={areaImages[area.name] || areaImages["Dubai Marina"]}
                   alt={area.name}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="img-zoom object-cover"
                   sizes="(max-width: 768px) 50vw, 16vw"
                 />
                 {/* Overlay */}
                 <div
-                  className="absolute inset-0 flex flex-col justify-end p-4"
+                  className="area-tile-overlay absolute inset-0 flex flex-col justify-end p-4"
                   style={{
                     background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%)",
                   }}
@@ -536,7 +536,7 @@ function StrategyKitSection() {
             <Button
               nativeButton={false}
               size="lg"
-              className="w-full h-[52px] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+              className="btn-hover-lift w-full h-[52px] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/strategy-kit" />}
             >
               Download Now
@@ -583,7 +583,7 @@ function CTASection() {
           <Button
             nativeButton={false}
             size="lg"
-            className="mt-4 h-12 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
+            className="btn-hover-lift mt-4 h-14 px-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
             render={<Link href="/contact" />}
           >
             Start a Conversation
