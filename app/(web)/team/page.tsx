@@ -67,22 +67,22 @@ export default async function TeamPage() {
 function HeroSection() {
   return (
     <section
-      className="relative min-h-[50vh] flex flex-col justify-center items-center text-center"
+      className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.5) 100%), url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2800&auto=format&fit=crop')`,
+        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2800&auto=format&fit=crop')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
       <Container size="lg" className="relative z-10 px-4">
-        <Stack gap="md" align="center" className="max-w-[700px] mx-auto">
-          <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.2em]">
+        <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
+          <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
             Our Team
           </span>
           
           <h1
-            className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5vw,48px)] font-normal leading-[1.15] tracking-tight"
-            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}
+            className="font-headline text-[var(--web-off-white)] text-[clamp(36px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
+            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.3)" }}
           >
             Meet the advisors behind
             <br />
@@ -90,8 +90,8 @@ function HeroSection() {
           </h1>
 
           <Text
-            className="text-white/80 text-[clamp(14px,1.6vw,16px)] font-light leading-relaxed max-w-[500px]"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
+            className="text-white/80 text-[clamp(15px,1.8vw,18px)] font-light leading-relaxed max-w-[580px] mt-2"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}
           >
             Experienced professionals with deep Dubai market knowledge, dedicated to
             helping sophisticated investors achieve their real estate objectives.

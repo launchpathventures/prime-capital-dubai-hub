@@ -88,7 +88,7 @@ function HeroSection() {
               >
                 Get Your Free Copy
               </Title>
-              <Text className="text-[var(--web-spruce)] text-[13px] font-light">
+              <Text className="text-[var(--web-spruce)] text-[14px] font-light">
                 48 pages of institutional-grade research
               </Text>
             </div>
@@ -98,14 +98,14 @@ function HeroSection() {
                 <input
                   type="text"
                   placeholder="Your name"
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
+                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
                 />
               </div>
               <div>
                 <input
                   type="email"
-                  placeholder="Your email"
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
+                  placeholder="Email address"
+                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
                 />
               </div>
               <button
@@ -167,7 +167,7 @@ function TableOfContentsSection() {
                 index < chapters.length - 1 ? "border-b border-[var(--web-serenity)]/20" : ""
               }`}
             >
-              <span className="text-[var(--web-spruce)]/40 text-[13px] font-light w-8">
+              <span className="text-[var(--web-spruce)]/40 text-[14px] font-light w-8">
                 {chapter.number}
               </span>
               <span className="text-[var(--web-ash)] text-[15px] font-light">

@@ -30,6 +30,8 @@ import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react"
+import { AnimatedStatsSection } from "./_surface/animated-stats"
+import { ParallaxHero } from "./_surface/parallax-hero"
 
 // Curated imagery for areas
 const areaImages: Record<string, string> = {
@@ -60,7 +62,7 @@ export default async function HomePage() {
   return (
     <div className="web-homepage">
       <HeroSection />
-      <StatsSection stats={stats} />
+      <AnimatedStatsSection stats={stats} />
       <PositioningSection />
       {config.features.properties && featuredProperties.length > 0 && (
         <PropertiesSection properties={featuredProperties} />
@@ -80,22 +82,12 @@ export default async function HomePage() {
 
 function HeroSection() {
   return (
-    <section
-      className="web-hero relative min-h-dvh flex flex-col justify-center items-center text-center"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center 30%",
-      }}
+    <ParallaxHero
+      imageUrl="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+      overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)"
+      intensity={0.15}
+      className="web-hero min-h-dvh flex flex-col justify-center items-center text-center"
     >
-      {/* Subtle gradient overlay at bottom */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-[40%] pointer-events-none"
-        style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
-        }}
-      />
-
       <Container size="lg" className="relative z-10 px-4">
         <Stack gap="lg" align="center" className="max-w-[720px] mx-auto">
           <h1
@@ -123,57 +115,14 @@ function HeroSection() {
         </Stack>
       </Container>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
+      {/* Scroll Indicator - anchored to bottom of hero */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce z-10">
         <span className="text-[var(--web-off-white)] text-[11px] font-normal uppercase tracking-[0.15em] opacity-70">
           Discover
         </span>
         <ChevronDownIcon className="h-4 w-4 text-[var(--web-off-white)] opacity-70" />
       </div>
-    </section>
-  )
-}
-
-// =============================================================================
-// STATS SECTION
-// =============================================================================
-
-function StatsSection({ stats }: { stats: Stat[] }) {
-  // Helper to render stat value with AED prefix styled differently
-  const renderStatValue = (value: string) => {
-    if (value.startsWith('AED ')) {
-      const numPart = value.replace('AED ', '')
-      return (
-        <span className="flex items-baseline justify-center gap-1">
-          <span className="text-[clamp(12px,2vw,16px)] font-sans font-medium tracking-wide opacity-70">AED</span>
-          <span>{numPart}</span>
-        </span>
-      )
-    }
-    return value
-  }
-
-  return (
-    <section id="stats-section" className="bg-[var(--web-ash)]">
-      <Container size="xl">
-        <div className="stats-grid grid grid-cols-2 md:grid-cols-4 py-12 md:py-14 text-center">
-          {stats.map((stat, index) => (
-            <div
-              key={stat.id}
-              className="stat-item py-4 md:py-0 px-4"
-              data-index={index}
-            >
-              <div className="font-headline text-[var(--web-off-white)] text-[clamp(28px,5vw,52px)] font-normal leading-none mb-2">
-                {renderStatValue(stat.value)}
-              </div>
-              <div className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.15em]">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Container>
-    </section>
+    </ParallaxHero>
   )
 }
 

@@ -38,29 +38,29 @@ export default function ContactPage() {
 function HeroSection() {
   return (
     <section
-      className="relative min-h-[50vh] flex flex-col justify-center items-center text-center"
+      className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.5) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
+        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
         backgroundSize: "cover",
         backgroundPosition: "center 30%",
       }}
     >
       <Container size="lg" className="relative z-10 px-4">
-        <Stack gap="md" align="center" className="max-w-[700px] mx-auto">
-          <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.2em]">
+        <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
+          <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
             Contact
           </span>
           
           <h1
-            className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5vw,48px)] font-normal leading-[1.15] tracking-tight"
-            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}
+            className="font-headline text-[var(--web-off-white)] text-[clamp(36px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
+            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.3)" }}
           >
             Let's start a conversation
           </h1>
 
           <Text
-            className="text-white/80 text-[clamp(14px,1.6vw,16px)] font-light leading-relaxed max-w-[500px]"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
+            className="text-white/80 text-[clamp(15px,1.8vw,18px)] font-light leading-relaxed max-w-[540px] mt-2"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}
           >
             Whether you have a specific property in mind or are exploring your options,
             we're here to help.
@@ -125,35 +125,35 @@ function ContactFormSection() {
             <form className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[var(--web-ash)] text-[13px] font-medium mb-2">
-                    Name
+                  <label className="block text-[var(--web-ash)] text-[14px] font-medium mb-2">
+                    Name *
                   </label>
                   <input
                     type="text"
                     placeholder="Your name"
-                    className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
+                    className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[var(--web-ash)] text-[13px] font-medium mb-2">
-                    Email
+                  <label className="block text-[var(--web-ash)] text-[14px] font-medium mb-2">
+                    Email *
                   </label>
                   <input
                     type="email"
-                    placeholder="your@email.com"
-                    className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
+                    placeholder="Your email"
+                    className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[var(--web-ash)] text-[13px] font-medium mb-2">
-                  Phone (optional)
+                <label className="block text-[var(--web-ash)] text-[14px] font-medium mb-2">
+                  Phone (Optional)
                 </label>
                 <input
                   type="tel"
-                  placeholder="+971 XX XXX XXXX"
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
+                  placeholder="+971..."
+                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
                 />
               </div>
 
@@ -169,13 +169,13 @@ function ContactFormSection() {
               </div>
 
               <div>
-                <label className="block text-[var(--web-ash)] text-[13px] font-medium mb-2">
+                <label className="block text-[var(--web-ash)] text-[14px] font-medium mb-2">
                   Message
                 </label>
                 <textarea
-                  rows={5}
-                  placeholder="Tell us about your requirements or questions..."
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[14px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors resize-none"
+                  rows={4}
+                  placeholder="Tell us about your investment objectives..."
+                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors resize-none"
                 />
               </div>
 
@@ -189,7 +189,7 @@ function ContactFormSection() {
                 </svg>
               </button>
 
-              <Text className="text-[var(--web-spruce)] text-[12px] font-light">
+              <Text className="text-[var(--web-spruce)] text-[13px] font-light">
                 We typically respond within one business day.
               </Text>
             </form>
@@ -210,7 +210,7 @@ function ContactFormSection() {
                 <div className="text-[var(--web-off-white)] text-[14px] font-medium">
                   Visit Our Office
                 </div>
-                <div className="text-white/70 text-[12px]">
+                <div className="text-white/70 text-[13px]">
                   By appointment only
                 </div>
               </div>
@@ -303,7 +303,7 @@ function ContactFormSection() {
               >
                 Prefer a call?
               </Title>
-              <Text className="text-[var(--web-serenity)] text-[13px] font-light">
+              <Text className="text-[var(--web-serenity)] text-[14px] font-light">
                 We're happy to schedule a consultation at your convenience.
               </Text>
             </div>

@@ -124,20 +124,20 @@ export function WebFooter() {
 
         {/* Bottom Bar */}
         <div className="mt-16 pt-6 border-t border-[var(--web-spruce)] flex flex-wrap justify-between items-center gap-4">
-          <Text className="text-[var(--web-serenity)] text-[13px] font-light">
+          <Text className="text-[var(--web-serenity)] text-[14px] font-light">
             © {currentYear} Prime Capital Dubai LLC. All rights reserved.
           </Text>
 
           <Row gap="lg">
             <Link
               href="/terms/privacy"
-              className="text-[var(--web-serenity)] text-[13px] font-light hover:text-[var(--web-off-white)] transition-colors"
+              className="text-[var(--web-serenity)] text-[14px] font-light hover:text-[var(--web-off-white)] transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms"
-              className="text-[var(--web-serenity)] text-[13px] font-light hover:text-[var(--web-off-white)] transition-colors"
+              className="text-[var(--web-serenity)] text-[14px] font-light hover:text-[var(--web-off-white)] transition-colors"
             >
               Terms of Service
             </Link>

@@ -908,3 +908,68 @@
   }
 }
 
+/* =============================================================================
+   ABOUT PAGE ANIMATIONS
+   Entrance animations and micro-interactions for the About page.
+   ============================================================================= */
+
+/* About hero content stagger */
+.about-hero-content > * {
+  opacity: 0;
+  animation: fadeSlideUp 700ms cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.about-hero-content > *:nth-child(1) { animation-delay: 100ms; }
+.about-hero-content > *:nth-child(2) { animation-delay: 250ms; }
+.about-hero-content > *:nth-child(3) { animation-delay: 400ms; }
+.about-hero-content > *:nth-child(4) { animation-delay: 550ms; }
+
+/* Story section image hover */
+.about-story-image .group:hover .img-zoom {
+  transform: scale(1.03);
+}
+
+/* Value card hover enhancement */
+.value-card {
+  transform: translateY(0);
+}
+
+.value-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Opportunity stat cards stagger animation */
+.opportunity-stat {
+  opacity: 0;
+  animation: fadeSlideUp 500ms cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.opportunity-stat:nth-child(1) { animation-delay: 100ms; }
+.opportunity-stat:nth-child(2) { animation-delay: 175ms; }
+.opportunity-stat:nth-child(3) { animation-delay: 250ms; }
+.opportunity-stat:nth-child(4) { animation-delay: 325ms; }
+
+/* Differentiator items hover */
+.differentiator-item {
+  transition: transform 200ms ease-out;
+}
+
+.differentiator-item:hover {
+  transform: translateX(4px);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .about-hero-content > *,
+  .opportunity-stat {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  
+  .value-card:hover,
+  .differentiator-item:hover {
+    transform: none;
+  }
+}
+

@@ -57,7 +57,7 @@ export function TeamCard({ member }: { member: TeamMember }) {
           <h3 className="font-headline text-[var(--web-ash)] text-xl font-normal mb-1 group-hover:text-[var(--web-spruce)] transition-colors">
             {member.name}
           </h3>
-          <div className="text-[var(--web-spruce)] text-[13px] font-light mb-3">
+          <div className="text-[var(--web-spruce)] text-[14px] font-light mb-3">
             {member.role}
           </div>
           
