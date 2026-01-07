@@ -165,6 +165,68 @@ const quizData: Record<string, {
       },
     ],
   },
+  "market-intelligence-3": {
+    title: "Golden Visa & Residency Quiz",
+    moduleSlug: "golden-visa",
+    competencySlug: "market-intelligence",
+    questions: [
+      {
+        id: "q1",
+        question: "A client is considering a AED 1.9M apartment. What should you highlight before they proceed?",
+        options: [
+          { text: "The property is overpriced for the area", correct: false },
+          { text: "They're AED 100K short of Golden Visa eligibility—consider going slightly higher", correct: true },
+          { text: "They should wait for prices to drop", correct: false },
+          { text: "The rental yield will be too low", correct: false },
+        ],
+        explanation: "At AED 1.9M, the client is just AED 100K short of the AED 2M Golden Visa threshold. A good consultant always flags this proximity so the client can make an informed decision about whether the visa benefits are worth the additional investment.",
+      },
+      {
+        id: "q2",
+        question: "A client asks: 'Can I get the Golden Visa if I buy with a mortgage?' What's the correct response?",
+        options: [
+          { text: "Yes, mortgages up to 50% LTV are allowed for visa purposes", correct: false },
+          { text: "No, the property must be fully paid off—but you can buy with a mortgage and pay it down before applying", correct: true },
+          { text: "Yes, but you need a UAE bank mortgage specifically", correct: false },
+          { text: "No, and you can never apply once a mortgage has been on the property", correct: false },
+        ],
+        explanation: "The Golden Visa requires the property to be fully paid off (no mortgage). However, many investors purchase with a mortgage initially and pay it down or refinance before applying for the visa. This is a common strategy that should be explained clearly.",
+      },
+      {
+        id: "q3",
+        question: "Beyond residency, what is often the MOST practical benefit of the Golden Visa for international investors?",
+        options: [
+          { text: "Access to UAE healthcare", correct: false },
+          { text: "UAE banking access for property management", correct: true },
+          { text: "Ability to vote in UAE elections", correct: false },
+          { text: "Free education for children", correct: false },
+        ],
+        explanation: "UAE bank accounts require residency. Without the Golden Visa, managing rental income, paying service charges, and handling property matters becomes complicated. The banking access is often more valuable than the residency itself for investors who don't plan to live in Dubai.",
+      },
+      {
+        id: "q4",
+        question: "How should you position the Golden Visa to a yield-focused UK investor comparing Dubai to London?",
+        options: [
+          { text: "Focus only on the residency benefits and lifestyle", correct: false },
+          { text: "Explain that Dubai yields (6-7%) plus the visa is better value than UK investor visas (£2M+) with lower yields (3-4%)", correct: true },
+          { text: "Tell them the Golden Visa isn't relevant if they want yield", correct: false },
+          { text: "Recommend they buy in London instead for stability", correct: false },
+        ],
+        explanation: "For yield-focused investors, position the Golden Visa as a bonus on top of strong returns. In the UK, investor visas require £2M+ AND deliver only 3-4% yields. In Dubai, the same AED 2M (≈£430K) delivers 6-7% yield AND a 10-year visa. This comparison demonstrates clear value.",
+      },
+      {
+        id: "q5",
+        question: "A family client asks about sponsoring relatives. What can the Golden Visa holder sponsor?",
+        options: [
+          { text: "Spouse only", correct: false },
+          { text: "Spouse and children under 18 only", correct: false },
+          { text: "Spouse, children, and potentially parents", correct: true },
+          { text: "Extended family including siblings", correct: false },
+        ],
+        explanation: "The Golden Visa allows holders to sponsor their spouse, children (regardless of age for sons with certain conditions, daughters until marriage), and in some cases parents. This makes it a complete family solution, which is a powerful selling point for family-oriented investors.",
+      },
+    ],
+  },
   "client-discovery-5": {
     title: "Understanding Investment Goals Quiz",
     moduleSlug: "understanding-investment-goals",

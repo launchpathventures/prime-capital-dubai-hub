@@ -159,6 +159,137 @@ This protects buyers from developer insolvency or fund misuse.
       nextModule: { slug: "market-segments", title: "Market Segments" },
       quizId: "market-intelligence-2",
     },
+    "golden-visa": {
+      title: "Golden Visa & Residency",
+      duration: "25 min",
+      content: `
+## Introduction
+
+The UAE Golden Visa program is one of Dubai's most powerful selling points for international investors. Understanding the requirements, benefits, and positioning enables you to present property investment as more than just a financial decision—it's a gateway to a new jurisdiction, banking system, and lifestyle.
+
+## Golden Visa Requirements
+
+### Property Investment Route
+
+To qualify for a 10-year Golden Visa through property investment:
+
+- **Minimum Investment**: AED 2,000,000 (approximately USD 545,000)
+- **Property Type**: Must be residential (not commercial)
+- **Ownership**: Can be single property or multiple properties totalling AED 2M+
+- **Mortgage**: Property must be fully paid (no mortgage allowed for visa purposes)
+- **Timeline**: Application can begin once title deed is issued
+
+### What to Say
+
+**Client:** "I'm interested in the Golden Visa. What exactly do I need to qualify?"
+
+**Consultant:** "The property investment route requires AED 2 million in residential real estate, fully paid off. Here's what makes it attractive: unlike investor visas in other countries where you park money in a fund, you own a tangible asset that generates 6-7% rental yield while you hold it. The visa covers your spouse and children automatically. Would you like me to show you some options that hit exactly the AED 2M threshold?"
+
+**Client:** "Can I get the visa if I have a mortgage?"
+
+**Consultant:** "The property needs to be fully paid for the Golden Visa. However, many clients purchase with a mortgage initially, then refinance or pay down once they're ready to apply. We can structure your investment timeline around this if the visa is important to you."
+
+## The Real Benefits
+
+### Beyond Residency
+
+The Golden Visa unlocks:
+
+- **10-year renewable residency** for investor and family
+- **UAE banking access** — essential for property management and business
+- **Business formation rights** — can establish UAE companies
+- **No minimum stay requirements** — visit when you want, live where you want
+- **Sponsor family members** — spouse, children, and even parents
+
+### The Banking Advantage
+
+This is often overlooked: UAE bank accounts require residency. Without the Golden Visa, managing rental income, paying service charges, and handling property matters becomes complicated. The visa solves this completely.
+
+## Common Mistakes
+
+❌ **Wrong:** "The Golden Visa is just about living in Dubai"
+
+✅ **Right:** "The Golden Visa transforms your Dubai investment into a regional business hub—banking, company formation, and family residency all become accessible"
+
+❌ **Wrong:** Recommending a AED 1.9M property without mentioning visa implications
+
+✅ **Right:** "At AED 1.9M you're just AED 100K short of Golden Visa eligibility. Would it make sense to look at options at AED 2M+ to unlock the residency benefits?"
+
+❌ **Wrong:** Assuming all clients want the visa
+
+✅ **Right:** Ask: "Is UAE residency something that would be valuable for you, or are you purely focused on the investment returns?"
+
+## Positioning for Different Clients
+
+### For Yield-Focused Investors
+
+"The Golden Visa is a bonus—you're getting 6-7% yield on a real asset, AND unlocking UAE residency and banking. In London, you'd need £2M+ for a similar investor visa, and you'd be earning 3% yield. Here, you get both."
+
+### For Business Owners
+
+"Beyond residency, the Golden Visa lets you establish a UAE company. Many clients use this to create a regional hub—lower tax environment, access to Middle East and African markets, and AED/USD currency stability."
+
+### For Families
+
+"The visa covers your spouse and children automatically. Some clients also sponsor parents. It's a complete family solution, not just an investment visa."
+
+### For Privacy-Conscious Clients
+
+"The UAE has no personal income tax and strong banking privacy. For clients restructuring their international affairs, the Golden Visa provides a legitimate second jurisdiction."
+
+## Worked Example
+
+**Client Profile:** UK family, budget AED 2.5M, wants rental income + visa
+
+**The Conversation:**
+
+**Consultant:** "Based on what you've shared—income generation plus the Golden Visa—I'd suggest looking at the AED 2.2-2.5M range. This gives you comfortable buffer above the AED 2M threshold, and at this price point in Dubai Marina, you're looking at properties that rent for AED 140-160K annually."
+
+**Client:** "What does that work out to as a yield?"
+
+**Consultant:** "Let me show you. On a AED 2.4M apartment with AED 150K annual rent, your gross yield is 6.25%. After service charges of around AED 20K, your net yield is 5.4%. Compare that to a £500K London flat earning £18K rent—that's 3.6% gross. Plus, in London there's no investor visa attached."
+
+**Property Example:**
+
+- **Property**: 2-bedroom apartment, Dubai Marina
+- **Price**: AED 2,400,000
+- **Expected rent**: AED 150,000/year
+- **Service charges**: AED 20,000/year
+- **Gross yield**: 6.25%
+- **Net yield**: 5.4%
+- **Golden Visa**: ✓ Qualifies
+
+## Pre-Meeting Checklist
+
+When a client mentions Golden Visa interest, prepare:
+
+- [ ] Confirm their budget is at or above AED 2M
+- [ ] Clarify if they'll pay cash or need to clear mortgage first
+- [ ] Understand family composition (spouse, children, parents to sponsor?)
+- [ ] Ask about banking needs and business interests
+- [ ] Prepare 3-4 properties at the AED 2M-2.5M range
+- [ ] Have comparison ready: Dubai visa vs UK/EU/US investor visa costs
+
+## Why This Matters
+
+The Golden Visa transforms your role from property broker to life advisor. Clients don't just buy square footage—they buy access to a new jurisdiction, banking system, and lifestyle option. When you can articulate this value clearly, you're no longer competing on price with other agents.
+
+1. Always check if clients are within range of the AED 2M threshold
+2. Position the visa as added value, not the primary reason to buy
+3. Understand family composition to explain full visa benefits
+4. Remember: the banking access is often more valuable than the residency itself
+      `,
+      keyTakeaways: [
+        "Golden Visa requires AED 2M+ in residential property, fully paid off—no mortgage",
+        "Benefits extend beyond residency: banking access, business formation, family sponsorship",
+        "Always flag when clients are within AED 100-200K of the AED 2M threshold",
+        "Position the visa as added value that transforms a property purchase into a lifestyle upgrade",
+        "UAE banking access is often the most practical benefit for international investors",
+      ],
+      prevModule: { slug: "area-knowledge", title: "Area Knowledge" },
+      nextModule: { slug: "market-trends", title: "Market Trends & Analysis" },
+      quizId: "market-intelligence-3",
+    },
   },
   "client-discovery": {
     "understanding-investment-goals": {
