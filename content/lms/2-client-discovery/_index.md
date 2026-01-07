@@ -6,6 +6,7 @@ description: "Learn to uncover what clients truly need—not just what they say 
 estimated_hours: 3.5
 module_count: 7
 icon: "UsersIcon"
+keywords: ["client discovery", "investor personas", "discovery questions", "active listening", "qualification", "expectation management"]
 videos: []
 resources: []
 ---
