@@ -166,7 +166,7 @@ C) Standard 12-month grace period
 D) 10% deposit with trustee  
 
 **Correct Answer:** B  
-**Explanation:** Any request to pay to a personal account (rather than the registered escrow account) is a major red flag. All off-plan payments must go through DLD-registered escrow accounts. This request should be refused and escalated immediately.
+**Explanation:** Any request to pay to a personal account (rather than the registered escrow account) is a major red flag. All off-plan payments must go through DLD-registered escrow accounts. This request should be refused immediately. Escalate to your line manager or compliance officer, document the request in writing, and consider reporting to RERA if the request persists.
 
 ---
 
