@@ -87,7 +87,7 @@ function HeroSection() {
               {config.contact.email}
             </a>
             <a
-              href="https://wa.me/9714XXXXXXX"
+              href={`https://wa.me/${config.contact.phone.replace(/\s/g, "").replace("+", "")}`}
               className="flex items-center gap-3 px-6 py-3 border border-[var(--web-spruce)]/30 rounded-[2px] text-[var(--web-spruce)] text-[13px] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)] transition-colors"
             >
               <MessageCircleIcon className="h-4 w-4" />

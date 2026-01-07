@@ -5,9 +5,7 @@
  * Matches design: hero with inline form, table of contents, "Why this matters" section, CTA
  */
 
-import Link from "next/link"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
-import { Button } from "@/components/ui/button"
 import { CheckIcon, DownloadIcon } from "lucide-react"
 
 export const metadata = {
@@ -82,7 +80,7 @@ function HeroSection() {
           </div>
 
           {/* Right Column - Form */}
-          <div className="bg-white rounded-[2px] p-8 shadow-xl">
+          <div id="download-form" className="bg-white rounded-[2px] p-8 shadow-xl">
             <div className="text-center mb-6">
               <Title
                 as="h2"
@@ -277,15 +275,13 @@ function CTASection() {
             investment decisions.
           </Text>
 
-          <Button
-            nativeButton={false}
-            size="lg"
-            className="mt-4 h-12 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-            render={<Link href="#" />}
+          <a
+            href="#download-form"
+            className="mt-4 h-12 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] inline-flex items-center justify-center"
           >
             <DownloadIcon className="mr-2 h-4 w-4" />
             Download Free Guide
-          </Button>
+          </a>
         </Stack>
       </Container>
     </section>
