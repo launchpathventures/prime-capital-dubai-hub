@@ -7,32 +7,16 @@
 
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
 import { Row, Text } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { HomeIcon } from "lucide-react"
 
 // -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-interface LMSUser {
-  name: string
-  email: string
-  role: string
-  avatarUrl?: string
-}
-
-interface LMSHeaderProps {
-  user: LMSUser
-}
-
-// -----------------------------------------------------------------------------
 // LMSHeader Component
 // -----------------------------------------------------------------------------
 
-export function LMSHeader({ user: _user }: LMSHeaderProps) {
+export function LMSHeader() {
   return (
     <header className="lms-header fixed top-0 left-0 right-0 z-50 h-14 bg-[#576C75]">
       <Row className="h-full max-w-7xl mx-auto px-4 md:px-6" align="center" justify="between">

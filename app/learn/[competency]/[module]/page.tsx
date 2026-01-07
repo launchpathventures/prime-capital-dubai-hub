@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
-  CheckCircleIcon,
   CircleIcon,
   LockIcon,
   AlertTriangleIcon,
@@ -176,8 +175,6 @@ export default async function ModulePage({ params }: PageProps) {
   if (!moduleData) {
     notFound()
   }
-
-  const currentBehaviourIndex = behavioursList.findIndex(b => b.slug === moduleSlug)
 
   return (
     <div className="flex min-h-screen bg-[#F2EFEA]">

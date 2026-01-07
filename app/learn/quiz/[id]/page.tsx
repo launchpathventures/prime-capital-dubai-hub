@@ -163,8 +163,6 @@ export default function QuizPage() {
 
   // Completion Screen
   if (isComplete) {
-    const passed = score === totalQuestions
-    
     return (
       <div className="flex min-h-screen bg-[#F2EFEA]">
         {/* Sidebar */}

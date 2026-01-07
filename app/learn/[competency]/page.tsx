@@ -21,6 +21,7 @@ import {
   AlertTriangleIcon,
   CheckIcon,
   FileTextIcon,
+  TargetIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
@@ -446,16 +447,6 @@ export default async function CompetencyPage({ params }: PageProps) {
 // -----------------------------------------------------------------------------
 // Behaviour Card Component
 // -----------------------------------------------------------------------------
-
-function TargetIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
-  )
-}
 
 interface BehaviourCardProps {
   behaviour: Behaviour
