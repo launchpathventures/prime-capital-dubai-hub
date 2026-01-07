@@ -1,252 +1,154 @@
 /**
- * CATALYST - Module Content Page
+ * CATALYST - Module/Behaviour Content Page
  *
- * Displays learning module content with progress tracking.
+ * Displays learning content with sidebar navigation matching the design.
  * Dynamic route: /learn/[competency]/[module]
  */
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Container, Stack, Row, Text, Title, Prose } from "@/components/core"
+import { Stack, Row, Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
-  ChevronRightIcon,
-  ChevronLeftIcon,
+  ArrowLeftIcon,
+  ChevronDownIcon,
   CheckCircleIcon,
-  ClockIcon,
-  BookOpenIcon,
-  ClipboardCheckIcon,
+  CircleIcon,
+  LockIcon,
+  AlertTriangleIcon,
+  CheckIcon,
+  FileTextIcon,
+  UsersIcon,
+  HeartIcon,
+  ChevronRightIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
-// Module Content Data (mock - would come from database/CMS)
+// Data Types and Mock Data
 // -----------------------------------------------------------------------------
 
-const moduleContent: Record<string, Record<string, {
+interface Founder {
+  initials: string
+  name: string
+  experience: string
+  focus: string
+}
+
+interface BrandValue {
   title: string
-  duration: string
-  content: string
-  keyTakeaways: string[]
-  nextModule?: { slug: string; title: string }
-  prevModule?: { slug: string; title: string }
-  quizId?: string
-}>> = {
-  "market-intelligence": {
-    "dubai-real-estate-overview": {
-      title: "Dubai Real Estate Overview",
-      duration: "30 min",
-      content: `
-## Introduction
+  description: string
+}
 
-Dubai's real estate market is one of the most dynamic and attractive in the world. Understanding its history, growth trajectory, and current state is fundamental to advising international investors effectively.
+interface ProcessStep {
+  number: number
+  title: string
+  description: string
+  quote: string
+}
 
-## Historical Context
+interface Resource {
+  title: string
+  slug: string
+}
 
-Dubai's transformation from a small trading port to a global metropolis is one of the most remarkable urban development stories of the modern era. The real estate sector has been central to this transformation.
+interface ModuleContent {
+  title: string
+  subtitle: string
+  description: string
+  riskReward: {
+    risk: string
+    reward: string
+  }
+  founders?: Founder[]
+  brandValues?: BrandValue[]
+  processSteps?: ProcessStep[]
+  resources: Resource[]
+}
 
-### Key Milestones
+// All competencies for sidebar
+const allCompetencies = [
+  { id: 1, slug: "prime-capital-identity", name: "Prime Capital Identity", behaviourCount: 5, status: "active" as const },
+  { id: 2, slug: "market-intelligence", name: "Market Intelligence", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 3, slug: "client-discovery", name: "Client Discovery", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 4, slug: "property-matching", name: "Property Matching", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 5, slug: "objection-navigation", name: "Objection Navigation", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 6, slug: "transaction-management", name: "Transaction Management", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 7, slug: "relationship-stewardship", name: "Relationship Stewardship", behaviourCount: 5, status: "coming-soon" as const },
+]
 
-- **1997**: Freehold property ownership introduced for UAE nationals
-- **2002**: Freehold ownership extended to foreign nationals in designated areas
-- **2004-2008**: First real estate boom, major developments launched
-- **2008-2010**: Global financial crisis impact and market correction
-- **2011-2014**: Recovery and sustainable growth period
-- **2020-Present**: Pandemic-driven transformation and record growth
+// Behaviours for sidebar navigation
+const behavioursList = [
+  { slug: "our-story", title: "Our Story", status: "current" as const },
+  { slug: "boutique-positioning", title: "Boutique Positioning", status: "current" as const },
+  { slug: "service-model", title: "Service Model", status: "current" as const },
+  { slug: "founders-vision", title: "Founders' Vision", status: "current" as const },
+  { slug: "brand-voice", title: "Brand Voice", status: "locked" as const },
+]
 
-## Current Market State
-
-The Dubai real estate market has demonstrated remarkable resilience and growth, particularly since 2021. Key characteristics include:
-
-### Market Fundamentals
-
-- **Population Growth**: Dubai's population continues to grow, driving housing demand
-- **Economic Diversification**: Tourism, finance, and technology sectors drive investment
-- **Regulatory Maturity**: RERA and DLD provide robust investor protection
-- **Infrastructure**: World-class infrastructure supports property values
-
-### Price Dynamics
-
-Dubai remains competitively priced compared to global cities like London, New York, and Singapore, offering attractive entry points for international investors.
-
-## Why This Matters
-
-Understanding the market context enables you to:
-
-1. Position Dubai as a credible investment destination
-2. Address investor concerns with factual context
-3. Demonstrate expertise that builds client trust
-4. Make informed property recommendations
-      `,
-      keyTakeaways: [
-        "Dubai's property market has matured significantly since 2002",
-        "The regulatory framework (RERA, DLD) provides strong investor protection",
-        "Dubai offers competitive pricing compared to global gateway cities",
-        "Population growth and economic diversification drive long-term demand",
+// Module content data
+const moduleContentData: Record<string, Record<string, ModuleContent>> = {
+  "prime-capital-identity": {
+    "our-story": {
+      title: "Articulates the Prime Capital Story",
+      subtitle: "KEY BEHAVIOUR 1.1",
+      description: "Can clearly explain who Prime Capital is, how we started, and what we stand for in a way that resonates with sophisticated investors.",
+      riskReward: {
+        risk: "You give a generic description that sounds like any agency. Client doesn't understand why we're different.",
+        reward: "Client immediately grasps our unique positioning and feels they've found something special.",
+      },
+      founders: [
+        {
+          initials: "TM",
+          name: "Tahir Majithia",
+          experience: "20+ years experience: UHNW client relationships, real estate portfolio management, YouTube/social media presence",
+          focus: "Client trust & content",
+        },
+        {
+          initials: "SH",
+          name: "Shaad Haji",
+          experience: "20+ years experience: Developer relationships (Ellington, DAMAC, CBRE), off-plan sales, project management",
+          focus: "Developer partnerships",
+        },
+        {
+          initials: "RS",
+          name: "Rohit Saluja",
+          experience: "20+ years experience: International markets (UK, China, India), project development, new-age marketing",
+          focus: "Global reach",
+        },
       ],
-      nextModule: { slug: "regulatory-framework", title: "Regulatory Framework" },
-      quizId: "market-intelligence-1",
-    },
-    "regulatory-framework": {
-      title: "Regulatory Framework",
-      duration: "45 min",
-      content: `
-## Introduction
-
-Dubai's real estate regulatory framework is designed to protect investors and ensure market transparency. Understanding these regulations is essential for providing accurate advice to clients.
-
-## Key Regulatory Bodies
-
-### RERA (Real Estate Regulatory Agency)
-
-RERA is the regulatory arm of the Dubai Land Department, responsible for:
-
-- Licensing real estate professionals and companies
-- Regulating property advertisements
-- Managing escrow accounts for off-plan projects
-- Handling disputes between parties
-
-### DLD (Dubai Land Department)
-
-The DLD is the government authority that:
-
-- Registers all property transactions
-- Issues title deeds (Oqood for off-plan, Title Deed for completed)
-- Maintains the property ownership registry
-- Collects registration fees (4% of property value)
-
-## Ownership Types
-
-### Freehold
-
-- Full ownership rights in perpetuity
-- Available to foreign nationals in designated areas
-- Most common for international investors
-
-### Leasehold
-
-- Long-term lease (typically 99 years)
-- Less common, mainly in older developments
-
-## Registration Process
-
-All property transactions must be registered with the DLD:
-
-1. **MOU (Memorandum of Understanding)**: Initial agreement between buyer and seller
-2. **NOC (No Objection Certificate)**: Issued by developer confirming no outstanding payments
-3. **Transfer**: Official registration at DLD trustee office
-4. **Title Deed**: Issued by DLD confirming ownership
-
-## Escrow Regulations
-
-For off-plan purchases, developers must:
-
-- Register the project with RERA
-- Open a dedicated escrow account
-- Use buyer payments only for construction
-- Meet milestone requirements before fund release
-
-This protects buyers from developer insolvency or fund misuse.
-      `,
-      keyTakeaways: [
-        "RERA and DLD work together to regulate Dubai's property market",
-        "All transactions must be registered with DLD (4% registration fee)",
-        "Escrow accounts protect off-plan buyers from developer default",
-        "Freehold ownership is available to foreign nationals in designated areas",
+      brandValues: [
+        { title: "AUTHORITATIVE", description: "We know this market deeply. Our founders have 60+ years combined experience." },
+        { title: "DISCREET", description: "We protect client privacy. No flashy social media posts about deals." },
+        { title: "TRANSPARENT", description: "No hidden agendas. We tell clients what they need to hear, not what they want to hear." },
+        { title: "CALM", description: "No pressure tactics. No artificial urgency. Sophisticated investors don't respond to that." },
       ],
-      prevModule: { slug: "dubai-real-estate-overview", title: "Dubai Real Estate Overview" },
-      nextModule: { slug: "market-segments", title: "Market Segments" },
-      quizId: "market-intelligence-2",
-    },
-  },
-  "client-discovery": {
-    "understanding-investment-goals": {
-      title: "Understanding Investment Goals",
-      duration: "35 min",
-      content: `
-## Introduction
-
-Every investor has unique goals, constraints, and priorities. Understanding these thoroughly is the foundation of providing genuinely valuable advice.
-
-## Investment Goal Categories
-
-### Capital Growth
-
-Investors prioritizing capital growth typically:
-
-- Have a longer time horizon (5+ years)
-- Accept lower initial yields for appreciation potential
-- Prefer emerging areas or off-plan purchases
-- Focus on developer reputation and project quality
-
-### Rental Yield
-
-Yield-focused investors typically:
-
-- Need regular income from their investment
-- Prefer completed, tenanted properties
-- Focus on established areas with rental demand
-- Prioritize property management convenience
-
-### Lifestyle & Usage
-
-Some investors seek:
-
-- A holiday home or potential retirement residence
-- Access to Dubai's amenities and lifestyle
-- A combination of personal use and rental income
-- Specific location or property type preferences
-
-### Golden Visa & Residency
-
-Many investors want:
-
-- UAE residency through the Golden Visa program
-- Property investment of AED 2M+ for 10-year visa
-- Access to UAE banking and business opportunities
-- A foothold in the region for business purposes
-
-## Discovery Questions Framework
-
-### Financial Position
-
-- "What budget range are you comfortable with?"
-- "Would you be financing the purchase or paying cash?"
-- "What timeline works for your capital deployment?"
-
-### Investment Objectives
-
-- "Is your primary goal capital growth, rental income, or a mix of both?"
-- "Are you interested in the Golden Visa program?"
-- "What investment horizon are you considering?"
-
-### Experience & Concerns
-
-- "Have you invested in property overseas before?"
-- "What concerns, if any, do you have about Dubai real estate?"
-- "What would make this a successful investment for you?"
-
-## Matching Goals to Properties
-
-Use this framework to match investor goals:
-
-| Goal | Property Type | Area | Timing |
-|------|--------------|------|--------|
-| Capital Growth | Off-plan, emerging areas | Dubai South, Creek Harbour | Now |
-| Rental Yield | Ready, established | Marina, Downtown, JVC | Now |
-| Lifestyle | Ready, premium | Palm, Bluewaters | Now |
-| Golden Visa | AED 2M+ ready | Any prime location | Now |
-      `,
-      keyTakeaways: [
-        "Investment goals fall into four main categories: growth, yield, lifestyle, and residency",
-        "Discovery questions should explore financial position, objectives, and concerns",
-        "Match property recommendations to specific investor goals",
-        "Golden Visa requires AED 2M+ property investment for 10-year residency",
+      processSteps: [
+        {
+          number: 1,
+          title: "Know the Origin Story",
+          description: "Understand how Prime Capital was founded and what gap in the market it was created to fill.",
+          quote: '"Prime Capital was founded by three partners who saw a gap: there was no truly client-first boutique serving international investors who wanted expertise without the sales pressure."',
+        },
+        {
+          number: 2,
+          title: "Articulate the Combined Expertise",
+          description: "Be able to explain what each founder brings and how it creates a unique combination.",
+          quote: '"Our founders bring 60+ years combined experience — Tahir in client relationships, Shaad in developer networks, and Rohit in international markets. You get institutional knowledge in a boutique setting."',
+        },
+        {
+          number: 3,
+          title: "Connect to Client Benefit",
+          description: "Always tie the story back to what it means for the client.",
+          quote: '"What this means for you is access to off-market opportunities, honest guidance, and a team that genuinely doesn\'t need your business — we work with clients we believe in."',
+        },
       ],
-      prevModule: { slug: "qualification-framework", title: "Qualification Framework" },
-      nextModule: { slug: "managing-expectations", title: "Managing Expectations" },
-      quizId: "client-discovery-5",
+      resources: [
+        { title: "Prime Capital Origin Story", slug: "origin-story" },
+        { title: "Founder Biography Document", slug: "founder-bios" },
+        { title: "Brand Values One-Pager", slug: "brand-values" },
+      ],
     },
   },
 }
@@ -265,163 +167,317 @@ interface PageProps {
 export default async function ModulePage({ params }: PageProps) {
   const { competency: competencySlug, module: moduleSlug } = await params
   
-  const competencyModules = moduleContent[competencySlug]
-  if (!competencyModules) {
+  const competencyContent = moduleContentData[competencySlug]
+  if (!competencyContent) {
     notFound()
   }
   
-  const moduleData = competencyModules[moduleSlug]
+  const moduleData = competencyContent[moduleSlug]
   if (!moduleData) {
     notFound()
   }
 
+  const currentBehaviourIndex = behavioursList.findIndex(b => b.slug === moduleSlug)
+
   return (
-    <Container size="md" className="py-8">
-      <Stack gap="xl">
-        {/* Breadcrumb */}
-        <Row gap="xs" align="center" className="flex-wrap">
-          <Link href="/learn">
-            <Text size="sm" variant="muted" className="hover:text-foreground transition-colors">
-              Dashboard
-            </Text>
+    <div className="flex min-h-screen bg-[#F2EFEA]">
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#576C75] text-white flex-shrink-0 flex flex-col">
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-white/10">
+          <Text size="xs" className="text-white/60 uppercase tracking-wider mb-3">
+            Consultant Training
+          </Text>
+          <Link 
+            href="/learn" 
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Exit to Course Overview
           </Link>
-          <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-          <Link href={`/learn/${competencySlug}`}>
-            <Text size="sm" variant="muted" className="hover:text-foreground transition-colors capitalize">
-              {competencySlug.replace(/-/g, " ")}
-            </Text>
-          </Link>
-          <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-          <Text size="sm">{moduleData.title}</Text>
-        </Row>
+        </div>
 
-        {/* Module Header */}
-        <Stack gap="md">
-          <Stack gap="sm">
-            <Badge variant="outline" className="w-fit">
-              <BookOpenIcon className="h-3 w-3 mr-1" />
-              Module
-            </Badge>
-            <Title size="h1">{moduleData.title}</Title>
+        {/* Competency Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {allCompetencies.map((comp, index) => {
+            const isActive = comp.slug === competencySlug
+            const isExpanded = isActive
+            
+            return (
+              <div key={comp.slug}>
+                {/* Competency Item */}
+                <Link
+                  href={`/learn/${comp.slug}`}
+                  className={`flex items-start gap-3 px-4 py-3 transition-colors ${
+                    isActive 
+                      ? "bg-white/10" 
+                      : "hover:bg-white/5"
+                  }`}
+                >
+                  <div className={`flex items-center justify-center w-6 h-6 rounded text-xs font-medium flex-shrink-0 ${
+                    isActive ? "bg-white text-[#576C75]" : "bg-white/20 text-white"
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Text size="sm" className="text-white truncate">
+                        {comp.name}
+                      </Text>
+                      {isExpanded && <ChevronDownIcon className="h-4 w-4 text-white/60 flex-shrink-0" />}
+                    </div>
+                    <Text size="xs" className="text-white/60">
+                      0/{comp.behaviourCount} behaviours
+                    </Text>
+                  </div>
+                </Link>
+
+                {/* Expanded Behaviours */}
+                {isExpanded && (
+                  <div className="pl-12 pr-4 pb-2">
+                    {behavioursList.map((behaviour) => {
+                      const isCurrent = behaviour.slug === moduleSlug
+                      return (
+                        <Link
+                          key={behaviour.slug}
+                          href={`/learn/${comp.slug}/${behaviour.slug}`}
+                          className={`flex items-center gap-2 py-2 text-sm transition-colors ${
+                            isCurrent 
+                              ? "text-white bg-white/10 -mx-2 px-2 rounded" 
+                              : "text-white/70 hover:text-white"
+                          }`}
+                        >
+                          {behaviour.status === "locked" ? (
+                            <LockIcon className="h-3 w-3 text-white/40" />
+                          ) : (
+                            <CircleIcon className="h-4 w-4 text-white/60" />
+                          )}
+                          <span className={behaviour.status === "locked" ? "text-white/40" : ""}>
+                            {behaviour.title}
+                          </span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Coming Soon Badge */}
+                {comp.status === "coming-soon" && !isActive && (
+                  <div className="px-4 pb-2 pl-12">
+                    <Badge className="bg-white/10 text-white/60 text-[10px] border-0">
+                      <LockIcon className="h-3 w-3 mr-1" />
+                      COMING SOON
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </nav>
+
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-white/10">
+          <div className="flex justify-between items-center text-sm">
+            <Text size="xs" className="text-white/60 uppercase tracking-wider">
+              Overall Progress
+            </Text>
+            <Text size="xs" className="text-white/80">
+              0 / 35
+            </Text>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-8 py-12">
+          {/* Back Link */}
+          <Link 
+            href={`/learn/${competencySlug}`}
+            className="inline-flex items-center gap-2 text-[#576C75] hover:text-[#3F4142] transition-colors mb-8 text-sm uppercase tracking-wider"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to Competency Overview
+          </Link>
+
+          {/* Module Header */}
+          <Stack gap="sm" className="mb-8">
+            <Text size="xs" className="text-[#576C75] uppercase tracking-wider">
+              {moduleData.subtitle}
+            </Text>
+            <h1 className="font-headline text-3xl text-[#3F4142]">
+              {moduleData.title}
+            </h1>
+            <Text className="text-[#576C75] text-lg">
+              {moduleData.description}
+            </Text>
           </Stack>
-          <Row gap="md" align="center">
-            <Row gap="xs" align="center">
-              <ClockIcon className="h-4 w-4 text-muted-foreground" />
-              <Text size="sm" variant="muted">{moduleData.duration} read</Text>
-            </Row>
-          </Row>
-        </Stack>
 
-        {/* Module Content */}
-        <Prose className="module-content">
-          <div dangerouslySetInnerHTML={{ __html: formatMarkdown(moduleData.content) }} />
-        </Prose>
-
-        {/* Key Takeaways */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-6">
-            <Stack gap="md">
-              <Row gap="sm" align="center">
-                <CheckCircleIcon className="h-5 w-5 text-primary" />
-                <Title size="h4">Key Takeaways</Title>
-              </Row>
-              <ul className="space-y-2">
-                {moduleData.keyTakeaways.map((takeaway, index) => (
-                  <li key={index} className="flex gap-2">
-                    <span className="text-primary mt-1">•</span>
-                    <Text size="sm">{takeaway}</Text>
-                  </li>
-                ))}
-              </ul>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Knowledge Check CTA */}
-        {moduleData.quizId && (
-          <Card>
-            <CardContent className="pt-6">
-              <Row gap="md" align="center" justify="between">
-                <Stack gap="xs">
-                  <Row gap="sm" align="center">
-                    <ClipboardCheckIcon className="h-5 w-5 text-primary" />
-                    <Text weight="medium">Knowledge Check</Text>
-                  </Row>
-                  <Text size="sm" variant="muted">
-                    Test your understanding of this module with a short quiz.
+          {/* Risk/Reward Cards */}
+          <div className="grid grid-cols-2 gap-4 mb-10">
+            <Card className="bg-[#FEF3F2] border-[#FEE4E2] rounded-[2px]">
+              <CardContent className="p-5">
+                <Row gap="xs" align="center" className="mb-3">
+                  <AlertTriangleIcon className="h-4 w-4 text-[#D92D20]" />
+                  <Text size="xs" weight="semibold" className="text-[#D92D20] uppercase tracking-wider">
+                    The Risk
                   </Text>
-                </Stack>
-                <Button nativeButton={false} render={<Link href={`/learn/quiz/${moduleData.quizId}`} />}>
-                  Take Quiz
-                </Button>
-              </Row>
-            </CardContent>
-          </Card>
-        )}
+                </Row>
+                <Text size="sm" className="text-[#3F4142]">
+                  {moduleData.riskReward.risk}
+                </Text>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#ECFDF3] border-[#D1FADF] rounded-[2px]">
+              <CardContent className="p-5">
+                <Row gap="xs" align="center" className="mb-3">
+                  <CheckIcon className="h-4 w-4 text-[#039855]" />
+                  <Text size="xs" weight="semibold" className="text-[#039855] uppercase tracking-wider">
+                    The Reward
+                  </Text>
+                </Row>
+                <Text size="sm" className="text-[#3F4142]">
+                  {moduleData.riskReward.reward}
+                </Text>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Navigation */}
-        <Row gap="md" align="center" justify="between" className="pt-4 border-t">
-          {moduleData.prevModule ? (
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href={`/learn/${competencySlug}/${moduleData.prevModule.slug}`} />}
-              className="gap-2"
-            >
-              <ChevronLeftIcon className="h-4 w-4" />
-              <Stack gap="none" align="start">
-                <Text size="xs" variant="muted">Previous</Text>
-                <Text size="sm">{moduleData.prevModule.title}</Text>
+          {/* Our Founders Section */}
+          {moduleData.founders && (
+            <Stack gap="md" className="mb-10">
+              <Row gap="sm" align="center">
+                <UsersIcon className="h-5 w-5 text-[#576C75]" />
+                <h2 className="font-headline text-xl text-[#3F4142]">Our Founders</h2>
+              </Row>
+              <Stack gap="sm">
+                {moduleData.founders.map((founder) => (
+                  <Card key={founder.initials} className="bg-white border-[#E5E2DD] rounded-[2px]">
+                    <CardContent className="p-5">
+                      <Row gap="md" align="start">
+                        <div className="w-12 h-12 rounded-full bg-[#576C75] text-white flex items-center justify-center font-semibold flex-shrink-0">
+                          {founder.initials}
+                        </div>
+                        <Stack gap="xs" className="flex-1">
+                          <Text weight="semibold" className="text-[#3F4142]">
+                            {founder.name}
+                          </Text>
+                          <Text size="sm" className="text-[#576C75]">
+                            <strong>{founder.experience.split(":")[0]}:</strong>
+                            {founder.experience.split(":")[1]}
+                          </Text>
+                          <Text size="sm" className="text-[#576C75]">
+                            <strong>Focus:</strong> {founder.focus}
+                          </Text>
+                        </Stack>
+                      </Row>
+                    </CardContent>
+                  </Card>
+                ))}
               </Stack>
-            </Button>
-          ) : (
-            <div />
+            </Stack>
           )}
-          
-          {moduleData.nextModule ? (
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link href={`/learn/${competencySlug}/${moduleData.nextModule.slug}`} />}
-              className="gap-2"
-            >
-              <Stack gap="none" align="end">
-                <Text size="xs" variant="muted">Next</Text>
-                <Text size="sm">{moduleData.nextModule.title}</Text>
+
+          {/* Brand Values Section */}
+          {moduleData.brandValues && (
+            <Stack gap="md" className="mb-10">
+              <Row gap="sm" align="center">
+                <HeartIcon className="h-5 w-5 text-[#576C75]" />
+                <h2 className="font-headline text-xl text-[#3F4142]">Brand Values</h2>
+              </Row>
+              <div className="grid grid-cols-2 gap-4">
+                {moduleData.brandValues.map((value) => (
+                  <Card key={value.title} className="bg-white border-[#E5E2DD] rounded-[2px]">
+                    <CardContent className="p-5">
+                      <Text size="xs" weight="semibold" className="text-[#576C75] uppercase tracking-wider mb-2">
+                        {value.title}
+                      </Text>
+                      <Text size="sm" className="text-[#3F4142] italic">
+                        {value.description}
+                      </Text>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </Stack>
+          )}
+
+          {/* Process Model Section */}
+          {moduleData.processSteps && (
+            <Stack gap="md" className="mb-10">
+              <Row gap="sm" align="center">
+                <svg className="h-5 w-5 text-[#576C75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+                <h2 className="font-headline text-xl text-[#3F4142]">The Process Model</h2>
+              </Row>
+              <Stack gap="md">
+                {moduleData.processSteps.map((step) => (
+                  <Card key={step.number} className="bg-white border-[#E5E2DD] rounded-[2px]">
+                    <CardContent className="p-5">
+                      <Row gap="md" align="start">
+                        <div className="w-8 h-8 rounded-full bg-[#576C75] text-white flex items-center justify-center font-semibold flex-shrink-0 text-sm">
+                          {step.number}
+                        </div>
+                        <Stack gap="sm" className="flex-1">
+                          <Text weight="semibold" className="text-[#3F4142]">
+                            {step.title}
+                          </Text>
+                          <Text size="sm" className="text-[#576C75]">
+                            {step.description}
+                          </Text>
+                          <div className="border-l-4 border-[#576C75]/30 pl-4 mt-2">
+                            <Text size="sm" className="text-[#3F4142] italic">
+                              {step.quote}
+                            </Text>
+                          </div>
+                        </Stack>
+                      </Row>
+                    </CardContent>
+                  </Card>
+                ))}
               </Stack>
+            </Stack>
+          )}
+
+          {/* Resources Section */}
+          {moduleData.resources.length > 0 && (
+            <Stack gap="md" className="mb-10">
+              <Row gap="sm" align="center">
+                <FileTextIcon className="h-5 w-5 text-[#576C75]" />
+                <h2 className="font-headline text-xl text-[#3F4142]">Resources</h2>
+              </Row>
+              <Stack gap="xs">
+                {moduleData.resources.map((resource) => (
+                  <Card key={resource.slug} className="bg-white border-[#E5E2DD] rounded-[2px] hover:border-[#576C75]/30 transition-colors cursor-pointer">
+                    <CardContent className="py-4 px-5">
+                      <Row gap="sm" align="center">
+                        <FileTextIcon className="h-4 w-4 text-[#576C75]" />
+                        <Text className="text-[#3F4142]">{resource.title}</Text>
+                      </Row>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+
+          {/* Continue to Knowledge Check CTA */}
+          <div className="flex justify-center pt-4">
+            <Button
+              nativeButton={false}
+              render={<Link href={`/learn/quiz/${competencySlug}-${moduleSlug}`} />}
+              className="bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px] gap-2 px-8 uppercase tracking-wider"
+            >
+              Continue to Knowledge Check
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
-          ) : (
-            <Button
-              nativeButton={false}
-              render={<Link href={`/learn/${competencySlug}`} />}
-            >
-              Complete Competency
-            </Button>
-          )}
-        </Row>
-      </Stack>
-    </Container>
+          </div>
+        </div>
+      </main>
+    </div>
   )
-}
-
-// -----------------------------------------------------------------------------
-// Helper Functions
-// -----------------------------------------------------------------------------
-
-function formatMarkdown(content: string): string {
-  // Simple markdown to HTML conversion
-  // In production, use a proper markdown library like remark/rehype
-  return content
-    .replace(/## (.*)/g, '<h2>$1</h2>')
-    .replace(/### (.*)/g, '<h3>$1</h3>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/\n- (.*)/g, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)+/g, '<ul>$&</ul>')
-    .replace(/\n\| /g, '<tr><td>')
-    .replace(/ \| /g, '</td><td>')
-    .replace(/ \|$/gm, '</td></tr>')
 }
 
 // -----------------------------------------------------------------------------
@@ -431,7 +487,7 @@ function formatMarkdown(content: string): string {
 export async function generateStaticParams() {
   const params: { competency: string; module: string }[] = []
   
-  for (const [competency, modules] of Object.entries(moduleContent)) {
+  for (const [competency, modules] of Object.entries(moduleContentData)) {
     for (const moduleSlug of Object.keys(modules)) {
       params.push({ competency, module: moduleSlug })
     }

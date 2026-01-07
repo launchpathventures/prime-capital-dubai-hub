@@ -1,101 +1,41 @@
 /**
  * CATALYST - Learn Dashboard Page
  *
- * Learning portal dashboard showing competencies and progress.
- * This is the main landing page for learners after authentication.
+ * Learning portal dashboard matching the Prime Capital Learning design.
+ * Features welcome message, progress overview, and course cards.
  */
 
 import Link from "next/link"
-import { Container, Stack, Grid, Row, Text, Title } from "@/components/core"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Container, Stack, Row, Text } from "@/components/core"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
-  TrendingUpIcon,
+  GraduationCapIcon,
+  PlayCircleIcon,
+  ChevronRightIcon,
+  TargetIcon,
   BookOpenIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  BarChart3Icon,
-  UsersIcon,
-  HomeIcon,
-  FileTextIcon,
-  MessageSquareIcon,
-  HeartHandshakeIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
-// Competency Data (mock - would come from database)
+// Course Data (mock - would come from database)
 // -----------------------------------------------------------------------------
 
-const competencies = [
-  {
-    slug: "market-intelligence",
-    name: "Market Intelligence",
-    description: "Understand Dubai's real estate landscape, regulations, and market dynamics",
-    icon: BarChart3Icon,
-    modules: 8,
-    completedModules: 8,
-    estimatedTime: "4 hours",
-    status: "completed" as const,
-  },
-  {
-    slug: "client-discovery",
-    name: "Client Discovery",
-    description: "Master the art of understanding client needs, goals, and preferences",
-    icon: UsersIcon,
-    modules: 6,
-    completedModules: 4,
-    estimatedTime: "3 hours",
-    status: "in-progress" as const,
-  },
-  {
-    slug: "property-matching",
-    name: "Property Matching",
-    description: "Learn to identify and present properties that align with client criteria",
-    icon: HomeIcon,
-    modules: 7,
-    completedModules: 0,
-    estimatedTime: "3.5 hours",
-    status: "not-started" as const,
-  },
-  {
-    slug: "transaction-management",
-    name: "Transaction Management",
-    description: "Navigate the full transaction process from offer to handover",
-    icon: FileTextIcon,
-    modules: 9,
-    completedModules: 0,
-    estimatedTime: "4.5 hours",
-    status: "not-started" as const,
-  },
-  {
-    slug: "objection-navigation",
-    name: "Objection Navigation",
-    description: "Handle investor concerns with confidence and credibility",
-    icon: MessageSquareIcon,
-    modules: 5,
-    completedModules: 0,
-    estimatedTime: "2.5 hours",
-    status: "not-started" as const,
-  },
-  {
-    slug: "relationship-stewardship",
-    name: "Relationship Stewardship",
-    description: "Build lasting relationships through exceptional service and follow-up",
-    icon: HeartHandshakeIcon,
-    modules: 4,
-    completedModules: 0,
-    estimatedTime: "2 hours",
-    status: "not-started" as const,
-  },
-]
+const courseData = {
+  title: "Real Estate Consultant Certification",
+  description: "Master the 7 core competencies and 35 key behaviours that define a Prime Capital consultant.",
+  competencies: 7,
+  behaviours: 35,
+  completedCompetencies: 0,
+  completedBehaviours: 0,
+}
 
 // Calculate overall progress
-const totalModules = competencies.reduce((sum, c) => sum + c.modules, 0)
-const completedModules = competencies.reduce((sum, c) => sum + c.completedModules, 0)
-const overallProgress = Math.round((completedModules / totalModules) * 100)
+const overallProgress = Math.round(
+  (courseData.completedBehaviours / courseData.behaviours) * 100
+)
 
 // -----------------------------------------------------------------------------
 // Page Component
@@ -103,158 +43,153 @@ const overallProgress = Math.round((completedModules / totalModules) * 100)
 
 export default function LearnDashboardPage() {
   return (
-    <Container size="lg" className="py-8">
-      <Stack gap="xl">
-        {/* Page Header */}
-        <Stack gap="sm">
-          <Row gap="sm" align="center">
-            <Title size="h2">Learning Dashboard</Title>
-            <Badge variant="outline">
-              {overallProgress}% Complete
-            </Badge>
-          </Row>
-          <Text variant="muted">
-            Welcome to the Prime Capital training platform. Complete all competencies to become certified.
-          </Text>
-        </Stack>
-
-        {/* Progress Overview */}
-        <Card>
-          <CardContent className="pt-6">
-            <Grid cols={4} gap="lg">
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <TrendingUpIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Overall Progress</Text>
-                </Row>
-                <Title size="h3">{overallProgress}%</Title>
-                <Progress value={overallProgress} className="h-2" />
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <BookOpenIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Modules Completed</Text>
-                </Row>
-                <Title size="h3">{completedModules}/{totalModules}</Title>
-                <Text size="xs" variant="muted">modules across all competencies</Text>
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <ClockIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Time Remaining</Text>
-                </Row>
-                <Title size="h3">~16 hrs</Title>
-                <Text size="xs" variant="muted">estimated to completion</Text>
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <CheckCircleIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Certification Status</Text>
-                </Row>
-                <Title size="h3">In Progress</Title>
-                <Text size="xs" variant="muted">complete all competencies</Text>
-              </Stack>
-            </Grid>
-          </CardContent>
-        </Card>
-
-        {/* Competencies Grid */}
-        <Stack gap="md">
-          <Title size="h4">Core Competencies</Title>
-          <Grid cols={3} gap="md">
-            {competencies.map((competency) => (
-              <CompetencyCard key={competency.slug} competency={competency} />
-            ))}
-          </Grid>
-        </Stack>
-
-        {/* Next Up Section */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PlayIcon className="h-5 w-5" />
-              Continue Learning
-            </CardTitle>
-            <CardDescription>
-              Pick up where you left off
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Row gap="md" align="center" justify="between">
-              <Stack gap="xs">
-                <Text weight="medium">Client Discovery</Text>
-                <Text size="sm" variant="muted">
-                  Module 5: Understanding Investment Goals
-                </Text>
-              </Stack>
-              <Button nativeButton={false} render={<Link href="/learn/client-discovery/understanding-investment-goals" />}>
-                Continue
-              </Button>
-            </Row>
-          </CardContent>
-        </Card>
-      </Stack>
-    </Container>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// Competency Card Component
-// -----------------------------------------------------------------------------
-
-interface CompetencyCardProps {
-  competency: typeof competencies[0]
-}
-
-function CompetencyCard({ competency }: CompetencyCardProps) {
-  const progress = Math.round((competency.completedModules / competency.modules) * 100)
-  const Icon = competency.icon
-  
-  const statusConfig = {
-    completed: { label: "Completed", variant: "default" as const, color: "text-success" },
-    "in-progress": { label: "In Progress", variant: "secondary" as const, color: "text-warning" },
-    "not-started": { label: "Not Started", variant: "outline" as const, color: "text-muted-foreground" },
-  }
-  
-  const { label, variant, color } = statusConfig[competency.status]
-
-  return (
-    <Link href={`/learn/${competency.slug}`}>
-      <Card className="competency-card h-full hover:border-primary/50 transition-colors cursor-pointer">
-        <CardHeader className="pb-2">
-          <Row gap="sm" align="start" justify="between">
-            <div className={`p-2 rounded-lg bg-primary/10 ${color}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <Badge variant={variant}>{label}</Badge>
-          </Row>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen bg-[#F2EFEA]">
+      <Container size="md" className="py-12 px-4 md:px-6">
+        <Stack gap="xl">
+          {/* Welcome Header */}
           <Stack gap="sm">
-            <Stack gap="xs">
-              <Text weight="semibold">{competency.name}</Text>
-              <Text size="sm" variant="muted" className="line-clamp-2">
-                {competency.description}
-              </Text>
-            </Stack>
-            
-            <Stack gap="xs">
-              <Row gap="sm" align="center" justify="between">
-                <Text size="xs" variant="muted">
-                  {competency.completedModules}/{competency.modules} modules
-                </Text>
-                <Text size="xs" variant="muted">
-                  {competency.estimatedTime}
-                </Text>
-              </Row>
-              <Progress value={progress} className="h-1.5" />
-            </Stack>
+            <h1 className="font-headline text-4xl md:text-5xl text-[#3F4142] tracking-tight">
+              Welcome back, Sarah
+            </h1>
+            <Text className="text-[#576C75] text-lg">
+              Continue your journey to becoming a Prime Capital expert.
+            </Text>
           </Stack>
-        </CardContent>
-      </Card>
-    </Link>
+
+          {/* Tour Card */}
+          <Card className="bg-white border-[#E5E2DD] rounded-[2px]">
+            <CardContent className="py-5 px-6">
+              <Row gap="md" align="center" justify="between" className="flex-wrap">
+                <Row gap="md" align="center">
+                  <div className="w-12 h-12 rounded-full bg-[#576C75]/10 flex items-center justify-center">
+                    <GraduationCapIcon className="h-6 w-6 text-[#576C75]" />
+                  </div>
+                  <Stack gap="none">
+                    <Text weight="medium" className="text-[#3F4142]">
+                      New to the platform?
+                    </Text>
+                    <Text size="sm" className="text-[#576C75]">
+                      Take a quick 2-minute tour to understand how your training works.
+                    </Text>
+                  </Stack>
+                </Row>
+                <Button 
+                  className="bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px] gap-2"
+                >
+                  <PlayCircleIcon className="h-4 w-4" />
+                  Start Tour
+                </Button>
+              </Row>
+            </CardContent>
+          </Card>
+
+          {/* Your Progress */}
+          <Stack gap="md">
+            <h2 className="font-headline text-xl text-[#3F4142]">Your Progress</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="bg-white border-[#E5E2DD] rounded-[2px]">
+                <CardContent className="py-6 text-center">
+                  <Text className="font-headline text-4xl text-[#3F4142]">
+                    {overallProgress}%
+                  </Text>
+                  <Text size="sm" className="text-[#576C75] mt-1">
+                    Overall Complete
+                  </Text>
+                </CardContent>
+              </Card>
+              <Card className="bg-white border-[#E5E2DD] rounded-[2px]">
+                <CardContent className="py-6 text-center">
+                  <Text className="font-headline text-4xl text-[#3F4142]">
+                    {courseData.completedCompetencies}/{courseData.competencies}
+                  </Text>
+                  <Text size="sm" className="text-[#576C75] mt-1">
+                    Competencies
+                  </Text>
+                </CardContent>
+              </Card>
+              <Card className="bg-white border-[#E5E2DD] rounded-[2px]">
+                <CardContent className="py-6 text-center">
+                  <Text className="font-headline text-4xl text-[#3F4142]">
+                    {courseData.completedBehaviours}/{courseData.behaviours}
+                  </Text>
+                  <Text size="sm" className="text-[#576C75] mt-1">
+                    Behaviours
+                  </Text>
+                </CardContent>
+              </Card>
+            </div>
+          </Stack>
+
+          {/* Your Courses */}
+          <Stack gap="md">
+            <h2 className="font-headline text-xl text-[#3F4142]">Your Courses</h2>
+            <Card className="bg-white border-[#E5E2DD] rounded-[2px] overflow-hidden">
+              {/* Course Image - Dubai Skyline gradient placeholder */}
+              <div 
+                className="relative h-48 md:h-64 w-full"
+                style={{
+                  background: "linear-gradient(135deg, #576C75 0%, #A6B5B0 50%, #F2EFEA 100%)",
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </div>
+              
+              {/* Course Content */}
+              <CardContent className="p-6">
+                <Stack gap="md">
+                  <Badge 
+                    variant="outline" 
+                    className="w-fit border-[#576C75]/30 text-[#576C75] rounded-[2px] text-xs uppercase tracking-wider"
+                  >
+                    Required Training
+                  </Badge>
+                  
+                  <h3 className="font-headline text-2xl text-[#3F4142]">
+                    {courseData.title}
+                  </h3>
+                  
+                  <Text className="text-[#576C75]">
+                    {courseData.description}
+                  </Text>
+                  
+                  <Row gap="md" align="center">
+                    <Row gap="xs" align="center">
+                      <TargetIcon className="h-4 w-4 text-[#576C75]" />
+                      <Text size="sm" className="text-[#576C75]">
+                        {courseData.competencies} Competencies
+                      </Text>
+                    </Row>
+                    <Row gap="xs" align="center">
+                      <BookOpenIcon className="h-4 w-4 text-[#576C75]" />
+                      <Text size="sm" className="text-[#576C75]">
+                        {courseData.behaviours} Behaviours
+                      </Text>
+                    </Row>
+                  </Row>
+                  
+                  <Stack gap="xs">
+                    <Row align="center" justify="between">
+                      <Progress value={overallProgress} className="h-1.5 flex-1 mr-4" />
+                      <Text size="sm" className="text-[#576C75]">
+                        {overallProgress > 0 ? `${overallProgress}% complete` : "Not started"}
+                      </Text>
+                    </Row>
+                  </Stack>
+                  
+                  <Button 
+                    nativeButton={false}
+                    render={<Link href="/learn/prime-capital-identity" />}
+                    className="w-fit bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px] gap-2 mt-2"
+                  >
+                    Start Course
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Stack>
+      </Container>
+    </div>
   )
 }

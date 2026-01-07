@@ -8,12 +8,21 @@
  * =============================================================================
  *
  * The learn surface uses a simple, content-focused layout:
- * - Fixed header that hides on scroll
+ * - Fixed header with Prime Capital branding
  * - Full-width content area with max-width constraint
  * - Generous padding for readability
  */
 
 @import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   TYPOGRAPHY
+   ============================================================================= */
+
+/* Headline font - serif for elegance */
+.font-headline {
+  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+}
 
 /* =============================================================================
    LEARN CONTENT LAYOUT

@@ -1,362 +1,202 @@
 /**
  * CATALYST - Competency Page
  *
- * Lists all modules within a competency with progress tracking.
+ * Displays competency overview with sidebar navigation matching the design.
  * Dynamic route: /learn/[competency]
  */
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Container, Stack, Row, Text, Title } from "@/components/core"
+import { Stack, Row, Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import {
+  ArrowLeftIcon,
   ChevronRightIcon,
+  ChevronDownIcon,
   CheckCircleIcon,
   CircleIcon,
-  PlayCircleIcon,
-  ClockIcon,
+  LockIcon,
   BookOpenIcon,
-  BarChart3Icon,
-  UsersIcon,
-  HomeIcon,
+  AlertTriangleIcon,
+  CheckIcon,
   FileTextIcon,
-  MessageSquareIcon,
-  HeartHandshakeIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
 // Competency Data (mock - would come from database)
 // -----------------------------------------------------------------------------
 
-const competencyData: Record<string, {
-  name: string
+interface Behaviour {
+  slug: string
+  title: string
   description: string
-  icon: React.ElementType
-  modules: Array<{
-    slug: string
+  status: "completed" | "current" | "locked"
+}
+
+interface Competency {
+  id: number
+  name: string
+  subtitle: string
+  quote: string
+  behaviours: Behaviour[]
+  context: {
+    intro: string
+    paragraphs: string[]
+  }
+  riskReward: {
+    risk: string
+    reward: string
+  }
+  toolkit: Array<{
     title: string
-    description: string
-    duration: string
-    status: "completed" | "in-progress" | "not-started"
+    slug: string
   }>
-}> = {
+}
+
+const allCompetencies: Array<{
+  id: number
+  slug: string
+  name: string
+  behaviourCount: number
+  status: "active" | "coming-soon"
+}> = [
+  { id: 1, slug: "prime-capital-identity", name: "Prime Capital Identity", behaviourCount: 5, status: "active" },
+  { id: 2, slug: "market-intelligence", name: "Market Intelligence", behaviourCount: 5, status: "coming-soon" },
+  { id: 3, slug: "client-discovery", name: "Client Discovery", behaviourCount: 5, status: "coming-soon" },
+  { id: 4, slug: "property-matching", name: "Property Matching", behaviourCount: 5, status: "coming-soon" },
+  { id: 5, slug: "objection-navigation", name: "Objection Navigation", behaviourCount: 5, status: "coming-soon" },
+  { id: 6, slug: "transaction-management", name: "Transaction Management", behaviourCount: 5, status: "coming-soon" },
+  { id: 7, slug: "relationship-stewardship", name: "Relationship Stewardship", behaviourCount: 5, status: "coming-soon" },
+]
+
+const competencyData: Record<string, Competency> = {
+  "prime-capital-identity": {
+    id: 1,
+    name: "Prime Capital Identity",
+    subtitle: '"Who are we and what makes us different?"',
+    quote: "",
+    behaviours: [
+      {
+        slug: "our-story",
+        title: "Articulates the Prime Capital story",
+        description: "Explains our founding, our journey, and why we exist",
+        status: "current",
+      },
+      {
+        slug: "boutique-positioning",
+        title: "Embodies boutique positioning",
+        description: "Demonstrates 'quiet luxury' — expertise without arrogance",
+        status: "current",
+      },
+      {
+        slug: "service-model",
+        title: "Explains our service model",
+        description: "Articulates how we serve clients differently than competitors",
+        status: "current",
+      },
+      {
+        slug: "founders-vision",
+        title: "Represents the founders' vision",
+        description: "Understands and communicates Tahir, Shaad, and Rohit's combined expertise",
+        status: "current",
+      },
+      {
+        slug: "brand-voice",
+        title: "Demonstrates brand voice",
+        description: "Communicates with authority, discretion, and calm confidence",
+        status: "locked",
+      },
+    ],
+    context: {
+      intro: "This is where every consultant's journey begins. Before you can represent Prime Capital to clients, you need to deeply understand who we are, what we stand for, and how we're different from every other real estate company in Dubai.",
+      paragraphs: [
+        "Prime Capital Dubai is not just another real estate company. We are a boutique advisory serving discerning international investors who expect more than transactions — they expect trusted guidance.",
+        "**Our Positioning:** Quiet luxury. We don't chase volume. We don't use pressure tactics. We build relationships with sophisticated clients who value expertise, discretion, and transparency.",
+        "**Our Founders:** 60+ combined years of experience across Tahir (client relationships, content), Shaad (developer relationships, off-plan), and Rohit (international markets, project development). This isn't a startup — it's institutional knowledge in a boutique setting.",
+        "**Our Promise:** From initial enquiry to handover and beyond, we guide clients through every step. We earn trust through competence, not persuasion.",
+      ],
+    },
+    riskReward: {
+      risk: "You sound like every other agent in Dubai. Clients don't see the difference. You compete on price and lose to bigger firms.",
+      reward: "You articulate our unique value proposition with confidence. Clients choose us because they understand we're different — and you embody that difference.",
+    },
+    toolkit: [
+      { title: "Prime Capital Brand Guidelines", slug: "brand-guidelines" },
+      { title: "Founder Bios & Expertise Areas", slug: "founder-bios" },
+      { title: "Client Testimonials Library", slug: "testimonials" },
+    ],
+  },
   "market-intelligence": {
+    id: 2,
     name: "Market Intelligence",
-    description: "Understand Dubai's real estate landscape, regulations, and market dynamics",
-    icon: BarChart3Icon,
-    modules: [
+    subtitle: '"Understanding the Dubai real estate landscape"',
+    quote: "",
+    behaviours: [
       {
-        slug: "dubai-real-estate-overview",
-        title: "Dubai Real Estate Overview",
-        description: "History, growth, and current state of the Dubai property market",
-        duration: "30 min",
-        status: "completed",
+        slug: "market-overview",
+        title: "Explains Dubai market fundamentals",
+        description: "Demonstrates knowledge of market history, trends, and dynamics",
+        status: "locked",
       },
       {
-        slug: "regulatory-framework",
-        title: "Regulatory Framework",
-        description: "RERA, DLD, and key regulations governing property transactions",
-        duration: "45 min",
-        status: "completed",
+        slug: "regulatory-knowledge",
+        title: "Navigates regulatory framework",
+        description: "Understands RERA, DLD, and compliance requirements",
+        status: "locked",
       },
       {
-        slug: "market-segments",
-        title: "Market Segments",
-        description: "Understanding off-plan, secondary, and commercial segments",
-        duration: "35 min",
-        status: "completed",
+        slug: "area-expertise",
+        title: "Shows area expertise",
+        description: "Knows Dubai communities, developments, and investment potential",
+        status: "locked",
       },
       {
-        slug: "key-developers",
-        title: "Key Developers",
-        description: "Major developers, their portfolios, and reputation",
-        duration: "25 min",
-        status: "completed",
+        slug: "developer-knowledge",
+        title: "Evaluates developers",
+        description: "Assesses developer reputation, track record, and reliability",
+        status: "locked",
       },
       {
-        slug: "area-knowledge",
-        title: "Area Knowledge",
-        description: "Dubai's key areas, communities, and their characteristics",
-        duration: "40 min",
-        status: "completed",
-      },
-      {
-        slug: "golden-visa",
-        title: "Golden Visa & Residency",
-        description: "Investment thresholds and residency benefits for property investors",
-        duration: "20 min",
-        status: "completed",
-      },
-      {
-        slug: "market-trends",
-        title: "Market Trends & Analysis",
-        description: "How to read and interpret market data and trends",
-        duration: "35 min",
-        status: "completed",
-      },
-      {
-        slug: "competitive-landscape",
-        title: "Competitive Landscape",
-        description: "Understanding Prime Capital's positioning and competitors",
-        duration: "30 min",
-        status: "completed",
+        slug: "market-analysis",
+        title: "Analyzes market data",
+        description: "Interprets trends, yields, and investment indicators",
+        status: "locked",
       },
     ],
-  },
-  "client-discovery": {
-    name: "Client Discovery",
-    description: "Master the art of understanding client needs, goals, and preferences",
-    icon: UsersIcon,
-    modules: [
-      {
-        slug: "investor-personas",
-        title: "Investor Personas",
-        description: "Understanding different investor types and their motivations",
-        duration: "35 min",
-        status: "completed",
-      },
-      {
-        slug: "discovery-questions",
-        title: "Discovery Questions",
-        description: "Crafting questions that uncover true client needs",
-        duration: "40 min",
-        status: "completed",
-      },
-      {
-        slug: "active-listening",
-        title: "Active Listening",
-        description: "Techniques for truly understanding client communication",
-        duration: "25 min",
-        status: "completed",
-      },
-      {
-        slug: "qualification-framework",
-        title: "Qualification Framework",
-        description: "Assessing client readiness and fit",
-        duration: "30 min",
-        status: "completed",
-      },
-      {
-        slug: "understanding-investment-goals",
-        title: "Understanding Investment Goals",
-        description: "Identifying capital growth, yield, and lifestyle priorities",
-        duration: "35 min",
-        status: "in-progress",
-      },
-      {
-        slug: "managing-expectations",
-        title: "Managing Expectations",
-        description: "Setting realistic expectations from the first conversation",
-        duration: "25 min",
-        status: "not-started",
-      },
+    context: {
+      intro: "Understanding Dubai's real estate market is fundamental to advising clients effectively.",
+      paragraphs: [
+        "Dubai's property market is dynamic and evolving. To serve sophisticated investors, you must demonstrate deep market knowledge.",
+      ],
+    },
+    riskReward: {
+      risk: "You can't answer basic market questions. Clients lose confidence in your expertise.",
+      reward: "You demonstrate authoritative market knowledge. Clients trust your recommendations.",
+    },
+    toolkit: [
+      { title: "Dubai Market Overview", slug: "market-overview" },
+      { title: "Area Guides", slug: "area-guides" },
     ],
   },
-  "property-matching": {
-    name: "Property Matching",
-    description: "Learn to identify and present properties that align with client criteria",
-    icon: HomeIcon,
-    modules: [
-      {
-        slug: "property-analysis",
-        title: "Property Analysis",
-        description: "Evaluating properties against client requirements",
-        duration: "40 min",
-        status: "not-started",
-      },
-      {
-        slug: "yield-calculations",
-        title: "Yield Calculations",
-        description: "ROI, gross yield, and net yield calculations",
-        duration: "35 min",
-        status: "not-started",
-      },
-      {
-        slug: "off-plan-evaluation",
-        title: "Off-Plan Evaluation",
-        description: "Assessing off-plan opportunities and risks",
-        duration: "45 min",
-        status: "not-started",
-      },
-      {
-        slug: "secondary-market",
-        title: "Secondary Market",
-        description: "Evaluating resale properties and value",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "presentation-skills",
-        title: "Property Presentation",
-        description: "Presenting properties professionally to clients",
-        duration: "35 min",
-        status: "not-started",
-      },
-      {
-        slug: "viewings-management",
-        title: "Managing Viewings",
-        description: "Organizing and conducting effective property viewings",
-        duration: "25 min",
-        status: "not-started",
-      },
-      {
-        slug: "comparative-analysis",
-        title: "Comparative Market Analysis",
-        description: "Creating compelling property comparisons",
-        duration: "30 min",
-        status: "not-started",
-      },
-    ],
+}
+
+// Default competency for unknown slugs
+const defaultCompetency: Competency = {
+  id: 0,
+  name: "Coming Soon",
+  subtitle: "This competency is under development",
+  quote: "",
+  behaviours: [],
+  context: {
+    intro: "This competency is coming soon.",
+    paragraphs: [],
   },
-  "transaction-management": {
-    name: "Transaction Management",
-    description: "Navigate the full transaction process from offer to handover",
-    icon: FileTextIcon,
-    modules: [
-      {
-        slug: "transaction-process",
-        title: "Transaction Process Overview",
-        description: "End-to-end view of the Dubai property transaction",
-        duration: "40 min",
-        status: "not-started",
-      },
-      {
-        slug: "offers-negotiation",
-        title: "Offers & Negotiation",
-        description: "Structuring offers and negotiating terms",
-        duration: "45 min",
-        status: "not-started",
-      },
-      {
-        slug: "mou-process",
-        title: "MOU Process",
-        description: "Memorandum of Understanding requirements and process",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "due-diligence",
-        title: "Due Diligence",
-        description: "Property verification and legal checks",
-        duration: "35 min",
-        status: "not-started",
-      },
-      {
-        slug: "noc-transfer",
-        title: "NOC & Transfer",
-        description: "No Objection Certificate and title transfer process",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "mortgage-process",
-        title: "Mortgage Process",
-        description: "Mortgage options and application process",
-        duration: "40 min",
-        status: "not-started",
-      },
-      {
-        slug: "payment-plans",
-        title: "Payment Plans",
-        description: "Understanding developer payment plans",
-        duration: "25 min",
-        status: "not-started",
-      },
-      {
-        slug: "handover-process",
-        title: "Handover Process",
-        description: "Property handover and snagging",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "post-transaction",
-        title: "Post-Transaction Support",
-        description: "After-sale service and client follow-up",
-        duration: "20 min",
-        status: "not-started",
-      },
-    ],
+  riskReward: {
+    risk: "",
+    reward: "",
   },
-  "objection-navigation": {
-    name: "Objection Navigation",
-    description: "Handle investor concerns with confidence and credibility",
-    icon: MessageSquareIcon,
-    modules: [
-      {
-        slug: "common-objections",
-        title: "Common Objections",
-        description: "Understanding the most frequent investor concerns",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "bubble-concerns",
-        title: "Market Bubble Concerns",
-        description: "Addressing fears about market overvaluation",
-        duration: "35 min",
-        status: "not-started",
-      },
-      {
-        slug: "developer-delays",
-        title: "Developer Delays",
-        description: "Handling concerns about construction timelines",
-        duration: "25 min",
-        status: "not-started",
-      },
-      {
-        slug: "hidden-fees",
-        title: "Hidden Fees & Costs",
-        description: "Transparency about all transaction costs",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "objection-techniques",
-        title: "Objection Handling Techniques",
-        description: "Frameworks for addressing concerns professionally",
-        duration: "35 min",
-        status: "not-started",
-      },
-    ],
-  },
-  "relationship-stewardship": {
-    name: "Relationship Stewardship",
-    description: "Build lasting relationships through exceptional service and follow-up",
-    icon: HeartHandshakeIcon,
-    modules: [
-      {
-        slug: "client-communication",
-        title: "Client Communication",
-        description: "Professional communication standards and best practices",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "follow-up-systems",
-        title: "Follow-Up Systems",
-        description: "Creating systematic client follow-up processes",
-        duration: "25 min",
-        status: "not-started",
-      },
-      {
-        slug: "referral-generation",
-        title: "Referral Generation",
-        description: "Building a referral-based business",
-        duration: "30 min",
-        status: "not-started",
-      },
-      {
-        slug: "long-term-relationships",
-        title: "Long-Term Relationships",
-        description: "Nurturing client relationships over time",
-        duration: "25 min",
-        status: "not-started",
-      },
-    ],
-  },
+  toolkit: [],
 }
 
 // -----------------------------------------------------------------------------
@@ -371,159 +211,310 @@ interface PageProps {
 
 export default async function CompetencyPage({ params }: PageProps) {
   const { competency: competencySlug } = await params
-  const competency = competencyData[competencySlug]
-
-  if (!competency) {
-    notFound()
+  const competency = competencyData[competencySlug] || defaultCompetency
+  
+  // For coming soon competencies, show a placeholder
+  if (!competencyData[competencySlug]) {
+    const found = allCompetencies.find(c => c.slug === competencySlug)
+    if (!found) {
+      notFound()
+    }
   }
 
-  const Icon = competency.icon
-  const completedCount = competency.modules.filter((m) => m.status === "completed").length
-  const progress = Math.round((completedCount / competency.modules.length) * 100)
+  const currentCompetencyIndex = allCompetencies.findIndex(c => c.slug === competencySlug)
+  const completedBehaviours = competency.behaviours.filter(b => b.status === "completed").length
+  const totalBehaviours = competency.behaviours.length
 
   return (
-    <Container size="lg" className="py-8">
-      <Stack gap="xl">
-        {/* Breadcrumb */}
-        <Row gap="xs" align="center">
-          <Link href="/learn">
-            <Text size="sm" variant="muted" className="hover:text-foreground transition-colors">
-              Learning Dashboard
-            </Text>
+    <div className="flex min-h-screen bg-[#F2EFEA]">
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#576C75] text-white flex-shrink-0 flex flex-col">
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-white/10">
+          <Text size="xs" className="text-white/60 uppercase tracking-wider mb-3">
+            Consultant Training
+          </Text>
+          <Link 
+            href="/learn" 
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Exit to Course Overview
           </Link>
-          <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-          <Text size="sm">{competency.name}</Text>
-        </Row>
+        </div>
 
-        {/* Competency Header */}
-        <Card>
-          <CardContent className="pt-6">
-            <Row gap="lg" align="start">
-              <div className="p-3 rounded-lg bg-primary/10 text-primary">
-                <Icon className="h-8 w-8" />
+        {/* Competency Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {allCompetencies.map((comp, index) => {
+            const isActive = comp.slug === competencySlug
+            const isExpanded = isActive
+            const compData = competencyData[comp.slug]
+            
+            return (
+              <div key={comp.slug}>
+                {/* Competency Item */}
+                <Link
+                  href={`/learn/${comp.slug}`}
+                  className={`flex items-start gap-3 px-4 py-3 transition-colors ${
+                    isActive 
+                      ? "bg-white/10" 
+                      : "hover:bg-white/5"
+                  }`}
+                >
+                  <div className={`flex items-center justify-center w-6 h-6 rounded text-xs font-medium flex-shrink-0 ${
+                    isActive ? "bg-white text-[#576C75]" : "bg-white/20 text-white"
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Text size="sm" className="text-white truncate">
+                        {comp.name}
+                      </Text>
+                      {isExpanded && <ChevronDownIcon className="h-4 w-4 text-white/60 flex-shrink-0" />}
+                    </div>
+                    <Text size="xs" className="text-white/60">
+                      {completedBehaviours}/{comp.behaviourCount} behaviours
+                    </Text>
+                  </div>
+                </Link>
+
+                {/* Expanded Behaviours */}
+                {isExpanded && compData && (
+                  <div className="pl-12 pr-4 pb-2">
+                    {compData.behaviours.map((behaviour) => (
+                      <Link
+                        key={behaviour.slug}
+                        href={`/learn/${comp.slug}/${behaviour.slug}`}
+                        className="flex items-center gap-2 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                      >
+                        {behaviour.status === "completed" ? (
+                          <CheckCircleIcon className="h-4 w-4 text-white/60" />
+                        ) : behaviour.status === "current" ? (
+                          <CircleIcon className="h-4 w-4 text-white/60" />
+                        ) : (
+                          <LockIcon className="h-3 w-3 text-white/40" />
+                        )}
+                        <span className={behaviour.status === "locked" ? "text-white/40" : ""}>
+                          {behaviour.title.split(" ").slice(0, 2).join(" ")}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+
+                {/* Coming Soon Badge */}
+                {comp.status === "coming-soon" && !isActive && (
+                  <div className="px-4 pb-2 pl-12">
+                    <Badge className="bg-white/10 text-white/60 text-[10px] border-0">
+                      <LockIcon className="h-3 w-3 mr-1" />
+                      COMING SOON
+                    </Badge>
+                  </div>
+                )}
               </div>
-              <Stack gap="sm" className="flex-1">
-                <Stack gap="xs">
-                  <Title size="h2">{competency.name}</Title>
-                  <Text variant="muted">{competency.description}</Text>
-                </Stack>
-                <Row gap="md" align="center">
-                  <Row gap="xs" align="center">
-                    <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
-                    <Text size="sm" variant="muted">
-                      {competency.modules.length} modules
-                    </Text>
-                  </Row>
-                  <Row gap="xs" align="center">
-                    <CheckCircleIcon className="h-4 w-4 text-muted-foreground" />
-                    <Text size="sm" variant="muted">
-                      {completedCount} completed
-                    </Text>
-                  </Row>
-                  <Row gap="xs" align="center">
-                    <ClockIcon className="h-4 w-4 text-muted-foreground" />
-                    <Text size="sm" variant="muted">
-                      ~{Math.round(competency.modules.reduce((sum, m) => sum + parseInt(m.duration), 0) / 60)} hours total
-                    </Text>
-                  </Row>
-                </Row>
-                <Stack gap="xs">
-                  <Row gap="sm" align="center" justify="between">
-                    <Text size="sm" variant="muted">Progress</Text>
-                    <Text size="sm" weight="medium">{progress}%</Text>
-                  </Row>
-                  <Progress value={progress} className="h-2" />
-                </Stack>
-              </Stack>
-            </Row>
-          </CardContent>
-        </Card>
+            )
+          })}
+        </nav>
 
-        {/* Module List */}
-        <Stack gap="md">
-          <Title size="h4">Modules</Title>
-          <Stack gap="sm">
-            {competency.modules.map((module, index) => (
-              <ModuleCard
-                key={module.slug}
-                module={module}
-                competencySlug={competencySlug}
-                index={index + 1}
-              />
-            ))}
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-white/10">
+          <div className="flex justify-between items-center text-sm">
+            <Text size="xs" className="text-white/60 uppercase tracking-wider">
+              Overall Progress
+            </Text>
+            <Text size="xs" className="text-white/80">
+              {completedBehaviours} / 35
+            </Text>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-8 py-12">
+          {/* Competency Header */}
+          <Stack gap="sm" className="mb-8">
+            <Text size="xs" className="text-[#576C75] uppercase tracking-wider">
+              Competency {currentCompetencyIndex + 1}
+            </Text>
+            <h1 className="font-headline text-4xl text-[#3F4142]">
+              {competency.name}
+            </h1>
+            {competency.subtitle && (
+              <Text className="text-[#576C75] italic text-lg">
+                {competency.subtitle}
+              </Text>
+            )}
           </Stack>
-        </Stack>
-      </Stack>
-    </Container>
+
+          {/* The Context Section */}
+          <Stack gap="md" className="mb-10">
+            <Row gap="sm" align="center">
+              <BookOpenIcon className="h-5 w-5 text-[#576C75]" />
+              <h2 className="font-headline text-xl text-[#3F4142]">The Context</h2>
+            </Row>
+            <div className="prose prose-sm max-w-none text-[#3F4142]">
+              <p>{competency.context.intro}</p>
+              {competency.context.paragraphs.map((para, i) => (
+                <p key={i} dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+              ))}
+            </div>
+          </Stack>
+
+          {/* Risk/Reward Cards */}
+          {competency.riskReward.risk && (
+            <div className="grid grid-cols-2 gap-4 mb-10">
+              <Card className="bg-[#FEF3F2] border-[#FEE4E2] rounded-[2px]">
+                <CardContent className="p-5">
+                  <Row gap="xs" align="center" className="mb-3">
+                    <AlertTriangleIcon className="h-4 w-4 text-[#D92D20]" />
+                    <Text size="xs" weight="semibold" className="text-[#D92D20] uppercase tracking-wider">
+                      The Risk
+                    </Text>
+                  </Row>
+                  <Text size="sm" className="text-[#3F4142]">
+                    {competency.riskReward.risk}
+                  </Text>
+                </CardContent>
+              </Card>
+              <Card className="bg-[#ECFDF3] border-[#D1FADF] rounded-[2px]">
+                <CardContent className="p-5">
+                  <Row gap="xs" align="center" className="mb-3">
+                    <CheckIcon className="h-4 w-4 text-[#039855]" />
+                    <Text size="xs" weight="semibold" className="text-[#039855] uppercase tracking-wider">
+                      The Reward
+                    </Text>
+                  </Row>
+                  <Text size="sm" className="text-[#3F4142]">
+                    {competency.riskReward.reward}
+                  </Text>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Key Behaviours Section */}
+          {competency.behaviours.length > 0 && (
+            <Stack gap="md" className="mb-10">
+              <Row gap="sm" align="center">
+                <TargetIcon className="h-5 w-5 text-[#576C75]" />
+                <h2 className="font-headline text-xl text-[#3F4142]">
+                  Key Behaviours ({completedBehaviours}/{totalBehaviours} completed)
+                </h2>
+              </Row>
+              <Stack gap="sm">
+                {competency.behaviours.map((behaviour, index) => (
+                  <BehaviourCard
+                    key={behaviour.slug}
+                    behaviour={behaviour}
+                    competencySlug={competencySlug}
+                    index={index + 1}
+                  />
+                ))}
+              </Stack>
+            </Stack>
+          )}
+
+          {/* Toolkit Section */}
+          {competency.toolkit.length > 0 && (
+            <Stack gap="md">
+              <Row gap="sm" align="center">
+                <FileTextIcon className="h-5 w-5 text-[#576C75]" />
+                <h2 className="font-headline text-xl text-[#3F4142]">Toolkit</h2>
+              </Row>
+              <Stack gap="xs">
+                {competency.toolkit.map((item) => (
+                  <Card key={item.slug} className="bg-white border-[#E5E2DD] rounded-[2px] hover:border-[#576C75]/30 transition-colors cursor-pointer">
+                    <CardContent className="py-4 px-5">
+                      <Row gap="sm" align="center">
+                        <FileTextIcon className="h-4 w-4 text-[#576C75]" />
+                        <Text className="text-[#3F4142]">{item.title}</Text>
+                      </Row>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+        </div>
+      </main>
+    </div>
   )
 }
 
 // -----------------------------------------------------------------------------
-// Module Card Component
+// Behaviour Card Component
 // -----------------------------------------------------------------------------
 
-interface ModuleCardProps {
-  module: {
-    slug: string
-    title: string
-    description: string
-    duration: string
-    status: "completed" | "in-progress" | "not-started"
-  }
+function TargetIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  )
+}
+
+interface BehaviourCardProps {
+  behaviour: Behaviour
   competencySlug: string
   index: number
 }
 
-function ModuleCard({ module, competencySlug, index }: ModuleCardProps) {
-  const statusConfig = {
-    completed: {
-      icon: CheckCircleIcon,
-      iconClass: "text-success",
-      label: "Completed",
-      variant: "default" as const,
-    },
-    "in-progress": {
-      icon: PlayCircleIcon,
-      iconClass: "text-primary",
-      label: "In Progress",
-      variant: "secondary" as const,
-    },
-    "not-started": {
-      icon: CircleIcon,
-      iconClass: "text-muted-foreground",
-      label: "Not Started",
-      variant: "outline" as const,
-    },
+function BehaviourCard({ behaviour, competencySlug, index }: BehaviourCardProps) {
+  const isLocked = behaviour.status === "locked"
+  
+  const content = (
+    <Card className={`bg-white border-[#E5E2DD] rounded-[2px] ${!isLocked ? "hover:border-[#576C75]/30 transition-colors cursor-pointer" : "opacity-60"}`}>
+      <CardContent className="py-4 px-5">
+        <Row gap="md" align="center">
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+            behaviour.status === "completed" 
+              ? "bg-[#039855] text-white" 
+              : behaviour.status === "current"
+                ? "bg-[#576C75] text-white"
+                : "bg-[#E5E2DD] text-[#576C75]"
+          }`}>
+            {index}
+          </div>
+          <Stack gap="none" className="flex-1">
+            <Row gap="sm" align="center">
+              <Text weight="medium" className="text-[#3F4142]">
+                {behaviour.title}
+              </Text>
+              {behaviour.status === "current" && (
+                <Badge className="bg-[#3F4142] text-white text-[10px] rounded-[2px]">
+                  CURRENT
+                </Badge>
+              )}
+              {behaviour.status === "locked" && (
+                <Badge className="bg-[#E5E2DD] text-[#576C75] text-[10px] rounded-[2px]">
+                  <LockIcon className="h-3 w-3 mr-1" />
+                  LOCKED
+                </Badge>
+              )}
+            </Row>
+            <Text size="sm" className="text-[#576C75]">
+              {behaviour.description}
+            </Text>
+          </Stack>
+          {!isLocked && (
+            <ChevronRightIcon className="h-5 w-5 text-[#576C75]" />
+          )}
+        </Row>
+      </CardContent>
+    </Card>
+  )
+
+  if (isLocked) {
+    return content
   }
 
-  const { icon: StatusIcon, iconClass, label, variant } = statusConfig[module.status]
-
   return (
-    <Link href={`/learn/${competencySlug}/${module.slug}`}>
-      <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-        <CardContent className="py-4">
-          <Row gap="md" align="center">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-muted text-muted-foreground">
-              <Text size="sm" weight="medium">{index}</Text>
-            </div>
-            <StatusIcon className={`h-5 w-5 ${iconClass}`} />
-            <Stack gap="none" className="flex-1 min-w-0">
-              <Text weight="medium">{module.title}</Text>
-              <Text size="sm" variant="muted" className="truncate">
-                {module.description}
-              </Text>
-            </Stack>
-            <Row gap="sm" align="center" className="shrink-0">
-              <Badge variant={variant}>{label}</Badge>
-              <Row gap="xs" align="center">
-                <ClockIcon className="h-3 w-3 text-muted-foreground" />
-                <Text size="xs" variant="muted">{module.duration}</Text>
-              </Row>
-              <ChevronRightIcon className="h-4 w-4 text-muted-foreground" />
-            </Row>
-          </Row>
-        </CardContent>
-      </Card>
+    <Link href={`/learn/${competencySlug}/${behaviour.slug}`}>
+      {content}
     </Link>
   )
 }
@@ -533,7 +524,7 @@ function ModuleCard({ module, competencySlug, index }: ModuleCardProps) {
 // -----------------------------------------------------------------------------
 
 export async function generateStaticParams() {
-  return Object.keys(competencyData).map((competency) => ({
-    competency,
+  return allCompetencies.map((competency) => ({
+    competency: competency.slug,
   }))
 }

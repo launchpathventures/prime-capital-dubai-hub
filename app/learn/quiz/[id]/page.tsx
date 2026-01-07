@@ -1,7 +1,7 @@
 /**
  * CATALYST - Quiz Page
  *
- * Knowledge check interface for learning modules.
+ * Knowledge check interface matching the design screenshots.
  * Dynamic route: /learn/quiz/[id]
  */
 
@@ -10,20 +10,18 @@
 import * as React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Container, Stack, Row, Text, Title } from "@/components/core"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Stack, Row, Text } from "@/components/core"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import {
-  ChevronRightIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClipboardCheckIcon,
-  RefreshCwIcon,
   ArrowLeftIcon,
+  ChevronDownIcon,
+  CheckCircleIcon,
+  CircleIcon,
+  LockIcon,
+  ChevronRightIcon,
 } from "lucide-react"
-import { config } from "@/lib/config"
 import { cn } from "@/lib/utils"
 
 // -----------------------------------------------------------------------------
@@ -32,202 +30,78 @@ import { cn } from "@/lib/utils"
 
 const quizData: Record<string, {
   title: string
-  moduleSlug: string
+  behaviourTitle: string
   competencySlug: string
+  moduleSlug: string
   questions: Array<{
     id: string
     question: string
-    options: Array<{ text: string; correct: boolean }>
-    explanation: string
+    options: string[]
+    correctIndex: number
   }>
 }> = {
-  "market-intelligence-1": {
-    title: "Dubai Real Estate Overview Quiz",
-    moduleSlug: "dubai-real-estate-overview",
-    competencySlug: "market-intelligence",
+  "prime-capital-identity-our-story": {
+    title: "Knowledge Check",
+    behaviourTitle: "Articulates the Prime Capital Story",
+    competencySlug: "prime-capital-identity",
+    moduleSlug: "our-story",
     questions: [
       {
         id: "q1",
-        question: "When was freehold property ownership first extended to foreign nationals in Dubai?",
+        question: "What is Prime Capital's positioning in the Dubai market?",
         options: [
-          { text: "1997", correct: false },
-          { text: "2002", correct: true },
-          { text: "2008", correct: false },
-          { text: "2010", correct: false },
+          "The largest agency with the most listings",
+          "A boutique advisory focused on quality over volume",
+          "A discount brokerage with low fees",
+          "A developer-owned sales channel",
         ],
-        explanation: "Freehold ownership was extended to foreign nationals in designated areas in 2002, five years after it was introduced for UAE nationals in 1997.",
+        correctIndex: 1,
       },
       {
         id: "q2",
-        question: "Which of the following is NOT a key characteristic of Dubai's current real estate market?",
+        question: "What are the three key areas of founder expertise?",
         options: [
-          { text: "Population growth driving housing demand", correct: false },
-          { text: "Robust regulatory framework (RERA, DLD)", correct: false },
-          { text: "Higher prices than London and New York", correct: true },
-          { text: "Economic diversification supporting investment", correct: false },
+          "Marketing, Sales, Finance",
+          "Technology, Operations, HR",
+          "Client relationships, Developer networks, International markets",
+          "Legal, Compliance, Administration",
         ],
-        explanation: "Dubai remains competitively priced compared to global gateway cities like London, New York, and Singapore, which is one of its key attractions for international investors.",
+        correctIndex: 2,
       },
       {
         id: "q3",
-        question: "What significant market event occurred between 2008-2010?",
+        question: "How many years of combined experience do the founders have?",
         options: [
-          { text: "First real estate boom", correct: false },
-          { text: "Global financial crisis impact and market correction", correct: true },
-          { text: "Introduction of freehold ownership", correct: false },
-          { text: "Launch of Golden Visa program", correct: false },
+          "20+ years",
+          "40+ years",
+          "60+ years",
+          "100+ years",
         ],
-        explanation: "The global financial crisis had a significant impact on Dubai's property market between 2008-2010, leading to a market correction before the recovery period began in 2011.",
-      },
-      {
-        id: "q4",
-        question: "Why is understanding Dubai's market context important for real estate consultants?",
-        options: [
-          { text: "To memorize statistics for client meetings", correct: false },
-          { text: "To position Dubai credibly and address investor concerns with facts", correct: true },
-          { text: "To compare prices with other markets", correct: false },
-          { text: "To predict future market movements", correct: false },
-        ],
-        explanation: "Understanding market context enables consultants to position Dubai as a credible investment destination, address investor concerns with factual context, and demonstrate expertise that builds client trust.",
-      },
-      {
-        id: "q5",
-        question: "What has driven Dubai's remarkable real estate growth since 2021?",
-        options: [
-          { text: "Pandemic-driven transformation and market fundamentals", correct: true },
-          { text: "Government subsidies for property purchases", correct: false },
-          { text: "Removal of all foreign ownership restrictions", correct: false },
-          { text: "Mandatory property investment requirements", correct: false },
-        ],
-        explanation: "The Dubai real estate market has demonstrated remarkable resilience and growth since 2021, driven by pandemic-driven transformation, strong market fundamentals, and continued economic diversification.",
-      },
-    ],
-  },
-  "market-intelligence-2": {
-    title: "Regulatory Framework Quiz",
-    moduleSlug: "regulatory-framework",
-    competencySlug: "market-intelligence",
-    questions: [
-      {
-        id: "q1",
-        question: "What is the primary role of RERA in Dubai's real estate sector?",
-        options: [
-          { text: "Issuing title deeds", correct: false },
-          { text: "Collecting registration fees", correct: false },
-          { text: "Licensing professionals and regulating the market", correct: true },
-          { text: "Providing mortgage financing", correct: false },
-        ],
-        explanation: "RERA (Real Estate Regulatory Agency) is responsible for licensing real estate professionals and companies, regulating property advertisements, managing escrow accounts, and handling disputes.",
-      },
-      {
-        id: "q2",
-        question: "What is the standard property registration fee collected by DLD?",
-        options: [
-          { text: "2% of property value", correct: false },
-          { text: "4% of property value", correct: true },
-          { text: "5% of property value", correct: false },
-          { text: "10% of property value", correct: false },
-        ],
-        explanation: "The Dubai Land Department collects a registration fee of 4% of the property value for all property transactions.",
-      },
-      {
-        id: "q3",
-        question: "What is the purpose of escrow accounts for off-plan purchases?",
-        options: [
-          { text: "To hold the buyer's personal documents", correct: false },
-          { text: "To provide tax benefits to developers", correct: false },
-          { text: "To protect buyers by ensuring funds are used only for construction", correct: true },
-          { text: "To speed up the transaction process", correct: false },
-        ],
-        explanation: "Escrow regulations require developers to open dedicated accounts where buyer payments can only be used for construction, protecting buyers from developer insolvency or fund misuse.",
-      },
-      {
-        id: "q4",
-        question: "Which document confirms that a developer has no outstanding payments from a property seller?",
-        options: [
-          { text: "MOU (Memorandum of Understanding)", correct: false },
-          { text: "Title Deed", correct: false },
-          { text: "NOC (No Objection Certificate)", correct: true },
-          { text: "Oqood", correct: false },
-        ],
-        explanation: "The NOC (No Objection Certificate) is issued by the developer confirming there are no outstanding payments or issues before a property can be transferred to a new owner.",
-      },
-      {
-        id: "q5",
-        question: "What is an Oqood?",
-        options: [
-          { text: "A type of lease agreement", correct: false },
-          { text: "A title deed for off-plan properties", correct: true },
-          { text: "A mortgage document", correct: false },
-          { text: "A developer registration certificate", correct: false },
-        ],
-        explanation: "Oqood is the title document issued for off-plan properties, while a Title Deed is issued for completed properties after full payment and handover.",
-      },
-    ],
-  },
-  "client-discovery-5": {
-    title: "Understanding Investment Goals Quiz",
-    moduleSlug: "understanding-investment-goals",
-    competencySlug: "client-discovery",
-    questions: [
-      {
-        id: "q1",
-        question: "What is the minimum property investment required for a 10-year Golden Visa?",
-        options: [
-          { text: "AED 750,000", correct: false },
-          { text: "AED 1,000,000", correct: false },
-          { text: "AED 2,000,000", correct: true },
-          { text: "AED 5,000,000", correct: false },
-        ],
-        explanation: "The Golden Visa program requires a property investment of AED 2 million or more for a 10-year residency visa.",
-      },
-      {
-        id: "q2",
-        question: "Which investor type typically prefers off-plan purchases in emerging areas?",
-        options: [
-          { text: "Yield-focused investors", correct: false },
-          { text: "Capital growth investors", correct: true },
-          { text: "Lifestyle investors", correct: false },
-          { text: "Short-term traders", correct: false },
-        ],
-        explanation: "Capital growth investors typically prefer off-plan purchases in emerging areas, accepting lower initial yields in exchange for appreciation potential over a longer time horizon.",
-      },
-      {
-        id: "q3",
-        question: "What is the first category of discovery questions in the framework?",
-        options: [
-          { text: "Investment objectives", correct: false },
-          { text: "Property preferences", correct: false },
-          { text: "Financial position", correct: true },
-          { text: "Timeline requirements", correct: false },
-        ],
-        explanation: "The discovery questions framework starts with understanding the client's financial position (budget, financing preference, capital deployment timeline) before moving to investment objectives.",
-      },
-      {
-        id: "q4",
-        question: "Which type of property would you recommend to a yield-focused investor?",
-        options: [
-          { text: "Off-plan in Dubai South", correct: false },
-          { text: "Ready, tenanted property in established area", correct: true },
-          { text: "Premium villa on Palm Jumeirah", correct: false },
-          { text: "Any property over AED 2M", correct: false },
-        ],
-        explanation: "Yield-focused investors prefer completed, tenanted properties in established areas with proven rental demand, as they need regular income from their investment.",
-      },
-      {
-        id: "q5",
-        question: "What question helps uncover a client's true concerns about Dubai investment?",
-        options: [
-          { text: "What is your budget?", correct: false },
-          { text: "What concerns, if any, do you have about Dubai real estate?", correct: true },
-          { text: "When do you want to complete the purchase?", correct: false },
-          { text: "How many properties do you own?", correct: false },
-        ],
-        explanation: "Asking about concerns directly helps uncover the investor's specific worries and objections, which can then be addressed with relevant information and reassurance.",
+        correctIndex: 2,
       },
     ],
   },
 }
+
+// All competencies for sidebar
+const allCompetencies = [
+  { id: 1, slug: "prime-capital-identity", name: "Prime Capital Identity", behaviourCount: 5, status: "active" as const },
+  { id: 2, slug: "market-intelligence", name: "Market Intelligence", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 3, slug: "client-discovery", name: "Client Discovery", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 4, slug: "property-matching", name: "Property Matching", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 5, slug: "objection-navigation", name: "Objection Navigation", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 6, slug: "transaction-management", name: "Transaction Management", behaviourCount: 5, status: "coming-soon" as const },
+  { id: 7, slug: "relationship-stewardship", name: "Relationship Stewardship", behaviourCount: 5, status: "coming-soon" as const },
+]
+
+// Behaviours for sidebar
+const behavioursList = [
+  { slug: "our-story", title: "Our Story", status: "current" as const },
+  { slug: "boutique-positioning", title: "Boutique Positioning", status: "current" as const },
+  { slug: "service-model", title: "Service Model", status: "current" as const },
+  { slug: "founders-vision", title: "Founders' Vision", status: "current" as const },
+  { slug: "brand-voice", title: "Brand Voice", status: "locked" as const },
+]
 
 // -----------------------------------------------------------------------------
 // Page Component
@@ -240,249 +114,280 @@ export default function QuizPage() {
 
   const [currentQuestion, setCurrentQuestion] = React.useState(0)
   const [selectedAnswer, setSelectedAnswer] = React.useState<number | null>(null)
-  const [isAnswered, setIsAnswered] = React.useState(false)
   const [score, setScore] = React.useState(0)
   const [isComplete, setIsComplete] = React.useState(false)
 
+  // Handle quiz not found
   if (!quiz) {
     return (
-      <Container size="md" className="py-8">
-        <Card>
+      <div className="flex min-h-screen bg-[#F2EFEA] items-center justify-center">
+        <Card className="bg-white border-[#E5E2DD] rounded-[2px] max-w-md">
           <CardContent className="py-12 text-center">
             <Stack gap="md" align="center">
-              <XCircleIcon className="h-12 w-12 text-muted-foreground" />
-              <Title size="h3">Quiz Not Found</Title>
-              <Text variant="muted">
-                The quiz you&apos;re looking for doesn&apos;t exist or has been removed.
-              </Text>
-              <Button nativeButton={false} render={<Link href="/learn" />}>
+              <Text className="text-[#3F4142]">Quiz not found</Text>
+              <Button 
+                nativeButton={false}
+                render={<Link href="/learn" />}
+                className="bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px]"
+              >
                 Back to Dashboard
               </Button>
             </Stack>
           </CardContent>
         </Card>
-      </Container>
+      </div>
     )
   }
 
   const question = quiz.questions[currentQuestion]
-  const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
-  const passThreshold = config.learning.quizPassThreshold
-  const passed = score / quiz.questions.length >= passThreshold
+  const totalQuestions = quiz.questions.length
 
   const handleSelectAnswer = (index: number) => {
-    if (isAnswered) return
     setSelectedAnswer(index)
   }
 
   const handleSubmitAnswer = () => {
     if (selectedAnswer === null) return
-    setIsAnswered(true)
-    if (question.options[selectedAnswer].correct) {
+    
+    if (selectedAnswer === question.correctIndex) {
       setScore((prev) => prev + 1)
     }
-  }
-
-  const handleNextQuestion = () => {
-    if (currentQuestion < quiz.questions.length - 1) {
+    
+    if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion((prev) => prev + 1)
       setSelectedAnswer(null)
-      setIsAnswered(false)
     } else {
       setIsComplete(true)
     }
   }
 
-  const handleRetry = () => {
-    setCurrentQuestion(0)
-    setSelectedAnswer(null)
-    setIsAnswered(false)
-    setScore(0)
-    setIsComplete(false)
-  }
-
   // Completion Screen
   if (isComplete) {
+    const passed = score === totalQuestions
+    
     return (
-      <Container size="md" className="py-8">
-        <Stack gap="xl">
-          <Card>
-            <CardContent className="py-12">
-              <Stack gap="lg" align="center">
-                {passed ? (
-                  <CheckCircleIcon className="h-16 w-16 text-success" />
-                ) : (
-                  <XCircleIcon className="h-16 w-16 text-destructive" />
-                )}
-                <Stack gap="sm" align="center">
-                  <Title size="h2">
-                    {passed ? "Congratulations!" : "Keep Learning"}
-                  </Title>
-                  <Text variant="muted" align="center">
-                    {passed
-                      ? "You've successfully completed this knowledge check."
-                      : `You need ${Math.round(passThreshold * 100)}% to pass. Review the module and try again.`}
-                  </Text>
-                </Stack>
+      <div className="flex min-h-screen bg-[#F2EFEA]">
+        {/* Sidebar */}
+        <QuizSidebar competencySlug={quiz.competencySlug} />
 
-                <Card className="w-full max-w-xs">
-                  <CardContent className="pt-6">
-                    <Stack gap="sm" align="center">
-                      <Title size="h1">
-                        {score}/{quiz.questions.length}
-                      </Title>
-                      <Text variant="muted">
-                        {Math.round((score / quiz.questions.length) * 100)}% correct
-                      </Text>
-                      <Badge variant={passed ? "default" : "destructive"}>
-                        {passed ? "Passed" : "Not Passed"}
-                      </Badge>
-                    </Stack>
-                  </CardContent>
-                </Card>
+        {/* Main Content */}
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-md">
+            <Stack gap="lg" align="center">
+              {/* Success Icon */}
+              <div className="w-20 h-20 rounded-full bg-[#576C75] flex items-center justify-center">
+                <CheckCircleIcon className="h-10 w-10 text-white" />
+              </div>
 
-                <Row gap="md">
-                  {!passed && (
-                    <Button variant="outline" onClick={handleRetry}>
-                      <RefreshCwIcon className="h-4 w-4 mr-2" />
-                      Retry Quiz
-                    </Button>
-                  )}
-                  <Button
-                    nativeButton={false}
-                    render={<Link href={`/learn/${quiz.competencySlug}/${quiz.moduleSlug}`} />}
-                  >
-                    {passed ? "Continue Learning" : "Review Module"}
-                  </Button>
-                </Row>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Stack>
-      </Container>
+              {/* Title */}
+              <h1 className="font-headline text-3xl text-[#3F4142]">
+                Knowledge Check Complete!
+              </h1>
+
+              {/* Score */}
+              <Text className="text-[#576C75] text-lg">
+                You scored {score}/{totalQuestions} on &quot;{quiz.behaviourTitle}&quot;
+              </Text>
+
+              {/* Actions */}
+              <Row gap="md" className="mt-4">
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={`/learn/${quiz.competencySlug}/${quiz.moduleSlug}`} />}
+                  className="border-[#576C75] text-[#576C75] hover:bg-[#576C75]/10 rounded-[2px] uppercase tracking-wider"
+                >
+                  Review Content
+                </Button>
+                <Button
+                  nativeButton={false}
+                  render={<Link href={`/learn/${quiz.competencySlug}`} />}
+                  className="bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px] gap-2 uppercase tracking-wider"
+                >
+                  Next Behaviour
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              </Row>
+            </Stack>
+          </div>
+        </main>
+      </div>
     )
   }
 
   // Quiz Screen
   return (
-    <Container size="md" className="py-8">
-      <Stack gap="xl">
-        {/* Header */}
-        <Stack gap="sm">
-          <Row gap="sm" align="center">
+    <div className="flex min-h-screen bg-[#F2EFEA]">
+      {/* Sidebar */}
+      <QuizSidebar competencySlug={quiz.competencySlug} />
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-8 py-12">
+          {/* Back Link */}
+          <Link 
+            href={`/learn/${quiz.competencySlug}/${quiz.moduleSlug}`}
+            className="inline-flex items-center gap-2 text-[#576C75] hover:text-[#3F4142] transition-colors mb-8 text-sm uppercase tracking-wider"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to Learning Content
+          </Link>
+
+          {/* Question Header */}
+          <div className="text-center mb-8">
+            <Text size="sm" className="text-[#576C75] uppercase tracking-wider mb-4">
+              {quiz.title} — Question {currentQuestion + 1} of {totalQuestions}
+            </Text>
+            <h1 className="font-headline text-2xl md:text-3xl text-[#3F4142]">
+              {question.question}
+            </h1>
+          </div>
+
+          {/* Answer Options */}
+          <Stack gap="sm" className="mb-8">
+            {question.options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleSelectAnswer(index)}
+                className={cn(
+                  "w-full text-left p-5 rounded-[2px] border-2 transition-all",
+                  "flex items-center gap-4",
+                  selectedAnswer === index
+                    ? "border-[#576C75] bg-[#576C75]/5"
+                    : "border-[#E5E2DD] bg-white hover:border-[#576C75]/30"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0",
+                    selectedAnswer === index
+                      ? "border-[#576C75]"
+                      : "border-[#E5E2DD]"
+                  )}
+                >
+                  {selectedAnswer === index && (
+                    <div className="w-3 h-3 rounded-full bg-[#576C75]" />
+                  )}
+                </div>
+                <Text className="text-[#3F4142]">{option}</Text>
+              </button>
+            ))}
+          </Stack>
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
             <Button
-              variant="ghost"
-              size="sm"
-              nativeButton={false}
-              render={<Link href={`/learn/${quiz.competencySlug}/${quiz.moduleSlug}`} />}
+              onClick={handleSubmitAnswer}
+              disabled={selectedAnswer === null}
+              className="bg-[#576C75] hover:bg-[#4a5d65] text-white rounded-[2px] px-12 uppercase tracking-wider disabled:opacity-50"
             >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Back to Module
+              Submit Answer
             </Button>
-          </Row>
-          <Row gap="sm" align="center" justify="between">
-            <Stack gap="xs">
-              <Badge variant="outline">
-                <ClipboardCheckIcon className="h-3 w-3 mr-1" />
-                Knowledge Check
-              </Badge>
-              <Title size="h3">{quiz.title}</Title>
-            </Stack>
-            <Badge variant="secondary">
-              Question {currentQuestion + 1} of {quiz.questions.length}
-            </Badge>
-          </Row>
-          <Progress value={progress} className="h-2" />
-        </Stack>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
 
-        {/* Question Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{question.question}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Stack gap="sm">
-              {question.options.map((option, index) => {
-                const isSelected = selectedAnswer === index
-                const isCorrect = option.correct
-                const showCorrect = isAnswered && isCorrect
-                const showIncorrect = isAnswered && isSelected && !isCorrect
+// -----------------------------------------------------------------------------
+// Quiz Sidebar Component
+// -----------------------------------------------------------------------------
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectAnswer(index)}
-                    disabled={isAnswered}
-                    className={cn(
-                      "quiz-option w-full text-left p-4 rounded-lg border-2 transition-colors",
-                      "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                      isSelected && !isAnswered && "border-primary bg-primary/5",
-                      !isSelected && !isAnswered && "border-border hover:border-primary/50",
-                      showCorrect && "border-success bg-success/10",
-                      showIncorrect && "border-destructive bg-destructive/10",
-                      isAnswered && !isSelected && !isCorrect && "opacity-50"
-                    )}
-                    data-selected={isSelected}
-                    data-correct={showCorrect}
-                    data-incorrect={showIncorrect}
-                  >
-                    <Row gap="sm" align="center">
-                      <div
-                        className={cn(
-                          "flex items-center justify-center w-6 h-6 rounded-full border-2 text-sm font-medium",
-                          isSelected && !isAnswered && "border-primary text-primary",
-                          !isSelected && !isAnswered && "border-muted-foreground text-muted-foreground",
-                          showCorrect && "border-success text-success",
-                          showIncorrect && "border-destructive text-destructive"
-                        )}
-                      >
-                        {String.fromCharCode(65 + index)}
-                      </div>
-                      <Text className="flex-1">{option.text}</Text>
-                      {showCorrect && <CheckCircleIcon className="h-5 w-5 text-success" />}
-                      {showIncorrect && <XCircleIcon className="h-5 w-5 text-destructive" />}
-                    </Row>
-                  </button>
-                )
-              })}
-            </Stack>
+function QuizSidebar({ competencySlug }: { competencySlug: string }) {
+  return (
+    <aside className="w-64 bg-[#576C75] text-white flex-shrink-0 flex flex-col">
+      {/* Sidebar Header */}
+      <div className="p-4 border-b border-white/10">
+        <Text size="xs" className="text-white/60 uppercase tracking-wider mb-3">
+          Consultant Training
+        </Text>
+        <Link 
+          href="/learn" 
+          className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          Exit to Course Overview
+        </Link>
+      </div>
 
-            {/* Explanation */}
-            {isAnswered && (
-              <Card className="mt-4 border-primary/20 bg-primary/5">
-                <CardContent className="pt-4">
-                  <Stack gap="xs">
-                    <Text size="sm" weight="medium">Explanation</Text>
-                    <Text size="sm" variant="muted">
-                      {question.explanation}
+      {/* Competency Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4">
+        {allCompetencies.map((comp, index) => {
+          const isActive = comp.slug === competencySlug
+          const isExpanded = isActive
+          
+          return (
+            <div key={comp.slug}>
+              <Link
+                href={`/learn/${comp.slug}`}
+                className={`flex items-start gap-3 px-4 py-3 transition-colors ${
+                  isActive ? "bg-white/10" : "hover:bg-white/5"
+                }`}
+              >
+                <div className={`flex items-center justify-center w-6 h-6 rounded text-xs font-medium flex-shrink-0 ${
+                  isActive ? "bg-white text-[#576C75]" : "bg-white/20 text-white"
+                }`}>
+                  {index + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Text size="sm" className="text-white truncate">
+                      {comp.name}
                     </Text>
-                  </Stack>
-                </CardContent>
-              </Card>
-            )}
-          </CardContent>
-        </Card>
+                    {isExpanded && <ChevronDownIcon className="h-4 w-4 text-white/60 flex-shrink-0" />}
+                  </div>
+                  <Text size="xs" className="text-white/60">
+                    0/{comp.behaviourCount} behaviours
+                  </Text>
+                </div>
+              </Link>
 
-        {/* Actions */}
-        <Row gap="md" justify="end">
-          {!isAnswered ? (
-            <Button onClick={handleSubmitAnswer} disabled={selectedAnswer === null}>
-              Check Answer
-            </Button>
-          ) : (
-            <Button onClick={handleNextQuestion}>
-              {currentQuestion < quiz.questions.length - 1 ? (
-                <>
-                  Next Question
-                  <ChevronRightIcon className="h-4 w-4 ml-1" />
-                </>
-              ) : (
-                "See Results"
+              {isExpanded && (
+                <div className="pl-12 pr-4 pb-2">
+                  {behavioursList.map((behaviour) => (
+                    <Link
+                      key={behaviour.slug}
+                      href={`/learn/${comp.slug}/${behaviour.slug}`}
+                      className="flex items-center gap-2 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                    >
+                      {behaviour.status === "locked" ? (
+                        <LockIcon className="h-3 w-3 text-white/40" />
+                      ) : (
+                        <CircleIcon className="h-4 w-4 text-white/60" />
+                      )}
+                      <span className={behaviour.status === "locked" ? "text-white/40" : ""}>
+                        {behaviour.title}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               )}
-            </Button>
-          )}
-        </Row>
-      </Stack>
-    </Container>
+
+              {comp.status === "coming-soon" && !isActive && (
+                <div className="px-4 pb-2 pl-12">
+                  <Badge className="bg-white/10 text-white/60 text-[10px] border-0">
+                    <LockIcon className="h-3 w-3 mr-1" />
+                    COMING SOON
+                  </Badge>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </nav>
+
+      {/* Sidebar Footer */}
+      <div className="p-4 border-t border-white/10">
+        <div className="flex justify-between items-center text-sm">
+          <Text size="xs" className="text-white/60 uppercase tracking-wider">
+            Overall Progress
+          </Text>
+          <Text size="xs" className="text-white/80">
+            0 / 35
+          </Text>
+        </div>
+      </div>
+    </aside>
   )
 }
