@@ -67,7 +67,7 @@ This quiz tests your understanding of Module 1.8: Golden Visa & Residency. You n
 - [ ] C) AED 1 million
 - [x] D) AED 1.5 million (50% of property value)
 
-**Explanation**: The mortgage must not exceed 50% of the property value. With a AED 3 million property, you could have up to AED 1.5 million mortgage and still qualify, as your equity would be AED 1.5 million and the property value exceeds AED 2 million.
+**Explanation**: The mortgage must not exceed 50% of the property value. With an AED 3 million property, you could have up to AED 1.5 million mortgage and still qualify, as your equity would be AED 1.5 million and the property value exceeds AED 2 million.
 
 ---
 
