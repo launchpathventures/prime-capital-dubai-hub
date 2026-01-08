@@ -289,6 +289,130 @@ const quizData: Record<string, {
       },
     ],
   },
+  "client-discovery-1": {
+    title: "Discovery: Investors Quiz",
+    moduleSlug: "discovery-investors",
+    competencySlug: "client-discovery",
+    questions: [
+      {
+        id: "q1",
+        question: "An investor says 'I want a good investment in Dubai.' What should you do next?",
+        options: [
+          { text: "Show them the highest-yielding properties available", correct: false },
+          { text: "Ask what they mean by 'good'—yield, growth, safety, or something else", correct: true },
+          { text: "Send them a list of current opportunities", correct: false },
+          { text: "Explain Dubai market fundamentals", correct: false },
+        ],
+        explanation: "'Good investment' means different things to different people. Without qualifying what they mean—yield-focused, growth-focused, safety-focused, or tax-focused—you can't recommend appropriately.",
+      },
+      {
+        id: "q2",
+        question: "During investor discovery, you learn the client has spoken to two other agents. What's the best response?",
+        options: [
+          { text: "Ignore it and focus on your properties", correct: false },
+          { text: "Ask what their experience was like and what worked or didn't work", correct: true },
+          { text: "Offer to beat any deal the other agents showed them", correct: false },
+          { text: "Explain why Prime Capital is better than competitors", correct: false },
+        ],
+        explanation: "Understanding the competitive situation helps you position effectively. Asking about their experience reveals what they're looking for and what hasn't worked.",
+      },
+      {
+        id: "q3",
+        question: "A client's stated goal is 'high rental yield.' Using the 'Goal Behind the Goal' technique, which question would best uncover their deeper motivation?",
+        options: [
+          { text: "What yield percentage are you targeting?", correct: false },
+          { text: "What does that rental income actually mean for you?", correct: true },
+          { text: "Have you considered areas with higher yields?", correct: false },
+          { text: "Would you sacrifice yield for capital growth?", correct: false },
+        ],
+        explanation: "'What does that rental income actually mean for you?' uncovers the motivation behind the stated goal. They might reveal it's about early retirement, financial independence, or replacing job income.",
+      },
+      {
+        id: "q4",
+        question: "An Indian investor seems interested but keeps giving vague answers. What's the most appropriate approach?",
+        options: [
+          { text: "Push harder for specific information", correct: false },
+          { text: "Assume they're not serious and deprioritize", correct: false },
+          { text: "Offer specific options to choose from rather than open-ended questions", correct: true },
+          { text: "End the call and follow up by email instead", correct: false },
+        ],
+        explanation: "Some clients don't respond well to open-ended questions. Offering specific options ('Are you more focused on yield or capital growth?') gives them something to react to and often generates more information.",
+      },
+      {
+        id: "q5",
+        question: "You've completed discovery with an investor. Before recommending properties, what should you always do?",
+        options: [
+          { text: "Send them listings immediately while interest is high", correct: false },
+          { text: "Summarize what you've understood and confirm accuracy", correct: true },
+          { text: "Ask if they want to see properties", correct: false },
+          { text: "Check your inventory for matching options", correct: false },
+        ],
+        explanation: "Always confirm understanding before proceeding. Summarizing what you've heard catches misunderstandings early and shows the client you've listened carefully.",
+      },
+    ],
+  },
+  "client-discovery-2": {
+    title: "BANT+ Qualification Quiz",
+    moduleSlug: "qualification-framework",
+    competencySlug: "client-discovery",
+    questions: [
+      {
+        id: "q1",
+        question: "A client says they have a budget of 'around two million dirhams.' What's the next essential qualification question?",
+        options: [
+          { text: "What areas are you interested in?", correct: false },
+          { text: "Would that be cash or financing?", correct: true },
+          { text: "When are you looking to buy?", correct: false },
+          { text: "Have you looked at properties before?", correct: false },
+        ],
+        explanation: "Cash vs. financing fundamentally changes the process and timeline. A cash buyer can move faster; a financed buyer needs mortgage approval. This is essential qualifying information.",
+      },
+      {
+        id: "q2",
+        question: "In the BANT+ framework, what does the '+' represent?",
+        options: [
+          { text: "Plus other decision-makers", correct: false },
+          { text: "The competitive situation", correct: true },
+          { text: "Additional budget flexibility", correct: false },
+          { text: "Extended timeline considerations", correct: false },
+        ],
+        explanation: "BANT covers Budget, Authority, Need, and Timeline. The '+' adds Competitive Situation—understanding what other agents, markets, or options the client is considering.",
+      },
+      {
+        id: "q3",
+        question: "A client mentions their wife will be involved in the decision. According to the Decision Map framework, what role does the wife likely play?",
+        options: [
+          { text: "She's definitely the blocker", correct: false },
+          { text: "She could be any of the four roles—economic buyer, user, influencer, or blocker", correct: true },
+          { text: "She's automatically the user", correct: false },
+          { text: "She's a secondary contact to copy on emails", correct: false },
+        ],
+        explanation: "Without more information, the wife could play any role. You need to explore further to understand her specific role in the decision.",
+      },
+      {
+        id: "q4",
+        question: "A lead says 'I'm just looking' when asked about timeline. What's the best response?",
+        options: [
+          { text: "Deprioritize them as not serious", correct: false },
+          { text: "Send them generic market information", correct: false },
+          { text: "Probe to understand what sparked their interest and whether there's any timeline context", correct: true },
+          { text: "Schedule a follow-up in six months", correct: false },
+        ],
+        explanation: "'Just looking' can mean genuinely exploratory or hiding hesitation. Probe further: 'What sparked your interest now?' This reveals whether they're truly early-stage or further along.",
+      },
+      {
+        id: "q5",
+        question: "Which combination of BANT+ signals indicates a HOT lead?",
+        options: [
+          { text: "Clear budget, unclear timeline, single decision-maker, no competition", correct: false },
+          { text: "Vague budget, urgent timeline, multiple decision-makers, comparing markets", correct: false },
+          { text: "Clear budget, deadline-driven timeline, accessible decision-maker, chose Dubai over alternatives", correct: true },
+          { text: "Flexible budget, no timeline, sole decision-maker, first enquiry", correct: false },
+        ],
+        explanation: "Hot leads have: clear budget, deadline-driven timeline, accessible decision-maker, and have already chosen Dubai over alternatives.",
+      },
+    ],
+  },
 }
 
 // -----------------------------------------------------------------------------

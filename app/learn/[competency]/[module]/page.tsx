@@ -292,92 +292,572 @@ The Golden Visa transforms your role from property broker to life advisor. Clien
     },
   },
   "client-discovery": {
-    "understanding-investment-goals": {
-      title: "Understanding Investment Goals",
-      duration: "35 min",
+    "investor-personas": {
+      title: "Investor Personas",
+      duration: "30 min",
       content: `
-## Introduction
+## Learning Objective
 
-Every investor has unique goals, constraints, and priorities. Understanding these thoroughly is the foundation of providing genuinely valuable advice.
+By the end of this module, you will be able to identify the primary investor persona within 60 seconds of initial conversation and adapt your discovery approach based on their likely motivations, concerns, and decision-making patterns.
 
-## Investment Goal Categories
+## Why Investor Personas Matter
 
-### Capital Growth
+Every client who contacts Prime Capital has a story. Some want a home. Some want returns. Some want a visa. Many want a combination. Understanding the primary driver shapes everything—the questions you ask, the properties you recommend, the objections you'll face.
 
-Investors prioritizing capital growth typically:
+Personas aren't boxes that clients fit neatly into. They're lenses that help you see clearly. Most clients have a primary motivation and secondary motivations. Your job is to identify the primary driver first, then explore the full picture.
 
-- Have a longer time horizon (5+ years)
-- Accept lower initial yields for appreciation potential
-- Prefer emerging areas or off-plan purchases
-- Focus on developer reputation and project quality
+## The Four Primary Personas
 
-### Rental Yield
+### 1. The End-User
 
-Yield-focused investors typically:
+**Primary motivation:** A home to live in, now or in the future.
 
-- Need regular income from their investment
-- Prefer completed, tenanted properties
-- Focus on established areas with rental demand
-- Prioritize property management convenience
+**What they say:**
+- "I want something close to my office"
+- "My kids need good schools nearby"
+- "I'm tired of paying rent every month"
 
-### Lifestyle & Usage
+**Decision dynamics:** Spouse/partner usually involved heavily. Children's needs often decide the location. Timeline tied to lease expiry, job start, or life events.
 
-Some investors seek:
+### 2. The Investor
 
-- A holiday home or potential retirement residence
-- Access to Dubai's amenities and lifestyle
-- A combination of personal use and rental income
-- Specific location or property type preferences
+**Primary motivation:** Financial returns—capital appreciation, rental yield, or both.
 
-### Golden Visa & Residency
+**What they say:**
+- "What's the ROI on this?"
+- "I want passive income"
+- "I'm looking for something that will appreciate"
 
-Many investors want:
+**Decision dynamics:** Often sole decision-maker (or with financial advisor). Comparison-driven: evaluating Dubai vs other markets.
 
-- UAE residency through the Golden Visa program
-- Property investment of AED 2M+ for 10-year visa
-- Access to UAE banking and business opportunities
-- A foothold in the region for business purposes
+### 3. The Visa-Seeker
 
-## Discovery Questions Framework
+**Primary motivation:** UAE residency through the Golden Visa program.
 
-### Financial Position
+**What they say:**
+- "I need something for the visa"
+- "What's the minimum for Golden Visa?"
+- "Can my family be included?"
 
-- "What budget range are you comfortable with?"
-- "Would you be financing the purchase or paying cash?"
-- "What timeline works for your capital deployment?"
+**Decision dynamics:** Often first-time Dubai buyers. May have misconceptions about the process. Sometimes on a specific timeline.
 
-### Investment Objectives
+### 4. The Hybrid
 
-- "Is your primary goal capital growth, rental income, or a mix of both?"
-- "Are you interested in the Golden Visa program?"
-- "What investment horizon are you considering?"
+**Primary motivation:** Combination of above—most common in reality.
 
-### Experience & Concerns
+**What they say:**
+- "I want a good investment that could also be a visa"
+- "We might move to Dubai eventually, but for now we'd rent it out"
 
-- "Have you invested in property overseas before?"
-- "What concerns, if any, do you have about Dubai real estate?"
-- "What would make this a successful investment for you?"
+**Decision dynamics:** More complex qualification needed. May shift priorities as conversation progresses.
 
-## Matching Goals to Properties
+## Nationality Patterns
 
-Use this framework to match investor goals:
+### Indian Investors
+- Family decisions are common; ask who else is involved
+- Strong ROI focus; have yield calculations ready
+- Golden Visa for children's education is a major driver
 
-| Goal | Property Type | Area | Timing |
-|------|--------------|------|--------|
-| Capital Growth | Off-plan, emerging areas | Dubai South, Creek Harbour | Now |
-| Rental Yield | Ready, established | Marina, Downtown, JVC | Now |
-| Lifestyle | Ready, premium | Palm, Bluewaters | Now |
-| Golden Visa | AED 2M+ ready | Any prime location | Now |
+### European Expats
+- Lifestyle focus often trumps pure returns
+- Exit strategy matters; they think about selling before buying
+- Currency considerations affect perceived value
+
+### GCC Investors
+- Discretion paramount; earn trust before probing
+- Developer reputation and prestige matter more than yield
+- Relationship-first; don't rush the commercial discussion
+
+### Chinese Investors
+- Capital mobility considerations; don't ask directly
+- Family safety and children's education are powerful motivators
+- Extensive due diligence on developers; be ready with details
+
+## The 60-Second Assessment
+
+Within the first minute of conversation, gather clues:
+
+**Listen for:** Why did they reach out? What words do they use? What questions do they ask first?
+
+**Form a hypothesis:** Primary persona, likely secondary interests, nationality patterns that may apply.
+
+Then test your hypothesis with early discovery questions.
       `,
       keyTakeaways: [
-        "Investment goals fall into four main categories: growth, yield, lifestyle, and residency",
-        "Discovery questions should explore financial position, objectives, and concerns",
-        "Match property recommendations to specific investor goals",
-        "Golden Visa requires AED 2M+ property investment for 10-year residency",
+        "Four primary personas exist: End-user, Investor, Visa-seeker, and Hybrid—most clients are hybrids",
+        "Nationality patterns inform but don't dictate your approach—use them as calibration",
+        "60-second assessment is a hypothesis to test and refine through discovery",
+        "The stated goal isn't always the real goal—dig deeper with follow-up questions",
       ],
-      prevModule: { slug: "qualification-framework", title: "Qualification Framework" },
+      nextModule: { slug: "discovery-endusers", title: "Discovery: End-Users" },
+    },
+    "discovery-endusers": {
+      title: "Discovery: End-Users",
+      duration: "35 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to conduct a complete end-user discovery conversation using a structured script that uncovers lifestyle needs, family dynamics, timeline drivers, and emotional priorities.
+
+## Why End-User Discovery Differs
+
+End-users aren't buying an asset—they're buying a life. The apartment in Business Bay isn't about square footage; it's about waking up to a view, walking to work, and having a place to call home.
+
+This emotional dimension changes everything. An investor tolerates imperfections if the numbers work. An end-user notices every flaw because they'll live with it daily.
+
+## The End-User Discovery Script
+
+### Opening: Set the Tone
+
+**Consultant:** "Before we look at any properties, I'd like to understand what you're looking for so we can focus on options that actually fit. Does that sound okay?"
+
+### Section 1: Current Situation
+
+**Consultant:** "Let's start with where you are now. Are you currently renting in Dubai, or would this be a move from another city?"
+
+Key follow-ups:
+- "What made you choose [current location] originally?"
+- "If you could change one thing about your current place, what would it be?"
+
+### Section 2: Who's Involved
+
+**Consultant:** "Who will be living in the new property? Is it just yourself, or is there family involved?"
+
+Key follow-ups:
+- "Are both of you equally involved in this decision?"
+- "Will anyone else be visiting regularly—parents, other family?"
+
+### Section 3: Location Priorities
+
+**Consultant:** "Let's talk about location. Where do you work? Commute is usually a big factor."
+
+Key follow-ups:
+- "If you had to choose between a shorter commute and a bigger apartment, which would win?"
+- "How important is walkability?"
+
+### Section 4: Property Requirements
+
+**Consultant:** "How many bedrooms are you thinking? What about outdoor space?"
+
+Key follow-ups:
+- "Are there any must-haves that would eliminate a property if it didn't have them?"
+- "Do you prefer newer buildings or would an older building with more space work?"
+
+### Section 5: Budget & Financing
+
+**Consultant:** "Do you have a price range you're working with? Would you be paying cash, or would you need a mortgage?"
+
+### Section 6: Timeline
+
+**Consultant:** "What's your timeline looking like? Is there a date you need to move by?"
+
+### Closing: Confirm Understanding
+
+**Consultant:** "Let me make sure I've got this right. [Summarize key points.] Did I miss anything important?"
+
+## Common Mistakes
+
+1. **Jumping to properties too quickly** - Discovery first, listings second
+2. **Focusing only on the primary contact** - Ask about absent partners
+3. **Treating budget as a hard number** - Explore flexibility
+      `,
+      keyTakeaways: [
+        "End-users buy a life, not an asset—discovery must uncover lifestyle and emotional priorities",
+        "Family dynamics shape everything—who's involved, who decides, whose needs take priority",
+        "The current situation reveals values—what they love and hate predicts what they'll want next",
+        "Confirm understanding before moving forward—misunderstandings waste viewings",
+      ],
+      prevModule: { slug: "investor-personas", title: "Investor Personas" },
+      nextModule: { slug: "discovery-investors", title: "Discovery: Investors" },
+    },
+    "discovery-investors": {
+      title: "Discovery: Investors",
+      duration: "40 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to qualify an investment buyer using a complete discovery script that uncovers investment objectives, risk tolerance, experience level, portfolio context, and the Goal Behind the Goal.
+
+## Why Investor Discovery Is Different
+
+Investors think in numbers. But the numbers that matter vary dramatically.
+
+One investor wants the highest possible yield. Another wants capital appreciation. A third wants currency diversification and couldn't care less about Dubai specifically.
+
+## The Investor Discovery Script
+
+### Section 1: Investment Objective
+
+**Consultant:** "When you think about property investment in Dubai, what's your primary goal? Are you focused on rental income, capital growth, or something else like diversification?"
+
+Key follow-ups for yield-focused:
+- "What yield range are you targeting?"
+- "How important is tenant quality versus absolute yield?"
+
+Key follow-ups for growth-focused:
+- "What's your investment horizon?"
+- "Are you comfortable with off-plan and timing risk?"
+
+### Section 2: Experience Level
+
+**Consultant:** "Have you invested in property before—either in Dubai or elsewhere?"
+
+Key follow-ups:
+- "What's your experience been like with those?"
+- "Have you had any experiences that influence what you're looking for?"
+
+### Section 3: Portfolio Context
+
+**Consultant:** "How does Dubai fit into your overall investment strategy?"
+
+This often reveals hidden motivations—currency hedging, diversification away from home market, etc.
+
+### Section 4: Budget & Financing
+
+**Consultant:** "What investment size are you comfortable with? Would you be paying cash, or would you want to leverage?"
+
+If budget is vague: "Dubai has properties from AED 500K to AED 50M. Where do you see yourself on that spectrum?"
+
+### Section 5: Timeline & Decision Process
+
+**Consultant:** "What's your timeline? Are you actively ready to invest, or still in research mode?"
+
+**Consultant:** "When it comes to making the decision, is that something you'll decide on your own, or are there others involved?"
+
+### Section 6: The Goal Behind the Goal
+
+**Consultant:** "Can I ask—what does [stated goal] actually mean for you? Why is that important?"
+
+This technique uncovers real motivation. "High yield" might really mean "financial freedom." "Capital preservation" might mean "protecting wealth from inflation in my country."
+
+### The Competitive Situation Check
+
+**Consultant:** "Are you looking at other markets besides Dubai? Have you already spoken to other agents?"
+
+## Common Mistakes
+
+1. **Accepting "good investment" as an answer** - Push for specifics
+2. **Quoting yield without knowing their baseline** - Establish their target first
+3. **Skipping the decision process question** - Know who else is involved
+      `,
+      keyTakeaways: [
+        "Always qualify what 'good investment' means—yield, growth, safety, or tax efficiency",
+        "The Goal Behind the Goal reveals true motivation—dig beneath surface statements",
+        "Experience shapes expectations—first-timers need education; seasoned investors need strategy",
+        "Portfolio context matters—understand how Dubai fits their bigger picture",
+      ],
+      prevModule: { slug: "discovery-endusers", title: "Discovery: End-Users" },
+      nextModule: { slug: "discovery-visa", title: "Discovery: Visa-Seekers" },
+      quizId: "client-discovery-1",
+    },
+    "discovery-visa": {
+      title: "Discovery: Visa-Seekers",
+      duration: "35 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to qualify Golden Visa seekers efficiently using a discovery script that uncovers their real motivation for residency, family composition, budget constraints, and corrects common misconceptions.
+
+## Why Visa-Seeker Discovery Matters
+
+Visa-seekers think they want a property. What they actually want is what the visa enables: residency, banking access, business formation, family security, or a Plan B.
+
+## Common Misconceptions to Correct
+
+| Misconception | Reality |
+|---------------|---------|
+| "I can use a mortgage" | Property must be fully paid off |
+| "Any property works" | Must be residential (not commercial) |
+| "Immediate visa" | 3-6 weeks after title deed |
+| "Visa is forever" | 10-year visa, renewable |
+
+## The Visa-Seeker Discovery Script
+
+### Section 1: The Real Motivation
+
+**Consultant:** "When you think about having UAE residency, what does that open up for you? Is it about actually living here, banking access, business opportunities, or something else?"
+
+Key follow-ups:
+- "If you had the visa tomorrow, what would you actually do with it?"
+- "Is banking access in the UAE important for you?"
+
+### Section 2: Family Composition
+
+**Consultant:** "Who will be included on the visa? Spouse, children, parents?"
+
+The Golden Visa covers spouse and children automatically. Parents require additional applications.
+
+### Section 3: Budget Reality Check
+
+**Consultant:** "The Golden Visa requires AED 2 million minimum, fully paid off. No mortgage. Are you looking at the AED 2 million level, or higher?"
+
+If they can't afford AED 2M: "At that budget, the property investment route won't work. However, there are other visa options—retirement visa, entrepreneur visa, remote work visa."
+
+### Section 4: Timeline and Urgency
+
+**Consultant:** "What's driving your timeline? Is there a specific date you need the visa by?"
+
+Translate their deadline into purchase timeline: property takes 4-8 weeks, then visa application 3-6 weeks.
+
+### Section 5: Secondary Interests
+
+**Consultant:** "Beyond the visa, what else matters? Would you live in the property, rent it out, or keep it as a holiday base?"
+
+Many visa-seekers also want yield—but some just want to qualify and don't care about the asset itself.
+
+## Common Mistakes
+
+1. **Assuming the visa is the only goal** - Explore secondary interests
+2. **Not confirming cash availability** - "I have the budget" doesn't mean liquid cash
+3. **Ignoring the family dimension** - Map the full family situation
+      `,
+      keyTakeaways: [
+        "The visa is a means, not an end—understand what residency enables for them",
+        "Correct misconceptions gently—many visa-seekers don't understand requirements",
+        "Confirm cash reality—verify they can pay without mortgage",
+        "Explore secondary interests—a pure-threshold buyer differs from someone wanting yield too",
+      ],
+      prevModule: { slug: "discovery-investors", title: "Discovery: Investors" },
+      nextModule: { slug: "active-listening", title: "Active Listening" },
+    },
+    "active-listening": {
+      title: "Active Listening",
+      duration: "30 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to read between the lines of client responses, recognize the difference between buying signals and politeness, and use pivot questions that go deeper without being intrusive.
+
+## The Three Levels of Listening
+
+### Level 1: Surface Listening
+You hear the words. You remember facts.
+
+### Level 2: Contextual Listening
+You hear the words plus their context. You understand why they're saying what they're saying.
+
+### Level 3: Deep Listening
+You hear what's said, what's not said, and how it's said. You notice emotion, hesitation, and conviction.
+
+## What to Listen For
+
+### Verbal Cues
+- **Conviction words:** "Definitely," "absolutely," "must have" — signal non-negotiables
+- **Hedging words:** "Maybe," "I guess," "ideally" — signal flexibility or uncertainty
+- **Emotion words:** "Love," "hate," "can't stand" — signal strong preferences
+
+### Tonal Cues
+- **Energy increase:** Voice lifts, pace quickens — genuine interest
+- **Energy decrease:** Voice drops, pace slows — boredom or discomfort
+- **Hesitation:** Pause before answering — uncertainty or sensitivity
+
+### What's NOT Said
+- Avoided topics may indicate sensitivity
+- Questions not asked reveal what doesn't matter to them
+
+## Reading Between the Lines
+
+### "That sounds interesting"
+Could mean: genuine interest, polite deflection, or still processing.
+**Pivot:** "What specifically caught your attention about that?"
+
+### "I'll think about it"
+Could mean: needs time, not convinced, or polite exit.
+**Pivot:** "What aspects would you want to think through?"
+
+### "My spouse will need to agree"
+Could mean: joint decision, needs to convince them, or using spouse as excuse.
+**Pivot:** "What do you think their main concerns would be?"
+
+## Recognizing Buying Signals vs Politeness
+
+### Buying Signals (Genuine Interest)
+- "What happens next if we decide to proceed?"
+- "How does the payment plan work?"
+- Forward-looking statements: "When we move in..."
+- Asking for specifics and details
+
+### Politeness Signals (Not Interested)
+- "That's nice." / "Interesting." / "Okay, good."
+- Changing subject repeatedly
+- Short answers, no follow-up questions
+- "I have another call in a few minutes"
+
+## Handling Clients Who Won't Open Up
+
+**Acknowledge the resistance:** "I notice you're keeping your cards close, which I completely understand."
+
+**Start with facts:** "Let's start with the practical stuff—budget, timeline, areas."
+
+**Share first:** "Let me tell you what I'm seeing from other investors in similar situations."
+
+**Give permission:** "It's completely fine if you're not sure yet."
+      `,
+      keyTakeaways: [
+        "Listen at three levels: surface (words), contextual (meaning), and deep (emotion)",
+        "Buying signals are forward-looking; politeness signals are surface-level",
+        "Use pivot questions to go deeper: acknowledge, probe gently, offer an out",
+        "Some clients need permission to open up—name the resistance or share first",
+      ],
+      prevModule: { slug: "discovery-visa", title: "Discovery: Visa-Seekers" },
+      nextModule: { slug: "qualification-framework", title: "BANT+ Qualification" },
+    },
+    "qualification-framework": {
+      title: "BANT+ Qualification",
+      duration: "35 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to qualify a client's readiness within 5 minutes using the BANT+ framework—Budget, Authority, Need, Timeline, and Competitive situation.
+
+## The BANT+ Framework
+
+### B — Budget
+What is their budget range? Is there flexibility? Cash or financing?
+
+### A — Authority
+Who makes the final decision? Who else needs to agree? Are there advisors involved?
+
+### N — Need
+What problem are they solving? How urgent is the need?
+
+### T — Timeline
+When do they want to buy? What's driving that timeline?
+
+### + — Competitive Situation
+Are they talking to other agents? Looking at other markets?
+
+## The 5-Minute Qualifier Script
+
+**Opening:** "Before we dive into specifics, let me ask a few quick questions to make sure I'm showing you things that actually fit."
+
+**Question 1 (Budget):** "What budget range are you working with? Would that be cash or mortgage?"
+
+**Question 2 (Timeline):** "What's your timeline? Are you looking to buy soon, or still researching?"
+
+**Question 3 (Need):** "What's the main goal—living in, rental income, Golden Visa, or something else?"
+
+**Question 4 (Authority):** "When it comes to deciding, is it just yourself, or are others involved?"
+
+**Question 5 (Competition):** "Have you been looking at properties or speaking to other agents?"
+
+**Closing:** "Perfect. So you're looking at [budget] for [goal], buying [timeline], with [decision-makers]. I have strong options. Shall we schedule a call this week?"
+
+## The Decision Map Framework
+
+For complex purchases, map who's involved:
+
+- **Economic Buyer:** Has budget authority, signs the check
+- **User:** Will actually use the property
+- **Influencer:** Shapes the decision (family, advisors)
+- **Blocker:** Could veto the deal
+
+## Handling Common Challenges
+
+### They won't tell you budget:
+"Dubai has everything from AED 500K to AED 50M. Are we talking entry-level, mid-market, or premium?"
+
+### "I'm just looking":
+"That's fine. Can I ask what sparked your interest now? Is there a timeline, even roughly?"
+
+### Decision-maker not available:
+"What would be most useful for you to bring back to them?"
+
+## Qualification Scoring
+
+| Score | Profile | Action |
+|-------|---------|--------|
+| 5/5 strong | Hot lead | Prioritize, move fast |
+| 3-4/5 | Warm lead | Nurture, schedule follow-up |
+| 1-2/5 | Cold lead | Add to drip, check back later |
+      `,
+      keyTakeaways: [
+        "BANT+ covers Budget, Authority, Need, Timeline, and Competitive situation",
+        "The 5-Minute Qualifier is a conversation, not an interrogation—weave questions naturally",
+        "Decision Maps reveal the full picture: economic buyer, user, influencers, and blockers",
+        "Qualify early but not aggressively—balance efficiency with rapport-building",
+      ],
+      prevModule: { slug: "active-listening", title: "Active Listening" },
       nextModule: { slug: "managing-expectations", title: "Managing Expectations" },
-      quizId: "client-discovery-5",
+      quizId: "client-discovery-2",
+    },
+    "managing-expectations": {
+      title: "Managing Expectations",
+      duration: "30 min",
+      content: `
+## Learning Objective
+
+By the end of this module, you will be able to set realistic expectations from the first conversation about timelines, yields, processes, and market realities—protecting both client and consultant from future friction.
+
+## Why Expectation Management Matters
+
+Disappointed clients don't come from bad properties. They come from unrealistic expectations.
+
+A client who expects 10% yield will be disappointed by 7%—even though 7% is excellent. A client who expects completion in one year will be frustrated by eighteen months—even though that's normal.
+
+## The Five Expectation Areas
+
+### 1. Market Expectations
+**Unrealistic:** 10-15% yields, prices only go up
+**Realistic:** 6-8% gross yields, markets fluctuate
+
+**Script:** "Dubai's market is strong, but I want to be realistic. Average yields are around 6-8% gross, which is excellent compared to most global cities. That said, every investment has risks."
+
+### 2. Timeline Expectations
+**Unrealistic:** Purchase takes a few weeks, off-plan completes on time
+**Realistic:** Ready property 4-8 weeks, off-plan dates are estimates
+
+**Script:** "For a ready property, you're looking at four to eight weeks from offer to keys. For off-plan, completion dates are estimates—most developers complete within a few months of target, but delays happen."
+
+### 3. Process Expectations
+**Unrealistic:** Everything is simple, agent handles everything
+**Realistic:** Multiple steps, multiple parties, costs beyond price
+
+**Script:** "There are several steps: offer, MOU, due diligence, NOC, transfer at DLD. I'll coordinate everything, but you'll also interact with lawyers, developers, possibly banks."
+
+### 4. Property Expectations
+**Unrealistic:** Perfect property exists at their budget
+**Realistic:** Every property involves trade-offs
+
+**Script:** "At every budget level, there are trade-offs. Part of my job is understanding which factors matter most so we prioritize correctly."
+
+### 5. Role Expectations
+**Unrealistic:** Agent tells them what to buy
+**Realistic:** Agent advises, client decides
+
+**Script:** "My job isn't to sell you a property—it's to help you find the right one. I'll give my honest assessment, including concerns. Ultimately, you decide."
+
+## When to Set Expectations
+
+- **First contact:** Your role, realistic timeline, market realities
+- **During discovery:** Specific budget and goal limitations
+- **Before viewings:** Properties won't look exactly like marketing
+- **Before offers:** Process steps, costs, what can be negotiated
+
+## Handling Unrealistic Expectations
+
+**Strategy 1: Acknowledge, Educate, Redirect**
+"I understand the appeal of Downtown. At under one million, you'd be looking at studios there. For a three-bedroom at that budget, we'd explore JVC or Al Furjan."
+
+**Strategy 2: Use Data**
+"Let me share actual data: according to DXB Interact, average yields are 6-8%. The higher figures you've seen are likely calculated differently."
+
+**Strategy 3: The "Other Clients" Frame**
+"Most clients who've tried to negotiate 20% off have lost properties to other buyers. The successful approach is identifying fair value and moving quickly."
+
+## Preventing Future Problems
+
+- **Document everything:** Follow up in writing with key expectations
+- **Confirm understanding:** "Just to confirm—you understand the 4% DLD fee is additional?"
+- **Proactive updates:** When reality changes, communicate immediately
+      `,
+      keyTakeaways: [
+        "Disappointment comes from unrealistic expectations, not bad properties—set expectations early",
+        "Five key areas: market, timeline, process, property, and your role",
+        "Use data and comparisons to educate—'According to DLD...' is more credible than 'I think...'",
+        "Document and confirm understanding—put it in writing, verify they absorbed it",
+      ],
+      prevModule: { slug: "qualification-framework", title: "BANT+ Qualification" },
     },
   },
 }
