@@ -117,7 +117,7 @@ questions:
         correct: false
       - text: "Genuine concerns never involve commercial terms"
         correct: false
-    explanation: "Negotiation tactics often feel rehearsed, focus on commercial terms, and appear at suspicious timing (after significant engagement). Genuine concerns have emotional undertones and are asked with curiosity. The distinction helps you respond appropriately."
+    explanation: "Negotiation tactics often feel rehearsed, focus on commercial terms, and emerge at strategically convenient moments (after significant engagement). Genuine concerns have emotional undertones and are asked with curiosity. The distinction helps you respond appropriately."
 ---
 
 # Objection Handling Framework Quiz
