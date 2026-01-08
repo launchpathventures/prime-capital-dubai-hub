@@ -9,45 +9,45 @@ time_limit_minutes: 10
 questions:
   - id: "q1"
     type: "multiple-choice"
-    question: "What does the 'L' in the LAER framework stand for?"
+    question: "An investor says: 'I've been looking at Dubai for months but I just can't decide. Everyone tells me it's great but something doesn't feel right.' What type of objection is this?"
     options:
-      - text: "Learn the objection"
+      - text: "Information gap—they need more data"
         correct: false
-      - text: "Listen completely"
+      - text: "Genuine concern—there's a hidden worry they haven't voiced"
         correct: true
-      - text: "Look for signals"
+      - text: "Negotiation tactic—they're trying to get a better deal"
         correct: false
-      - text: "Lead the conversation"
+      - text: "Buying signal—they're ready to move forward"
         correct: false
-    explanation: "The L in LAER stands for Listen completely. Most consultants begin formulating responses before investors finish speaking, missing important information and making the investor feel unheard."
+    explanation: "When someone says 'something doesn't feel right' but can't articulate what, there's usually an unspoken concern. This requires exploration to uncover the real objection, not more information."
 
   - id: "q2"
     type: "multiple-choice"
-    question: "Why should you avoid using the word 'but' after acknowledging an objection?"
+    question: "You've explained escrow protections to an investor. They respond: 'I hear what you're saying, but I'm still worried about delays.' What went wrong?"
     options:
-      - text: "It's grammatically incorrect in sales contexts"
+      - text: "You didn't explain escrow clearly enough"
         correct: false
-      - text: "It makes the sentence too long"
-        correct: false
-      - text: "It negates everything you said before it"
+      - text: "You addressed the wrong concern—they're worried about delays, not protections"
         correct: true
-      - text: "Investors find it unprofessional"
+      - text: "The investor is being unreasonable"
         correct: false
-    explanation: "The word 'but' negates everything before it. 'I understand, but...' essentially dismisses the acknowledgment. Pause after acknowledging before providing your response."
+      - text: "Nothing—you should repeat the same information"
+        correct: false
+    explanation: "The 'but' reveals they weren't satisfied. More importantly, you may have answered a different question than what was really troubling them. Escrow protects money; they're worried about timeline. The 'Explore Deeper' step was needed first."
 
   - id: "q3"
     type: "multiple-choice"
-    question: "What is the primary purpose of the 'Explore Deeper' step in LAER?"
+    question: "What is the primary purpose of the 'Acknowledge Validity' step in LAER?"
     options:
-      - text: "To find weaknesses in the investor's argument"
+      - text: "To agree with the investor's conclusion"
         correct: false
-      - text: "To uncover the real concern behind the stated objection"
+      - text: "To buy time while you formulate a response"
+        correct: false
+      - text: "To show respect for the concern and reduce defensiveness"
         correct: true
-      - text: "To gather information for your sales pitch"
+      - text: "To identify if the objection is legitimate"
         correct: false
-      - text: "To buy time before responding"
-        correct: false
-    explanation: "Most objections have an objection behind them. The stated concern is often not the real concern. Exploring deeper reveals what really needs to be addressed."
+    explanation: "Acknowledging validity is not agreement—it's respect. 'That's a sensible question' validates their concern without conceding the point. This reduces defensiveness and creates space for your response to be heard."
 
   - id: "q4"
     type: "multiple-choice"
@@ -61,49 +61,49 @@ questions:
         correct: true
       - text: "Testimonials from satisfied clients"
         correct: false
-    explanation: "Specific data from authoritative sources like DLD, RERA, and bank reports provides the strongest evidence. It's objective, verifiable, and carries institutional credibility."
+    explanation: "Specific data from authoritative sources like DLD, RERA, and bank reports provides the strongest evidence. It's objective, verifiable, and carries institutional credibility that personal experience cannot match."
 
   - id: "q5"
     type: "multiple-choice"
-    question: "An investor asks increasingly specific questions about payment processes and paperwork. What type of objection is this likely to be?"
+    question: "An investor asks increasingly specific questions about payment processes, handover timelines, and paperwork requirements. What type of objection is this likely to be?"
     options:
-      - text: "Genuine concern"
+      - text: "Genuine concern—they're worried about the process"
         correct: false
-      - text: "Information gap"
+      - text: "Information gap—they need more details"
         correct: false
-      - text: "Negotiation tactic"
+      - text: "Negotiation tactic—they're testing your knowledge"
         correct: false
-      - text: "Buying signal in disguise"
+      - text: "Buying signal in disguise—they're mentally preparing to move forward"
         correct: true
-    explanation: "When objections become more specific and practical—focusing on logistics, timelines, and processes—it often indicates serious interest. The investor is mentally preparing to move forward."
+    explanation: "When objections become more specific and practical—focusing on logistics, timelines, and processes—it often indicates serious interest. The investor is mentally preparing to move forward, not seeking reasons to say no."
 
   - id: "q6"
     type: "multiple-choice"
-    question: "What should you do when you feel defensive during a challenging objection?"
+    question: "An investor becomes visibly upset and says: 'You agents are all the same—just telling me what I want to hear!' What should you do?"
     options:
-      - text: "Address the investor's tone directly"
+      - text: "Defend yourself by explaining how you're different"
         correct: false
-      - text: "Pause, breathe, and respond to the content, not the tone"
+      - text: "Pause, take a breath, and respond to the content, not the tone"
         correct: true
-      - text: "Mirror their energy to show confidence"
+      - text: "Mirror their energy to show you're taking them seriously"
         correct: false
-      - text: "Redirect to a different topic"
+      - text: "Redirect to a different topic to reduce tension"
         correct: false
-    explanation: "When defensive, pause before responding, take a breath, and remember the objection is about them, not you. Respond to the content of their concern, not their tone."
+    explanation: "When defensive, pause before responding, take a breath, and remember this is about them, not you. Respond to the content of their concern ('You want honest advice, not a sales pitch') rather than their tone. Your composure under pressure defines your professionalism."
 
   - id: "q7"
     type: "multiple-choice"
-    question: "Which is a sign that you should step back rather than continue addressing an objection?"
+    question: "After you address an objection, the investor immediately raises a completely different concern. Then another. Then another. What is likely happening?"
     options:
-      - text: "The investor asks for more details"
+      - text: "They have many genuine concerns that need addressing"
         correct: false
-      - text: "Multiple objections are cascading rapidly"
+      - text: "Multiple objections cascading may signal they need space or this is 'no' in disguise"
         correct: true
-      - text: "The investor becomes quiet"
+      - text: "You need to address each concern more thoroughly"
         correct: false
-      - text: "The objection involves pricing"
+      - text: "This is a buying signal—they're getting serious"
         correct: false
-    explanation: "When multiple objections cascade rapidly, the investor may be overwhelmed or the objection is actually 'no' in disguise. Stepping back gives them space and shows respect."
+    explanation: "When multiple objections cascade rapidly, the investor may be overwhelmed or the real objection is 'no' that they can't voice directly. This is a sign to step back gracefully rather than keep addressing new concerns."
 
   - id: "q8"
     type: "multiple-choice"
@@ -111,13 +111,13 @@ questions:
     options:
       - text: "Negotiation tactics are always about price"
         correct: false
-      - text: "Genuine concerns are asked with genuine curiosity; tactics often feel rehearsed"
+      - text: "Genuine concerns are asked with genuine curiosity; tactics often feel rehearsed and appear at suspicious timing"
         correct: true
       - text: "Negotiation tactics come from experienced investors only"
         correct: false
       - text: "Genuine concerns never involve commercial terms"
         correct: false
-    explanation: "Negotiation tactics often feel rehearsed, focus on commercial terms, and appear at suspicious timing (after significant engagement). Genuine concerns have emotional undertones and are asked with curiosity."
+    explanation: "Negotiation tactics often feel rehearsed, focus on commercial terms, and appear at suspicious timing (after significant engagement). Genuine concerns have emotional undertones and are asked with curiosity. The distinction helps you respond appropriately."
 ---
 
 # Objection Handling Framework Quiz
