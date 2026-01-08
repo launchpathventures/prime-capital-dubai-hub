@@ -41,132 +41,132 @@ aiCoach:
 ## Questions
 
 ### Question 1
-**What is the recommended time for your morning CRM review?**
+**It's 6:15 AM. Your alarm goes off. You have 12 unread WhatsApp messages from overnight, including one from a client. What's the correct first action?**
 
-A) 5:00 - 5:30 AM  
-B) 7:00 - 7:30 AM  
-C) 9:00 - 9:30 AM  
-D) Whenever you have time during the day  
+A) Immediately check the WhatsApp messages — the client might need something urgent  
+B) Get up, hydrate, and do your morning physical routine first. Messages can wait 30 minutes.  
+C) Reply "I'll get back to you" to the client, then go back to sleep for 15 more minutes  
+D) Skip the morning routine — it's more important to be responsive  
 
 **Correct Answer:** B  
-**Explanation:** The Prime Capital morning routine recommends 7:00 - 7:30 AM for CRM review and planning. This happens after physical preparation but before checking messages, ensuring you start the day proactively.
+**Explanation:** Starting your day by checking messages puts you in reactive mode immediately. Nothing is so urgent it can't wait 30 minutes. Get up, move, hydrate, and prepare mentally. You'll handle messages during Communication Triage at 7:30 AM — with more clarity and professionalism.
 
 ---
 
 ### Question 2
-**When should you check your WhatsApp and email messages in the morning routine?**
+**You open your CRM at 7:00 AM and see that 3 of your 8 active leads haven't been contacted in 7+ days. What should you do?**
 
-A) First thing when you wake up  
-B) During breakfast  
-C) After CRM review and planning (around 7:30 AM)  
-D) Not until 10:00 AM  
+A) Leave them alone — if they were interested, they would have contacted you  
+B) Send all three a quick "just checking in" message  
+C) Triage each lead: schedule follow-up (if viable), move to nurture (if long-term), or mark as lost (if dead)  
+D) Delete them from the CRM to keep your pipeline clean  
 
 **Correct Answer:** C  
-**Explanation:** Messages should be checked AFTER you've completed your CRM review and planning. Checking messages first makes your day reactive instead of proactive.
+**Explanation:** Leads with no activity need triage, not neglect or deletion. "Just checking in" adds no value. Instead, evaluate each: Are they worth pursuing now? Should they move to long-term nurture? Or should you honestly mark them lost? Action-less limbo is the worst option.
 
 ---
 
 ### Question 3
-**What is the "2-minute rule" in productivity?**
+**A client messaged you at 9 PM last night asking for an update on their offer. It's now 7:30 AM. What's the most professional response?**
 
-A) Respond to all messages within 2 minutes  
-B) Take a 2-minute break every hour  
-C) If a task takes less than 2 minutes, do it immediately; if more, schedule it  
-D) Complete your most important task in the first 2 minutes of the day  
+A) "Hi! Just saw this — let me check and get back to you"  
+B) "Good morning! I'm following up with the developer this morning for an update. I'll have information for you by 12 PM today."  
+C) "Sorry for the delay! I'll check now"  
+D) Wait until you actually have the update before responding  
 
-**Correct Answer:** C  
-**Explanation:** The 2-minute rule states: If a task takes less than 2 minutes, do it immediately. If it takes more than 2 minutes, schedule it properly. This prevents small tasks from piling up while also preventing important work from being done hastily.
+**Correct Answer:** B  
+**Explanation:** Response B is professional because it: (1) acknowledges the message, (2) shows you're proactively taking action, and (3) sets a specific expectation ("by 12 PM"). Vague responses ("let me check") create anxiety. Waiting until you have the update means the client thinks you've forgotten them.
 
 ---
 
 ### Question 4
-**How often should you conduct a full pipeline review?**
+**When is the best time to do "deep work" — focused tasks like preparing property analysis or client presentations?**
 
-A) Daily  
-B) Weekly  
-C) Monthly  
-D) Only when a deal closes  
+A) Late evening when no one is messaging  
+B) Early morning (8-10 AM) when mental energy is highest  
+C) Right after lunch when the office is quiet  
+D) Whenever you can fit it between client calls  
 
 **Correct Answer:** B  
-**Explanation:** Weekly pipeline reviews (typically Monday morning or Friday end-of-week) are essential for identifying stuck deals, planning follow-ups, and maintaining pipeline health.
+**Explanation:** Your mental energy is highest in the morning (8-10 AM). Deep work requires focus and quality thinking. Protect this time block for important tasks. Don't squander it on reactive work like checking messages.
 
 ---
 
 ### Question 5
-**What percentage of your day should ideally be proactive vs. reactive?**
+**You just finished a discovery call with a potential investor. The call went well — she's interested in 2BR apartments in Business Bay, budget AED 1.5-2M, timeline 3 months. When should you update your CRM?**
 
-A) 50% proactive, 50% reactive  
-B) 90% proactive, 10% reactive  
-C) 70% proactive, 30% reactive  
-D) 30% proactive, 70% reactive  
+A) At the end of the day when you have time  
+B) At the end of the week during your pipeline review  
+C) Immediately after the call — within 5 minutes  
+D) When you send her the property shortlist  
 
 **Correct Answer:** C  
-**Explanation:** The goal is 70% proactive (planned work based on your priorities) and 30% reactive (responding to incoming demands). This balance ensures important work happens while remaining responsive to clients.
+**Explanation:** Update CRM immediately after every interaction. Waiting until end of day means you'll forget details. Waiting until end of week means critical information is lost. The 2-minute investment now saves 20 minutes trying to reconstruct from memory later.
 
 ---
 
 ### Question 6
-**When is the best time block for "deep work" (focused, uninterrupted tasks)?**
+**What's wrong with sending a "just checking in" follow-up message to a lead who's gone quiet?**
 
-A) 8:00 - 10:00 AM  
-B) 12:00 - 2:00 PM (during lunch)  
-C) 5:00 - 7:00 PM  
-D) Late evening (9:00 - 11:00 PM)  
+A) Nothing — it's a standard professional follow-up  
+B) It's lazy — it puts the burden on the client to generate conversation without providing any value  
+C) It's too formal for WhatsApp  
+D) It should only be sent by email, not WhatsApp  
 
-**Correct Answer:** A  
-**Explanation:** Early morning (8:00 - 10:00 AM) is ideal for deep work because your mental energy is highest. This time should be protected for tasks requiring focus and quality thinking.
+**Correct Answer:** B  
+**Explanation:** "Just checking in" adds zero value. It says: "I have nothing useful to offer, but please do the work of responding anyway." Instead, follow up with value: a market update, a new listing that matches their criteria, or a specific question. Give them a reason to respond.
 
 ---
 
 ### Question 7
-**When should you update your CRM after a client interaction?**
+**You have a viewing scheduled with Investor B at 2 PM. At 1:45 PM, you realize you haven't reviewed their file — you don't remember their budget, preferences, or what they've already seen. What does this indicate?**
 
-A) At the end of the day  
-B) At the end of the week  
-C) Immediately after the interaction  
-D) Only if it was an important conversation  
+A) Normal — you can't remember everything about every client  
+B) A failure of workflow — you should have prep time blocked before viewings  
+C) You need a better memory  
+D) The CRM isn't working properly  
 
-**Correct Answer:** C  
-**Explanation:** CRM should be updated immediately after every interaction. Waiting until later means you forget details, lose momentum, and often don't do it at all.
+**Correct Answer:** B  
+**Explanation:** Walking into a client meeting unprepared is a workflow failure. Block 15-30 minutes before every viewing or call to review the client's file, refresh your memory, and prepare relevant talking points. Flying blind makes you look unprofessional and wastes the client's time.
 
 ---
 
 ### Question 8
-**What should you do with a deal that has had no activity for 7+ days during your pipeline review?**
+**What percentage of your day should ideally be proactive (planned priorities) vs. reactive (responding to incoming demands)?**
 
-A) Leave it alone — the client will reach out when ready  
-B) Immediately mark it as lost  
-C) Schedule follow-up, move to nurture, or mark as lost (depending on situation)  
-D) Remove it from CRM to keep pipeline clean  
+A) 50/50 — equal balance  
+B) 30% proactive / 70% reactive — clients come first  
+C) 70% proactive / 30% reactive — important work happens first  
+D) 100% proactive — never react to anything  
 
 **Correct Answer:** C  
-**Explanation:** Deals with no activity need triage: schedule immediate follow-up (if viable), move to long-term nurture status, or honestly mark as lost. Leaving them in limbo clutters your pipeline and wastes mental energy.
+**Explanation:** The goal is 70% proactive (working on your priorities), 30% reactive (responding to clients and requests). If you're 70% reactive, you're not controlling your day — everyone else is. Important work never happens in reactive mode.
 
 ---
 
 ### Question 9
-**What is the recommended hard stop time for work each day?**
+**It's 6:30 PM. You have 15 unread emails and a client just messaged asking about a property. What should you do?**
 
-A) 8:00 PM  
-B) 6:00 PM  
-C) 10:00 PM  
-D) No hard stop — work until everything is done  
+A) Work through everything — you can't leave things undone  
+B) Respond to the client, then quickly clear the emails before leaving  
+C) Acknowledge the client's message if urgent, note remaining items for tomorrow, and stop work. Set boundaries.  
+D) Log into CRM from home after dinner to finish up  
 
-**Correct Answer:** B  
-**Explanation:** 6:00 PM is the recommended hard stop to maintain work-life boundaries. Real estate can consume your entire life if you let it. Boundaries are essential for long-term sustainability.
+**Correct Answer:** C  
+**Explanation:** 6 PM is the recommended hard stop. Real estate will consume your entire life if you let it. Acknowledge anything truly urgent, note tomorrow's priorities, and stop. Working evenings creates burnout and doesn't improve client outcomes — it just trains clients to expect 24/7 availability.
 
 ---
 
 ### Question 10
-**Which of the following is an example of "batching similar tasks"?**
+**During your weekly pipeline review, you notice a deal has been "stuck" at the "offer submitted" stage for 12 days with no update. The client, Rashid, hasn't responded to your last two messages. What's the professional approach?**
 
-A) Checking email continuously throughout the day whenever a notification appears  
-B) Checking email at three specific times: morning, midday, and end of day  
-C) Responding to one email, then making a call, then updating CRM, then checking another email  
-D) Doing whatever task feels most urgent in the moment  
+A) Wait for Rashid to respond — you don't want to seem pushy  
+B) Call Rashid directly, acknowledge the silence, and ask if something has changed  
+C) Mark the deal as lost and move on  
+D) Send another "just checking in" message  
 
 **Correct Answer:** B  
-**Explanation:** Batching means grouping similar tasks together to minimize context-switching. Checking email at three designated times (instead of continuously) is a classic batching strategy that preserves focus and productivity.
+**Explanation:** 12 days of silence on an active offer is a red flag. Don't wait passively or send weak follow-ups. Call directly and address it: "Hi Rashid, I noticed we haven't connected since the offer was submitted. I wanted to check — has anything changed on your end, or is there something I can help with?" Direct communication respects their time and gets you clarity.
 
 ---
 
@@ -197,15 +197,14 @@ D) Doing whatever task feels most urgent in the moment
 
 Passing this quiz is one thing. Implementing these habits is what separates good intentions from real results.
 
-**Your Challenge:**
-- Follow the morning routine for 5 consecutive days
-- Track your completion in a simple checklist
-- Report to your manager or mentor at the end of the week
+**Your 5-Day Challenge:**
+- [ ] Day 1: No phone before morning routine complete
+- [ ] Day 2: CRM review at 7 AM before checking messages
+- [ ] Day 3: Deep work block 8-10 AM (no interruptions)
+- [ ] Day 4: Update CRM immediately after every interaction
+- [ ] Day 5: Hard stop at 6 PM
 
-**Why This Matters:**
-Knowledge without implementation is worthless. These habits compound over time — 90 days from now, you'll either have a healthy pipeline and sustainable workload, or you'll be overwhelmed and struggling.
-
-The choice is yours.
+**Track your completion and report to your manager at the end of the week.**
 
 ---
 

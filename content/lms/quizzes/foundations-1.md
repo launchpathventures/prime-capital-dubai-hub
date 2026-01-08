@@ -41,32 +41,84 @@ aiCoach:
 ## Questions
 
 ### Question 1
-**What is the minimum requirement for obtaining a RERA broker license in Dubai?**
+**You're about to post a property listing on Instagram. A colleague says "Just post it, we can get the permit later." What should you do?**
 
-A) Bachelor's degree and 5 years experience  
-B) High school diploma, RERA training completion, and passing the RERA exam  
-C) UAE citizenship or GCC nationality  
-D) Real estate degree from a recognized university  
+A) Post it now and apply for the Trakheesi permit tomorrow  
+B) Wait until you have a valid Trakheesi permit number and QR code before posting  
+C) Post it without the permit since it's social media, not a property portal  
+D) Use a generic company permit number for all posts  
 
 **Correct Answer:** B  
-**Explanation:** RERA requires a high school diploma (minimum), completion of RERA-approved training, and passing the certification exam. UAE citizenship is not required.
+**Explanation:** All property advertisements in Dubai — including social media — require a valid Trakheesi permit number and QR code BEFORE posting. Posting without a permit can result in fines of AED 50,000+ per violation. Each property requires its own permit.
 
 ---
 
 ### Question 2
-**What must be included in all property advertisements according to RERA regulations?**
+**A British investor asks you about buying a 1BR apartment in Deira (a non-freehold area). What's the correct response?**
 
-A) Property price and location only  
-B) Your RERA registration number  
-C) Developer contact information  
-D) Commission rate  
+A) "No problem, foreign nationals can buy anywhere in Dubai"  
+B) "You can only purchase property in designated freehold areas. Let me show you options in Dubai Marina or Business Bay instead"  
+C) "You'll need to form a local company to buy there"  
+D) "Deira requires a special permit for foreign buyers"  
 
 **Correct Answer:** B  
-**Explanation:** All property advertisements must include your RERA registration number. This is a mandatory compliance requirement.
+**Explanation:** Foreign nationals can only own property outright in designated freehold areas (Dubai Marina, Downtown, Business Bay, JVC, etc.). Deira is not a freehold area. The professional response redirects to areas where they can legally purchase.
 
 ---
 
 ### Question 3
+**A client is purchasing a 2BR off-plan apartment at DAMAC Hills for AED 1.8M. They ask where to send the booking deposit. The developer's sales rep suggests sending it to their personal bank account "to speed up the process." What do you do?**
+
+A) If the sales rep works for the developer, it's probably fine  
+B) Suggest splitting the payment between personal account and escrow  
+C) Stop immediately, explain that all payments must go to the project's registered escrow account, and verify the escrow details  
+D) Proceed if the amount is under AED 100,000  
+
+**Correct Answer:** C  
+**Explanation:** All off-plan payments must go to DLD-registered escrow accounts. Requests to send funds to personal accounts are a major red flag — potentially indicating fraud. Stop the process, verify escrow account details via DLD, and escalate to management if necessary.
+
+---
+
+### Question 4
+**What is the minimum property value required for Golden Visa eligibility?**
+
+A) AED 750,000  
+B) AED 1,000,000  
+C) AED 2,000,000  
+D) AED 5,000,000  
+
+**Correct Answer:** C  
+**Explanation:** The minimum property value for Golden Visa eligibility is AED 2,000,000. This can be a single property or multiple properties totaling AED 2M+. The property must be freehold and in the buyer's name.
+
+---
+
+### Question 5
+**A client signed an SPA for an off-plan apartment 10 days ago. Now they want to cancel because they found a better deal. What are their rights?**
+
+A) They cannot cancel once the SPA is signed  
+B) They have 14 days from SPA signing to cancel with a full refund minus admin fees  
+C) They must wait until construction is complete to request a refund  
+D) They can cancel anytime before handover with no penalty  
+
+**Correct Answer:** B  
+**Explanation:** Buyers have a 14-day cooling-off period for off-plan purchases. They can cancel within this period and receive a full refund minus administrative fees (typically AED 5,000-10,000). The request must be made in writing.
+
+---
+
+### Question 6
+**You're advising a client about total transaction costs for purchasing a ready property worth AED 3,000,000. Which breakdown is most accurate?**
+
+A) Just 4% DLD fee = AED 120,000 total  
+B) 4% DLD + 2% commission + fees = approximately AED 210,000-240,000 (7-8% total)  
+C) 2% commission only = AED 60,000 total  
+D) 10% total = AED 300,000  
+
+**Correct Answer:** B  
+**Explanation:** Total typical costs are 7-8% of property value: 4% DLD registration fee, 2% buyer-side commission + VAT, trustee fees (AED 4,000-5,000), and NOC fees. For a AED 3M property, expect approximately AED 210,000-240,000 in total transaction costs.
+
+---
+
+### Question 7
 **How long must you retain transaction records according to RERA guidelines?**
 
 A) 1 year  
@@ -75,98 +127,46 @@ C) 5 years
 D) 10 years  
 
 **Correct Answer:** C  
-**Explanation:** Transaction records must be retained for a minimum of 5 years. This includes contracts, client documentation, and communication records.
-
----
-
-### Question 4
-**What is the purpose of escrow accounts for off-plan properties?**
-
-A) To hold buyer funds securely until construction milestones are met  
-B) To avoid paying taxes on transactions  
-C) To increase developer profits  
-D) To simplify the payment process  
-
-**Correct Answer:** A  
-**Explanation:** Escrow accounts protect buyer funds by holding them until construction milestones are completed. Developers can only withdraw funds as construction progresses, reducing risk of project abandonment.
-
----
-
-### Question 5
-**What is the minimum property value required for Golden Visa eligibility through real estate investment?**
-
-A) AED 1 million  
-B) AED 2 million  
-C) AED 5 million  
-D) AED 10 million  
-
-**Correct Answer:** B  
-**Explanation:** The minimum property value for Golden Visa eligibility is AED 2 million. The property must be freehold and can be a single property or multiple properties totaling AED 2M+.
-
----
-
-### Question 6
-**What is the cooling-off period for off-plan property purchases?**
-
-A) 7 days  
-B) 14 days  
-C) 30 days  
-D) There is no cooling-off period  
-
-**Correct Answer:** B  
-**Explanation:** Buyers have 14 days to cancel off-plan property contracts and receive a full refund minus administrative fees.
-
----
-
-### Question 7
-**Which of the following actions is NOT permitted for a RERA-licensed broker?**
-
-A) Providing market analysis to clients  
-B) Guaranteeing specific property returns or appreciation  
-C) Facilitating property viewings  
-D) Negotiating on behalf of clients  
-
-**Correct Answer:** B  
-**Explanation:** Brokers cannot guarantee property returns, appreciation, or rental yields. You can provide market data and historical trends, but not guarantees about future performance.
+**Explanation:** Transaction records must be retained for a minimum of 5 years. This includes contracts, client documentation, emails, WhatsApp messages, and all transaction-related communication. These records protect you if disputes arise later.
 
 ---
 
 ### Question 8
-**What is the standard DLD registration fee for property transactions?**
+**A lead asks: "Can I get Golden Visa if I buy an off-plan apartment that won't be ready for 2 years?" What's the correct answer?**
 
-A) 2% of property value  
-B) 4% of property value (typically split between buyer and seller)  
-C) 5% of property value  
-D) Fixed fee of AED 10,000  
+A) No, the property must be completed and handed over first  
+B) Yes, off-plan purchases qualify for Golden Visa from the time of SPA signing  
+C) Only if the property is above AED 5M  
+D) Only if they pay the full amount upfront  
 
 **Correct Answer:** B  
-**Explanation:** The DLD registration fee is 4% of the property value, typically split 2% buyer and 2% seller, though this can be negotiated.
+**Explanation:** As of 2023 regulations, off-plan purchases qualify for Golden Visa from the time of SPA signing, not just after handover. The property must be worth AED 2M+ and must be in the buyer's name, but they don't need to wait for completion.
 
 ---
 
 ### Question 9
-**When can foreign nationals own property in Dubai?**
+**Your RERA broker card expires next month. What should you do?**
 
-A) Anywhere in Dubai  
-B) Only in designated freehold areas  
-C) Never — only UAE citizens can own property  
-D) Only in leasehold areas  
+A) Continue working and renew when you have time  
+B) Renew before expiration to avoid any gap in licensing  
+C) You can work for up to 3 months after expiration  
+D) Only renew if you're actively working with clients  
 
 **Correct Answer:** B  
-**Explanation:** Foreign nationals can own property outright in designated freehold areas (e.g., Dubai Marina, Downtown, Palm Jumeirah, Business Bay). UAE/GCC nationals can own property anywhere in Dubai.
+**Explanation:** Your RERA broker card must be renewed before expiration. Working with an expired license is illegal and can result in fines, license suspension, and damage to your professional reputation. Set a reminder 30 days before expiration.
 
 ---
 
 ### Question 10
-**What should you do if a client requests you send funds to a personal bank account instead of the official escrow account?**
+**A potential client seems evasive about their source of funds and wants to pay a AED 2M property entirely in cash. What should you do?**
 
-A) Comply if the client insists  
-B) Stop immediately and escalate to management  
-C) Request written confirmation from the developer  
-D) Proceed if the amount is small  
+A) Proceed — cash buyers are easier to close  
+B) Accept if they provide a passport copy  
+C) Flag as a potential AML concern, request proper source of funds documentation, and consult with management  
+D) Suggest they pay half in cash, half via bank transfer  
 
-**Correct Answer:** B  
-**Explanation:** Never facilitate payments to personal accounts. All off-plan payments must go through DLD-registered escrow accounts. This request is a major red flag and must be escalated to management immediately.
+**Correct Answer:** C  
+**Explanation:** All Dubai property transactions must be via bank transfer (not physical cash). Reluctance to disclose source of funds is an AML red flag. You must request proper documentation and escalate concerns to management. Never proceed with a suspicious transaction to close a deal.
 
 ---
 
