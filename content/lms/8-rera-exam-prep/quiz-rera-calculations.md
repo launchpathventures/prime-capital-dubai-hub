@@ -208,14 +208,14 @@ A property generates monthly rent of AED 8,500. Calculate the annual rent and gr
 
 ## Question 15
 
-A property transaction involves: Purchase price AED 2,400,000, DLD fee 4%, broker commission 2% (buyer's share 1%), admin fee AED 580. What is the buyer's total transaction cost (excluding the property price)?
+A property transaction involves: Purchase price AED 2,400,000, DLD fee 4% (split 50/50), broker commission 2% (buyer's share 1%), admin fee AED 580. What is the buyer's total transaction cost (excluding the property price)?
 
 - [ ] AED 96,580
 - [ ] AED 24,000
 - [x] AED 72,580
 - [ ] AED 120,580
 
-**Explanation:** Buyer's costs: DLD share (2%) = AED 48,000 + Commission share (1%) = AED 24,000 + Admin = AED 580. Total = AED 72,580. Note: If DLD split 50/50, buyer pays 2% of 4% total.
+**Explanation:** Buyer's costs: DLD share (50% of 4% = 2% of property value) = AED 2,400,000 × 2% = AED 48,000 + Commission share (1% of property value) = AED 24,000 + Admin fee = AED 580. Total = AED 48,000 + AED 24,000 + AED 580 = AED 72,580.
 
 ---
 

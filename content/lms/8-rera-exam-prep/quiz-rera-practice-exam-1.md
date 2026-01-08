@@ -508,7 +508,7 @@ What is the retention period for broker transaction records under RERA regulatio
 
 A property generates AED 80,000 annual rent with annual expenses of AED 12,000. If the purchase price was AED 1,200,000, what is the net rental yield?
 
-- [ ] 5.67%
+- [ ] 5.00%
 - [x] 5.67%
 - [ ] 6.67%
 - [ ] 7.67%
