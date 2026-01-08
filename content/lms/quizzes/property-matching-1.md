@@ -9,13 +9,19 @@ questions_count: 10
 ai_coach:
   enabled: true
   review_incorrect: true
+topics_covered:
+  - "The Investment Score methodology"
+  - "Gross and net yield calculations"
+  - "Service charge impact by area"
+  - "Total return projections"
+  - "Risk-Reward Matrix application"
 videos: []
 resources: []
 ---
 
 # Property Matching Quiz 1: Yield & ROI Calculations
 
-This quiz assesses your understanding of yield calculations and investment return metrics.
+This quiz assesses your understanding of The Investment Score methodology and yield calculations.
 
 **Passing score:** 80% (8 of 10 correct)  
 **Time limit:** 15 minutes
@@ -24,148 +30,148 @@ This quiz assesses your understanding of yield calculations and investment retur
 
 ## Question 1
 
-A property costs AED 1,500,000 and generates AED 90,000 in annual rent. What is the gross yield?
+What are the three components of The Investment Score methodology?
 
-- A) 5.0%
-- B) 6.0%
-- C) 6.5%
-- D) 7.0%
+- A) Purchase price, rental income, service charges
+- B) Gross yield, net yield, total return
+- C) Location, size, view
+- D) Developer tier, payment plan, completion date
 
 **Correct answer:** B
 
-**Explanation:** Gross yield = (Annual rent / Purchase price) × 100 = (90,000 / 1,500,000) × 100 = 6.0%
+**Explanation:** The Investment Score methodology evaluates every property using three metrics: Gross yield (annual rent / purchase price), Net yield (after operating costs), and Total return (net yield + capital appreciation projection).
 
 ---
 
 ## Question 2
 
-Which of the following costs should be subtracted from gross rental income when calculating net yield?
+A property costs AED 1,350,000 and generates AED 102,000 in annual rent. What is the gross yield?
 
-- A) Service charges only
-- B) Service charges and vacancy allowance only
-- C) Service charges, property management, vacancy allowance, and maintenance reserve
-- D) Purchase costs including DLD fees
+- A) 6.5%
+- B) 7.6%
+- C) 8.2%
+- D) 5.5%
 
-**Correct answer:** C
+**Correct answer:** B
 
-**Explanation:** Net yield accounts for recurring operating costs: service charges, property management fees (if applicable), vacancy allowance, and maintenance reserves. Purchase costs like DLD fees are capital costs, not operating costs.
+**Explanation:** Gross yield = (Annual rent / Purchase price) × 100 = (102,000 / 1,350,000) × 100 = 7.56%, rounded to 7.6%
 
 ---
 
 ## Question 3
 
-A 1,200 sqft apartment has service charges of AED 20 per square foot annually. What is the total annual service charge?
+When calculating net yield, which costs should be subtracted from gross rental income?
 
-- A) AED 20,000
-- B) AED 24,000
-- C) AED 12,000
-- D) AED 2,400
+- A) Service charges only
+- B) Service charges and DLD transfer fees
+- C) Service charges, property management, vacancy allowance, and maintenance reserve
+- D) Service charges, property management, and mortgage payments
 
-**Correct answer:** B
+**Correct answer:** C
 
-**Explanation:** Total service charge = Size × Rate = 1,200 × AED 20 = AED 24,000
+**Explanation:** Net yield accounts for recurring operating costs: service charges, property management fees (typically 5%), vacancy allowance (typically 5%), and maintenance reserves (typically 1% of property value). Purchase costs (DLD fees) and financing costs (mortgage) are capital costs, not operating costs.
 
 ---
 
 ## Question 4
 
-Property A has a gross yield of 7.0%. Property B has a gross yield of 5.5%. Without additional information, which statement is most accurate?
+A 750 sqft apartment in Dubai Marina has service charges of AED 16 per sqft. What is the annual service charge?
 
-- A) Property A is the better investment
-- B) Property B is the better investment
-- C) Gross yield alone cannot determine which is the better investment
-- D) Property A has lower operating costs
+- A) AED 11,250
+- B) AED 12,000
+- C) AED 15,000
+- D) AED 16,000
 
-**Correct answer:** C
+**Correct answer:** B
 
-**Explanation:** Gross yield is useful for quick comparisons but doesn't account for operating costs, capital appreciation potential, location quality, or other factors that affect total return. A property with lower gross yield may have lower costs, better appreciation, or stronger resale liquidity.
+**Explanation:** Annual service charge = Size × Rate = 750 sqft × AED 16/sqft = AED 12,000
 
 ---
 
 ## Question 5
 
-An investor purchases a property for AED 2,000,000. Annual rent is AED 140,000 and annual operating costs total AED 45,000. What is the net yield?
+According to the service charge benchmarks, which area typically has the LOWEST service charges per sqft?
 
-- A) 7.0%
-- B) 4.75%
-- C) 2.25%
-- D) 5.5%
+- A) Palm Jumeirah
+- B) Downtown Dubai
+- C) JVC/JVT
+- D) Dubai Marina
 
-**Correct answer:** B
+**Correct answer:** C
 
-**Explanation:** Net operating income = 140,000 - 45,000 = AED 95,000. Net yield = (95,000 / 2,000,000) × 100 = 4.75%
+**Explanation:** JVC/JVT typically has the lowest service charges at AED 10-14/sqft, compared to Marina (AED 14-25), Downtown (AED 18-35), and Palm (AED 20-45). This significantly impacts net yield calculations.
 
 ---
 
 ## Question 6
 
-A property purchased 3 years ago for AED 1,800,000 is now worth AED 2,200,000. Annual net rental income is AED 75,000. What is the approximate annual total return?
+A property has a gross yield of 8.2% and annual operating costs that represent 38% of rental income. Approximately what is the net yield?
 
-- A) 4.2%
-- B) 7.4%
-- C) 11.5%
-- D) 22.2%
+- A) 5.1%
+- B) 3.1%
+- C) 8.2%
+- D) 6.5%
 
-**Correct answer:** C
+**Correct answer:** A
 
-**Explanation:** Annual capital gain = (2,200,000 - 1,800,000) / 3 = AED 133,333. Annual total return = (75,000 + 133,333) / 1,800,000 × 100 = 11.6% (approximately 11.5%)
+**Explanation:** If costs are 38% of income, net income is 62% of gross income. Net yield ≈ 8.2% × 0.62 = 5.08%, approximately 5.1%.
 
 ---
 
 ## Question 7
 
-When presenting yield figures to a sophisticated investor, which approach is most appropriate?
+When comparing a Marina 1BR (4.9% net yield, 6% projected appreciation) to a JVC 2BR (5.1% net yield, 4% projected appreciation), which has the higher total return?
 
-- A) Quote gross yield as it's higher and more impressive
-- B) Quote net yield without showing the calculation
-- C) Quote both gross and net yield, showing how you arrived at each figure
-- D) Quote whichever yield makes the property look best
+- A) JVC 2BR at 9.1% total return
+- B) Marina 1BR at 10.9% total return
+- C) They are equal
+- D) Cannot be determined
 
-**Correct answer:** C
+**Correct answer:** B
 
-**Explanation:** Transparency builds trust. Show both gross and net yield with your calculations. Sophisticated investors want to see the working and will lose confidence if they later discover the figures were misleading.
+**Explanation:** Marina total return = 4.9% + 6.0% = 10.9%. JVC total return = 5.1% + 4.0% = 9.1%. Marina wins on total return despite lower yield because of stronger appreciation.
 
 ---
 
 ## Question 8
 
-Two apartments have the same purchase price and gross yield, but Property A is in a branded residence with service charges of AED 28/sqft, while Property B is in a standard building with service charges of AED 14/sqft. Both properties are 1,000 sqft. How much more do Property A's service charges cost annually?
+According to the Risk-Reward Matrix, which investment approach is recommended for a conservative investor (e.g., pension fund, retiree)?
 
-- A) AED 7,000
-- B) AED 14,000
-- C) AED 28,000
-- D) AED 42,000
+- A) Off-plan in emerging areas with highest appreciation potential
+- B) Ready property in established areas with focus on yield stability
+- C) Any property with the highest gross yield
+- D) Branded residences for prestige
 
 **Correct answer:** B
 
-**Explanation:** Property A service charges = 1,000 × 28 = AED 28,000. Property B service charges = 1,000 × 14 = AED 14,000. Difference = AED 14,000.
+**Explanation:** Conservative investors should focus on ready properties in established areas (Marina, Downtown, Palm) with emphasis on net yield stability and long-term hold (7-10 years). This minimises construction risk and provides predictable income.
 
 ---
 
 ## Question 9
 
-An investor says: "I need at least 5% net yield." You've found a property priced at AED 1,200,000 with annual rent of AED 78,000 and estimated annual operating costs of AED 15,000. Does this property meet their requirement?
+Two apartments have identical AED 1,800,000 prices and AED 108,000 annual rent. Property A has service charges of AED 14/sqft (1,100 sqft), Property B has service charges of AED 28/sqft (1,100 sqft). What is the net yield difference?
 
-- A) Yes, the net yield is 5.25%
-- B) No, the net yield is 4.8%
-- C) Yes, the gross yield is 6.5%
-- D) Cannot be determined from this information
+- A) 0.4%
+- B) 0.8%
+- C) 1.2%
+- D) No difference — both have same rent
 
-**Correct answer:** A
+**Correct answer:** B
 
-**Explanation:** Net operating income = 78,000 - 15,000 = AED 63,000. Net yield = (63,000 / 1,200,000) × 100 = 5.25%. This exceeds the 5% requirement.
+**Explanation:** Property A costs: 1,100 × 14 = AED 15,400. Property B costs: 1,100 × 28 = AED 30,800. Difference: AED 15,400. This is 0.86% of purchase price (15,400/1,800,000), approximately 0.8% yield difference.
 
 ---
 
 ## Question 10
 
-Which of the following is NOT typically included when calculating net yield?
+An investor asks: "What yield should I expect?" Which response best demonstrates The Investment Score approach?
 
-- A) Annual service charges
-- B) Property management fees
-- C) DLD transfer fees (4%)
-- D) Vacancy allowance
+- A) "Dubai yields are typically 6-7%"
+- B) "This property yields about 5%"
+- C) "The gross yield is 7.6%. After service charges of AED 12,000, management at 5%, and vacancy buffer, the net yield is 4.9%. With conservative 6% appreciation, total return is 10.9%."
+- D) "Higher than London or Singapore"
 
 **Correct answer:** C
 
-**Explanation:** DLD transfer fees are a one-time purchase cost, not a recurring operating expense. Net yield calculations include recurring costs: service charges, property management, vacancy allowance, and maintenance. Purchase costs affect total investment amount but not ongoing yield.
+**Explanation:** The Investment Score approach requires presenting all three metrics: gross yield, net yield (with cost breakdown), and total return (including appreciation projection). Transparency and showing calculations builds trust with sophisticated investors.
