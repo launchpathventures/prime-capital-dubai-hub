@@ -311,7 +311,7 @@ const quizData: Record<string, {
         options: [
           { text: "Dubai has higher stamp duty than Singapore", correct: false },
           { text: "Both markets have similar transaction costs around 4%", correct: false },
-          { text: "Dubai's 4% DLD fee is lower than Singapore's 25-30% ABSD for foreigners", correct: true },
+          { text: "Dubai's 4% DLD fee is far lower than Singapore's 60% ABSD for foreigners", correct: true },
           { text: "Singapore has no foreign buyer restrictions unlike Dubai", correct: false },
         ],
         explanation: "Singapore imposes Additional Buyer Stamp Duty (ABSD) of 60% for foreign buyers, making Dubai's 4% DLD registration fee dramatically more accessible. This is a powerful comparison for Singapore-based investors.",
