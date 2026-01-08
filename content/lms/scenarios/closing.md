@@ -334,10 +334,11 @@ An investor wants to purchase multiple units as part of a portfolio. The closing
 
 ### Client Persona
 **Name:** Elizabeth Huang  
-**Background:** Taiwanese family office manager, 48, buying 3 units  
+**Background:** Taiwanese family office manager, 48, buying 3 units, manages AED 150M portfolio for family business  
 **Motivation:** Portfolio allocation, wants efficiency  
 **Communication style:** Professional, expects competent handling  
-**Concerns:** Efficient process for multiple units, any bulk considerations
+**Concerns:** Efficient process for multiple units, any bulk considerations  
+**Source of wealth:** Family manufacturing business (electronics), manages investment arm
 
 ### Consultant Objective
 Facilitate multi-unit purchase efficiently, address portfolio-level considerations, and ensure smooth execution.

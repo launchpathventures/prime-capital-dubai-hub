@@ -633,10 +633,11 @@ A client says the property is too expensive. This could mean it's above their bu
 
 ### Client Persona
 **Name:** Sarah Mitchell  
-**Background:** British marketing director, 38, budget-conscious  
+**Background:** British marketing director, 38, budget-conscious, works for tech company in Dubai  
 **Motivation:** Interested but feels it's overpriced  
 **Communication style:** Direct, expects value for money  
-**Concerns:** Overpaying, value for money, comparison to alternatives
+**Concerns:** Overpaying, value for money, comparison to alternatives  
+**Decision-making style:** Analytical comparison shopper, needs to understand value proposition, takes 2-3 weeks to decide after seeing options
 
 ### Consultant Objective
 Understand what "too expensive" means to them, address value perception, and find a path forward.

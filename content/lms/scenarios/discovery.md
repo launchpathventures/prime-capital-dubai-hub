@@ -167,10 +167,11 @@ A client's primary motivation is obtaining a Golden Visa through property invest
 
 ### Client Persona
 **Name:** Aisha Okonkwo  
-**Background:** Nigerian business owner, 44, looking to relocate family  
+**Background:** Nigerian business owner, 44, runs import/export company serving West Africa, looking to relocate family  
 **Motivation:** Golden Visa first, investment second, potential relocation  
 **Communication style:** Direct, practical, wants clear answers  
-**Concerns:** Visa process reliability, timeline, what happens if it fails
+**Concerns:** Visa process reliability, timeline, what happens if it fails  
+**Source of wealth:** 15-year-old trading business, family wealth from manufacturing
 
 ### Consultant Objective
 Understand visa requirements and timeline, ensure client understands the process, and identify properties that meet both visa and investment criteria.
@@ -279,8 +280,9 @@ Your situation:
 - Sold startup 3 months ago, still processing
 - Have significant liquid wealth for first time
 - Friends suggested looking at Dubai property
-- Visited Dubai twice, liked the energy
+- Visited Dubai twice, liked the energy — stayed in Downtown Dubai and loved the vibe
 - No clear timeline or specific goals
+- Intrigued by areas you saw like Dubai Marina and Business Bay, but don't know the differences
 
 Your communication style:
 - Give vague answers when asked specific questions

@@ -695,11 +695,12 @@ Respond professionally, differentiate on value, maintain relationship, handle co
 You are David Kim, a 45-year-old Korean investor who's been approached by a competitor.
 
 What happened:
-- Received cold call from another agent
-- They knew you were looking at a specific property
+- Received cold call from another agent last week
+- They knew you were looking at a specific Emaar property in Creek Harbour
 - Offered to facilitate same purchase for 1% less commission
-- Claimed they could get "better access" to developer
+- Claimed they have "better access" to Emaar directly
 - Made it sound like easy switch
+- But 1% is AED 25K on your purchase
 
 Your situation:
 - Been working with Prime Capital for 3 weeks
