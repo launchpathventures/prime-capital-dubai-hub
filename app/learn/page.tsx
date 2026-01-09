@@ -23,7 +23,37 @@ import {
   FileTextIcon,
   MessageSquareIcon,
   HeartHandshakeIcon,
+  GraduationCapIcon,
+  TargetIcon,
 } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+
+// -----------------------------------------------------------------------------
+// User Data Fetching
+// -----------------------------------------------------------------------------
+
+async function getUserName(): Promise<string> {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      const displayName =
+        user.user_metadata?.display_name ??
+        user.user_metadata?.full_name ??
+        user.user_metadata?.name ??
+        user.email?.split("@")[0] ??
+        "there"
+      return displayName
+    }
+  } catch {
+    // Fall through to default
+  }
+
+  return "there"
+}
 
 // -----------------------------------------------------------------------------
 // Competency Data (mock - would come from database)
@@ -31,230 +61,233 @@ import {
 
 const competencies = [
   {
+    slug: "prime-capital-identity",
+    name: "Prime Capital Identity",
+    description: "Who we are and what makes us different",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "45 min",
+    status: "not-started" as const,
+  },
+  {
     slug: "market-intelligence",
     name: "Market Intelligence",
-    description: "Understand Dubai's real estate landscape, regulations, and market dynamics",
-    icon: BarChart3Icon,
-    modules: 8,
-    completedModules: 8,
-    estimatedTime: "4 hours",
-    status: "completed" as const,
+    description: "Why Dubai? Why now?",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "50 min",
+    status: "not-started" as const,
   },
   {
     slug: "client-discovery",
     name: "Client Discovery",
-    description: "Master the art of understanding client needs, goals, and preferences",
-    icon: UsersIcon,
-    modules: 6,
-    completedModules: 4,
-    estimatedTime: "3 hours",
-    status: "in-progress" as const,
+    description: "Understanding client needs",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "50 min",
+    status: "not-started" as const,
   },
   {
     slug: "property-matching",
     name: "Property Matching",
-    description: "Learn to identify and present properties that align with client criteria",
-    icon: HomeIcon,
-    modules: 7,
-    completedModules: 0,
-    estimatedTime: "3.5 hours",
-    status: "not-started" as const,
-  },
-  {
-    slug: "transaction-management",
-    name: "Transaction Management",
-    description: "Navigate the full transaction process from offer to handover",
-    icon: FileTextIcon,
-    modules: 9,
-    completedModules: 0,
-    estimatedTime: "4.5 hours",
+    description: "Connecting clients with opportunities",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "55 min",
     status: "not-started" as const,
   },
   {
     slug: "objection-navigation",
     name: "Objection Navigation",
-    description: "Handle investor concerns with confidence and credibility",
-    icon: MessageSquareIcon,
-    modules: 5,
-    completedModules: 0,
-    estimatedTime: "2.5 hours",
+    description: "Addressing concerns with expertise",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "55 min",
     status: "not-started" as const,
   },
   {
-    slug: "relationship-stewardship",
-    name: "Relationship Stewardship",
-    description: "Build lasting relationships through exceptional service and follow-up",
-    icon: HeartHandshakeIcon,
-    modules: 4,
-    completedModules: 0,
-    estimatedTime: "2 hours",
+    slug: "transaction-excellence",
+    name: "Transaction Excellence",
+    description: "Guiding the process",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "55 min",
+    status: "not-started" as const,
+  },
+  {
+    slug: "relationship-building",
+    name: "Relationship Building",
+    description: "Creating lasting partnerships",
+    behaviours: 5,
+    completedBehaviours: 0,
+    estimatedTime: "40 min",
     status: "not-started" as const,
   },
 ]
 
 // Calculate overall progress
-const totalModules = competencies.reduce((sum, c) => sum + c.modules, 0)
-const completedModules = competencies.reduce((sum, c) => sum + c.completedModules, 0)
-const overallProgress = Math.round((completedModules / totalModules) * 100)
+const totalCompetencies = competencies.length
+const completedCompetencies = competencies.filter((c) => c.status === "completed").length
+const totalBehaviours = competencies.reduce((sum, c) => sum + c.behaviours, 0)
+const completedBehaviours = competencies.reduce((sum, c) => sum + c.completedBehaviours, 0)
+const overallProgress = totalBehaviours > 0 ? Math.round((completedBehaviours / totalBehaviours) * 100) : 0
 
 // -----------------------------------------------------------------------------
 // Page Component
 // -----------------------------------------------------------------------------
 
-export default function LearnDashboardPage() {
-  return (
-    <Container size="lg" className="py-8">
-      <Stack gap="xl">
-        {/* Page Header */}
-        <Stack gap="sm">
-          <Row gap="sm" align="center">
-            <Title size="h2">Learning Dashboard</Title>
-            <Badge variant="outline">
-              {overallProgress}% Complete
-            </Badge>
-          </Row>
-          <Text variant="muted">
-            Welcome to the Prime Capital training platform. Complete all competencies to become certified.
-          </Text>
-        </Stack>
-
-        {/* Progress Overview */}
-        <Card>
-          <CardContent className="pt-6">
-            <Grid cols={4} gap="lg">
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <TrendingUpIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Overall Progress</Text>
-                </Row>
-                <Title size="h3">{overallProgress}%</Title>
-                <Progress value={overallProgress} className="h-2" />
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <BookOpenIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Modules Completed</Text>
-                </Row>
-                <Title size="h3">{completedModules}/{totalModules}</Title>
-                <Text size="xs" variant="muted">modules across all competencies</Text>
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <ClockIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Time Remaining</Text>
-                </Row>
-                <Title size="h3">~16 hrs</Title>
-                <Text size="xs" variant="muted">estimated to completion</Text>
-              </Stack>
-              
-              <Stack gap="xs">
-                <Row gap="xs" align="center">
-                  <CheckCircleIcon className="h-4 w-4 text-primary" />
-                  <Text size="sm" variant="muted">Certification Status</Text>
-                </Row>
-                <Title size="h3">In Progress</Title>
-                <Text size="xs" variant="muted">complete all competencies</Text>
-              </Stack>
-            </Grid>
-          </CardContent>
-        </Card>
-
-        {/* Competencies Grid */}
-        <Stack gap="md">
-          <Title size="h4">Core Competencies</Title>
-          <Grid cols={3} gap="md">
-            {competencies.map((competency) => (
-              <CompetencyCard key={competency.slug} competency={competency} />
-            ))}
-          </Grid>
-        </Stack>
-
-        {/* Next Up Section */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PlayIcon className="h-5 w-5" />
-              Continue Learning
-            </CardTitle>
-            <CardDescription>
-              Pick up where you left off
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Row gap="md" align="center" justify="between">
-              <Stack gap="xs">
-                <Text weight="medium">Client Discovery</Text>
-                <Text size="sm" variant="muted">
-                  Module 5: Understanding Investment Goals
-                </Text>
-              </Stack>
-              <Button nativeButton={false} render={<Link href="/learn/client-discovery/understanding-investment-goals" />}>
-                Continue
-              </Button>
-            </Row>
-          </CardContent>
-        </Card>
-      </Stack>
-    </Container>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// Competency Card Component
-// -----------------------------------------------------------------------------
-
-interface CompetencyCardProps {
-  competency: typeof competencies[0]
-}
-
-function CompetencyCard({ competency }: CompetencyCardProps) {
-  const progress = Math.round((competency.completedModules / competency.modules) * 100)
-  const Icon = competency.icon
-  
-  const statusConfig = {
-    completed: { label: "Completed", variant: "default" as const, color: "text-success" },
-    "in-progress": { label: "In Progress", variant: "secondary" as const, color: "text-warning" },
-    "not-started": { label: "Not Started", variant: "outline" as const, color: "text-muted-foreground" },
-  }
-  
-  const { label, variant, color } = statusConfig[competency.status]
+export default async function LearnDashboardPage() {
+  const userName = await getUserName()
 
   return (
-    <Link href={`/learn/${competency.slug}`}>
-      <Card className="competency-card h-full hover:border-primary/50 transition-colors cursor-pointer">
-        <CardHeader className="pb-2">
-          <Row gap="sm" align="start" justify="between">
-            <div className={`p-2 rounded-lg bg-primary/10 ${color}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <Badge variant={variant}>{label}</Badge>
-          </Row>
-        </CardHeader>
-        <CardContent>
-          <Stack gap="sm">
-            <Stack gap="xs">
-              <Text weight="semibold">{competency.name}</Text>
-              <Text size="sm" variant="muted" className="line-clamp-2">
-                {competency.description}
-              </Text>
-            </Stack>
-            
-            <Stack gap="xs">
-              <Row gap="sm" align="center" justify="between">
-                <Text size="xs" variant="muted">
-                  {competency.completedModules}/{competency.modules} modules
-                </Text>
-                <Text size="xs" variant="muted">
-                  {competency.estimatedTime}
-                </Text>
-              </Row>
-              <Progress value={progress} className="h-1.5" />
-            </Stack>
+    <div className="min-h-[calc(100vh-3.5rem)]" style={{ backgroundColor: "#f5f5f5" }}>
+      <Container size="lg" className="py-8 sm:py-12">
+        <Stack gap="xl">
+          {/* Welcome Section */}
+          <Stack gap="md" className="text-center max-w-2xl mx-auto">
+            <Title size="h1" className="text-4xl sm:text-5xl">
+              Welcome back, {userName}
+            </Title>
+            <Text size="lg" variant="muted">
+              Continue your journey to becoming a Prime Capital expert.
+            </Text>
           </Stack>
-        </CardContent>
-      </Card>
-    </Link>
+
+          {/* New to Platform Card */}
+          <Card className="border-2">
+            <CardContent className="py-6">
+              <Row gap="lg" align="center" justify="between" className="flex-col sm:flex-row">
+                <Row gap="md" align="center">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted shrink-0">
+                    <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <Stack gap="xs">
+                    <Text weight="semibold" size="lg">
+                      New to the platform?
+                    </Text>
+                    <Text size="sm" variant="muted">
+                      Take a quick 2-minute tour to understand how your training works.
+                    </Text>
+                  </Stack>
+                </Row>
+                <Button variant="secondary" className="shrink-0">
+                  <PlayIcon className="h-4 w-4 mr-2" />
+                  Start Tour
+                </Button>
+              </Row>
+            </CardContent>
+          </Card>
+
+          {/* Progress Overview */}
+          <Stack gap="md">
+            <Title size="h3">Your Progress</Title>
+            <Grid cols={3} gap="md" className="grid-cols-1 sm:grid-cols-3">
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Stack gap="sm">
+                    <Title size="h2" className="text-4xl">
+                      {overallProgress}%
+                    </Title>
+                    <Text variant="muted">Overall Complete</Text>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Stack gap="sm">
+                    <Title size="h2" className="text-4xl">
+                      {completedCompetencies}/{totalCompetencies}
+                    </Title>
+                    <Text variant="muted">Competencies</Text>
+                  </Stack>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <Stack gap="sm">
+                    <Title size="h2" className="text-4xl">
+                      {completedBehaviours}/{totalBehaviours}
+                    </Title>
+                    <Text variant="muted">Behaviours</Text>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Stack>
+
+          {/* Your Courses */}
+          <Stack gap="md">
+            <Title size="h3">Your Courses</Title>
+            
+            {/* Main Course Card */}
+            <Card className="overflow-hidden">
+              {/* Hero Image */}
+              <div
+                className="h-48 sm:h-64 bg-cover bg-center"
+                style={{
+                  backgroundImage: "url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80')",
+                }}
+              />
+              
+              <CardContent className="pt-6">
+                <Stack gap="md">
+                  <Badge variant="secondary" className="w-fit">
+                    REQUIRED TRAINING
+                  </Badge>
+                  
+                  <Stack gap="sm">
+                    <Title size="h3">Real Estate Consultant Certification</Title>
+                    <Text variant="muted">
+                      Master the 7 core competencies and 35 key behaviours that define a Prime Capital consultant.
+                    </Text>
+                  </Stack>
+
+                  <Row gap="lg" className="flex-wrap">
+                    <Row gap="xs" align="center">
+                      <TargetIcon className="h-4 w-4 text-muted-foreground" />
+                      <Text size="sm" variant="muted">
+                        {totalCompetencies} Competencies
+                      </Text>
+                    </Row>
+                    <Row gap="xs" align="center">
+                      <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
+                      <Text size="sm" variant="muted">
+                        {totalBehaviours} Behaviours
+                      </Text>
+                    </Row>
+                  </Row>
+
+                  <Stack gap="xs">
+                    <Row gap="sm" align="center" justify="between">
+                      <Text size="sm" variant="muted">
+                        Progress
+                      </Text>
+                      <Text size="sm" variant="muted">
+                        Not started
+                      </Text>
+                    </Row>
+                    <Progress value={overallProgress} className="h-2" />
+                  </Stack>
+
+                  <div className="pt-2">
+                    <Button size="lg" nativeButton={false} render={<Link href="/learn/prime-capital-identity" />}>
+                      <PlayIcon className="h-4 w-4 mr-2" />
+                      Start Course
+                    </Button>
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Stack>
+      </Container>
+    </div>
   )
 }
+
+// -----------------------------------------------------------------------------
+// Competency Card Component (Removed - no longer used in dashboard)
+// -----------------------------------------------------------------------------
+
