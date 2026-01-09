@@ -272,7 +272,7 @@ export default async function LearnDashboardPage() {
                   </Stack>
 
                   <div className="pt-2">
-                    <Button size="lg" nativeButton={false} render={<Link href="/learn/prime-capital-identity" />}>
+                    <Button size="lg" nativeButton={false} render={<Link href="/learn/course" />}>
                       <PlayIcon className="h-4 w-4 mr-2" />
                       Start Course
                     </Button>
