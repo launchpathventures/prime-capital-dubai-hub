@@ -3,8 +3,8 @@ title: "RERA Exam Preparation"
 slug: "rera-exam-prep"
 competencyNumber: 8
 description: "Master the knowledge required to pass the RERA broker licensing exam on your first attempt."
-moduleCount: 4
-estimatedTime: "3-4 hours"
+moduleCount: 8
+estimatedTime: "5-6 hours"
 icon: "graduation-cap"
 color: "amber"
 modules:
@@ -28,6 +28,26 @@ modules:
     slug: "landlord-tenant"
     type: "Knowledge"
     duration: "45 min"
+  - number: "8.5"
+    title: "Property Registration & Transfer"
+    slug: "property-registration"
+    type: "Knowledge + Practice"
+    duration: "35 min"
+  - number: "8.6"
+    title: "Off-Plan Sales & Escrow"
+    slug: "offplan-escrow"
+    type: "Knowledge + Practice"
+    duration: "40 min"
+  - number: "8.7"
+    title: "Valuation & Calculations"
+    slug: "valuation-calculations"
+    type: "Skills + Practice"
+    duration: "45 min"
+  - number: "8.8"
+    title: "Exam Strategies & Time Management"
+    slug: "exam-strategies"
+    type: "Skills + Practice"
+    duration: "30 min"
 ---
 
 ## What You'll Learn
