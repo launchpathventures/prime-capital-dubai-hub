@@ -1,3 +1,23 @@
+---
+title: "Objection Scenarios"
+slug: "objections"
+type: "scenario"
+description: "AI roleplay training scenarios covering the full range of concerns investors raise. Effective objection handling acknowledges the validity of concerns and provides substantive responses."
+competencies: ["objection-navigation", "market-intelligence"]
+difficulty: "mixed"
+estimatedDuration: "6-8 hours"
+objectives:
+  - "Master market cycle discussion for bubble concerns"
+  - "Develop track record presentation skills for developer delays"
+  - "Build complete cost transparency capabilities"
+  - "Practice professional differentiation against competition"
+  - "Learn graceful probing for hesitation handling"
+  - "Handle comprehensive exit scenario coverage"
+scenarioCount: 20
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # Objection Scenarios
 ## Prime Capital — AI Roleplay Training
 

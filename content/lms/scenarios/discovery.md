@@ -1,3 +1,23 @@
+---
+title: "Discovery Scenarios"
+slug: "discovery"
+type: "scenario"
+description: "AI roleplay training scenarios focused on understanding investor needs, motivations, and constraints. Effective discovery separates qualified prospects from casual enquirers."
+competencies: ["client-discovery", "market-intelligence", "property-matching"]
+difficulty: "mixed"
+estimatedDuration: "5-6 hours"
+objectives:
+  - "Practice family needs assessment for end-user buyers"
+  - "Develop data-driven conversation skills for pure investors"
+  - "Master process expertise for visa-seekers"
+  - "Build skills to clarify undefined client needs"
+  - "Learn diplomatic qualification techniques"
+  - "Handle sensitive guidance for emotional situations"
+scenarioCount: 15
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # Discovery Scenarios
 ## Prime Capital — AI Roleplay Training
 
