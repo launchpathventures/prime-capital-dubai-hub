@@ -5,3 +5,4 @@
  */
 
 export { useHashState, useSimpleHashState } from "./use-hash-state"
+export { useLearningProgress } from "./use-learning-progress"

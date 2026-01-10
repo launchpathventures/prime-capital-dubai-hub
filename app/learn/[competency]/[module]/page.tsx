@@ -21,6 +21,7 @@ import {
   ResourceList,
   KnowledgeCheckCTA,
 } from "@/components/lms"
+import { markModuleStarted } from "@/lib/actions/learning"
 
 interface PageProps {
   params: Promise<{ 
@@ -41,6 +42,14 @@ export default async function ModulePage({ params }: PageProps) {
   
   if (!competency || !module) {
     notFound()
+  }
+  
+  // Mark module as started (tracks when user views module)
+  try {
+    await markModuleStarted(module.id)
+  } catch (error) {
+    // Fail silently - progress tracking shouldn't break the page
+    console.error("Failed to mark module as started:", error)
   }
   
   // Extract from flexible frontmatter (JSONB)
