@@ -7,18 +7,19 @@
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Container, Stack, Row, Text, Title } from "@/components/core"
+import { Stack, Row, Text, Title } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CompetencySidebar } from "../../_surface/competency-sidebar"
+import { LearnShell } from "../../_surface"
+import { getLearnUser } from "@/lib/learning"
 import { ChevronRightIcon, BookOpenIcon } from "lucide-react"
 
 // -----------------------------------------------------------------------------
 // Competency Data
 // -----------------------------------------------------------------------------
 
-const competencies = [
+const competenciesData = [
   {
     id: 1,
     slug: "prime-capital-identity",
@@ -104,6 +105,21 @@ const competencies = [
     ],
   },
 ]
+
+// Transform data for sidebar component
+function getCompetenciesForSidebar() {
+  return competenciesData.map((comp) => ({
+    slug: comp.slug,
+    name: comp.name,
+    number: comp.id,
+    locked: comp.behaviours.every(b => b.locked),
+    modules: comp.behaviours.map((b) => ({
+      slug: b.slug,
+      title: b.title,
+      status: b.locked ? "locked" as const : "current" as const,
+    })),
+  }))
+}
 
 // Mock content data - in production this would come from CMS/database
 const behaviourContent: Record<string, Record<string, {
@@ -274,8 +290,9 @@ interface PageProps {
 
 export default async function BehaviourPage({ params }: PageProps) {
   const { competency: competencySlug, module: behaviourSlug } = await params
+  const user = await getLearnUser()
 
-  const competency = competencies.find((c) => c.slug === competencySlug)
+  const competency = competenciesData.find((c) => c.slug === competencySlug)
   if (!competency) {
     notFound()
   }
@@ -290,79 +307,67 @@ export default async function BehaviourPage({ params }: PageProps) {
     notFound()
   }
 
-  // Find next behaviour
-  const currentIndex = competency.behaviours.findIndex((b) => b.slug === behaviourSlug)
-  const nextBehaviour = currentIndex < competency.behaviours.length - 1 
-    ? competency.behaviours[currentIndex + 1]
-    : null
+  const competencies = getCompetenciesForSidebar()
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)]">
-      {/* Sidebar */}
-      <CompetencySidebar
-        competencies={competencies}
-        currentCompetency={competencySlug}
-        currentBehaviour={behaviourSlug}
-        completedBehaviours={0}
-        totalBehaviours={35}
-      />
+    <LearnShell 
+      user={user}
+      showSidebar={true}
+      competencies={competencies}
+      currentCompetency={competencySlug}
+      currentModule={behaviourSlug}
+    >
+      <Stack gap="xl">
+        {/* Breadcrumb */}
+        <Row gap="xs" align="center" className="text-sm">
+          <Link href="/learn/course" className="text-muted-foreground hover:text-foreground">
+            <ChevronRightIcon className="h-4 w-4" />
+          </Link>
+          <Text size="sm" variant="muted">BACK TO COMPETENCY OVERVIEW</Text>
+        </Row>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto" style={{ backgroundColor: "#f5f5f5" }}>
-        <Container size="md" className="py-8">
-          <Stack gap="xl">
-            {/* Breadcrumb */}
-            <Row gap="xs" align="center" className="text-sm">
-              <Link href="/learn/course" className="text-muted-foreground hover:text-foreground">
-                <ChevronRightIcon className="h-4 w-4" />
-              </Link>
-              <Text size="sm" variant="muted">BACK TO COMPETENCY OVERVIEW</Text>
-            </Row>
+        {/* Header */}
+        <Stack gap="sm">
+          <Text size="sm" variant="muted" className="uppercase tracking-wider">
+            Competency {competency.id}
+          </Text>
+          <Title size="h1">{content.title}</Title>
+          <Text size="lg" className="italic text-muted-foreground">
+            "{content.subtitle}"
+          </Text>
+        </Stack>
 
-            {/* Header */}
-            <Stack gap="sm">
-              <Text size="sm" variant="muted" className="uppercase tracking-wider">
-                Competency {competency.id}
-              </Text>
-              <Title size="h1">{content.title}</Title>
-              <Text size="lg" className="italic text-muted-foreground">
-                "{content.subtitle}"
-              </Text>
+        {/* Content */}
+        <Card>
+          <CardContent className="pt-8 pb-8">
+            {content.content}
+          </CardContent>
+        </Card>
+
+        {/* Knowledge Check CTA */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6 pb-6 text-center">
+            <Stack gap="md">
+              <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+                <BookOpenIcon className="h-6 w-6 text-primary" />
+              </div>
+              <Stack gap="sm">
+                <Text weight="semibold" size="lg">Ready to test your knowledge?</Text>
+                <Text size="sm" variant="muted">
+                  Complete a short quiz to demonstrate your understanding of this behaviour.
+                </Text>
+              </Stack>
+              <div>
+                <Button size="lg" nativeButton={false} render={<Link href={`/learn/quiz/${competencySlug}-${behaviourSlug}`} />}>
+                  CONTINUE TO KNOWLEDGE CHECK
+                  <ChevronRightIcon className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </Stack>
-
-            {/* Content */}
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                {content.content}
-              </CardContent>
-            </Card>
-
-            {/* Knowledge Check CTA */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6 pb-6 text-center">
-                <Stack gap="md">
-                  <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-                    <BookOpenIcon className="h-6 w-6 text-primary" />
-                  </div>
-                  <Stack gap="sm">
-                    <Text weight="semibold" size="lg">Ready to test your knowledge?</Text>
-                    <Text size="sm" variant="muted">
-                      Complete a short quiz to demonstrate your understanding of this behaviour.
-                    </Text>
-                  </Stack>
-                  <div>
-                    <Button size="lg" nativeButton={false} render={<Link href={`/learn/quiz/${competencySlug}-${behaviourSlug}`} />}>
-                      CONTINUE TO KNOWLEDGE CHECK
-                      <ChevronRightIcon className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Container>
-      </main>
-    </div>
+          </CardContent>
+        </Card>
+      </Stack>
+    </LearnShell>
   )
 }
 
@@ -373,7 +378,7 @@ export default async function BehaviourPage({ params }: PageProps) {
 export async function generateStaticParams() {
   const params: { competency: string; module: string }[] = []
 
-  for (const competency of competencies) {
+  for (const competency of competenciesData) {
     for (const behaviour of competency.behaviours) {
       if (!behaviour.locked) {
         params.push({

@@ -5,4 +5,5 @@
  */
 
 export { LearnShell } from "./learn-shell"
-export { CompetencySidebar } from "./competency-sidebar"
+export { LMSHeader } from "./lms-header"
+export { LearnSidebar } from "./learn-sidebar"

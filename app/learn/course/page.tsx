@@ -20,6 +20,8 @@ import {
   LightbulbIcon,
   MessageSquareIcon,
 } from "lucide-react"
+import { LearnShell } from "../_surface"
+import { getLearnUser } from "@/lib/learning"
 
 // -----------------------------------------------------------------------------
 // Course Data
@@ -113,9 +115,12 @@ const courseData = {
 // Page Component
 // -----------------------------------------------------------------------------
 
-export default function CourseHomePage() {
+export default async function CourseHomePage() {
+  const user = await getLearnUser()
+
   return (
-    <div className="min-h-screen">
+    <LearnShell user={user}>
+      <div className="min-h-screen">
       {/* Hero Section */}
       <div
         className="relative h-[400px] bg-cover bg-center"
@@ -329,6 +334,7 @@ export default function CourseHomePage() {
           </Stack>
         </Container>
       </div>
-    </div>
+      </div>
+    </LearnShell>
   )
 }
