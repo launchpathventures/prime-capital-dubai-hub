@@ -1,16 +1,13 @@
 ---
 title: "Property Matching Quiz 2: Payment Plan Structures"
-quiz_id: "property-matching-2"
+slug: "property-matching-2"
+quizNumber: 2
 competency: "property-matching"
-covers_module: "4.4"
-passing_score: 80
-time_limit_minutes: 15
-questions_count: 10
-ai_coach:
-  enabled: true
-  review_incorrect: true
-videos: []
-resources: []
+relatedModule: "4.4-payment-plan-analysis"
+description: "Assess your understanding of off-plan payment plans and how to match them to investor needs."
+passingScore: 80
+questionCount: 10
+estimatedDuration: "15 minutes"
 ---
 
 # Property Matching Quiz 2: Payment Plan Structures
