@@ -147,6 +147,131 @@ export async function getCompetenciesWithProgress(
   })
 }
 
+/**
+ * Get all competencies with progress for the current user (or zero progress if unauthenticated).
+ * This version automatically gets the current user from the session.
+ * Returns fallback data if database is unavailable.
+ */
+export async function getAllCompetenciesWithProgress(): Promise<CompetencyWithProgress[]> {
+  try {
+    const supabase = await createClient()
+    
+    // Get current user (if authenticated)
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // Get competencies with modules
+    const { data: competencies, error: compError } = await supabase
+      .from("competencies")
+      .select(
+        `
+        *,
+        learning_modules (*)
+      `
+      )
+      .order("display_order", { ascending: true })
+
+    if (compError) {
+      console.error("Error fetching competencies:", compError)
+      return getFallbackCompetencies()
+    }
+    if (!competencies || competencies.length === 0) {
+      return getFallbackCompetencies()
+    }
+
+    // If no user, return with zero progress
+    if (!user) {
+      return competencies.map((comp) => {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        const modules = (comp.learning_modules || []).map((mod: any) => ({
+          ...transformModule(mod),
+          progress: null,
+          isCompleted: false,
+          isLocked: false,
+        }))
+        /* eslint-enable @typescript-eslint/no-explicit-any */
+
+        return {
+          ...transformCompetency(comp),
+          modules,
+          completedCount: 0,
+          totalCount: modules.length,
+          progressPercent: 0,
+        }
+      })
+    }
+
+    // Get user's progress
+    const { data: progress, error: progError } = await supabase
+      .from("learning_progress")
+      .select("*")
+      .eq("user_id", user.id)
+
+    if (progError) {
+      console.error("Error fetching progress:", progError)
+    }
+
+    const progressMap = new Map(progress?.map((p) => [p.module_id, p]) || [])
+
+    return competencies.map((comp) => {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const modules = (comp.learning_modules || []).map((mod: any) => ({
+        ...transformModule(mod),
+        progress: progressMap.get(mod.id)
+          ? transformProgress(progressMap.get(mod.id)!)
+          : null,
+        isCompleted: progressMap.get(mod.id)?.status === "completed",
+        isLocked: false,
+      }))
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+
+      const completedCount = modules.filter((m: { isCompleted: boolean }) => m.isCompleted).length
+
+      return {
+        ...transformCompetency(comp),
+        modules,
+        completedCount,
+        totalCount: modules.length,
+        progressPercent:
+          modules.length > 0
+            ? Math.round((completedCount / modules.length) * 100)
+            : 0,
+      }
+    })
+  } catch (error) {
+    console.error("Error in getAllCompetenciesWithProgress:", error)
+    return getFallbackCompetencies()
+  }
+}
+
+/**
+ * Returns fallback competency data when database is unavailable.
+ */
+function getFallbackCompetencies(): CompetencyWithProgress[] {
+  const fallbackData = [
+    { slug: "prime-capital-identity", name: "Prime Capital Identity", description: "Who we are and what makes us different" },
+    { slug: "market-intelligence", name: "Market Intelligence", description: "Why Dubai? Why now?" },
+    { slug: "client-discovery", name: "Client Discovery", description: "Understanding client needs" },
+    { slug: "property-matching", name: "Property Matching", description: "Connecting clients with opportunities" },
+    { slug: "objection-navigation", name: "Objection Navigation", description: "Addressing concerns with expertise" },
+    { slug: "transaction-excellence", name: "Transaction Excellence", description: "Guiding the process" },
+    { slug: "relationship-building", name: "Relationship Building", description: "Creating lasting partnerships" },
+  ]
+  
+  return fallbackData.map((comp, index) => ({
+    id: `fallback-${index}`,
+    slug: comp.slug,
+    name: comp.name,
+    description: comp.description,
+    displayOrder: index,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    modules: [],
+    completedCount: 0,
+    totalCount: 5,
+    progressPercent: 0,
+  }))
+}
+
 // =============================================================================
 // MODULE QUERIES
 // =============================================================================
