@@ -1,20 +1,15 @@
 ---
-quizId: "transaction-management-3"
 title: "Transaction Management Quiz: MOU & Form F"
-competency: 5
-module: 5.9
+slug: "transaction-management-3"
+quizNumber: 3
+competency: "transaction-management"
+relatedModule: "5.9-mou-formf"
 description: "Test your understanding of secondary market documentation, including Form F preparation, deposit handling, and completion requirements."
 passingScore: 80
 questionCount: 10
-estimatedDuration: 15
-status: published
-aiCoach:
-  enabled: true
-  personality: "expert-mentor"
-  coachingPoints:
-    - "Form F accuracy prevents problems throughout the transaction"
-    - "Deposit terms must be crystal clear"
-    - "If you score below 80%, review Module 5.9 before retaking"
+estimatedDuration: "15 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Transaction Management Quiz: MOU & Form F

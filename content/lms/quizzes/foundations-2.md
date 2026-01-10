@@ -1,20 +1,15 @@
 ---
-quizId: "foundations-2"
 title: "Foundations Quiz: Daily Workflow & Productivity"
-competency: 0
-module: 0.5
+slug: "foundations-2"
+quizNumber: 2
+competency: "foundations"
+relatedModule: "0.5-daily-workflow"
 description: "Test your understanding of daily workflows, time management, CRM discipline, and productivity habits for real estate consultants."
 passingScore: 80
 questionCount: 10
-estimatedDuration: 15
-status: published
-aiCoach:
-  enabled: true
-  personality: "performance-coach"
-  coachingPoints:
-    - "Knowing the system is step one — implementing it daily is what matters"
-    - "These habits separate successful consultants from struggling ones"
-    - "If you score below 80%, review the workflow section carefully"
+estimatedDuration: "15 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Foundations Quiz: Daily Workflow & Productivity

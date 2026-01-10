@@ -1,11 +1,15 @@
 ---
 title: "Failure Scenarios & Resilience Quiz"
 slug: "objection-navigation-3"
-quiz_id: "objection-navigation-3"
-module: "6.7-failure-resilience"
+quizNumber: 3
 competency: "objection-navigation"
-passing_score: 80
-time_limit_minutes: 10
+relatedModule: "6.7-failure-resilience"
+description: "Test your understanding of failure scenarios and resilience practices."
+passingScore: 80
+questionCount: 10
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 questions:
   - id: "q1"
     type: "multiple-choice"

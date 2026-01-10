@@ -1,20 +1,15 @@
 ---
-quizId: "transaction-management-1"
 title: "Transaction Management Quiz: Off-Plan Journey"
-competency: 5
-module: 5.1
+slug: "transaction-management-1"
+quizNumber: 1
+competency: "transaction-management"
+relatedModule: "5.1-offplan-journey"
 description: "Test your understanding of the off-plan property purchase process from EOI through title deed issuance."
 passingScore: 80
 questionCount: 10
-estimatedDuration: 15
-status: published
-aiCoach:
-  enabled: true
-  personality: "expert-mentor"
-  coachingPoints:
-    - "Off-plan transactions follow a specific sequence — know each stage"
-    - "Timing and documentation are critical for smooth transactions"
-    - "If you score below 80%, review Module 5.1 before retaking"
+estimatedDuration: "15 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Transaction Management Quiz: Off-Plan Journey
