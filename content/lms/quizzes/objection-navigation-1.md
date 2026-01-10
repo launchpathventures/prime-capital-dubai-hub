@@ -37,17 +37,17 @@ questions:
 
   - id: "q3"
     type: "multiple-choice"
-    question: "What is the primary purpose of the 'Explore Deeper' step in LAER?"
+    question: "A Dubai-based investor says: 'I've looked at Marina properties before and the developer always delays. I'm not going through that again.' What is the primary purpose of the 'Explore Deeper' step here?"
     options:
-      - text: "To find weaknesses in the investor's argument"
+      - text: "To find weaknesses in the investor's previous experience"
         correct: false
-      - text: "To uncover the real concern behind the stated objection"
+      - text: "To uncover which specific developer disappointed them and whether this project is different"
         correct: true
       - text: "To gather information for your sales pitch"
         correct: false
       - text: "To buy time before responding"
         correct: false
-    explanation: "Most objections have an objection behind them. The stated concern is often not the real concern. Exploring deeper reveals what really needs to be addressed."
+    explanation: "Exploring deeper reveals the real issue. They've been burned before—you need to know by whom and whether your project has the same risk. The stated concern (delays) masks the real concern (not wanting to repeat a bad experience)."
 
   - id: "q4"
     type: "multiple-choice"
@@ -65,17 +65,17 @@ questions:
 
   - id: "q5"
     type: "multiple-choice"
-    question: "An investor asks increasingly specific questions about payment processes and paperwork. What type of objection is this likely to be?"
+    question: "An Indian investor interested in a Sobha Hartland property asks: 'What's the payment plan? When do I need to pay the DLD fees? Can I get a mortgage for this?' What type of objection is this likely to be?"
     options:
-      - text: "Genuine concern"
+      - text: "Genuine concern about financing"
         correct: false
-      - text: "Information gap"
+      - text: "Information gap needing clarification"
         correct: false
-      - text: "Negotiation tactic"
+      - text: "Negotiation tactic to test your knowledge"
         correct: false
       - text: "Buying signal in disguise"
         correct: true
-    explanation: "When objections become more specific and practical—focusing on logistics, timelines, and processes—it often indicates serious interest. The investor is mentally preparing to move forward."
+    explanation: "When objections become more specific and practical—focusing on payment logistics, timelines, and processes—it often indicates serious interest. The investor is mentally preparing to move forward and needs operational details."
 
   - id: "q6"
     type: "multiple-choice"
@@ -93,17 +93,17 @@ questions:
 
   - id: "q7"
     type: "multiple-choice"
-    question: "Which is a sign that you should step back rather than continue addressing an objection?"
+    question: "An investor viewing properties in Business Bay asks: 'What about the traffic? And the construction noise? And are there enough parking spots? And what about...' Which is a sign that you should step back rather than continue addressing objections?"
     options:
       - text: "The investor asks for more details"
         correct: false
-      - text: "Multiple objections are cascading rapidly"
+      - text: "Multiple objections are cascading rapidly without giving you time to respond"
         correct: true
-      - text: "The investor becomes quiet"
+      - text: "The investor becomes quiet and thoughtful"
         correct: false
-      - text: "The objection involves pricing"
+      - text: "The objection involves pricing or location"
         correct: false
-    explanation: "When multiple objections cascade rapidly, the investor may be overwhelmed or the objection is actually 'no' in disguise. Stepping back gives them space and shows respect."
+    explanation: "When multiple objections cascade rapidly without pause, the investor may be overwhelmed or the objections are masking 'no'. Stepping back gives them space: 'I sense there's a lot to consider. Would it help to take some time?'"
 
   - id: "q8"
     type: "multiple-choice"
