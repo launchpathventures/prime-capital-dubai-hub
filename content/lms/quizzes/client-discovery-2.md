@@ -1,11 +1,13 @@
 ---
 title: "Client Discovery Quiz 2"
-quiz_id: "client-discovery-2"
-module: "2.6"
-module_slug: "qualification-framework"
+slug: "client-discovery-2"
+quizNumber: 2
 competency: "client-discovery"
+relatedModule: "2.6-qualification-framework"
 description: "Knowledge check for BANT+ qualification framework and client assessment"
-pass_threshold: 0.8
+passingScore: 80
+questionCount: 12
+estimatedDuration: "18 minutes"
 questions:
   - id: "cd2-q1"
     question: "What does BANT+ stand for in the qualification framework?"
