@@ -7,6 +7,7 @@
 
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import type { Components } from "react-markdown"
 import { Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -17,33 +18,32 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+  const components: Partial<Components> = {
+    // Blockquotes → Script callouts
+    blockquote: BlockquoteComponent as any,
+    
+    // Tables → Styled comparison tables  
+    table: TableComponent as any,
+    th: TableHeaderCell as any,
+    td: TableDataCell as any,
+    
+    // Headings → Section dividers with scenario detection
+    h2: H2Component as any,
+    h3: H3Component as any,
+    h4: H4Component as any,
+    
+    // Lists → Styled with icons
+    ol: OrderedListComponent as any,
+    ul: UnorderedListComponent as any,
+    li: ListItemComponent as any,
+    
+    // Paragraphs with pattern detection (Context:, Approach:)
+    p: ParagraphComponent as any,
+  }
+
   return (
     <div className={cn("lms-content", className)}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          // Blockquotes → Script callouts
-          blockquote: BlockquoteComponent,
-          
-          // Tables → Styled comparison tables  
-          table: TableComponent,
-          th: TableHeaderCell,
-          td: TableDataCell,
-          
-          // Headings → Section dividers with scenario detection
-          h2: H2Component,
-          h3: H3Component,
-          h4: H4Component,
-          
-          // Lists → Styled with icons
-          ol: OrderedListComponent,
-          ul: UnorderedListComponent,
-          li: ListItemComponent,
-          
-          // Paragraphs with pattern detection (Context:, Approach:)
-          p: ParagraphComponent,
-        }}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
     </div>

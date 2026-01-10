@@ -13,11 +13,9 @@ interface KnowledgeCheckCTAProps {
 export function KnowledgeCheckCTA({ quizId }: KnowledgeCheckCTAProps) {
   return (
     <div className="pt-6 border-t">
-      <Button asChild size="lg" className="w-full gap-2">
-        <Link href={`/learn/quiz/${quizId}`}>
-          Continue to Knowledge Check
-          <ArrowRightIcon className="h-4 w-4" />
-        </Link>
+      <Button size="lg" className="w-full gap-2" render={<Link href={`/learn/quiz/${quizId}`} />}>
+        Continue to Knowledge Check
+        <ArrowRightIcon className="h-4 w-4" />
       </Button>
     </div>
   )
