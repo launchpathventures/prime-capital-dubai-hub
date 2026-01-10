@@ -1,12 +1,13 @@
 ---
-title: "Quiz: RERA Laws & Regulations"
+title: "RERA Laws & Regulations"
+slug: "quiz-rera-regulations"
+quizNumber: 3
+competency: "rera-exam-prep"
+relatedModule: "8.3-regulations-licensing"
 description: "Focused 15-question quiz on Dubai real estate laws and regulations. Covers law numbers, time limits, deadlines, penalties, fines, and registration requirements."
-type: quiz
-competency: 8
-prerequisite: ["8.3"]
-questions: 15
-passing_score: 75
-time_limit: 20
+passingScore: 75
+questionCount: 15
+estimatedDuration: "20 minutes"
 ---
 
 # RERA Laws & Regulations Quiz

@@ -1,12 +1,13 @@
 ---
-title: "Quiz: RERA Ethics & Professional Conduct"
+title: "RERA Ethics & Professional Conduct"
+slug: "quiz-rera-ethics"
+quizNumber: 2
+competency: "rera-exam-prep"
+relatedModule: "8.2-ethics-compliance"
 description: "Focused 15-question quiz on ethics and professional conduct for Dubai real estate professionals. Covers code of ethics, conflict of interest, disclosure requirements, and professional standards."
-type: quiz
-competency: 8
-prerequisite: ["8.1"]
-questions: 15
-passing_score: 75
-time_limit: 20
+passingScore: 75
+questionCount: 15
+estimatedDuration: "20 minutes"
 ---
 
 # RERA Ethics & Professional Conduct Quiz

@@ -1,12 +1,13 @@
 ---
-title: "Quiz: RERA Calculations & Valuation"
+title: "RERA Calculations & Valuation"
+slug: "quiz-rera-calculations"
+quizNumber: 1
+competency: "rera-exam-prep"
+relatedModule: "8.7-valuation-calculations"
 description: "Focused 15-question quiz on mathematical calculations for Dubai real estate. Covers DLD fees, commission calculations, area conversions, yield calculations, and service charges."
-type: quiz
-competency: 8
-prerequisite: ["8.2"]
-questions: 15
-passing_score: 75
-time_limit: 20
+passingScore: 75
+questionCount: 15
+estimatedDuration: "20 minutes"
 ---
 
 # RERA Calculations & Valuation Quiz
