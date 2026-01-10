@@ -1,10 +1,11 @@
 ---
 title: "Objection Navigation"
 slug: "objection-navigation"
-competency: 6
+competencyNumber: 6
 description: "Handle investor concerns with confidence and credibility. Transform objections into opportunities for deeper understanding."
 icon: "message-square"
-estimated_hours: 5
+estimatedDuration: "5 hours"
+moduleCount: 7
 modules:
   - 6.1-objection-framework
   - 6.2-market-objections
