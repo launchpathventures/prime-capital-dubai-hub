@@ -1,4 +1,155 @@
-# Competency 4: Property Matching - Quality Audit Report
+# Competency 4: Property Matching - Content Audit
+
+**Audit Date:** January 10, 2026  
+**Auditor:** GitHub Copilot  
+**Modules Audited:** 7 (_index.md, 4.1-4.7) + 2 quizzes
+
+---
+
+## Summary
+
+- Files audited: 10 (1 index, 7 modules, 2 quizzes)
+- Issues fixed: 65
+- No action needed: 0
+
+---
+
+## Fixes Applied
+
+### File: `_index.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 4 | competencyNumber: 4 | Field renamed to match schema |
+| duration_minutes | 180 | estimatedDuration: "3 hours" | Field renamed and formatted as string |
+| module_count | 7 | moduleCount: 7 | Field renamed to camelCase |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed to match schema |
+| focus_areas | (snake_case) | focusAreas (camelCase) | Field renamed to match schema |
+
+### File: `4.1-property-analysis.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "property-analysis" | Required field added |
+| module | "4.1" | moduleNumber: "4.1" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 20 | estimatedDuration: "20 minutes" | Field renamed and formatted |
+| description | (missing) | "Apply a systematic..." | Required field added |
+| order | (missing) | 1 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+
+### File: `4.2-yield-calculations.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "yield-calculations" | Required field added |
+| module | "4.2" | moduleNumber: "4.2" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 30 | estimatedDuration: "30 minutes" | Field renamed and formatted |
+| description | (missing) | "Calculate gross and net..." | Required field added |
+| order | (missing) | 2 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+| assessment.quiz | "property-matching-1" | quiz: "property-matching-1" | Simplified structure |
+
+### File: `4.3-offplan-evaluation.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "offplan-evaluation" | Required field added |
+| module | "4.3" | moduleNumber: "4.3" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| type | "skills-checklist" | "skills" | Invalid type fixed |
+| duration_minutes | 25 | estimatedDuration: "25 minutes" | Field renamed and formatted |
+| description | (missing) | "Evaluate off-plan..." | Required field added |
+| order | (missing) | 3 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+
+### File: `4.4-payment-plan-analysis.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "payment-plan-analysis" | Required field added |
+| module | "4.4" | moduleNumber: "4.4" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 25 | estimatedDuration: "25 minutes" | Field renamed and formatted |
+| description | (missing) | "Explain different payment..." | Required field added |
+| order | (missing) | 4 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+| assessment.quiz | "property-matching-2" | quiz: "property-matching-2" | Simplified structure |
+
+### File: `4.5-secondary-evaluation.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "secondary-evaluation" | Required field added |
+| module | "4.5" | moduleNumber: "4.5" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 20 | estimatedDuration: "20 minutes" | Field renamed and formatted |
+| description | (missing) | "Assess secondary market..." | Required field added |
+| order | (missing) | 5 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+
+### File: `4.6-presentation-skills.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "presentation-skills" | Required field added |
+| module | "4.6" | moduleNumber: "4.6" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 30 | estimatedDuration: "30 minutes" | Field renamed and formatted |
+| description | (missing) | "Present properties..." | Required field added |
+| order | (missing) | 6 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+
+### File: `4.7-comparative-analysis.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| slug | (missing) | "comparative-analysis" | Required field added |
+| module | "4.7" | moduleNumber: "4.7" | Field renamed |
+| competencyNumber | (missing) | 4 | Required field added |
+| duration_minutes | 30 | estimatedDuration: "30 minutes" | Field renamed and formatted |
+| description | (missing) | "Conduct systematic..." | Required field added |
+| order | (missing) | 7 | Required field added |
+| learning_outcomes | (snake_case) | learningObjectives (camelCase) | Field renamed |
+| ai_coach | (snake_case) | aiCoach (camelCase) | Field renamed |
+
+### File: `quizzes/property-matching-1.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_id | "property-matching-1" | slug: "property-matching-1" | Field renamed |
+| quizNumber | (missing) | 1 | Required field added |
+| covers_module | "4.2" | relatedModule: "4.2-yield-calculations" | Field renamed and expanded |
+| passing_score | 80 | passingScore: 80 | Field renamed to camelCase |
+| time_limit_minutes | 15 | estimatedDuration: "15 minutes" | Field renamed and formatted |
+| questions_count | 10 | questionCount: 10 | Field renamed |
+| description | (missing) | "Assess your understanding..." | Required field added |
+
+### File: `quizzes/property-matching-2.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_id | "property-matching-2" | slug: "property-matching-2" | Field renamed |
+| quizNumber | (missing) | 2 | Required field added |
+| covers_module | "4.4" | relatedModule: "4.4-payment-plan-analysis" | Field renamed and expanded |
+| passing_score | 80 | passingScore: 80 | Field renamed to camelCase |
+| time_limit_minutes | 15 | estimatedDuration: "15 minutes" | Field renamed and formatted |
+| questions_count | 10 | questionCount: 10 | Field renamed |
+| description | (missing) | "Assess your understanding..." | Required field added |
+
+---
+
+## Verification Checklist
+
+- [x] `_index.md` has all required fields
+- [x] All 7 module files have all required fields
+- [x] `moduleCount: 7` is accurate
+- [x] Module numbers sequential: 4.1 through 4.7
+- [x] Order values sequential: 1 through 7
+- [x] All slugs match filenames
+- [x] Quiz files have required frontmatter
+- [x] AUDIT.md updated
+
+---
+
+## Previous Quality Audit Report
 
 **Audit Date:** January 9, 2026  
 **Auditor:** GitHub Copilot  

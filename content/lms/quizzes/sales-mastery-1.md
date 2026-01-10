@@ -8,8 +8,6 @@ description: "Test your understanding of first contact fundamentals and the 60-s
 passingScore: 80
 questionCount: 10
 estimatedDuration: "10 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
 ---
 
 # Sales Mastery Quiz 1

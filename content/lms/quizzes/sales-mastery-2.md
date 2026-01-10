@@ -8,8 +8,6 @@ description: "Test your understanding of EOI processes and booking conversion te
 passingScore: 80
 questionCount: 10
 estimatedDuration: "10 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
 ---
 
 # Sales Mastery Quiz 2

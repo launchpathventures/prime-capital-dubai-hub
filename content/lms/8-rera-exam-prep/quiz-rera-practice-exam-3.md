@@ -1,13 +1,13 @@
 ---
-title: "Quiz: RERA Practice Exam 3"
+title: "RERA Practice Exam 3"
+slug: "quiz-rera-practice-exam-3"
+quizNumber: 6
+competency: "rera-exam-prep"
+relatedModule: "8.8-exam-strategies"
 description: "Full 40-question practice exam simulating the official RERA certification test. Covers all exam topics including ethics, licensing, landlord-tenant law, registration, off-plan sales, contracts, valuation, property management, and calculations."
-type: quiz
-competency: 8
-prerequisite: ["8.1", "8.2", "8.3"]
-questions: 40
-passing_score: 75
-time_limit: 60
-exam_simulation: true
+passingScore: 75
+questionCount: 40
+estimatedDuration: "60 minutes"
 ---
 
 # RERA Practice Exam 3

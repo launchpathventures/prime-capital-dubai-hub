@@ -4,12 +4,10 @@ slug: "property-matching-1"
 quizNumber: 1
 competency: "property-matching"
 relatedModule: "4.2-yield-calculations"
-description: "Test your understanding of yield calculations and investment return metrics."
+description: "Assess your understanding of yield calculations and investment return metrics."
 passingScore: 80
 questionCount: 10
 estimatedDuration: "15 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
 ---
 
 # Property Matching Quiz 1: Yield & ROI Calculations

@@ -1,6 +1,6 @@
 # Competency 2: Client Discovery - Content Quality Audit
 
-**Audit Date**: January 9, 2026  
+**Audit Date**: January 10, 2026  
 **Auditor**: AI Content Quality Agent  
 **Competency**: 2 - Client Discovery  
 **Module Count**: 7 modules  
@@ -8,7 +8,147 @@
 
 ---
 
-## Executive Summary
+## Frontmatter Schema Fixes (January 10, 2026)
+
+This audit phase addressed frontmatter field naming to match the required camelCase schema per `lms-content-audit-master.md`.
+
+### Summary
+
+- Files audited: 10 (1 index, 7 modules, 2 quizzes)
+- Issues fixed: 48 field name conversions
+- No action needed: 0
+
+### Fixes Applied
+
+#### File: `_index.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency_number | `competency_number: 2` | `competencyNumber: 2` | Required camelCase |
+| estimated_hours | `estimated_hours: 3.5` | `estimatedDuration: "3.5 hours"` | Required field name and string format |
+| module_count | `module_count: 7` | `moduleCount: 7` | Required camelCase |
+
+#### File: `2.1-investor-personas.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.1"` | `moduleNumber: "2.1"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Knowledge"` | `type: "knowledge"` | Required field name and lowercase |
+| duration_minutes | `duration_minutes: 30` | `estimatedDuration: "30 minutes"` | Required field name and string format |
+| (missing) | — | `order: 1` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+
+#### File: `2.2-discovery-endusers.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.2"` | `moduleNumber: "2.2"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills + Script"` | `type: "skills-script"` | Required field name and format |
+| duration_minutes | `duration_minutes: 35` | `estimatedDuration: "35 minutes"` | Required field name and string format |
+| (missing) | — | `order: 2` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+| coach_walkthrough | `coach_walkthrough:` | `coachWalkthrough:` | Required camelCase |
+
+#### File: `2.3-discovery-investors.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.3"` | `moduleNumber: "2.3"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills + Script"` | `type: "skills-script"` | Required field name and format |
+| duration_minutes | `duration_minutes: 45` | `estimatedDuration: "45 minutes"` | Required field name and string format |
+| (missing) | — | `order: 3` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+| quiz_id | `quiz_id: "client-discovery-1"` | `quiz: "client-discovery-1"` | Required field name |
+
+#### File: `2.4-discovery-visa.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.4"` | `moduleNumber: "2.4"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills + Script"` | `type: "skills-script"` | Required field name and format |
+| duration_minutes | `duration_minutes: 30` | `estimatedDuration: "30 minutes"` | Required field name and string format |
+| (missing) | — | `order: 4` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+
+#### File: `2.5-active-listening.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.5"` | `moduleNumber: "2.5"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills"` | `type: "skills"` | Required field name and lowercase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Required field name and string format |
+| (missing) | — | `order: 5` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+
+#### File: `2.6-qualification-framework.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.6"` | `moduleNumber: "2.6"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills + Script"` | `type: "skills-script"` | Required field name and format |
+| duration_minutes | `duration_minutes: 35` | `estimatedDuration: "35 minutes"` | Required field name and string format |
+| (missing) | — | `order: 6` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+| quiz_id | `quiz_id: "client-discovery-2"` | `quiz: "client-discovery-2"` | Required field name |
+
+#### File: `2.7-managing-expectations.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "2.7"` | `moduleNumber: "2.7"` | Required camelCase |
+| (missing) | — | `competencyNumber: 2` | Required field added |
+| module_type | `module_type: "Skills + Script"` | `type: "skills-script"` | Required field name and format |
+| duration_minutes | `duration_minutes: 30` | `estimatedDuration: "30 minutes"` | Required field name and string format |
+| (missing) | — | `order: 7` | Required field added |
+| ai_coach | `ai_coach:` | `aiCoach:` | Required camelCase |
+
+#### File: `quizzes/client-discovery-1.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_id | `quiz_id: "client-discovery-1"` | `slug: "client-discovery-1"` | Required field name |
+| (missing) | — | `quizNumber: 1` | Required field added |
+| module | `module: "2.3"` | (removed) | Replaced by relatedModule |
+| module_slug | `module_slug: "discovery-investors"` | `relatedModule: "2.3-discovery-investors"` | Required field name |
+| pass_threshold | `pass_threshold: 0.8` | `passingScore: 80` | Required field name and integer format |
+| (missing) | — | `questionCount: 10` | Required field added |
+| (missing) | — | `estimatedDuration: "15 minutes"` | Required field added |
+
+#### File: `quizzes/client-discovery-2.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_id | `quiz_id: "client-discovery-2"` | `slug: "client-discovery-2"` | Required field name |
+| (missing) | — | `quizNumber: 2` | Required field added |
+| module | `module: "2.6"` | (removed) | Replaced by relatedModule |
+| module_slug | `module_slug: "qualification-framework"` | `relatedModule: "2.6-qualification-framework"` | Required field name |
+| pass_threshold | `pass_threshold: 0.8` | `passingScore: 80` | Required field name and integer format |
+| (missing) | — | `questionCount: 12` | Required field added |
+| (missing) | — | `estimatedDuration: "18 minutes"` | Required field added |
+
+---
+
+## Success Criteria Validation
+
+- [x] `_index.md` has all required fields (competencyNumber, estimatedDuration, moduleCount)
+- [x] All 7 module files have all required fields
+- [x] `moduleCount: 7` is accurate
+- [x] Module numbers sequential: 2.1 through 2.7
+- [x] Order values sequential: 1 through 7
+- [x] All slugs match filenames
+- [x] AUDIT.md updated
+
+---
+
+## Previous Content Quality Audit (January 9, 2026)
+
+### Executive Summary
 
 This audit reviewed all 7 modules in Competency 2: Client Discovery for content quality, format compliance, and instructional effectiveness. This is a **skills-heavy competency** with 5 Skills+Script modules and strong emphasis on discovery frameworks, talk tracks, and realistic client dialogue.
 

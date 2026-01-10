@@ -1,15 +1,20 @@
 ---
-title: "Referral Generation Quiz"
-slug: "relationship-stewardship-1"
-quizNumber: 1
-competency: "relationship-stewardship"
-relatedModule: "7.3-referral-generation"
+quizId: "relationship-stewardship-1"
+title: "Relationship Stewardship Quiz: Referral Generation"
+competency: 7
+module: 7.3
 description: "Test your understanding of referral timing, language, and recognition approaches."
 passingScore: 80
 questionCount: 10
-estimatedDuration: "10 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
+estimatedDuration: 15
+status: published
+aiCoach:
+  enabled: true
+  personality: "referral-specialist"
+  coachingPoints:
+    - "Timing matters enormously for referral asks — ask at the wrong moment and you damage the relationship"
+    - "Referrals are earned through excellent service, not clever tactics"
+    - "Always acknowledge referrals immediately, regardless of outcome"
 questions:
   - id: rs1-q1
     question: "When is the BEST time to ask a client for a referral?"

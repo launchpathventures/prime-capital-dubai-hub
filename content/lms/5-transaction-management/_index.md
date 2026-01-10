@@ -1,18 +1,31 @@
 ---
-competency: 5
-slug: transaction-management
-title: "Competency 5: Transaction Management"
+title: "Transaction Management"
+slug: "transaction-management"
+competencyNumber: 5
 description: "Master the complete lifecycle of Dubai real estate transactions. From off-plan EOI to secondary market transfers, understand every document, process, and regulatory requirement."
+estimatedDuration: "9 hours"
 moduleCount: 12
-estimatedDuration: 540
-order: 5
-status: published
+learningObjectives:
+  - "Navigate the complete off-plan transaction journey from EOI to title deed"
+  - "Execute secondary market transactions from MOU to transfer"
+  - "Explain RERA contract protections and escrow requirements"
+  - "Manage NOC applications and DLD transfer procedures"
+  - "Conduct thorough snagging inspections at handover"
+  - "Build long-term client relationships post-transaction"
+prerequisites:
+  - "foundations"
+  - "market-intelligence"
+aiCoach:
+  persona: "Transaction Expert"
+  focusAreas:
+    - "Process mastery"
+    - "Compliance requirements"
+    - "Client communication"
+    - "Document accuracy"
 videos: []
 resources: []
-aiCoach:
-  enabled: true
-  personality: "expert-mentor"
-  focus: "process-mastery-and-compliance"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
 ---
 
 # Competency 5: Transaction Management

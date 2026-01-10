@@ -4,12 +4,10 @@ slug: "property-matching-2"
 quizNumber: 2
 competency: "property-matching"
 relatedModule: "4.4-payment-plan-analysis"
-description: "Test your understanding of off-plan payment plans and how to match them to investor needs."
+description: "Assess your understanding of off-plan payment plans and how to match them to investor needs."
 passingScore: 80
 questionCount: 10
 estimatedDuration: "15 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
 ---
 
 # Property Matching Quiz 2: Payment Plan Structures

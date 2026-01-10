@@ -1,10 +1,10 @@
 ---
 title: "Property Matching"
-competency: 4
 slug: "property-matching"
+competencyNumber: 4
 description: "Connect investor requirements to the right property opportunities through systematic analysis, yield calculations, and compelling presentation."
-duration_minutes: 180
-module_count: 7
+estimatedDuration: "3 hours"
+moduleCount: 7
 prerequisites:
   - "client-discovery"
 learning_outcomes:
@@ -15,10 +15,9 @@ learning_outcomes:
   - "Assess secondary market properties for value and risk"
   - "Present properties in a way that builds confidence, not pressure"
   - "Conduct comparative market analysis for informed decisions"
-ai_coach:
-  enabled: true
+aiCoach:
   persona: "property-advisor"
-  focus_areas:
+  focusAreas:
     - "yield-calculations"
     - "payment-plan-explanation"
     - "property-presentation"

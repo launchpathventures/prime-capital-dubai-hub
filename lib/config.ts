@@ -132,14 +132,17 @@ export const config = {
   learning: {
     /** Quiz pass threshold (percentage as decimal, e.g., 0.8 = 80%) */
     quizPassThreshold: 0.8,
-    /** Core competency slugs in display order */
+    /** Core competency slugs in display order (matches content/lms/ structure) */
     competencies: [
+      "foundations",
       "market-intelligence",
       "client-discovery",
+      "sales-mastery",
       "property-matching",
       "transaction-management",
       "objection-navigation",
       "relationship-stewardship",
+      "rera-exam-prep",
     ],
   },
 } as const

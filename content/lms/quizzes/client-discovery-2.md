@@ -7,9 +7,7 @@ relatedModule: "2.6-qualification-framework"
 description: "Knowledge check for BANT+ qualification framework and client assessment"
 passingScore: 80
 questionCount: 12
-estimatedDuration: "12 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
+estimatedDuration: "18 minutes"
 questions:
   - id: "cd2-q1"
     question: "What does BANT+ stand for in the qualification framework?"

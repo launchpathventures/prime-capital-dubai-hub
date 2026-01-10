@@ -1,3 +1,23 @@
+---
+title: "Closing Scenarios"
+slug: "closing"
+type: "scenario"
+description: "AI roleplay training scenarios focused on moving qualified, interested investors toward commitment. The goal is helping ready investors take the next step with confidence."
+competencies: ["transaction-management", "objection-navigation", "relationship-stewardship"]
+difficulty: "mixed"
+estimatedDuration: "4-5 hours"
+objectives:
+  - "Master EOI process guidance for ready buyers"
+  - "Develop skills to find real concerns behind hesitation"
+  - "Build confident facilitation for assumptive closes"
+  - "Practice honest urgency communication"
+  - "Learn portfolio-level handling for multiple units"
+  - "Handle last-moment concerns professionally"
+scenarioCount: 10
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # Closing Scenarios
 ## Prime Capital — AI Roleplay Training
 

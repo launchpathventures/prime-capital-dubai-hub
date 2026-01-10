@@ -1,13 +1,13 @@
 ---
-title: "Quiz: RERA Practice Exam 2"
+title: "RERA Practice Exam 2"
+slug: "quiz-rera-practice-exam-2"
+quizNumber: 5
+competency: "rera-exam-prep"
+relatedModule: "8.4-landlord-tenant"
 description: "Full 40-question practice exam simulating the official RERA certification test. Covers all exam topics including ethics, licensing, landlord-tenant law, registration, off-plan sales, contracts, valuation, property management, and calculations."
-type: quiz
-competency: 8
-prerequisite: ["8.1", "8.2", "8.3"]
-questions: 40
-passing_score: 75
-time_limit: 60
-exam_simulation: true
+passingScore: 75
+questionCount: 40
+estimatedDuration: "60 minutes"
 ---
 
 # RERA Practice Exam 2

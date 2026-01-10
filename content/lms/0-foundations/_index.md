@@ -1,10 +1,16 @@
 ---
-competency: 0
-slug: foundations
 title: "Competency 0: Foundations"
+slug: "foundations"
+competencyNumber: 0
 description: "Essential onboarding for new Prime Capital consultants. Master company culture, professional standards, regulatory compliance, tools, and daily workflows."
+estimatedDuration: "4 hours"
 moduleCount: 5
-estimatedDuration: 240
+learningObjectives:
+  - "Articulate Prime Capital's brand positioning and target market"
+  - "Apply professional standards and code of conduct"
+  - "Navigate RERA compliance and broker licensing requirements"
+  - "Utilize essential CRM and communication tools effectively"
+  - "Implement daily workflow and productivity frameworks"
 order: 0
 status: published
 videos: []

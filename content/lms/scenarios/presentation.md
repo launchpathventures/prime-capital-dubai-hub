@@ -1,3 +1,23 @@
+---
+title: "Presentation Scenarios"
+slug: "presentation"
+type: "scenario"
+description: "AI roleplay training scenarios covering how to effectively show properties, explain payment structures, and build developer credibility."
+competencies: ["property-matching", "market-intelligence", "transaction-management"]
+difficulty: "mixed"
+estimatedDuration: "4-5 hours"
+objectives:
+  - "Master first-time buyer education for off-plan purchases"
+  - "Develop financial analysis presentation skills"
+  - "Build evidence-based due diligence capabilities"
+  - "Practice remote visualization techniques"
+  - "Learn curated selection rationale presentation"
+  - "Handle ultra-prime client service expectations"
+scenarioCount: 10
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # Presentation Scenarios
 ## Prime Capital — AI Roleplay Training
 

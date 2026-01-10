@@ -7,9 +7,7 @@ relatedModule: "2.3-discovery-investors"
 description: "Knowledge check for investor discovery frameworks and techniques"
 passingScore: 80
 questionCount: 10
-estimatedDuration: "10 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
+estimatedDuration: "15 minutes"
 questions:
   - id: "cd1-q1"
     question: "What should be your opening approach when speaking with an investor prospect?"

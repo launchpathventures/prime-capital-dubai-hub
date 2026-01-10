@@ -8,8 +8,6 @@ description: "Test your understanding of buying signals, closing techniques, and
 passingScore: 80
 questionCount: 10
 estimatedDuration: "10 minutes"
-createdAt: "2026-01-07"
-updatedAt: "2026-01-07"
 ---
 
 # Sales Mastery Quiz 3

@@ -1,3 +1,23 @@
+---
+title: "Difficult Situations Scenarios"
+slug: "difficult-situations"
+type: "scenario"
+description: "AI roleplay training scenarios covering challenging moments that test consultant professionalism and client relationships. These situations are where trust is truly built — or lost."
+competencies: ["relationship-stewardship", "transaction-management"]
+difficulty: "mixed"
+estimatedDuration: "4-5 hours"
+objectives:
+  - "Practice graceful re-engagement for ghosted clients"
+  - "Develop graceful acceptance skills for lost deals"
+  - "Master bad news communication for developer delays"
+  - "Build de-escalation and support skills for angry clients"
+  - "Learn support techniques for clients in crisis"
+  - "Handle personal emergency crisis management"
+scenarioCount: 10
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # Difficult Situations Scenarios
 ## Prime Capital — AI Roleplay Training
 

@@ -1,9 +1,99 @@
 # Competency 6: Objection Navigation - Quality Audit Report
 
-**Audit Date:** January 9, 2026  
+**Audit Date:** January 10, 2026  
 **Auditor:** AI Agent (Copilot)  
 **Modules Audited:** 7 (6.1 through 6.7)  
 **Quizzes Audited:** 3 (objection-navigation-1, 2, 3)
+
+---
+
+## Frontmatter Schema Audit (LMS-002 Sync)
+
+**Audit Date:** January 10, 2026
+
+### Summary
+- Files audited: 8 (1 index + 7 modules)
+- Issues fixed: 32
+- No action needed: 3 quiz files (already compliant)
+
+### Fixes Applied
+
+#### File: `_index.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 6 | competencyNumber: 6 | Field name must be `competencyNumber` per schema |
+| estimated_hours | 5 | estimatedDuration: "5 hours" | Field must be `estimatedDuration` string with unit |
+| moduleCount | (missing) | moduleCount: 7 | Required field added |
+
+#### File: `6.1-objection-framework.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.1 | moduleNumber: "6.1" | Field must be `moduleNumber` string |
+| duration_minutes | 35 | estimatedDuration: "35 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 1 | Required field for display order |
+
+#### File: `6.2-market-objections.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.2 | moduleNumber: "6.2" | Field must be `moduleNumber` string |
+| duration_minutes | 45 | estimatedDuration: "45 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 2 | Required field for display order |
+
+#### File: `6.3-developer-objections.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.3 | moduleNumber: "6.3" | Field must be `moduleNumber` string |
+| duration_minutes | 40 | estimatedDuration: "40 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 3 | Required field for display order |
+
+#### File: `6.4-price-fee-objections.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.4 | moduleNumber: "6.4" | Field must be `moduleNumber` string |
+| duration_minutes | 40 | estimatedDuration: "40 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 4 | Required field for display order |
+
+#### File: `6.5-stall-objections.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.5 | moduleNumber: "6.5" | Field must be `moduleNumber` string |
+| duration_minutes | 35 | estimatedDuration: "35 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 5 | Required field for display order |
+
+#### File: `6.6-strategic-followup.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.6 | moduleNumber: "6.6" | Field must be `moduleNumber` string |
+| duration_minutes | 30 | estimatedDuration: "30 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 6 | Required field for display order |
+
+#### File: `6.7-failure-resilience.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | 6.7 | moduleNumber: "6.7" | Field must be `moduleNumber` string |
+| duration_minutes | 40 | estimatedDuration: "40 minutes" | Field must be `estimatedDuration` string with unit |
+| competencyNumber | (missing) | competencyNumber: 6 | Required field added |
+| order | (missing) | order: 7 | Required field for display order |
+
+### Quiz Files Status
+- ✅ `objection-navigation-1.md` - Already compliant
+- ✅ `objection-navigation-2.md` - Already compliant
+- ✅ `objection-navigation-3.md` - Already compliant
+
+### Success Criteria Validation
+- [x] `_index.md` has all required fields
+- [x] All 7 module files have all required fields
+- [x] `moduleCount: 7` is accurate
+- [x] Module numbers sequential: 6.1 through 6.7
+- [x] Order values sequential: 1 through 7
+- [x] All slugs match filenames
+- [x] AUDIT.md updated
 
 ---
 
