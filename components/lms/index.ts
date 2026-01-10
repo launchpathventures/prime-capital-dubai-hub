@@ -15,6 +15,9 @@ export { LearningObjectives } from "./learning-objectives"
 export { ResourceList } from "./resource-list"
 export { KnowledgeCheckCTA } from "./knowledge-check-cta"
 
+// Dashboard Components
+export { DashboardStats } from "./dashboard-stats"
+
 // Quiz Components
 export { QuizProgress } from "./quiz-progress"
 export { QuizQuestion } from "./quiz-question"

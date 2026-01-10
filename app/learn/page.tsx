@@ -21,6 +21,7 @@ import {
 import { LearnShell } from "./_surface"
 import { getLearnUser, getUserLearningStats } from "@/lib/learning"
 import { createClient } from "@/lib/supabase/server"
+import { DashboardStats } from "@/components/lms"
 
 // -----------------------------------------------------------------------------
 // Data Fetching
@@ -98,40 +99,7 @@ export default async function LearnDashboardPage() {
             {/* Progress Overview */}
             <Stack gap="md">
               <Title size="h3">Your Progress</Title>
-              <Grid cols={3} gap="md" className="grid-cols-1 sm:grid-cols-3">
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <Stack gap="sm">
-                      <Title size="h2" className="text-4xl">
-                        {stats.overallProgressPercent}%
-                      </Title>
-                      <Text variant="muted">Overall Complete</Text>
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <Stack gap="sm">
-                      <Title size="h2" className="text-4xl">
-                        {stats.completedCompetencies}/{stats.totalCompetencies}
-                      </Title>
-                      <Text variant="muted">Competencies</Text>
-                    </Stack>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <Stack gap="sm">
-                      <Title size="h2" className="text-4xl">
-                        {stats.completedModules}/{stats.totalModules}
-                      </Title>
-                      <Text variant="muted">Behaviours</Text>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
+              <DashboardStats />
             </Stack>
 
             {/* Your Courses */}

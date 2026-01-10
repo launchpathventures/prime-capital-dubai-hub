@@ -16,8 +16,13 @@ import {
   ChevronLeftIcon,
   FileTextIcon,
 } from "lucide-react"
-import { getCompetencyWithModules, getLearnUser } from "@/lib/learning"
+import { 
+  getCompetencyWithModules, 
+  getLearnUser,
+  getAllCompetenciesWithProgress,
+} from "@/lib/learning"
 import { LearnShell } from "../_surface"
+import { createClient } from "@/lib/supabase/server"
 
 // -----------------------------------------------------------------------------
 // Hardcoded competency data for sidebar (until DB provides full context)
@@ -117,19 +122,51 @@ const competenciesData = [
   },
 ]
 
-// Transform data for sidebar component
-function getCompetenciesForSidebar() {
-  return competenciesData.map((comp) => ({
-    slug: comp.slug,
-    name: comp.name,
-    number: comp.id,
-    locked: comp.behaviours.every(b => b.locked),
-    modules: comp.behaviours.map((b) => ({
-      slug: b.slug,
-      title: b.title,
-      status: b.locked ? "locked" as const : "current" as const,
-    })),
-  }))
+// Transform data for sidebar component with real progress
+async function getCompetenciesForSidebar() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // Get competencies with progress if user is authenticated
+    const competenciesWithProgress = await getAllCompetenciesWithProgress()
+    
+    return competenciesWithProgress.map((comp, index) => ({
+      slug: comp.slug,
+      name: comp.name,
+      number: index + 1,
+      locked: comp.modules.length === 0, // Lock if no modules
+      modules: comp.modules.map((mod) => {
+        // Determine status based on progress
+        let status: "complete" | "current" | "locked" = "current"
+        if (mod.isCompleted) {
+          status = "complete"
+        } else if (mod.isLocked) {
+          status = "locked"
+        }
+        
+        return {
+          slug: mod.slug,
+          title: mod.title,
+          status,
+        }
+      }),
+    }))
+  } catch (error) {
+    console.error("Failed to fetch competencies for sidebar:", error)
+    // Fallback to hardcoded data without progress
+    return competenciesData.map((comp) => ({
+      slug: comp.slug,
+      name: comp.name,
+      number: comp.id,
+      locked: comp.behaviours.every(b => b.locked),
+      modules: comp.behaviours.map((b) => ({
+        slug: b.slug,
+        title: b.title,
+        status: b.locked ? "locked" as const : "current" as const,
+      })),
+    }))
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -194,8 +231,8 @@ export default async function CompetencyOverviewPage({ params }: PageProps) {
   const completedCount = 0 // TODO: Get from user progress
   const totalCount = displayModules.length
   
-  // Get competencies for sidebar
-  const competencies = getCompetenciesForSidebar()
+  // Get competencies for sidebar with progress
+  const competencies = await getCompetenciesForSidebar()
   
   return (
     <LearnShell 
