@@ -1,10 +1,10 @@
 ---
 title: "Client Discovery"
 slug: "client-discovery"
-competency_number: 2
+competencyNumber: 2
 description: "Learn to uncover what clients truly need—not just what they say they want. Identify investment goals, risk tolerance, and hidden concerns that drive decision-making."
-estimated_hours: 3.5
-module_count: 7
+estimatedDuration: "3.5 hours"
+moduleCount: 7
 icon: "UsersIcon"
 videos: []
 resources: []

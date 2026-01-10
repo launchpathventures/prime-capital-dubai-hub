@@ -1,11 +1,13 @@
 ---
 title: "Client Discovery Quiz 1"
-quiz_id: "client-discovery-1"
-module: "2.3"
-module_slug: "discovery-investors"
+slug: "client-discovery-1"
+quizNumber: 1
 competency: "client-discovery"
+relatedModule: "2.3-discovery-investors"
 description: "Knowledge check for investor discovery frameworks and techniques"
-pass_threshold: 0.8
+passingScore: 80
+questionCount: 10
+estimatedDuration: "15 minutes"
 questions:
   - id: "cd1-q1"
     question: "What should be your opening approach when speaking with an investor prospect?"
