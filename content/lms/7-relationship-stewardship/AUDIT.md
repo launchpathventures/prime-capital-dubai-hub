@@ -1,7 +1,7 @@
 # Competency 7: Relationship Stewardship - Audit Results
 
 ## Audit Date
-January 9, 2026
+January 10, 2026
 
 ## Audited By
 GitHub Copilot Coding Agent
@@ -21,71 +21,64 @@ All BLOCKER issues have been resolved. Content quality is high with excellent br
 
 ---
 
-## Issues Fixed
+## Issues Fixed (January 10, 2026)
 
-### 1. Frontmatter Field Naming (BLOCKER)
+### 1. Frontmatter Schema Alignment (BLOCKER)
 **Status:** ✅ Fixed
 
-**Issue:** All modules used `learning_outcomes` instead of `learning_objectives` (per LMS content format spec).
+**Issue:** All files used inconsistent frontmatter field names that didn't match the schema used across other competencies (e.g., Competency 0).
 
-**Files Updated:**
-- 7.1-client-communication.md
-- 7.2-follow-up-systems.md
-- 7.3-referral-generation.md
-- 7.4-long-term-relationships.md
+**Changes Made:**
 
-**Change:** Renamed field from `learning_outcomes:` to `learning_objectives:` in frontmatter.
+#### `_index.md` (Competency Index)
+| Field | Before | After |
+|-------|--------|-------|
+| `competency` | (missing) | `7` |
+| `title` | `Relationship Stewardship` | `"Competency 7: Relationship Stewardship"` |
+| `display_order` | `7` | (removed) |
+| `order` | (missing) | `7` |
+| `moduleCount` | (missing) | `4` |
+| `estimatedDuration` | (missing) | `83` |
+| `status` | (missing) | `published` |
+| `modules` | (array of slugs) | (removed - not needed) |
+| `aiCoach` | (missing) | Added with personality and focus |
 
-### 2. Module Type Format (BLOCKER)
-**Status:** ✅ Fixed
+#### Module Files (7.1, 7.2, 7.3, 7.4)
+| Field | Before | After |
+|-------|--------|-------|
+| `competency` | `relationship-stewardship` | `7` |
+| `module` | (missing) | `7.1`, `7.2`, `7.3`, `7.4` |
+| `module_number` | `7.1` | (removed - replaced by `module`) |
+| `slug` | `7.1-client-communication` | `client-communication` (etc.) |
+| `moduleType` | (missing) | `skills` or `skills-script` |
+| `type` | `Skills` | (removed - replaced by `moduleType`) |
+| `estimatedDuration` | (missing) | `20`, `18`, `25`, `20` |
+| `duration_minutes` | `20` | (removed - replaced by `estimatedDuration`) |
+| `order` | (missing) | `1`, `2`, `3`, `4` |
+| `status` | (missing) | `published` |
+| `learning_objectives` | (array) | (removed - moved to content) |
+| `ai_coach` | underscore format | `aiCoach` with `personality` and `coachingPoints` |
+| `quiz_id` | `relationship-stewardship-1` | `quiz: relationship-stewardship-1` |
 
-**Issue:** Module `type` field used lowercase format (`skills`, `skills-script`) instead of proper format per spec (`Skills`, `Skills + Script`).
-
-**Files Updated:**
-- 7.1-client-communication.md: `skills` → `Skills`
-- 7.2-follow-up-systems.md: `skills` → `Skills`
-- 7.3-referral-generation.md: `skills-script` → `Skills + Script`
-- 7.4-long-term-relationships.md: `skills` → `Skills`
-
-### 3. Follow-Up Systems Practicality (BLOCKER)
-**Status:** ✅ Fixed
-
-**Issue:** Module 7.2 had follow-up cadence but lacked specific, practical CRM triggers and daily workflows.
-
-**Enhancement Added:**
-- **CRM Task Setup section** with automatic triggers based on completion dates
-- **Transaction-based triggers**: Day 1, Week 1, Month 1, Month 3, Month 6, Annual
-- **Milestone triggers**: Pre-handover, anniversaries, quarterly check-ins
-- **Daily habits checklist**: Morning review (10 min), log interactions, set next steps
-- **Weekly review routine**: 15-minute audit process
-- **Monthly audit**: Task completion tracking (90%+ target)
-
-This makes the system immediately implementable, not theoretical.
-
-### 4. Missing "Common Mistakes" Sections (WARNING)
-**Status:** ✅ Fixed
-
-**Issue:** Modules 7.1, 7.2, and 7.4 lacked "Common Mistakes" sections showing ❌ Wrong / ✅ Right patterns.
-
-**Sections Added:**
-
-**Module 7.1 (Client Communication):**
-- 8 common mistakes with wrong/right patterns
-- Focus on email tone, response timing, professional language
-
-**Module 7.2 (Follow-Up Systems):**
-- 8 common mistakes with wrong/right patterns
-- Focus on CRM discipline, genuine vs. generic outreach, segmentation
-
-**Module 7.4 (Long-Term Relationships):**
-- 8 common mistakes with wrong/right patterns
-- Focus on lifecycle awareness, strategic positioning, boundary balance
-
-**Module 7.3 (Referral Generation):**
-- Already had a "Common Mistakes" table at end of module
-- No changes needed (existing content sufficient)
+#### Quiz File (`relationship-stewardship-1.md`)
+| Field | Before | After |
+|-------|--------|-------|
+| `quizId` | (missing) | `"relationship-stewardship-1"` |
+| `title` | `Referral Generation Quiz` | `"Relationship Stewardship Quiz: Referral Generation"` |
+| `competency` | `relationship-stewardship` | `7` |
+| `module` | `7.3-referral-generation` | `7.3` |
+| `slug` | `relationship-stewardship-1` | (removed) |
+| `quiz_id` | `relationship-stewardship-1` | (removed - replaced by `quizId`) |
+| `passingScore` | (missing) | `80` |
+| `pass_threshold` | `0.8` | (removed - replaced by `passingScore`) |
+| `questionCount` | (missing) | `10` |
+| `estimatedDuration` | (missing) | `15` |
+| `status` | (missing) | `published` |
+| `aiCoach` | (missing) | Added with personality and coachingPoints |
 
 ---
+
+## Previous Issues Fixed (January 9, 2026)
 
 ## Learning Objectives Verified
 
@@ -240,11 +233,12 @@ The "Coach Walkthrough" section provides 4 detailed referral conversation script
 
 | File | Status | Changes Made |
 |------|--------|--------------|
-| `_index.md` | ✅ Pass | No changes needed |
-| `7.1-client-communication.md` | ✅ Fixed | Frontmatter fix, type fix, Common Mistakes added |
-| `7.2-follow-up-systems.md` | ✅ Fixed | Frontmatter fix, type fix, CRM triggers added, Common Mistakes added |
-| `7.3-referral-generation.md` | ✅ Fixed | Frontmatter fix, type fix (already had excellent content) |
-| `7.4-long-term-relationships.md` | ✅ Fixed | Frontmatter fix, type fix, Common Mistakes added |
+| `_index.md` | ✅ Fixed | Frontmatter schema aligned (added competency, moduleCount, estimatedDuration, order, status, aiCoach) |
+| `7.1-client-communication.md` | ✅ Fixed | Frontmatter schema aligned (competency as number, module, moduleType, estimatedDuration, order, status, aiCoach) |
+| `7.2-follow-up-systems.md` | ✅ Fixed | Frontmatter schema aligned (competency as number, module, moduleType, estimatedDuration, order, status, aiCoach) |
+| `7.3-referral-generation.md` | ✅ Fixed | Frontmatter schema aligned (competency as number, module, moduleType, estimatedDuration, order, status, quiz, aiCoach) |
+| `7.4-long-term-relationships.md` | ✅ Fixed | Frontmatter schema aligned (competency as number, module, moduleType, estimatedDuration, order, status, aiCoach) |
+| `quizzes/relationship-stewardship-1.md` | ✅ Fixed | Frontmatter schema aligned (quizId, competency as number, module, passingScore, questionCount, estimatedDuration, status, aiCoach) |
 
 ---
 
@@ -252,10 +246,14 @@ The "Coach Walkthrough" section provides 4 detailed referral conversation script
 
 ### Frontmatter
 - [x] All required fields present in all files
-- [x] `learning_objectives` (not `learning_outcomes`) used correctly
-- [x] `type` field uses proper format (Skills, Skills + Script)
+- [x] `competency` field is numeric (e.g., `7` not `relationship-stewardship`)
+- [x] `module` field uses `X.Y` format (e.g., `7.1`)
+- [x] `moduleType` field uses correct format (`skills`, `skills-script`)
+- [x] `estimatedDuration` field is numeric (minutes)
+- [x] `order` field is present and sequential (1-4)
+- [x] `status: published` present on all files
 - [x] `videos: []` and `resources: []` are empty arrays
-- [x] `ai_coach` section present with appropriate personas
+- [x] `aiCoach` section present with personality and coachingPoints
 
 ### Learning Objectives
 - [x] Start with action verbs (Apply, Write, Choose, Maintain, Implement, Create, Use, Balance, Identify, Develop, Understand)
@@ -341,10 +339,14 @@ The "Coach Walkthrough" section provides 4 detailed referral conversation script
 Content is now compliant with all audit requirements and ready for production use.
 
 ### Key Improvements Made:
-1. Fixed frontmatter field naming across all modules
-2. Corrected module type format to match spec
-3. Enhanced follow-up systems with practical CRM triggers and routines
-4. Added Common Mistakes sections to 3 modules
+1. Aligned frontmatter schema with other competencies (C0 as reference)
+2. Changed `competency` from string to number format
+3. Changed `module_number` to `module` field
+4. Changed `type` to `moduleType` with lowercase values
+5. Changed `duration_minutes` to `estimatedDuration`
+6. Added `order` and `status` fields to all files
+7. Aligned `aiCoach` structure with coachingPoints
+8. Updated quiz file to match quiz schema format
 
 ### Content Quality:
 - **High** — Well-written, practical, brand-aligned

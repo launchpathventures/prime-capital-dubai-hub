@@ -1,15 +1,18 @@
 ---
-title: Relationship Stewardship
+competency: 7
 slug: relationship-stewardship
-description: Master the art of building lasting client relationships through excellent communication, systematic follow-up, and natural referral generation.
-display_order: 7
-modules:
-  - 7.1-client-communication
-  - 7.2-follow-up-systems
-  - 7.3-referral-generation
-  - 7.4-long-term-relationships
+title: "Competency 7: Relationship Stewardship"
+description: "Master the art of building lasting client relationships through excellent communication, systematic follow-up, and natural referral generation."
+moduleCount: 4
+estimatedDuration: 83
+order: 7
+status: published
 videos: []
 resources: []
+aiCoach:
+  enabled: true
+  personality: "relationship-advisor"
+  focus: "client-retention-and-referrals"
 ---
 
 # Relationship Stewardship
