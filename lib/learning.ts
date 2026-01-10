@@ -1,0 +1,513 @@
+/**
+ * CATALYST - Learning Data Provider (Server Only)
+ *
+ * Fetches LMS data from Supabase.
+ * All functions are async and use the server-side Supabase client.
+ */
+
+import "server-only"
+import { createClient } from "@/lib/supabase/server"
+import type {
+  Competency,
+  CompetencyWithModules,
+  CompetencyWithProgress,
+  LearningModule,
+  ModuleWithProgress,
+  AudioTranscript,
+  QuizQuestion,
+  LearningProgress,
+  QuizAttempt,
+  UserLearningStats,
+} from "./learning-types"
+
+// =============================================================================
+// COMPETENCY QUERIES
+// =============================================================================
+
+/**
+ * Get all competencies in display order.
+ */
+export async function getCompetencies(): Promise<Competency[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("competencies")
+    .select("*")
+    .order("display_order", { ascending: true })
+
+  if (error) throw error
+  return transformCompetencies(data)
+}
+
+/**
+ * Get a single competency by slug.
+ */
+export async function getCompetency(slug: string): Promise<Competency | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("competencies")
+    .select("*")
+    .eq("slug", slug)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null // Not found
+    throw error
+  }
+  return transformCompetency(data)
+}
+
+/**
+ * Get competency with all its modules.
+ */
+export async function getCompetencyWithModules(
+  slug: string
+): Promise<CompetencyWithModules | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("competencies")
+    .select(
+      `
+      *,
+      learning_modules (*)
+    `
+    )
+    .eq("slug", slug)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null
+    throw error
+  }
+
+  return {
+    ...transformCompetency(data),
+    modules: transformModules(data.learning_modules || []),
+    moduleCount: data.learning_modules?.length || 0,
+  }
+}
+
+/**
+ * Get all competencies with user progress.
+ */
+export async function getCompetenciesWithProgress(
+  userId: string
+): Promise<CompetencyWithProgress[]> {
+  const supabase = await createClient()
+
+  // Get competencies with modules
+  const { data: competencies, error: compError } = await supabase
+    .from("competencies")
+    .select(
+      `
+      *,
+      learning_modules (*)
+    `
+    )
+    .order("display_order", { ascending: true })
+
+  if (compError) throw compError
+
+  // Get user's progress separately for modules without progress records
+  const { data: progress, error: progError } = await supabase
+    .from("learning_progress")
+    .select("*")
+    .eq("user_id", userId)
+
+  if (progError) throw progError
+
+  const progressMap = new Map(progress?.map((p) => [p.module_id, p]) || [])
+
+  return competencies.map((comp) => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const modules = (comp.learning_modules || []).map((mod: any) => ({
+      ...transformModule(mod),
+      progress: progressMap.get(mod.id)
+        ? transformProgress(progressMap.get(mod.id)!)
+        : null,
+      isCompleted: progressMap.get(mod.id)?.status === "completed",
+      isLocked: false, // TODO: Calculate based on previous module
+    }))
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    const completedCount = modules.filter((m: { isCompleted: boolean }) => m.isCompleted).length
+
+    return {
+      ...transformCompetency(comp),
+      modules,
+      completedCount,
+      totalCount: modules.length,
+      progressPercent:
+        modules.length > 0
+          ? Math.round((completedCount / modules.length) * 100)
+          : 0,
+    }
+  })
+}
+
+// =============================================================================
+// MODULE QUERIES
+// =============================================================================
+
+/**
+ * Get all modules for a competency.
+ */
+export async function getModules(
+  competencyId: string
+): Promise<LearningModule[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("learning_modules")
+    .select("*")
+    .eq("competency_id", competencyId)
+    .order("display_order", { ascending: true })
+
+  if (error) throw error
+  return transformModules(data)
+}
+
+/**
+ * Get a single module by competency slug and module slug.
+ */
+export async function getModule(
+  competencySlug: string,
+  moduleSlug: string
+): Promise<LearningModule | null> {
+  const supabase = await createClient()
+
+  // First get competency ID
+  const { data: comp, error: compError } = await supabase
+    .from("competencies")
+    .select("id")
+    .eq("slug", competencySlug)
+    .single()
+
+  if (compError) {
+    if (compError.code === "PGRST116") return null
+    throw compError
+  }
+
+  const { data, error } = await supabase
+    .from("learning_modules")
+    .select("*")
+    .eq("competency_id", comp.id)
+    .eq("slug", moduleSlug)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null
+    throw error
+  }
+
+  return transformModule(data)
+}
+
+/**
+ * Get module with progress for a user.
+ */
+export async function getModuleWithProgress(
+  competencySlug: string,
+  moduleSlug: string,
+  userId: string
+): Promise<ModuleWithProgress | null> {
+  const learningModule = await getModule(competencySlug, moduleSlug)
+  if (!learningModule) return null
+
+  const supabase = await createClient()
+
+  const { data: progress } = await supabase
+    .from("learning_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("module_id", learningModule.id)
+    .single()
+
+  return {
+    ...learningModule,
+    progress: progress ? transformProgress(progress) : null,
+    isCompleted: progress?.status === "completed",
+    isLocked: false, // TODO: Calculate
+  }
+}
+
+// =============================================================================
+// QUIZ QUERIES
+// =============================================================================
+
+/**
+ * Get quiz questions for a module.
+ */
+export async function getQuizQuestions(
+  moduleId: string
+): Promise<QuizQuestion[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("quiz_questions")
+    .select("*")
+    .eq("module_id", moduleId)
+    .order("display_order", { ascending: true })
+
+  if (error) throw error
+  return transformQuestions(data)
+}
+
+/**
+ * Get user's quiz attempts for a module.
+ */
+export async function getQuizAttempts(
+  userId: string,
+  moduleId: string
+): Promise<QuizAttempt[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("module_id", moduleId)
+    .order("attempted_at", { ascending: false })
+
+  if (error) throw error
+  return transformAttempts(data)
+}
+
+// =============================================================================
+// PROGRESS QUERIES
+// =============================================================================
+
+/**
+ * Get user's overall learning stats.
+ */
+export async function getUserLearningStats(
+  userId: string
+): Promise<UserLearningStats> {
+  const supabase = await createClient()
+
+  // Get all competencies and modules count
+  const { data: competencies } = await supabase
+    .from("competencies")
+    .select("id")
+
+  const { data: modules } = await supabase.from("learning_modules").select("id")
+
+  // Get user progress
+  const { data: progress } = await supabase
+    .from("learning_progress")
+    .select("*")
+    .eq("user_id", userId)
+
+  // Get quiz attempts
+  const { data: quizzes } = await supabase
+    .from("quiz_attempts")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("passed", true)
+
+  const totalModules = modules?.length || 0
+  const completedModules =
+    progress?.filter((p) => p.status === "completed").length || 0
+  const inProgressModules =
+    progress?.filter((p) => p.status === "in_progress").length || 0
+
+  // TODO: Calculate completed competencies properly
+  const completedCompetencies = 0
+
+  return {
+    totalCompetencies: competencies?.length || 0,
+    completedCompetencies,
+    totalModules,
+    completedModules,
+    inProgressModules,
+    overallProgressPercent:
+      totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0,
+    quizzesPassed: quizzes?.length || 0,
+    quizzesTotal: totalModules, // Assuming 1 quiz per module
+  }
+}
+
+/**
+ * Get user's progress for a specific module.
+ */
+export async function getModuleProgress(
+  userId: string,
+  moduleId: string
+): Promise<LearningProgress | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("learning_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("module_id", moduleId)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null
+    throw error
+  }
+
+  return transformProgress(data)
+}
+
+// =============================================================================
+// AUDIO TRANSCRIPT QUERIES
+// =============================================================================
+
+/**
+ * Get audio transcript for a module.
+ */
+export async function getAudioTranscript(
+  moduleSlug: string
+): Promise<AudioTranscript | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("audio_transcripts")
+    .select("*")
+    .eq("slug", `${moduleSlug}-audio`)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null
+    throw error
+  }
+
+  return transformAudioTranscript(data)
+}
+
+/**
+ * Get audio transcript for a competency overview.
+ */
+export async function getCompetencyAudioTranscript(
+  competencySlug: string
+): Promise<AudioTranscript | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("audio_transcripts")
+    .select("*")
+    .eq("slug", `${competencySlug}-intro-audio`)
+    .single()
+
+  if (error) {
+    if (error.code === "PGRST116") return null
+    throw error
+  }
+
+  return transformAudioTranscript(data)
+}
+
+// =============================================================================
+// TRANSFORM HELPERS (snake_case to camelCase)
+// =============================================================================
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+function transformCompetency(row: any): Competency {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    displayOrder: row.display_order,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+function transformCompetencies(rows: any[]): Competency[] {
+  return rows.map(transformCompetency)
+}
+
+function transformModule(row: any): LearningModule {
+  return {
+    id: row.id,
+    competencyId: row.competency_id,
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    moduleNumber: row.module_number,
+    type: row.type || "knowledge",
+    estimatedDuration: row.estimated_duration,
+    displayOrder: row.display_order,
+    content: row.content,
+    frontmatter: row.frontmatter, // JSONB - all frontmatter fields
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+function transformModules(rows: any[]): LearningModule[] {
+  return rows.map(transformModule)
+}
+
+function transformAudioTranscript(row: any): AudioTranscript {
+  return {
+    id: row.id,
+    moduleId: row.module_id,
+    competencyId: row.competency_id,
+    slug: row.slug,
+    title: row.title,
+    duration: row.duration,
+    voice: row.voice || "coach",
+    type: row.type || "demonstration",
+    transcript: row.transcript,
+    audioUrl: row.audio_url,
+    frontmatter: row.frontmatter,
+    createdAt: row.created_at,
+  }
+}
+
+function transformProgress(row: any): LearningProgress {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    moduleId: row.module_id,
+    status: row.status,
+    startedAt: row.started_at,
+    completedAt: row.completed_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
+}
+
+function transformQuestion(row: any): QuizQuestion {
+  return {
+    id: row.id,
+    quizId: row.quiz_id,
+    competencySlug: row.competency_slug,
+    relatedModule: row.related_module,
+    questionNumber: row.question_number,
+    questionText: row.question_text,
+    options: row.options,
+    explanation: row.explanation,
+    displayOrder: row.display_order,
+  }
+}
+
+function transformQuestions(rows: any[]): QuizQuestion[] {
+  return rows.map(transformQuestion)
+}
+
+function transformAttempt(row: any): QuizAttempt {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    moduleId: row.module_id,
+    score: row.score,
+    maxScore: row.max_score,
+    passed: row.passed,
+    answers: row.answers,
+    attemptedAt: row.attempted_at,
+  }
+}
+
+function transformAttempts(rows: any[]): QuizAttempt[] {
+  return rows.map(transformAttempt)
+}
+
+/* eslint-enable @typescript-eslint/no-explicit-any */
