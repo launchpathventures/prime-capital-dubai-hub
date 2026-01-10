@@ -1,110 +1,36 @@
 /**
  * CATALYST - Learn Dashboard Page
  *
- * Learning portal dashboard showing competencies and progress.
- * This is the main landing page for learners after authentication.
+ * Learning portal dashboard showing overall progress and courses.
+ * Route: /learn
  */
 
 import Link from "next/link"
 import { Container, Stack, Grid, Row, Text, Title } from "@/components/core"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
-  TrendingUpIcon,
-  BookOpenIcon,
-  ClockIcon,
-  CheckCircleIcon,
   PlayIcon,
-  BarChart3Icon,
-  UsersIcon,
-  HomeIcon,
-  FileTextIcon,
-  MessageSquareIcon,
-  HeartHandshakeIcon,
+  BookOpenIcon,
   GraduationCapIcon,
   TargetIcon,
+  ArrowRightIcon,
 } from "lucide-react"
 import { LearnShell } from "./_surface"
-import { getLearnUser } from "@/lib/learning"
+import { getLearnUser, getUserLearningStats } from "@/lib/learning"
+import { createClient } from "@/lib/supabase/server"
 
 // -----------------------------------------------------------------------------
-// Competency Data (mock - would come from database)
+// Data Fetching
 // -----------------------------------------------------------------------------
 
-const competencies = [
-  {
-    slug: "prime-capital-identity",
-    name: "Prime Capital Identity",
-    description: "Who we are and what makes us different",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "45 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "market-intelligence",
-    name: "Market Intelligence",
-    description: "Why Dubai? Why now?",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "50 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "client-discovery",
-    name: "Client Discovery",
-    description: "Understanding client needs",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "50 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "property-matching",
-    name: "Property Matching",
-    description: "Connecting clients with opportunities",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "55 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "objection-navigation",
-    name: "Objection Navigation",
-    description: "Addressing concerns with expertise",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "55 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "transaction-excellence",
-    name: "Transaction Excellence",
-    description: "Guiding the process",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "55 min",
-    status: "not-started" as const,
-  },
-  {
-    slug: "relationship-building",
-    name: "Relationship Building",
-    description: "Creating lasting partnerships",
-    behaviours: 5,
-    completedBehaviours: 0,
-    estimatedTime: "40 min",
-    status: "not-started" as const,
-  },
-]
-
-// Calculate overall progress
-const totalCompetencies = competencies.length
-const completedCompetencies = competencies.filter((c) => (c.status as string) === "completed").length
-const totalBehaviours = competencies.reduce((sum, c) => sum + c.behaviours, 0)
-const completedBehaviours = competencies.reduce((sum, c) => sum + c.completedBehaviours, 0)
-const overallProgress = totalBehaviours > 0 ? Math.round((completedBehaviours / totalBehaviours) * 100) : 0
+async function getUserId(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user?.id ?? null
+}
 
 // -----------------------------------------------------------------------------
 // Page Component
@@ -112,7 +38,20 @@ const overallProgress = totalBehaviours > 0 ? Math.round((completedBehaviours / 
 
 export default async function LearnDashboardPage() {
   const user = await getLearnUser()
-  const userName = user.name
+  const userId = await getUserId()
+  
+  // Get real progress stats from database
+  const stats = userId
+    ? await getUserLearningStats(userId)
+    : {
+        overallProgressPercent: 0,
+        completedCompetencies: 0,
+        totalCompetencies: 7,
+        completedModules: 0,
+        totalModules: 35,
+      }
+  
+  const hasStarted = stats.completedModules > 0 || stats.overallProgressPercent > 0
 
   return (
     <LearnShell user={user}>
@@ -122,37 +61,39 @@ export default async function LearnDashboardPage() {
             {/* Welcome Section */}
             <Stack gap="md" className="text-center max-w-2xl mx-auto">
               <Title size="h1" className="text-4xl sm:text-5xl">
-                Welcome back, {userName}
+                Welcome back, {user.name}
               </Title>
               <Text size="lg" variant="muted">
                 Continue your journey to becoming a Prime Capital expert.
               </Text>
             </Stack>
 
-            {/* New to Platform Card */}
-            <Card className="border-2">
-              <CardContent className="py-6">
-                <Row gap="lg" align="center" justify="between" className="flex-col sm:flex-row">
-                  <Row gap="md" align="center">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted shrink-0">
-                      <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <Stack gap="xs">
-                      <Text weight="semibold" size="lg">
-                        New to the platform?
-                      </Text>
-                      <Text size="sm" variant="muted">
-                        Take a quick 2-minute tour to understand how your training works.
-                      </Text>
-                    </Stack>
+            {/* Onboarding Prompt (show only if not started) */}
+            {!hasStarted && (
+              <Card className="border-2">
+                <CardContent className="py-6">
+                  <Row gap="lg" align="center" justify="between" className="flex-col sm:flex-row">
+                    <Row gap="md" align="center">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted shrink-0">
+                        <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <Stack gap="xs">
+                        <Text weight="semibold" size="lg">
+                          New to the platform?
+                        </Text>
+                        <Text size="sm" variant="muted">
+                          Take a quick 2-minute tour to understand how your training works.
+                        </Text>
+                      </Stack>
+                    </Row>
+                    <Button variant="secondary" className="shrink-0">
+                      <PlayIcon className="h-4 w-4 mr-2" />
+                      Start Tour
+                    </Button>
                   </Row>
-                  <Button variant="secondary" className="shrink-0">
-                    <PlayIcon className="h-4 w-4 mr-2" />
-                    Start Tour
-                  </Button>
-                </Row>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Progress Overview */}
             <Stack gap="md">
@@ -162,7 +103,7 @@ export default async function LearnDashboardPage() {
                   <CardContent className="pt-6 text-center">
                     <Stack gap="sm">
                       <Title size="h2" className="text-4xl">
-                        {overallProgress}%
+                        {stats.overallProgressPercent}%
                       </Title>
                       <Text variant="muted">Overall Complete</Text>
                     </Stack>
@@ -173,7 +114,7 @@ export default async function LearnDashboardPage() {
                   <CardContent className="pt-6 text-center">
                     <Stack gap="sm">
                       <Title size="h2" className="text-4xl">
-                        {completedCompetencies}/{totalCompetencies}
+                        {stats.completedCompetencies}/{stats.totalCompetencies}
                       </Title>
                       <Text variant="muted">Competencies</Text>
                     </Stack>
@@ -184,7 +125,7 @@ export default async function LearnDashboardPage() {
                   <CardContent className="pt-6 text-center">
                     <Stack gap="sm">
                       <Title size="h2" className="text-4xl">
-                        {completedBehaviours}/{totalBehaviours}
+                        {stats.completedModules}/{stats.totalModules}
                       </Title>
                       <Text variant="muted">Behaviours</Text>
                     </Stack>
@@ -224,13 +165,13 @@ export default async function LearnDashboardPage() {
                       <Row gap="xs" align="center">
                         <TargetIcon className="h-4 w-4 text-muted-foreground" />
                         <Text size="sm" variant="muted">
-                          {totalCompetencies} Competencies
+                          {stats.totalCompetencies} Competencies
                         </Text>
                       </Row>
                       <Row gap="xs" align="center">
                         <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
                         <Text size="sm" variant="muted">
-                          {totalBehaviours} Behaviours
+                          {stats.totalModules} Behaviours
                         </Text>
                       </Row>
                     </Row>
@@ -241,16 +182,25 @@ export default async function LearnDashboardPage() {
                           Progress
                         </Text>
                         <Text size="sm" variant="muted">
-                          Not started
+                          {hasStarted ? `${stats.overallProgressPercent}% complete` : "Not started"}
                         </Text>
                       </Row>
-                      <Progress value={overallProgress} className="h-2" />
+                      <Progress value={stats.overallProgressPercent} className="h-2" />
                     </Stack>
 
                     <div className="pt-2">
                       <Button size="lg" nativeButton={false} render={<Link href="/learn/course" />}>
-                        <PlayIcon className="h-4 w-4 mr-2" />
-                        Start Course
+                        {hasStarted ? (
+                          <>
+                            Continue Course
+                            <ArrowRightIcon className="h-4 w-4 ml-2" />
+                          </>
+                        ) : (
+                          <>
+                            <PlayIcon className="h-4 w-4 mr-2" />
+                            Start Course
+                          </>
+                        )}
                       </Button>
                     </div>
                   </Stack>
@@ -263,8 +213,3 @@ export default async function LearnDashboardPage() {
     </LearnShell>
   )
 }
-
-// -----------------------------------------------------------------------------
-// Competency Card Component (Removed - no longer used in dashboard)
-// -----------------------------------------------------------------------------
-
