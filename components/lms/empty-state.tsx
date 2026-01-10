@@ -28,8 +28,8 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         </Text>
       </Stack>
       {action && (
-        <Button asChild>
-          <Link href={action.href}>{action.label}</Link>
+        <Button render={<Link href={action.href} />}>
+          {action.label}
         </Button>
       )}
     </Stack>

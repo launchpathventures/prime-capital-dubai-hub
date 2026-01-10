@@ -15,11 +15,9 @@ export default function NotFound() {
         </Text>
       </Stack>
       
-      <Button asChild className="gap-2">
-        <Link href="/learn">
-          <ArrowLeftIcon className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
+      <Button className="gap-2" render={<Link href="/learn" />}>
+        <ArrowLeftIcon className="h-4 w-4" />
+        Back to Dashboard
       </Button>
     </Stack>
   )
