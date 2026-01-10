@@ -53,6 +53,7 @@ export default function QuizPage() {
   }>>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [userError, setUserError] = React.useState<string | null>(null)
 
   // Load quiz data
   React.useEffect(() => {
@@ -105,6 +106,7 @@ export default function QuizPage() {
 
   const handleAnswerSubmit = async (optionIndex: number) => {
     setIsSubmitting(true)
+    setUserError(null)
     
     // Record answer
     const newAnswers = { ...answers, [currentQuestion.id]: optionIndex }
@@ -114,24 +116,25 @@ export default function QuizPage() {
     const selectedOption = currentQuestion.options[optionIndex]
     if (!selectedOption) {
       console.error("Invalid option index selected:", optionIndex)
+      setUserError("An error occurred. Please try again.")
       setIsSubmitting(false)
       return
     }
     const isCorrect = selectedOption.correct
     
+    // Update score
+    const newScore = isCorrect ? score + 1 : score
     if (isCorrect) {
-      setScore((prev) => prev + 1)
+      setScore(newScore)
     }
     
     // Move to next question or complete
     if (isLastQuestion) {
       // Quiz complete - save attempt
-      const finalScore = score + (isCorrect ? 1 : 0)
-      
       try {
         await submitQuizAttemptAction({
           moduleId: quiz.moduleId,
-          score: finalScore,
+          score: newScore,
           totalQuestions,
           answers: newAnswers,
         })
@@ -231,6 +234,13 @@ export default function QuizPage() {
             onSubmit={handleAnswerSubmit}
             isSubmitting={isSubmitting}
           />
+          
+          {/* User Error Message */}
+          {userError && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <Text size="sm" className="text-red-700">{userError}</Text>
+            </div>
+          )}
         </Stack>
       </div>
     </div>

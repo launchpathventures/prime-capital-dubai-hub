@@ -11,7 +11,7 @@ interface QuizProgressProps {
 }
 
 export function QuizProgress({ current, total }: QuizProgressProps) {
-  const percentage = Math.round((current / total) * 100)
+  const percentage = total > 0 ? Math.round((current / total) * 100) : 0
   
   return (
     <Row align="center" gap="md" className="w-full">
