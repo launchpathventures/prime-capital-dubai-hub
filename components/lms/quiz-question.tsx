@@ -25,27 +25,52 @@ export function QuizQuestion({ question, onSubmit, isSubmitting }: QuizQuestionP
     }
   }
   
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    // Arrow key navigation
+    if (e.key === "ArrowDown" && index < question.options.length - 1) {
+      e.preventDefault()
+      const nextButton = document.querySelector(`[data-option-index="${index + 1}"]`) as HTMLButtonElement
+      nextButton?.focus()
+    }
+    if (e.key === "ArrowUp" && index > 0) {
+      e.preventDefault()
+      const prevButton = document.querySelector(`[data-option-index="${index - 1}"]`) as HTMLButtonElement
+      prevButton?.focus()
+    }
+    // Space or Enter to select
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault()
+      setSelectedIndex(index)
+    }
+  }
+  
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" role="group" aria-labelledby="question-text">
       {/* Question Text */}
-      <Text size="lg" weight="medium">
+      <Text id="question-text" size="lg" weight="medium">
         {question.questionText}
       </Text>
       
       {/* Answer Options */}
-      <Stack gap="sm">
+      <Stack gap="sm" role="radiogroup" aria-labelledby="question-text">
         {question.options.map((option, index) => (
           <button
             key={index}
+            data-option-index={index}
             onClick={() => setSelectedIndex(index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             className={cn(
-              "w-full p-4 text-left border rounded-lg transition-all",
+              "quiz-option w-full p-4 text-left border rounded-lg transition-all",
               "hover:border-foreground/30",
+              "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
               selectedIndex === index
                 ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                 : "border-border"
             )}
             disabled={isSubmitting}
+            role="radio"
+            aria-checked={selectedIndex === index}
+            aria-label={`Option ${index + 1}: ${option.text}`}
           >
             <Row align="center" gap="sm">
               <div
@@ -55,6 +80,7 @@ export function QuizQuestion({ question, onSubmit, isSubmitting }: QuizQuestionP
                     ? "border-primary"
                     : "border-muted-foreground/30"
                 )}
+                aria-hidden="true"
               >
                 {selectedIndex === index && (
                   <div className="w-2.5 h-2.5 rounded-full bg-primary" />
@@ -72,6 +98,7 @@ export function QuizQuestion({ question, onSubmit, isSubmitting }: QuizQuestionP
         className="w-full" 
         onClick={handleSubmit}
         disabled={selectedIndex === null || isSubmitting}
+        aria-label={selectedIndex !== null ? `Submit answer: ${question.options[selectedIndex].text}` : "Select an answer to submit"}
       >
         {isSubmitting ? "Submitting..." : "Submit Answer"}
       </Button>
