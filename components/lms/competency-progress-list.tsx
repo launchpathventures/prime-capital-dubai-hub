@@ -38,7 +38,7 @@ export function CompetencyProgressList({ competencies }: CompetencyProgressListP
                   </Text>
                 </Row>
                 <Progress 
-                  value={comp.total > 0 ? (comp.completed / comp.total) * 100 : 0} 
+                  value={comp.total > 0 ? Math.min((comp.completed / comp.total) * 100, 100) : 0} 
                   className="h-2" 
                 />
               </Stack>

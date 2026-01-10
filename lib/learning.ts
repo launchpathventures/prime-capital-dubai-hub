@@ -25,7 +25,9 @@ import type {
 // =============================================================================
 
 /**
- * Default passing score threshold for quizzes (percentage)
+ * Default passing score threshold for quizzes (percentage).
+ * Used as the default passing score when not specified per quiz.
+ * Individual quizzes may override this value in the future.
  */
 const DEFAULT_PASSING_SCORE = 70
 

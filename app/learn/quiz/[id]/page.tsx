@@ -116,7 +116,7 @@ export default function QuizPage() {
     const selectedOption = currentQuestion.options[optionIndex]
     if (!selectedOption) {
       console.error("Invalid option index selected:", optionIndex)
-      setUserError("An error occurred. Please try again.")
+      setUserError("Invalid answer selection. Please choose an option and try again.")
       setIsSubmitting(false)
       return
     }
