@@ -21,6 +21,17 @@ import type {
 } from "./learning-types"
 
 // =============================================================================
+// CONSTANTS
+// =============================================================================
+
+/**
+ * Default passing score threshold for quizzes (percentage).
+ * Used as the default passing score when not specified per quiz.
+ * Individual quizzes may override this value in the future.
+ */
+const DEFAULT_PASSING_SCORE = 70
+
+// =============================================================================
 // COMPETENCY QUERIES
 // =============================================================================
 
@@ -378,6 +389,146 @@ export async function getQuizQuestions(
 
   if (error) throw error
   return transformQuestions(data)
+}
+
+/**
+ * Get quiz with all questions and context for a module.
+ * Returns quiz data ready for the quiz page.
+ */
+export async function getQuizForModule(
+  moduleId: string
+): Promise<{
+  moduleId: string
+  moduleSlug: string
+  moduleTitle: string
+  competencySlug: string
+  competencyName: string
+  questions: QuizQuestion[]
+  passingScore: number
+} | null> {
+  const supabase = await createClient()
+
+  // Get module with competency info
+  const { data: module, error: moduleError } = await supabase
+    .from("learning_modules")
+    .select(`
+      id,
+      slug,
+      title,
+      competency:competencies(
+        slug,
+        name
+      )
+    `)
+    .eq("id", moduleId)
+    .single()
+
+  if (moduleError || !module) return null
+
+  // Get questions for this module
+  const questions = await getQuizQuestions(moduleId)
+
+  // Extract competency data (it comes as an array with single element from the join)
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const competency = (module as any).competency?.[0] || (module as any).competency
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
+  return {
+    moduleId: module.id,
+    moduleSlug: module.slug,
+    moduleTitle: module.title,
+    competencySlug: competency?.slug ?? "",
+    competencyName: competency?.name ?? "",
+    questions,
+    passingScore: DEFAULT_PASSING_SCORE,
+  }
+}
+
+/**
+ * Submit a quiz attempt.
+ */
+export async function submitQuizAttempt(data: {
+  moduleId: string
+  score: number
+  totalQuestions: number
+  answers: Record<string, number>
+}): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return
+  
+  const passed = (data.score / data.totalQuestions) * 100 >= DEFAULT_PASSING_SCORE
+
+  await supabase.from("quiz_attempts").insert({
+    user_id: user.id,
+    module_id: data.moduleId,
+    score: data.score,
+    max_score: data.totalQuestions,
+    passed,
+    answers: data.answers,
+  })
+
+  // Update learning progress if passed
+  if (passed) {
+    await supabase
+      .from("learning_progress")
+      .upsert({
+        user_id: user.id,
+        module_id: data.moduleId,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      })
+  }
+}
+
+/**
+ * Get competency progress summary for current user.
+ * Returns progress for all competencies.
+ */
+export async function getCompetencyProgressSummary(): Promise<Array<{
+  slug: string
+  name: string
+  completed: number
+  total: number
+}>> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return []
+
+  // Get all competencies with module counts
+  const { data: competencies } = await supabase
+    .from("competencies")
+    .select(`
+      slug,
+      name,
+      learning_modules(id)
+    `)
+    .order("display_order")
+
+  if (!competencies) return []
+
+  // Get user's completed modules
+  const { data: progress } = await supabase
+    .from("learning_progress")
+    .select("module_id")
+    .eq("user_id", user.id)
+    .eq("status", "completed")
+
+  const completedModuleIds = new Set(progress?.map((p) => p.module_id) ?? [])
+
+  return competencies.map((comp) => {
+    const modules = comp.learning_modules || []
+    const completed = modules.filter((m: { id: string }) => completedModuleIds.has(m.id)).length
+    
+    return {
+      slug: comp.slug,
+      name: comp.name,
+      completed,
+      total: modules.length,
+    }
+  })
 }
 
 /**
