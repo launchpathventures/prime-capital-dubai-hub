@@ -7,3 +7,10 @@
 export { CourseHero } from "./course-hero"
 export { HowItWorks } from "./how-it-works"
 export { LearningPathway } from "./learning-pathway"
+
+// Module Learning Experience Components
+export { MarkdownRenderer } from "./markdown-renderer"
+export { AudioCoachPlayer } from "./audio-coach-player"
+export { LearningObjectives } from "./learning-objectives"
+export { ResourceList } from "./resource-list"
+export { KnowledgeCheckCTA } from "./knowledge-check-cta"
