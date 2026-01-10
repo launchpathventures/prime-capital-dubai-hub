@@ -130,3 +130,13 @@ export interface UserLearningStats {
   quizzesPassed: number
   quizzesTotal: number
 }
+
+export interface ProgressStats {
+  totalModules: number
+  completedModules: number
+  inProgressModules: number
+  totalQuizzes: number
+  passedQuizzes: number
+  currentStreak: number
+  overallProgressPercent: number
+}

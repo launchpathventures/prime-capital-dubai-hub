@@ -11,6 +11,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { config } from "@/lib/config"
+import type { ProgressStats } from "@/lib/learning-types"
 
 // =============================================================================
 // PROGRESS ACTIONS
@@ -174,16 +175,6 @@ export async function submitQuizAttempt(
 // =============================================================================
 // PROGRESS STATS & ANALYTICS
 // =============================================================================
-
-export interface ProgressStats {
-  totalModules: number
-  completedModules: number
-  inProgressModules: number
-  totalQuizzes: number
-  passedQuizzes: number
-  currentStreak: number
-  overallProgressPercent: number
-}
 
 /**
  * Get current user's overall progress stats with streak calculation.

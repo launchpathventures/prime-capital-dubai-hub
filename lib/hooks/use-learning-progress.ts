@@ -12,8 +12,8 @@ import {
   markModuleStarted,
   markModuleComplete,
   getProgressStats,
-  type ProgressStats,
 } from "@/lib/actions/learning"
+import type { ProgressStats } from "@/lib/learning-types"
 
 interface UseLearningProgressReturn {
   stats: ProgressStats | null
