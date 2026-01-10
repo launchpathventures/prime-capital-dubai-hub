@@ -1,9 +1,8 @@
 /**
  * CATALYST - LMS Header Component
  *
- * Auto-hiding header for the learning portal.
- * Hides on scroll down, shows on scroll up.
- * Features minimal branding, dashboard link, and user menu.
+ * Fixed header for the learning portal.
+ * Features minimal branding, subtitle, and HUB link.
  */
 
 "use client"
@@ -17,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle, UserMenu, HeaderPopoverProvider } from "@/components/shared"
 import { 
   GraduationCapIcon, 
-  LayoutDashboardIcon,
+  HomeIcon,
   ChevronLeftIcon,
 } from "lucide-react"
 
@@ -37,46 +36,10 @@ interface LMSHeaderProps {
 }
 
 // -----------------------------------------------------------------------------
-// Hook: useScrollHide
-// -----------------------------------------------------------------------------
-
-function useScrollHide() {
-  const [isVisible, setIsVisible] = React.useState(true)
-  const [lastScrollY, setLastScrollY] = React.useState(0)
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const scrollingDown = currentScrollY > lastScrollY
-      const scrollThreshold = 50 // Minimum scroll before hiding
-
-      if (currentScrollY < scrollThreshold) {
-        // Always show when near top
-        setIsVisible(true)
-      } else if (scrollingDown && currentScrollY > scrollThreshold) {
-        // Hide when scrolling down past threshold
-        setIsVisible(false)
-      } else if (!scrollingDown) {
-        // Show when scrolling up
-        setIsVisible(true)
-      }
-
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [lastScrollY])
-
-  return isVisible
-}
-
-// -----------------------------------------------------------------------------
 // LMSHeader Component
 // -----------------------------------------------------------------------------
 
 export function LMSHeader({ user }: LMSHeaderProps) {
-  const isVisible = useScrollHide()
   const pathname = usePathname()
   
   // Determine if we're on a nested page (competency or module)
@@ -106,12 +69,11 @@ export function LMSHeader({ user }: LMSHeaderProps) {
         className={cn(
           "lms-header",
           "fixed top-0 left-0 right-0 z-50",
-          "h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-          "transition-transform duration-300",
-          !isVisible && "-translate-y-full"
+          "h-14 border-b",
+          "bg-[#525252] text-white"
         )}
       >
-        <Row className="h-full max-w-7xl mx-auto px-4" align="center" justify="between">
+        <Row className="h-full max-w-[90rem] mx-auto px-4 sm:px-6" align="center" justify="between">
           {/* Left: Logo/Back Navigation */}
           <Row gap="sm" align="center">
             {isNestedPage ? (
@@ -120,7 +82,7 @@ export function LMSHeader({ user }: LMSHeaderProps) {
                 size="sm"
                 nativeButton={false}
                 render={<Link href={getBackLink()} />}
-                className="gap-1"
+                className="gap-1 text-white hover:bg-white/10"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
                 Back
@@ -128,36 +90,33 @@ export function LMSHeader({ user }: LMSHeaderProps) {
             ) : (
               <Link 
                 href="/learn" 
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="flex flex-col hover:opacity-80 transition-opacity"
               >
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-                  <GraduationCapIcon className="h-4 w-4" />
-                </div>
-                <Text size="sm" weight="semibold" className="hidden sm:block">
-                  Learning Portal
+                <Text size="sm" weight="semibold" className="text-white leading-tight">
+                  Prime Capital Learning
+                </Text>
+                <Text size="xs" className="text-white/70 leading-tight">
+                  Real Estate Consultant Training
                 </Text>
               </Link>
             )}
           </Row>
 
-          {/* Center: Current Section (on larger screens) */}
-          <div className="hidden md:flex items-center">
+          {/* Right: HUB Button & User Menu */}
+          <Row gap="sm" align="center">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               nativeButton={false}
-              render={<Link href="/learn" />}
-              className="gap-2"
+              render={<Link href="/hub" />}
+              className="gap-2 border-white/20 text-white hover:bg-white/10"
             >
-              <LayoutDashboardIcon className="h-4 w-4" />
-              Dashboard
+              <HomeIcon className="h-4 w-4" />
+              HUB
             </Button>
-          </div>
-
-          {/* Right: User Menu & Theme */}
-          <Row gap="sm" align="center">
-            <ThemeToggle />
-            <UserMenu user={user} />
+            <div className="[&_button]:text-white [&_button]:hover:bg-white/10">
+              <UserMenu user={user} />
+            </div>
           </Row>
         </Row>
       </header>

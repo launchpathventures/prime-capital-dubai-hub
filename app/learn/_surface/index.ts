@@ -5,3 +5,4 @@
  */
 
 export { LearnShell } from "./learn-shell"
+export { CompetencySidebar } from "./competency-sidebar"
