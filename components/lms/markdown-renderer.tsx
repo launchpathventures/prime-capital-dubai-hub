@@ -18,6 +18,7 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const components: Partial<Components> = {
     // Blockquotes → Script callouts
     blockquote: BlockquoteComponent as any,
@@ -40,6 +41,7 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     // Paragraphs with pattern detection (Context:, Approach:)
     p: ParagraphComponent as any,
   }
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   return (
     <div className={cn("lms-content", className)}>

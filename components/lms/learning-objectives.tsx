@@ -2,7 +2,7 @@
  * CATALYST - Learning Objectives
  */
 
-import { Stack, Text } from "@/components/core"
+import { Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2Icon } from "lucide-react"
 
