@@ -1,16 +1,13 @@
 ---
 title: "Property Matching Quiz 1: Yield & ROI Calculations"
-quiz_id: "property-matching-1"
+slug: "property-matching-1"
+quizNumber: 1
 competency: "property-matching"
-covers_module: "4.2"
-passing_score: 80
-time_limit_minutes: 15
-questions_count: 10
-ai_coach:
-  enabled: true
-  review_incorrect: true
-videos: []
-resources: []
+relatedModule: "4.2-yield-calculations"
+description: "Assess your understanding of yield calculations and investment return metrics."
+passingScore: 80
+questionCount: 10
+estimatedDuration: "15 minutes"
 ---
 
 # Property Matching Quiz 1: Yield & ROI Calculations
