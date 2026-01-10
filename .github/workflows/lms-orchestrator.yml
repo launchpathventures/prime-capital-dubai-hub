@@ -66,6 +66,8 @@ jobs:
                 );
                 
                 if (!alreadyNotified) {
+                  const issueUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${issueNum}`;
+                  
                   await github.rest.issues.createComment({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -78,7 +80,22 @@ This issue is now ready to be worked on.
 ${deps.map(d => `- #${d}`).join('\n')}
 
 ---
-@copilot Please implement this issue following the brief linked in the description.`
+
+### 👉 [Click here to assign Copilot](${issueUrl})
+
+1. Click the link above
+2. In the right sidebar, click "Assignees"
+3. Select "Copilot"
+
+*Note: Copilot assignment cannot be automated via API yet.*`
+                  });
+                  
+                  // Also add a label so you can filter these easily
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: parseInt(issueNum),
+                    labels: ['ready-for-copilot']
                   });
                   
                   console.log(`Notified issue #${issueNum} - ready to start`);
