@@ -417,12 +417,17 @@ export async function getQuizForModule(
   // Get questions for this module
   const questions = await getQuizQuestions(moduleId)
 
+  // Extract competency data (it comes as an array with single element from the join)
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const competency = (module as any).competency?.[0] || (module as any).competency
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
   return {
     moduleId: module.id,
     moduleSlug: module.slug,
     moduleTitle: module.title,
-    competencySlug: module.competency?.slug ?? "",
-    competencyName: module.competency?.name ?? "",
+    competencySlug: competency?.slug ?? "",
+    competencyName: competency?.name ?? "",
     questions,
     passingScore: 70, // Default passing score
   }

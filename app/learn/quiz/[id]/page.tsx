@@ -9,7 +9,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { Stack, Text } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ChevronLeftIcon } from "lucide-react"
@@ -20,7 +20,7 @@ import {
   QuizNextSteps,
   CompetencyProgressList,
 } from "@/components/lms"
-import { getQuizForModule, submitQuizAttempt, getCompetencyProgressSummary } from "@/lib/learning"
+import { getQuizData, submitQuizAttemptAction, getCompetencyProgress } from "../actions"
 import type { QuizQuestion as QuizQuestionType } from "@/lib/learning-types"
 
 // -----------------------------------------------------------------------------
@@ -29,7 +29,6 @@ import type { QuizQuestion as QuizQuestionType } from "@/lib/learning-types"
 
 export default function QuizPage() {
   const params = useParams()
-  const router = useRouter()
   const moduleId = params.id as string
 
   const [quiz, setQuiz] = React.useState<{
@@ -59,16 +58,16 @@ export default function QuizPage() {
   React.useEffect(() => {
     async function loadQuiz() {
       try {
-        const quizData = await getQuizForModule(moduleId)
-        if (!quizData) {
-          setError("Quiz not found")
+        const result = await getQuizData(moduleId)
+        if (!result.success || !result.data) {
+          setError(result.error || "Quiz not found")
           return
         }
-        if (quizData.questions.length === 0) {
+        if (result.data.questions.length === 0) {
           setError("No questions available for this quiz")
           return
         }
-        setQuiz(quizData)
+        setQuiz(result.data)
       } catch (err) {
         console.error("Error loading quiz:", err)
         setError("Failed to load quiz")
@@ -124,7 +123,7 @@ export default function QuizPage() {
       const finalScore = score + (isCorrect ? 1 : 0)
       
       try {
-        await submitQuizAttempt({
+        await submitQuizAttemptAction({
           moduleId: quiz.moduleId,
           score: finalScore,
           totalQuestions,
@@ -132,8 +131,10 @@ export default function QuizPage() {
         })
         
         // Fetch updated progress
-        const progress = await getCompetencyProgressSummary()
-        setCompetencyProgress(progress)
+        const progressResult = await getCompetencyProgress()
+        if (progressResult.success && progressResult.data) {
+          setCompetencyProgress(progressResult.data)
+        }
         
         setIsComplete(true)
       } catch (err) {
