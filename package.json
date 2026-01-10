@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:lms": "npx tsx scripts/sync-lms-content.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
@@ -23,6 +24,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.561.0",
     "maplibre-gl": "^5.15.0",
     "next": "16.0.10",
