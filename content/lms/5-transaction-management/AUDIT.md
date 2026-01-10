@@ -1,8 +1,182 @@
-# Competency 5: Transaction Management - Quality Audit Report
+# Competency 5: Transaction Management - Content Audit Report
 
-**Audit Date:** January 9, 2026  
+**Audit Date:** January 10, 2026  
 **Auditor:** GitHub Copilot Agent  
-**Status:** ✅ **APPROVED FOR PRODUCTION**
+**Status:** ✅ **SCHEMA-COMPLIANT**
+
+---
+
+## Frontmatter Schema Fixes (January 10, 2026)
+
+This audit fixed frontmatter schema compliance issues across all files to match the required LMS content format specification.
+
+### Summary
+- Files audited: 13 (1 index + 12 modules)
+- Issues fixed: 13
+- No action needed: 0
+
+### Fixes Applied
+
+#### File: `_index.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| title | "Competency 5: Transaction Management" | "Transaction Management" | Remove competency number prefix per schema |
+| competency | 5 | (removed) | Field renamed to competencyNumber |
+| competencyNumber | (missing) | 5 | Required field per schema |
+| estimatedDuration | 540 | "9 hours" | Must be string with unit |
+| order | 5 | (removed) | Not required for competency index |
+| status | published | (removed) | Not in schema |
+| aiCoach.enabled | true | (removed) | Use persona/focusAreas format |
+| aiCoach.personality | "expert-mentor" | persona: "Transaction Expert" | Schema format |
+| learningObjectives | (missing) | (added) | Recommended field |
+| prerequisites | (missing) | ["foundations", "market-intelligence"] | Recommended field |
+| createdAt | (missing) | "2026-01-07" | Optional but added for consistency |
+| updatedAt | (missing) | "2026-01-10" | Optional but added for consistency |
+
+#### File: `5.1-offplan-journey.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | (removed) | Replaced with competencyNumber |
+| competencyNumber | (missing) | 5 | Required integer field |
+| competency (slug) | (missing) | "transaction-management" | Required parent competency slug |
+| module | 5.1 | (removed) | Field renamed |
+| moduleNumber | (missing) | "5.1" | Required string "X.Y" format |
+| moduleType | knowledge-checklist | (removed) | Field renamed to type |
+| type | (missing) | "knowledge" | Required: knowledge, skills, or skills-script |
+| estimatedDuration | 50 | "50 minutes" | Must be string with unit |
+| status | published | (removed) | Not in schema |
+| quiz | "transaction-management-1" | (removed) | Field renamed to quizId |
+| quizId | (missing) | "transaction-management-1" | Correct field name |
+| learningObjectives | (missing) | (added) | Recommended field |
+| aiCoach | coachingPoints format | persona/focusAreas format | Schema compliance |
+
+#### File: `5.2-secondary-journey.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.2 | moduleNumber: "5.2" | Schema field name and format |
+| moduleType | knowledge-checklist | type: "knowledge" | Schema compliance |
+| estimatedDuration | 45 | "45 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.3-rera-contracts.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.3 | moduleNumber: "5.3" | Schema field name and format |
+| moduleType | knowledge | type: "knowledge" | Schema compliance |
+| estimatedDuration | 40 | "40 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+| quiz | "transaction-management-2" | quizId: "transaction-management-2" | Correct field name |
+
+#### File: `5.4-eoi-process.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.4 | moduleNumber: "5.4" | Schema field name and format |
+| moduleType | skills-checklist | type: "skills" | Schema compliance (checklist is content, not type) |
+| estimatedDuration | 45 | "45 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.5-spa-process.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.5 | moduleNumber: "5.5" | Schema field name and format |
+| moduleType | skills-script | type: "skills-script" | Schema compliance |
+| estimatedDuration | 50 | "50 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.6-oqood-registration.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.6 | moduleNumber: "5.6" | Schema field name and format |
+| moduleType | knowledge-checklist | type: "knowledge" | Schema compliance |
+| estimatedDuration | 35 | "35 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.7-escrow-protection.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.7 | moduleNumber: "5.7" | Schema field name and format |
+| moduleType | skills-script | type: "skills-script" | Schema compliance |
+| estimatedDuration | 40 | "40 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.8-mortgage-process.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.8 | moduleNumber: "5.8" | Schema field name and format |
+| moduleType | knowledge | type: "knowledge" | Schema compliance |
+| estimatedDuration | 45 | "45 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.9-mou-formf.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.9 | moduleNumber: "5.9" | Schema field name and format |
+| moduleType | skills-checklist | type: "skills" | Schema compliance |
+| estimatedDuration | 45 | "45 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+| quiz | "transaction-management-3" | quizId: "transaction-management-3" | Correct field name |
+
+#### File: `5.10-noc-transfer.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.10 | moduleNumber: "5.10" | Schema field name and format |
+| moduleType | knowledge-checklist | type: "knowledge" | Schema compliance |
+| estimatedDuration | 45 | "45 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.11-handover-process.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.11 | moduleNumber: "5.11" | Schema field name and format |
+| moduleType | skills-checklist | type: "skills" | Schema compliance |
+| estimatedDuration | 50 | "50 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+#### File: `5.12-post-transaction.md`
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency | 5 | competencyNumber: 5 | Schema field name |
+| competency (slug) | (missing) | "transaction-management" | Required |
+| module | 5.12 | moduleNumber: "5.12" | Schema field name and format |
+| moduleType | skills | type: "skills" | Schema compliance |
+| estimatedDuration | 40 | "40 minutes" | String with unit |
+| status | published | (removed) | Not in schema |
+
+---
+
+## Success Criteria Verification
+
+- [x] `_index.md` has all required fields (title, slug, competencyNumber, description, estimatedDuration, moduleCount)
+- [x] All 12 module files have all required fields
+- [x] `moduleCount: 12` is accurate
+- [x] Module numbers sequential: 5.1 through 5.12
+- [x] Order values sequential: 1 through 12
+- [x] All slugs match filenames (offplan-journey, secondary-journey, etc.)
+- [x] AUDIT.md updated with fixes
+
+---
+
+## Previous Quality Audit (January 9, 2026)
 
 ---
 
