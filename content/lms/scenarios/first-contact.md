@@ -1,3 +1,22 @@
+---
+title: "First Contact Scenarios"
+slug: "first-contact"
+type: "scenario"
+description: "AI roleplay training scenarios covering initial interactions with potential investors. These moments set the tone for the entire relationship."
+competencies: ["client-discovery", "relationship-stewardship"]
+difficulty: "mixed"
+estimatedDuration: "3-4 hours"
+objectives:
+  - "Practice initial outreach and differentiation techniques"
+  - "Develop personalization and persistence skills"
+  - "Master graceful relationship repair and patience"
+  - "Build confidence in meeting expectations independently"
+  - "Improve efficient qualification and messaging skills"
+scenarioCount: 10
+createdAt: "2026-01-07"
+updatedAt: "2026-01-10"
+---
+
 # First Contact Scenarios
 ## Prime Capital — AI Roleplay Training
 
