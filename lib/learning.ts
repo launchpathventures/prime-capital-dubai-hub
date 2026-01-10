@@ -21,6 +21,15 @@ import type {
 } from "./learning-types"
 
 // =============================================================================
+// CONSTANTS
+// =============================================================================
+
+/**
+ * Default passing score threshold for quizzes (percentage)
+ */
+const DEFAULT_PASSING_SCORE = 70
+
+// =============================================================================
 // COMPETENCY QUERIES
 // =============================================================================
 
@@ -429,7 +438,7 @@ export async function getQuizForModule(
     competencySlug: competency?.slug ?? "",
     competencyName: competency?.name ?? "",
     questions,
-    passingScore: 70, // Default passing score
+    passingScore: DEFAULT_PASSING_SCORE,
   }
 }
 
@@ -447,7 +456,7 @@ export async function submitQuizAttempt(data: {
   
   if (!user) return
   
-  const passed = (data.score / data.totalQuestions) * 100 >= 70
+  const passed = (data.score / data.totalQuestions) * 100 >= DEFAULT_PASSING_SCORE
 
   await supabase.from("quiz_attempts").insert({
     user_id: user.id,

@@ -111,7 +111,13 @@ export default function QuizPage() {
     setAnswers(newAnswers)
     
     // Check if correct
-    const isCorrect = currentQuestion.options[optionIndex]?.correct || false
+    const selectedOption = currentQuestion.options[optionIndex]
+    if (!selectedOption) {
+      console.error("Invalid option index selected:", optionIndex)
+      setIsSubmitting(false)
+      return
+    }
+    const isCorrect = selectedOption.correct
     
     if (isCorrect) {
       setScore((prev) => prev + 1)
