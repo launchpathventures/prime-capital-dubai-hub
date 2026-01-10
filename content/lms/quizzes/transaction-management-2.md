@@ -1,20 +1,15 @@
 ---
-quizId: "transaction-management-2"
 title: "Transaction Management Quiz: RERA Contracts"
-competency: 5
-module: 5.3
+slug: "transaction-management-2"
+quizNumber: 2
+competency: "transaction-management"
+relatedModule: "5.3-rera-contracts"
 description: "Test your understanding of RERA-regulated contracts, including SPAs, Form F, buyer protections, and legal requirements."
 passingScore: 80
 questionCount: 10
-estimatedDuration: 15
-status: published
-aiCoach:
-  enabled: true
-  personality: "expert-mentor"
-  coachingPoints:
-    - "Contract knowledge protects both you and your clients"
-    - "Understanding legal protections builds client confidence"
-    - "If you score below 80%, review Module 5.3 before retaking"
+estimatedDuration: "15 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Transaction Management Quiz: RERA Contracts

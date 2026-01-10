@@ -1,13 +1,15 @@
 ---
 title: "Sales Mastery Quiz 1"
 slug: "sales-mastery-1"
-quiz_number: 1
+quizNumber: 1
 competency: "sales-mastery"
-module_reference: "3.2"
-module_title: "First Contact Excellence"
+relatedModule: "3.2-first-contact"
 description: "Test your understanding of first contact fundamentals and the 60-second rule."
-pass_threshold: 80
-total_questions: 10
+passingScore: 80
+questionCount: 10
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Sales Mastery Quiz 1

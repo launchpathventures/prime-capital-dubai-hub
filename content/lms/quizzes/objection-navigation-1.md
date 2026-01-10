@@ -1,11 +1,15 @@
 ---
 title: "Objection Handling Framework Quiz"
 slug: "objection-navigation-1"
-quiz_id: "objection-navigation-1"
-module: "6.1-objection-framework"
+quizNumber: 1
 competency: "objection-navigation"
-passing_score: 80
-time_limit_minutes: 10
+relatedModule: "6.1-objection-framework"
+description: "Test your understanding of the LAER framework and objection navigation fundamentals."
+passingScore: 80
+questionCount: 8
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 questions:
   - id: "q1"
     type: "multiple-choice"

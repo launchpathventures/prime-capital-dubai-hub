@@ -1,11 +1,15 @@
 ---
-title: Referral Generation Quiz
-slug: relationship-stewardship-1
-quiz_id: relationship-stewardship-1
-module: 7.3-referral-generation
-competency: relationship-stewardship
-description: Test your understanding of referral timing, language, and recognition approaches.
-pass_threshold: 0.8
+title: "Referral Generation Quiz"
+slug: "relationship-stewardship-1"
+quizNumber: 1
+competency: "relationship-stewardship"
+relatedModule: "7.3-referral-generation"
+description: "Test your understanding of referral timing, language, and recognition approaches."
+passingScore: 80
+questionCount: 10
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 questions:
   - id: rs1-q1
     question: "When is the BEST time to ask a client for a referral?"

@@ -1,13 +1,15 @@
 ---
 title: "Sales Mastery Quiz 2"
 slug: "sales-mastery-2"
-quiz_number: 2
+quizNumber: 2
 competency: "sales-mastery"
-module_reference: "3.5"
-module_title: "EOI & Booking Conversion"
+relatedModule: "3.5-eoi-booking"
 description: "Test your understanding of EOI processes and booking conversion techniques."
-pass_threshold: 80
-total_questions: 10
+passingScore: 80
+questionCount: 10
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Sales Mastery Quiz 2

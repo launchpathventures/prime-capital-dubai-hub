@@ -1,20 +1,15 @@
 ---
-quizId: "foundations-1"
 title: "Foundations Quiz: Broker Licensing & Compliance"
-competency: 0
-module: 0.3
+slug: "foundations-1"
+quizNumber: 1
+competency: "foundations"
+relatedModule: "0.3-broker-licensing"
 description: "Test your knowledge of RERA regulations, broker licensing requirements, compliance obligations, and regulatory framework."
 passingScore: 80
 questionCount: 10
-estimatedDuration: 15
-status: published
-aiCoach:
-  enabled: true
-  personality: "professional-mentor"
-  coachingPoints:
-    - "Compliance questions have no gray area — you must know the rules"
-    - "If you score below 80%, review Module 0.3 before retaking"
-    - "Real consequences exist for compliance violations — take this seriously"
+estimatedDuration: "15 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 ---
 
 # Foundations Quiz: Broker Licensing & Compliance

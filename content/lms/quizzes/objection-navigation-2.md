@@ -1,11 +1,15 @@
 ---
 title: "Market & Timing Objections Quiz"
 slug: "objection-navigation-2"
-quiz_id: "objection-navigation-2"
-module: "6.2-market-objections"
+quizNumber: 2
 competency: "objection-navigation"
-passing_score: 80
-time_limit_minutes: 10
+relatedModule: "6.2-market-objections"
+description: "Test your understanding of market and timing objections."
+passingScore: 80
+questionCount: 8
+estimatedDuration: "10 minutes"
+createdAt: "2026-01-07"
+updatedAt: "2026-01-07"
 questions:
   - id: "q1"
     type: "multiple-choice"
