@@ -1,53 +1,156 @@
-# Competency 3: Sales Mastery — Quality Audit Report
+# Competency 3: Sales Mastery — Content Audit Report
 
-**Date:** January 9, 2026  
+**Date:** January 10, 2026  
 **Auditor:** GitHub Copilot  
 **Modules Audited:** 8 (3.1 through 3.8)  
-**Status:** ✅ PASSED with minor fixes
+**Quizzes Audited:** 3  
+**Status:** ✅ COMPLETE
 
 ---
 
-## Executive Summary
+## Summary
 
-Competency 3: Sales Mastery has been audited against the requirements in:
-- `catalyst/prompts/lms-content-audit-prompt.md`
-- `catalyst/specs/lms-content-format.md`
-- `catalyst/specs/project-voice.md`
-
-**Overall Assessment:** HIGH QUALITY content with excellent practical value. All BLOCKER issues have been addressed. Content strongly aligns with Prime Capital's "quiet luxury" brand positioning.
-
-**Key Strengths:**
-- Extensive, realistic talk tracks in all Skills+Script modules
-- Practical frameworks and templates throughout
-- Strong Dubai market specificity
-- Professional tone that avoids pushy sales tactics
-- Excellent use of tables and structured information
-
-**Issues Found and Fixed:**
-- 2 instances of pressure language removed from examples
-- All sales techniques validated against brand voice
-- Lead sources confirmed accurate for Dubai market
+- Files audited: 12 (1 index + 8 modules + 3 quizzes)
+- Issues fixed: 44
+- No action needed: 0
 
 ---
 
-## BLOCKER Issues — Status
+## Fixes Applied
 
-### ✅ Frontmatter Completeness
-**Status:** PASS
+### File: `_index.md`
 
-All modules contain required frontmatter fields:
-- `title` ✓
-- `slug` ✓
-- `module_number` ✓
-- `competency` ✓
-- `type` ✓
-- `duration_minutes` ✓
-- `description` ✓
-- `learning_outcomes` ✓
-- `ai_coach` configuration ✓
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| competency_number | `competency_number: 3` | `competencyNumber: 3` | Field name must be camelCase per schema |
+| duration_minutes | `duration_minutes: 180` | `estimatedDuration: "3 hours"` | Field name change + must be string with unit |
+| modules | `modules: 8` | `moduleCount: 8` | Field name must match schema |
 
-**Index file (`_index.md`):**
-- Contains appropriate competency-level metadata
+### File: `3.1-lead-sources.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.1"` | `moduleNumber: "3.1"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 15` | `estimatedDuration: "15 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 1` | Required field, matches module number Y value |
+
+### File: `3.2-first-contact.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.2"` | `moduleNumber: "3.2"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 2` | Required field |
+
+### File: `3.3-needs-analysis.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.3"` | `moduleNumber: "3.3"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 3` | Required field |
+
+### File: `3.4-offplan-presentation.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.4"` | `moduleNumber: "3.4"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 4` | Required field |
+
+### File: `3.5-eoi-booking.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.5"` | `moduleNumber: "3.5"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 5` | Required field |
+
+### File: `3.6-followup-sequences.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.6"` | `moduleNumber: "3.6"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 20` | `estimatedDuration: "20 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 6` | Required field |
+
+### File: `3.7-closing-techniques.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.7"` | `moduleNumber: "3.7"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 25` | `estimatedDuration: "25 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 7` | Required field |
+
+### File: `3.8-pipeline-management.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| module_number | `module_number: "3.8"` | `moduleNumber: "3.8"` | Field name must be camelCase |
+| duration_minutes | `duration_minutes: 20` | `estimatedDuration: "20 minutes"` | Field name change + must be string with unit |
+| competencyNumber | (missing) | `competencyNumber: 3` | Required field |
+| order | (missing) | `order: 8` | Required field |
+
+### File: `quizzes/sales-mastery-1.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_number | `quiz_number: 1` | `quizNumber: 1` | Field name must be camelCase |
+| module_reference | `module_reference: "3.2"` | `relatedModule: "3.2-first-contact"` | Field name change + must reference module slug |
+| module_title | `module_title: "..."` | (removed) | Not in required schema |
+| pass_threshold | `pass_threshold: 80` | `passingScore: 80` | Field name must match schema |
+| total_questions | `total_questions: 10` | `questionCount: 10` | Field name must match schema |
+| estimatedDuration | (missing) | `estimatedDuration: "10 minutes"` | Required field |
+
+### File: `quizzes/sales-mastery-2.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_number | `quiz_number: 2` | `quizNumber: 2` | Field name must be camelCase |
+| module_reference | `module_reference: "3.5"` | `relatedModule: "3.5-eoi-booking"` | Field name change + must reference module slug |
+| module_title | `module_title: "..."` | (removed) | Not in required schema |
+| pass_threshold | `pass_threshold: 80` | `passingScore: 80` | Field name must match schema |
+| total_questions | `total_questions: 10` | `questionCount: 10` | Field name must match schema |
+| estimatedDuration | (missing) | `estimatedDuration: "10 minutes"` | Required field |
+
+### File: `quizzes/sales-mastery-3.md`
+
+| Field | Before | After | Reason |
+|-------|--------|-------|--------|
+| quiz_number | `quiz_number: 3` | `quizNumber: 3` | Field name must be camelCase |
+| module_reference | `module_reference: "3.7"` | `relatedModule: "3.7-closing-techniques"` | Field name change + must reference module slug |
+| module_title | `module_title: "..."` | (removed) | Not in required schema |
+| pass_threshold | `pass_threshold: 80` | `passingScore: 80` | Field name must match schema |
+| total_questions | `total_questions: 10` | `questionCount: 10` | Field name must match schema |
+| estimatedDuration | (missing) | `estimatedDuration: "10 minutes"` | Required field |
+
+---
+
+## Validation Checklist
+
+- [x] `_index.md` has all required fields
+- [x] All 8 module files have all required fields
+- [x] `moduleCount: 8` is accurate
+- [x] Module numbers sequential: 3.1 through 3.8
+- [x] Order values sequential: 1 through 8
+- [x] All slugs match filenames
+- [x] All 3 quiz files have all required fields
+- [x] Quiz `relatedModule` fields reference valid module slugs
+
+---
+
+## Sign-Off
+
+**Audited by:** GitHub Copilot  
+**Date:** January 10, 2026  
+**Status:** ✅ COMPLETE
 - Correctly structured for competency overview
 
 ### ✅ Learning Objectives

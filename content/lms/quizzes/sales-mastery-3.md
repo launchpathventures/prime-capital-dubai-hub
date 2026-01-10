@@ -1,13 +1,13 @@
 ---
 title: "Sales Mastery Quiz 3"
 slug: "sales-mastery-3"
-quiz_number: 3
+quizNumber: 3
 competency: "sales-mastery"
-module_reference: "3.7"
-module_title: "Closing Techniques"
+relatedModule: "3.7-closing-techniques"
 description: "Test your understanding of buying signals, closing techniques, and handling last-minute objections."
-pass_threshold: 80
-total_questions: 10
+passingScore: 80
+questionCount: 10
+estimatedDuration: "10 minutes"
 ---
 
 # Sales Mastery Quiz 3

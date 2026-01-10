@@ -1,10 +1,10 @@
 ---
 title: "Sales Mastery"
 slug: "sales-mastery"
-competency_number: 3
+competencyNumber: 3
 description: "Master the complete off-plan sales cycle — from lead qualification to closing."
-duration_minutes: 180
-modules: 8
+estimatedDuration: "3 hours"
+moduleCount: 8
 category: "core-skills"
 videos: []
 resources: []
