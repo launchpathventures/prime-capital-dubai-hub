@@ -20,18 +20,29 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // LMS Issue dependency map
+            // LMS Issue dependency map (optimized for parallel execution)
             const dependencies = {
-              124: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111], // LMS-002
-              125: [124], // LMS-003
-              126: [125], // LMS-004
-              127: [126], // LMS-005
-              128: [127], // LMS-006
-              129: [128], // LMS-007
-              130: [129], // LMS-008
-              131: [130], // LMS-009
-              132: [131], // LMS-010
-              133: [128], // LMS-011 (parallel after 006)
+              // Phase 1: Data Layer
+              124: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111], // LMS-002: Content Sync
+              
+              // Phase 2a: Shell
+              125: [124], // LMS-003: Shell Redesign
+              
+              // Phase 2b: Pages (PARALLEL after Shell)
+              126: [125], // LMS-004: Dashboard        ──┐
+              127: [125], // LMS-005: Competency Page  ──┼── Run in PARALLEL
+              130: [125], // LMS-008: Course Overview  ──┘
+              
+              // Phase 2c: Module Experience (after parallel pages)
+              128: [126, 127, 130], // LMS-006: Module Experience
+              
+              // Phase 2d: Quiz + Audio (PARALLEL)
+              129: [128], // LMS-007: Quiz System      ──┐
+              133: [128], // LMS-011: Audio Transcripts──┴── Run in PARALLEL
+              
+              // Phase 3: Polish
+              131: [129, 133], // LMS-009: Progress Tracking
+              132: [131],      // LMS-010: Polish
             };
             
             // Get all closed issues
