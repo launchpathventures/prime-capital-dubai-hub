@@ -381,6 +381,141 @@ export async function getQuizQuestions(
 }
 
 /**
+ * Get quiz with all questions and context for a module.
+ * Returns quiz data ready for the quiz page.
+ */
+export async function getQuizForModule(
+  moduleId: string
+): Promise<{
+  moduleId: string
+  moduleSlug: string
+  moduleTitle: string
+  competencySlug: string
+  competencyName: string
+  questions: QuizQuestion[]
+  passingScore: number
+} | null> {
+  const supabase = await createClient()
+
+  // Get module with competency info
+  const { data: module, error: moduleError } = await supabase
+    .from("learning_modules")
+    .select(`
+      id,
+      slug,
+      title,
+      competency:competencies(
+        slug,
+        name
+      )
+    `)
+    .eq("id", moduleId)
+    .single()
+
+  if (moduleError || !module) return null
+
+  // Get questions for this module
+  const questions = await getQuizQuestions(moduleId)
+
+  return {
+    moduleId: module.id,
+    moduleSlug: module.slug,
+    moduleTitle: module.title,
+    competencySlug: module.competency?.slug ?? "",
+    competencyName: module.competency?.name ?? "",
+    questions,
+    passingScore: 70, // Default passing score
+  }
+}
+
+/**
+ * Submit a quiz attempt.
+ */
+export async function submitQuizAttempt(data: {
+  moduleId: string
+  score: number
+  totalQuestions: number
+  answers: Record<string, number>
+}): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return
+  
+  const passed = (data.score / data.totalQuestions) * 100 >= 70
+
+  await supabase.from("quiz_attempts").insert({
+    user_id: user.id,
+    module_id: data.moduleId,
+    score: data.score,
+    max_score: data.totalQuestions,
+    passed,
+    answers: data.answers,
+  })
+
+  // Update learning progress if passed
+  if (passed) {
+    await supabase
+      .from("learning_progress")
+      .upsert({
+        user_id: user.id,
+        module_id: data.moduleId,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      })
+  }
+}
+
+/**
+ * Get competency progress summary for current user.
+ * Returns progress for all competencies.
+ */
+export async function getCompetencyProgressSummary(): Promise<Array<{
+  slug: string
+  name: string
+  completed: number
+  total: number
+}>> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return []
+
+  // Get all competencies with module counts
+  const { data: competencies } = await supabase
+    .from("competencies")
+    .select(`
+      slug,
+      name,
+      learning_modules(id)
+    `)
+    .order("display_order")
+
+  if (!competencies) return []
+
+  // Get user's completed modules
+  const { data: progress } = await supabase
+    .from("learning_progress")
+    .select("module_id")
+    .eq("user_id", user.id)
+    .eq("status", "completed")
+
+  const completedModuleIds = new Set(progress?.map((p) => p.module_id) ?? [])
+
+  return competencies.map((comp) => {
+    const modules = comp.learning_modules || []
+    const completed = modules.filter((m: { id: string }) => completedModuleIds.has(m.id)).length
+    
+    return {
+      slug: comp.slug,
+      name: comp.name,
+      completed,
+      total: modules.length,
+    }
+  })
+}
+
+/**
  * Get user's quiz attempts for a module.
  */
 export async function getQuizAttempts(
