@@ -176,17 +176,31 @@ export async function submitQuizAttempt(
 // PROGRESS STATS & ANALYTICS
 // =============================================================================
 
+/** Maximum number of days to consider when calculating streak */
+const MAX_STREAK_DAYS = 365
+
 /**
  * Get current user's overall progress stats with streak calculation.
  */
-export async function getProgressStats(): Promise<ProgressStats | null> {
+export async function getProgressStats(): Promise<ProgressStats> {
   const supabase = await createClient()
   
   const {
     data: { user },
   } = await supabase.auth.getUser()
   
-  if (!user) return null
+  // Return default stats if not authenticated
+  if (!user) {
+    return {
+      totalModules: 0,
+      completedModules: 0,
+      inProgressModules: 0,
+      totalQuizzes: 0,
+      passedQuizzes: 0,
+      currentStreak: 0,
+      overallProgressPercent: 0,
+    }
+  }
   
   // Get total modules count
   const { count: totalModules } = await supabase
@@ -270,8 +284,7 @@ function calculateStreak(dates: string[]): number {
   let streak = 0
   let currentDate = new Date()
   
-  for (let i = 0; i < 365; i++) {
-    // Limit to 1 year
+  for (let i = 0; i < MAX_STREAK_DAYS; i++) {
     const dateStr = currentDate.toISOString().split("T")[0]
     
     if (uniqueDays.includes(dateStr)) {

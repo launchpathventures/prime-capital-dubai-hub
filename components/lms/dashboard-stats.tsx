@@ -18,7 +18,10 @@ import {
 export async function DashboardStats() {
   const stats = await getProgressStats()
 
-  if (!stats) {
+  // If user not authenticated, stats will have all zeros
+  const isAuthenticated = stats.totalModules > 0 || stats.completedModules > 0
+
+  if (!isAuthenticated) {
     return (
       <Card>
         <CardContent className="pt-6">

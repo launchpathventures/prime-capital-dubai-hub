@@ -16,7 +16,7 @@ import {
 import type { ProgressStats } from "@/lib/learning-types"
 
 interface UseLearningProgressReturn {
-  stats: ProgressStats | null
+  stats: ProgressStats
   isLoading: boolean
   error: Error | null
   markStarted: (moduleId: string) => Promise<{ success: boolean }>
@@ -29,7 +29,15 @@ interface UseLearningProgressReturn {
  * Automatically fetches initial stats and provides mutation functions.
  */
 export function useLearningProgress(): UseLearningProgressReturn {
-  const [stats, setStats] = useState<ProgressStats | null>(null)
+  const [stats, setStats] = useState<ProgressStats>({
+    totalModules: 0,
+    completedModules: 0,
+    inProgressModules: 0,
+    totalQuizzes: 0,
+    passedQuizzes: 0,
+    currentStreak: 0,
+    overallProgressPercent: 0,
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -41,7 +49,8 @@ export function useLearningProgress(): UseLearningProgressReturn {
       const data = await getProgressStats()
       setStats(data)
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch progress"))
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      setError(new Error(`Failed to fetch progress: ${errorMessage}`))
     } finally {
       setIsLoading(false)
     }
