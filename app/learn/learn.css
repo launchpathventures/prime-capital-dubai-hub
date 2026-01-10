@@ -1,44 +1,419 @@
 /**
- * CATALYST - Learn Styles
+ * CATALYST - Learn Surface Styles
  *
  * Styles specific to the learning portal pages.
+ * Features header, sidebar navigation, and warm off-white content area.
  *
  * =============================================================================
  * LAYOUT SYSTEM
  * =============================================================================
  *
- * The learn surface uses a simple, content-focused layout:
- * - Fixed header that hides on scroll
- * - Full-width content area with max-width constraint
- * - Generous padding for readability
+ * The learn surface uses a grid-based layout:
+ * - Fixed header with dark slate background
+ * - Collapsible sidebar with competency navigation (desktop only)
+ * - Warm off-white content area with max-width constraint
+ * - Mobile drawer for sidebar access
  */
 
 @import "tailwindcss/theme" layer(theme);
 
 /* =============================================================================
-   LEARN CONTENT LAYOUT
+   CSS CUSTOM PROPERTIES
    ============================================================================= */
 
-.learn-content {
-  --learn-content-width: 72rem;
-  --learn-content-padding: 1rem;
-  --learn-content-padding-md: 2rem;
+:root {
+  --learn-header-bg: #4a5a6a;
+  --learn-sidebar-bg: #4a5a6a;
+  --learn-sidebar-width: 16rem;
+  --learn-header-height: 3.5rem;
+  --learn-content-bg: #f5f5f0;
+  
+  /* Badge states */
+  --learn-badge-current: #4a5a6a;
+  --learn-badge-locked: #9ca3af;
+  --learn-badge-complete: #22c55e;
+  
+  /* Callouts */
+  --learn-risk-bg: #fef2f2;
+  --learn-risk-border: #ef4444;
+  --learn-risk-text: #dc2626;
+  --learn-reward-bg: #f0fdf4;
+  --learn-reward-border: #22c55e;
+  --learn-reward-text: #16a34a;
 }
 
-/* Default content constraints */
-:where(.learn-content > *) {
-  max-width: var(--learn-content-width);
-  margin-inline: auto;
-  width: 100%;
-  padding-inline: var(--learn-content-padding);
+/* =============================================================================
+   LEARN SHELL LAYOUT
+   ============================================================================= */
 
-  @media (min-width: 768px) {
-    padding-inline: var(--learn-content-padding-md);
+.learn-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--learn-content-bg);
+}
+
+.learn-shell[data-has-sidebar="true"] {
+  @media (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: var(--learn-sidebar-width) 1fr;
+    grid-template-rows: var(--learn-header-height) 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar content";
   }
 }
 
 /* =============================================================================
-   COMPETENCY CARDS
+   HEADER
+   ============================================================================= */
+
+.learn-header {
+  grid-area: header;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--learn-header-height);
+  background: var(--learn-header-bg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 1rem;
+}
+
+.learn-header__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.learn-header__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.25;
+}
+
+.learn-header__subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.25;
+}
+
+.learn-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* =============================================================================
+   SIDEBAR
+   ============================================================================= */
+
+.learn-sidebar {
+  grid-area: sidebar;
+  background: var(--learn-sidebar-bg);
+  color: white;
+  display: none;
+  flex-direction: column;
+  height: calc(100vh - var(--learn-header-height));
+  position: sticky;
+  top: var(--learn-header-height);
+  overflow: hidden;
+  
+  @media (min-width: 1024px) {
+    display: flex;
+  }
+}
+
+.learn-sidebar__header {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.learn-sidebar__label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.learn-sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.learn-sidebar__footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.learn-sidebar__progress {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Competency item */
+.learn-competency {
+  padding: 0;
+}
+
+.learn-competency__trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.learn-competency__trigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.learn-competency__trigger[data-active="true"] {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.learn-competency__trigger:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.learn-competency__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.learn-competency__number[data-locked="true"] {
+  background: var(--learn-badge-locked);
+}
+
+.learn-competency__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.learn-competency__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.learn-competency__meta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.learn-competency__chevron {
+  width: 1rem;
+  height: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s;
+}
+
+.learn-competency[data-expanded="true"] .learn-competency__chevron {
+  transform: rotate(180deg);
+}
+
+/* Module list */
+.learn-modules {
+  padding: 0.25rem 0 0.5rem 2.25rem;
+}
+
+.learn-module {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 0.5rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  border-radius: 0.25rem;
+  transition: background 0.15s;
+}
+
+.learn-module:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.learn-module[data-active="true"] {
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 500;
+}
+
+.learn-module__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.learn-module__icon[data-status="complete"] {
+  color: var(--learn-badge-complete);
+}
+
+.learn-module__icon[data-status="current"] {
+  color: white;
+}
+
+.learn-module__icon[data-status="locked"] {
+  color: var(--learn-badge-locked);
+}
+
+/* =============================================================================
+   CONTENT AREA
+   ============================================================================= */
+
+.learn-content {
+  grid-area: content;
+  padding: 2rem;
+  background: var(--learn-content-bg);
+  min-height: calc(100vh - var(--learn-header-height));
+  
+  @media (max-width: 1023px) {
+    padding: 1rem;
+  }
+}
+
+.learn-content__inner {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+/* =============================================================================
+   MOBILE DRAWER
+   ============================================================================= */
+
+.learn-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+}
+
+.learn-drawer[data-open="true"] {
+  display: block;
+}
+
+.learn-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.learn-drawer__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--learn-sidebar-bg);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.learn-drawer[data-open="true"] .learn-drawer__panel {
+  transform: translateX(0);
+}
+
+/* Drawer sidebar overrides */
+.learn-drawer__panel .learn-sidebar {
+  display: flex;
+  height: 100%;
+  position: static;
+}
+
+/* =============================================================================
+   BADGES
+   ============================================================================= */
+
+.learn-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 0.25rem;
+}
+
+.learn-badge--current {
+  background: var(--learn-badge-current);
+  color: white;
+}
+
+.learn-badge--locked {
+  background: transparent;
+  border: 1px solid var(--learn-badge-locked);
+  color: var(--learn-badge-locked);
+}
+
+.learn-badge--complete {
+  background: var(--learn-badge-complete);
+  color: white;
+}
+
+/* =============================================================================
+   CALLOUT BOXES
+   ============================================================================= */
+
+.learn-callout {
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid;
+}
+
+.learn-callout--risk {
+  background: var(--learn-risk-bg);
+  border-color: var(--learn-risk-border);
+}
+
+.learn-callout--risk .learn-callout__label {
+  color: var(--learn-risk-text);
+}
+
+.learn-callout--reward {
+  background: var(--learn-reward-bg);
+  border-color: var(--learn-reward-border);
+}
+
+.learn-callout--reward .learn-callout__label {
+  color: var(--learn-reward-text);
+}
+
+.learn-callout__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.learn-callout__text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--learn-text-primary);
+}
+
+/* =============================================================================
+   COMPETENCY CARDS (Legacy - for dashboard)
    ============================================================================= */
 
 .competency-card {

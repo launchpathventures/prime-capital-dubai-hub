@@ -1,13 +1,11 @@
 /**
  * CATALYST - Competency Overview Page
  *
- * Shows competency details with sidebar navigation.
+ * Redirects to the first behaviour of the competency.
  * Dynamic route: /learn/[competency]
  */
 
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import { CompetencySidebar } from "../_surface/competency-sidebar"
+import { notFound, redirect } from "next/navigation"
 
 // -----------------------------------------------------------------------------
 // Competency Data
@@ -118,12 +116,9 @@ export default async function CompetencyOverviewPage({ params }: PageProps) {
     notFound()
   }
 
-  // For now, just redirect to the first behaviour
+  // Redirect to the first behaviour
   const firstBehaviour = competency.behaviours[0]
   if (firstBehaviour) {
-    // In a real implementation, we'd show an overview page
-    // For now, redirect to first behaviour
-    const { redirect } = await import("next/navigation")
     redirect(`/learn/${competencySlug}/${firstBehaviour.slug}`)
   }
 

@@ -511,3 +511,62 @@ function transformAttempts(rows: any[]): QuizAttempt[] {
 }
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+// =============================================================================
+// USER DATA FOR SHELL
+// =============================================================================
+
+/**
+ * User data for LearnShell display
+ */
+export interface LearnUser {
+  name: string
+  email: string
+  role: string
+  avatarUrl?: string
+}
+
+/**
+ * Get authenticated user data for display in learn shell header.
+ * User is guaranteed to be authenticated (protected by middleware).
+ */
+export async function getLearnUser(): Promise<LearnUser> {
+  try {
+    const supabase = await createClient()
+
+    // getClaims() reads from the token directly, no network call
+    const { data } = await supabase.auth.getClaims()
+    const claims = data?.claims
+
+    // For full user metadata, we still need getUser() but wrap in try/catch
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (claims || user) {
+      const email = (claims?.email || user?.email || "") as string
+      const displayName =
+        user?.user_metadata?.display_name ??
+        user?.user_metadata?.full_name ??
+        user?.user_metadata?.name ??
+        email?.split("@")[0] ??
+        "Learner"
+
+      return {
+        name: displayName,
+        email,
+        role: user?.user_metadata?.role || "learner",
+        avatarUrl: user?.user_metadata?.avatar_url,
+      }
+    }
+  } catch {
+    // Fall through to default
+  }
+
+  // Fallback (edge case or demo mode)
+  return {
+    name: "Learner",
+    email: "",
+    role: "learner",
+  }
+}
