@@ -29,6 +29,14 @@ interface QuizQuestion {
   explanation: string
 }
 
+interface SyncStats {
+  competencies: number
+  modules: number
+  quizzes: number
+  questions: number
+  scenarios: number
+}
+
 // =============================================================================
 // CONFIGURATION
 // =============================================================================
@@ -135,11 +143,12 @@ function parseQuizQuestions(content: string): QuizQuestion[] {
  * Sync competency index files to competencies table.
  * Reads _index.md from each competency folder.
  */
-export async function syncCompetencies(): Promise<void> {
+export async function syncCompetencies(): Promise<number> {
   const contentDir = getContentDir()
   const supabase = createSupabaseAdmin()
 
   const folders = getCompetencyFolders(contentDir)
+  let count = 0
 
   for (const folder of folders) {
     const indexPath = path.join(contentDir, folder, "_index.md")
@@ -148,16 +157,18 @@ export async function syncCompetencies(): Promise<void> {
       continue
     }
 
-    const { frontmatter } = parseMarkdownFile(indexPath)
+    const { frontmatter, content } = parseMarkdownFile(indexPath)
     const order = parseInt(folder.split("-")[0])
     const slug = folder.replace(/^\d+-/, "")
 
-    // Upsert competency
+    // Upsert competency with full content
     const { error } = await supabase.from("competencies").upsert(
       {
         slug,
         name: (frontmatter.title as string) || slug,
         description: frontmatter.description as string,
+        content, // Full markdown body
+        metadata: frontmatter, // ALL frontmatter preserved
         display_order: order,
       },
       { onConflict: "slug" }
@@ -167,15 +178,18 @@ export async function syncCompetencies(): Promise<void> {
       console.error(`✗ Error syncing competency ${slug}:`, error.message)
     } else {
       console.log(`✓ Synced competency: ${slug}`)
+      count++
     }
   }
+  
+  return count
 }
 
 /**
  * Sync module files to learning_modules table.
  * Reads all .md files (except _index.md) from each competency folder.
  */
-export async function syncModules(): Promise<void> {
+export async function syncModules(): Promise<number> {
   const contentDir = getContentDir()
   const supabase = createSupabaseAdmin()
 
@@ -189,8 +203,8 @@ export async function syncModules(): Promise<void> {
   }
 
   const competencyMap = new Map(competencies?.map((c) => [c.slug, c.id]))
-
   const folders = getCompetencyFolders(contentDir)
+  let totalCount = 0
 
   for (const folder of folders) {
     const competencySlug = folder.replace(/^\d+-/, "")
@@ -212,7 +226,8 @@ export async function syncModules(): Promise<void> {
           !f.startsWith("AUDIT") &&
           !f.startsWith("README") &&
           !f.startsWith("EXECUTIVE") &&
-          !f.startsWith("STATISTICS")
+          !f.startsWith("STATISTICS") &&
+          !f.startsWith("quiz-") // Skip quiz files in competency folders
       )
       .sort()
 
@@ -236,7 +251,9 @@ export async function syncModules(): Promise<void> {
             (frontmatter.type as string) ||
             (frontmatter.moduleType as string) ||
             "knowledge",
-          estimated_duration: frontmatter.estimatedDuration as string,
+          estimated_duration: 
+            (frontmatter.estimatedDuration as string) ||
+            (frontmatter.duration as string),
           frontmatter, // ALL frontmatter preserved
           content, // Full markdown body
           display_order: order++,
@@ -248,9 +265,12 @@ export async function syncModules(): Promise<void> {
         console.error(`    ✗ Error syncing module ${slug}:`, error.message)
       } else {
         console.log(`    ✓ ${slug}`)
+        totalCount++
       }
     }
   }
+  
+  return totalCount
 }
 
 /**
@@ -343,68 +363,156 @@ export async function syncAudioTranscripts(): Promise<void> {
 }
 
 /**
- * Sync quiz files to quiz_questions table.
- * Reads markdown files from content/lms/quizzes/ folder.
+ * Sync quiz files to quizzes and quiz_questions tables.
+ * Reads markdown files from content/lms/quizzes/ folder AND quiz files in competency folders.
  */
-export async function syncQuizzes(): Promise<void> {
+export async function syncQuizzes(): Promise<{ quizzes: number; questions: number }> {
   const contentDir = getContentDir()
   const supabase = createSupabaseAdmin()
 
+  let quizCount = 0
+  let questionCount = 0
+  
+  // Collect all quiz files from both locations
+  const quizFiles: Array<{ path: string; competencySlug?: string }> = []
+  
+  // 1. Main quizzes folder
   const quizzesDir = path.join(contentDir, "quizzes")
-  if (!fs.existsSync(quizzesDir)) {
-    console.log("  (No quizzes folder found)")
-    return
+  if (fs.existsSync(quizzesDir)) {
+    const files = fs.readdirSync(quizzesDir)
+      .filter((f) => f.endsWith(".md") && !f.startsWith("AUDIT"))
+    for (const file of files) {
+      quizFiles.push({ path: path.join(quizzesDir, file) })
+    }
+  }
+  
+  // 2. Quiz files in competency folders (e.g., 8-rera-exam-prep/quiz-*.md)
+  const folders = getCompetencyFolders(contentDir)
+  for (const folder of folders) {
+    const folderPath = path.join(contentDir, folder)
+    const competencySlug = folder.replace(/^\d+-/, "")
+    const files = fs.readdirSync(folderPath)
+      .filter((f) => f.startsWith("quiz-") && f.endsWith(".md"))
+    for (const file of files) {
+      quizFiles.push({ path: path.join(folderPath, file), competencySlug })
+    }
   }
 
-  const files = fs.readdirSync(quizzesDir).filter((f) => f.endsWith(".md") && !f.startsWith("AUDIT"))
-
-  for (const file of files) {
-    const filePath = path.join(quizzesDir, file)
+  for (const { path: filePath, competencySlug: folderCompetency } of quizFiles) {
     const { frontmatter, content } = parseMarkdownFile(filePath)
+    const filename = path.basename(filePath, ".md")
+    const quizSlug = (frontmatter.slug as string) || filename
 
-    const quizId = (frontmatter.slug as string) || file.replace(".md", "")
+    // Determine competency slug
+    const competencySlug = 
+      (frontmatter.competency as string) || 
+      folderCompetency || 
+      quizSlug.split("-").slice(0, -1).join("-")
 
     // Parse questions from markdown
     const questions = parseQuizQuestions(content)
 
-    // Delete existing questions for this quiz
-    const { error: deleteError } = await supabase
-      .from("quiz_questions")
-      .delete()
-      .eq("quiz_id", quizId)
+    // Upsert quiz metadata
+    const { error: quizError } = await supabase.from("quizzes").upsert(
+      {
+        slug: quizSlug,
+        competency_slug: competencySlug,
+        related_module: frontmatter.relatedModule as string,
+        title: (frontmatter.title as string) || quizSlug,
+        description: frontmatter.description as string,
+        passing_score: (frontmatter.passingScore as number) || 80,
+        question_count: questions.length || (frontmatter.questionCount as number),
+        estimated_duration: frontmatter.estimatedDuration as string,
+        frontmatter,
+      },
+      { onConflict: "slug" }
+    )
 
-    if (deleteError) {
-      console.error(
-        `  ✗ Error clearing existing questions for ${quizId}:`,
-        deleteError.message
-      )
+    if (quizError) {
+      console.error(`  ✗ Error syncing quiz ${quizSlug}:`, quizError.message)
       continue
     }
+    quizCount++
+
+    // Delete existing questions for this quiz
+    await supabase
+      .from("quiz_questions")
+      .delete()
+      .eq("quiz_slug", quizSlug)
 
     // Insert questions
     for (const [index, q] of questions.entries()) {
       const { error } = await supabase.from("quiz_questions").insert({
-        quiz_id: quizId,
-        competency_slug: frontmatter.competency as string,
+        quiz_slug: quizSlug,
+        competency_slug: competencySlug,
         related_module: frontmatter.relatedModule as string,
         question_number: index + 1,
         question_text: q.question,
-        question: q.question, // Also populate legacy column
+        question: q.question, // Legacy column
         options: q.options,
         explanation: q.explanation,
         display_order: index,
       })
 
       if (error) {
-        console.error(
-          `    ✗ Error inserting question ${index + 1}:`,
-          error.message
-        )
+        console.error(`    ✗ Error inserting question ${index + 1}:`, error.message)
+      } else {
+        questionCount++
       }
     }
 
-    console.log(`  ✓ ${quizId} (${questions.length} questions)`)
+    console.log(`  ✓ ${quizSlug} (${questions.length} questions)`)
   }
+
+  return { quizzes: quizCount, questions: questionCount }
+}
+
+/**
+ * Sync scenario files to scenarios table.
+ * Reads markdown files from content/lms/scenarios/ folder.
+ */
+export async function syncScenarios(): Promise<number> {
+  const contentDir = getContentDir()
+  const supabase = createSupabaseAdmin()
+
+  const scenariosDir = path.join(contentDir, "scenarios")
+  if (!fs.existsSync(scenariosDir)) {
+    console.log("  (No scenarios folder found)")
+    return 0
+  }
+
+  const files = fs.readdirSync(scenariosDir)
+    .filter((f) => f.endsWith(".md") && !f.startsWith("AUDIT") && !f.startsWith("_"))
+
+  let count = 0
+  for (const file of files) {
+    const filePath = path.join(scenariosDir, file)
+    const { frontmatter, content, slug } = parseMarkdownFile(filePath)
+
+    const { error } = await supabase.from("scenarios").upsert(
+      {
+        slug,
+        title: (frontmatter.title as string) || slug,
+        description: frontmatter.description as string,
+        competencies: frontmatter.competencies as string[],
+        difficulty: frontmatter.difficulty as string,
+        estimated_duration: frontmatter.estimatedDuration as string,
+        scenario_count: frontmatter.scenarioCount as number,
+        frontmatter,
+        content,
+      },
+      { onConflict: "slug" }
+    )
+
+    if (error) {
+      console.error(`  ✗ Error syncing scenario ${slug}:`, error.message)
+    } else {
+      console.log(`  ✓ ${slug}`)
+      count++
+    }
+  }
+
+  return count
 }
 
 // =============================================================================
@@ -413,22 +521,40 @@ export async function syncQuizzes(): Promise<void> {
 
 /**
  * Run full LMS content sync.
- * Syncs competencies, modules, audio transcripts, and quizzes.
+ * Syncs competencies, modules, quizzes, and scenarios.
  */
-export async function syncLmsContent(): Promise<void> {
+export async function syncLmsContent(): Promise<SyncStats> {
   console.log("🚀 Starting LMS content sync...\n")
 
   console.log("📁 Syncing competencies...")
-  await syncCompetencies()
+  const competencies = await syncCompetencies()
 
   console.log("\n📄 Syncing modules...")
-  await syncModules()
-
-  console.log("\n🎧 Syncing audio transcripts...")
-  await syncAudioTranscripts()
+  const modules = await syncModules()
 
   console.log("\n❓ Syncing quizzes...")
-  await syncQuizzes()
+  const { quizzes, questions } = await syncQuizzes()
 
-  console.log("\n✅ Sync complete!")
+  console.log("\n🎭 Syncing scenarios...")
+  const scenarios = await syncScenarios()
+
+  const stats: SyncStats = {
+    competencies,
+    modules,
+    quizzes,
+    questions,
+    scenarios,
+  }
+
+  console.log("\n" + "=".repeat(50))
+  console.log("✅ Sync complete!")
+  console.log("=".repeat(50))
+  console.log(`   Competencies: ${stats.competencies}`)
+  console.log(`   Modules:      ${stats.modules}`)
+  console.log(`   Quizzes:      ${stats.quizzes}`)
+  console.log(`   Questions:    ${stats.questions}`)
+  console.log(`   Scenarios:    ${stats.scenarios}`)
+  console.log("=".repeat(50))
+
+  return stats
 }

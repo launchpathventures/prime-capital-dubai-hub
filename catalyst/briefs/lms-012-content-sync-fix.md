@@ -1,9 +1,23 @@
 # LMS-012: Content Sync Fix
 
-**Status:** 📋 READY  
+**Status:** ✅ DONE  
 **Priority:** Critical (data layer broken)  
-**Estimated Time:** 2-3 hours  
+**Completed:** 2026-01-13  
 **Dependencies:** None  
+
+---
+
+## Results
+
+| Table | Before | After |
+|-------|--------|-------|
+| competencies | 7 (wrong slugs) | **9** ✓ |
+| learning_modules | 10 (descriptions only) | **68** (full content) ✓ |
+| quizzes | 0 | **26** ✓ |
+| quiz_questions | 0 | **51** ✓ |
+| scenarios | table didn't exist | **6** ✓ |
+
+All content synced with full markdown and frontmatter preserved as JSONB.
 
 ---
 

@@ -13,6 +13,11 @@
  *   SUPABASE_SERVICE_ROLE_KEY
  */
 
+import { config } from "dotenv"
+
+// Load environment variables from .env.local
+config({ path: ".env.local" })
+
 import { syncLmsContent } from "../lib/lms/sync"
 
 // Run sync
