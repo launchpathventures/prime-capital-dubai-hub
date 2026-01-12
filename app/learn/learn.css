@@ -497,3 +497,127 @@
   border-color: var(--color-destructive);
   background-color: oklch(from var(--color-destructive) l c h / 0.1);
 }
+
+/* =============================================================================
+   MOBILE RESPONSIVE ENHANCEMENTS
+   ============================================================================= */
+
+/* Ensure content doesn't overflow on mobile */
+.learn-content {
+  min-width: 0; /* Allow flex shrink */
+  overflow-x: hidden;
+}
+
+/* Quiz options full width on mobile */
+@media (max-width: 640px) {
+  .quiz-option {
+    padding: 1rem;
+  }
+}
+
+/* Stack grid layouts on mobile */
+@media (max-width: 640px) {
+  .learn-callout {
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* =============================================================================
+   TRANSITIONS & ANIMATIONS
+   ============================================================================= */
+
+/* Page transitions */
+.learn-content > * {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* Card hover effects */
+.learn-sidebar__nav a,
+.learn-competency__trigger {
+  position: relative;
+}
+
+.learn-sidebar__nav a::before,
+.learn-competency__trigger::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: white;
+  transition: height 0.2s ease;
+}
+
+.learn-sidebar__nav a[data-active="true"]::before,
+.learn-competency__trigger[data-active="true"]::before {
+  height: 60%;
+}
+
+/* Loading skeleton animations */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Smooth transitions for interactive elements */
+.learn-module,
+.learn-competency__trigger,
+.quiz-option {
+  transition: all 0.15s ease;
+}
+
+/* =============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================= */
+
+/* Focus styles for keyboard navigation */
+.learn-competency__trigger:focus-visible,
+.learn-module:focus-visible,
+.quiz-option:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .learn-competency__trigger,
+  .learn-module {
+    border: 1px solid transparent;
+  }
+  
+  .learn-competency__trigger:focus-visible,
+  .learn-module:focus-visible {
+    border-color: white;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .learn-content > *,
+  .learn-module,
+  .learn-competency__trigger,
+  .learn-competency__chevron,
+  .quiz-option {
+    animation: none;
+    transition: none;
+  }
+}
