@@ -1,59 +1,59 @@
 # State of Play: Prime Capital Dubai Hub
 **Technical Audit Report**  
-**Date:** 10 January 2026  
-**Phase:** LMS Content Complete → UI Polish  
-**Status:** All LMS content generated, audited, and merged. Learning portal ready for user testing.
+**Date:** 12 January 2026  
+**Phase:** LMS Architecture Rebuild → Content Population  
+**Status:** LMS frontend completely rebuilt with premium design. Database schema migrated to Supabase. Ready for content population.
 
 ---
 
 ## Executive Summary
 
-The Prime Capital Dubai platform is a unified Next.js application combining a public website, learning management system (LMS), and client engagement hub. **Current state: LMS content 100% complete with 68 modules, 26 quizzes, and 7 scenarios all audited.** All 9 competencies (0-8) have passed quality audits. The learning portal UI has been aligned with design specifications. **Next phase: User acceptance testing, photography for public website, and Hub schema application.**
+The Prime Capital Dubai platform is a unified Next.js application combining a public website, learning management system (LMS), and client engagement hub. **Current state: LMS architecture rebuilt from first principles with world-class design.** Data now flows from Supabase with 7 competencies and 10 modules seeded. RLS policies fixed for public read access. **Next phase: Populate remaining module content, add quizzes, complete content migration.**
 
 ---
 
-## Recent Changes (10 January 2026)
+## Recent Changes (12 January 2026)
 
-### ✅ LMS Content Generation & Audit Complete
+### ✅ LMS Frontend Complete Rebuild
 
-All learning content has been generated, audited, and merged:
+Scrapped legacy implementation and rebuilt from first principles:
 
-| Competency | Modules | Quizzes | Audit Status |
-|------------|---------|---------|--------------|
-| 0: Foundations | 5 | 2 | ✅ PASS |
-| 1: Market Intelligence | 10 | 4 | ✅ PASS |
-| 2: Client Discovery | 7 | 2 | ✅ PASS |
-| 3: Sales Mastery | 8 | 3 | ✅ PASS |
-| 4: Property Matching | 7 | 2 | ✅ PASS |
-| 5: Transaction Management | 12 | 3 | ✅ PASS |
-| 6: Objection Navigation | 7 | 3 | ✅ PASS |
-| 7: Relationship Stewardship | 4 | 1 | ✅ PASS |
-| 8: RERA Exam Prep | 8 | 6 | ✅ PASS |
-| **TOTAL** | **68** | **26** | **All Passed** |
+- **Premium CSS system** (`learn.css`) - Linear/Notion-inspired design
+- **Dashboard page** - Hero with stats, competency cards with hover effects
+- **Competency page** - Module list with "Start Competency" CTA
+- **Module page** - Sidebar navigation, content area, prev/next navigation
+- **Design tokens** - Uses Prime Capital brand colors (Spruce, Ash, Serenity)
 
-### ✅ Learning Portal UI Aligned
+### ✅ Database Migration to Supabase
 
-- Competency cards with progress tracking
-- Module pages with sidebar navigation
-- Quiz system with completion tracking
-- Responsive design for all screen sizes
+LMS content now stored in Supabase (not markdown files):
 
-### Merged PRs (10 January 2026)
-- #78: Audit Competency 0 - Foundations
-- #79: Audit Competency 1 - Market Intelligence
-- #80: Audit Competency 2 - Client Discovery
-- #81: Audit Competency 3 - Sales Mastery
-- #82: Audit Competency 4 - Property Matching
-- #83: Audit Competency 5 - Transaction Management
-- #84: Audit Competency 6 - Objection Navigation
-- #85: Audit Competency 7 - Relationship Stewardship
-- #86: Audit Competency 8 - RERA Exam Prep
-- #87: UI/UX alignment with design specifications
+| Competency | Modules | Status |
+|------------|---------|--------|
+| Prime Capital Identity | 4 | ✅ Content seeded |
+| Market Intelligence | 3 | ✅ Content seeded |
+| Client Discovery | 3 | ✅ Content seeded |
+| Property Matching | 0 | 🟡 Pending |
+| Objection Navigation | 0 | 🟡 Pending |
+| Transaction Excellence | 0 | 🟡 Pending |
+| Relationship Building | 0 | 🟡 Pending |
+| **TOTAL** | **10** | **3 of 7 started** |
+
+### ✅ RLS Policies Fixed
+
+- Fixed infinite recursion bug in `user_profiles` RLS
+- Updated `competencies` and `learning_modules` to allow public SELECT
+- Course catalog now visible without authentication
+
+### ✅ Database Schema Aligned
+
+- Competency slugs updated to match UI routing expectations
+- Migration applied: `20260112000001_update_competency_slugs.sql`
 
 ### Build Status
 - ✅ TypeScript: No errors
 - ✅ Build: Passing
-- ✅ All PRs merged, no open issues
+- ✅ Data fetching: Working (7 competencies, 10 modules displayed)
 
 ---
 
@@ -75,67 +75,71 @@ All learning content has been generated, audited, and merged:
 
 ## Next 3 Actions (Priority Order)
 
-### 1. � User Acceptance Testing - LMS (1-2 days)
+### 1. 🔴 Populate Module Content (2-3 hours)
 
-**Purpose:** Validate learning portal with real users  
-**Impact:** Catch usability issues before launch
+**Purpose:** Complete the learning content in Supabase  
+**Impact:** Only 10 of ~68 modules currently have content
 
 **Steps:**
-1. Create test user account
-2. Complete 2-3 modules from different competencies
-3. Take at least one quiz
-4. Document any issues or friction points
-5. Verify mobile responsiveness
+1. Migrate existing markdown content to `learning_modules.content` field
+2. Add remaining modules to empty competencies (Property Matching, Objection Navigation, etc.)
+3. Verify content renders correctly with markdown parsing
 
-**Success:** User can navigate, learn, and complete quizzes without confusion
+**Success:** All 7 competencies have full module content
 
 ---
 
-### 2. 🟠 Commission Photography (External, parallel track)
+### 2. 🟠 Add Quiz System (1-2 hours)
 
-**Purpose:** Unblock public website launch  
-**Impact:** Website functional but has placeholder images
+**Purpose:** Enable knowledge assessment  
+**Impact:** Quizzes not yet implemented in new architecture
 
-**Requirements:**
-- Property photography: 4 properties × 3-5 images each
-- Team headshots: 9 team members
-- Professional quality for luxury real estate brand
+**Steps:**
+1. Create `quizzes` and `quiz_questions` tables in Supabase
+2. Build quiz page component at `/learn/quiz/[id]`
+3. Link quizzes to competencies
+4. Add completion tracking
 
-**Success:** Website displays with real, professional imagery
+**Success:** Users can take quizzes after completing modules
 
 ---
 
-### 3. 🟡 Apply Hub Schema (30 minutes)
+### 3. 🟡 User Progress Tracking (1 hour)
 
-**Purpose:** Complete database foundation for client hub  
-**Impact:** Hub routes exist but can't connect to database
+**Purpose:** Track which modules users have completed  
+**Impact:** Currently no progress persistence
 
 **Steps:**
-1. Open Supabase Dashboard SQL Editor
-2. Paste contents of `supabase/migrations/20260105_hub_schema.sql`
-3. Execute
-4. Verify tables created: `hub_projects`, `hub_tasks`, `hub_questions`, `hub_activity`
+1. Create `user_progress` table with (user_id, module_id, completed_at)
+2. Add progress indicators to competency/module cards
+3. Update sidebar to show completion status
 
-**Success:** Hub routes can query database without errors
+**Success:** Users see their progress across sessions
 
 ---
 
 ## What's Ready vs What's Blocked
 
 ### ✅ Ready to Use Now
-- **Learning Portal** - 68 modules, 26 quizzes, all audited and merged
+- **LMS Dashboard** - Premium design, 7 competencies displayed
+- **Competency Pages** - Module lists with navigation
+- **Module Pages** - Sidebar nav, content area, prev/next
 - Admin CMS (all CRUD operations)
 - Public website structure and content
-- Database schema (CMS + LMS tables)
 - Authentication system
 - Feature flags for hiding incomplete sections
 
-### ✅ Recently Completed
-- All 9 competencies content generated
-- Quality audits passed for all competencies
-- Learning portal UI aligned with design specs
-- Coach Walkthrough sections with `<speak>` tags
-- Dubai market accuracy verified
+### ✅ Recently Completed (12 January 2026)
+- Complete LMS frontend rebuild (world-class design)
+- RLS policy fixes (public read access for course catalog)
+- Database schema alignment (slug migrations)
+- Premium CSS system with brand tokens
+- Data-driven pages (Supabase queries working)
+
+### ⚠️ Blocked - Needs Content Population
+- Full module content (only 10 of ~68 modules have content)
+- Quiz system (not yet implemented)
+- User progress tracking (not yet implemented)
 
 ### ⚠️ Blocked - Needs Hub Schema
 - `/hub` dashboard
@@ -178,11 +182,10 @@ All learning content has been generated, audited, and merged:
 
 | Route | Status | Details |
 |-------|--------|----------|
-| `/learn` | ✅ Live | Dashboard with 9 competency cards |
-| `/learn/[competency]` | ✅ Live | 68 modules with sidebar navigation |
-| `/learn/[competency]/[module]` | ✅ Live | Full content with coach walkthroughs |
-| `/learn/quiz/[id]` | ✅ Live | 26 quizzes with completion tracking |
-| `/learn/course` | ✅ Live | Course overview page |
+| `/learn` | ✅ Live | Dashboard with 7 competency cards, premium design |
+| `/learn/[competency]` | ✅ Live | Module list with hero and CTA |
+| `/learn/[competency]/[module]` | ✅ Live | Sidebar nav, content area, prev/next |
+| `/learn/quiz/[id]` | 🟡 Pending | Not yet implemented |
 
 ### hub/ - Client Hub ⚠️
 
@@ -204,11 +207,10 @@ All learning content has been generated, audited, and merged:
 - `stats` (4 rows)
 - `site_settings` (4 rows)
 
-**LMS Content (✅ Complete - Markdown files):**
-- 68 learning modules across 9 competencies
-- 26 quizzes (20 central + 6 RERA-specific)
-- 7 AI practice scenarios
-- 9 competency audit reports
+**LMS Tables (✅ Supabase):**
+- `competencies` (7 rows) - Course structure
+- `learning_modules` (10 rows) - Module content
+- `user_profiles` (auth-linked) - RLS policies fixed
 
 **Hub Tables (⚠️ Migration Pending):**
 - `hub_projects` - Not yet created
@@ -218,30 +220,49 @@ All learning content has been generated, audited, and merged:
 
 ---
 
-## LMS Content Summary
+## LMS Architecture
 
-### Competencies by Focus Area
+### Database Schema
 
-| # | Competency | Type | Modules | Focus |
-|---|------------|------|---------|-------|
-| 0 | Foundations | Knowledge | 5 | Company, compliance, tools |
-| 1 | Market Intelligence | Knowledge | 10 | Dubai market, areas, regulations |
-| 2 | Client Discovery | Skills | 7 | Personas, discovery, qualification |
-| 3 | Sales Mastery | Skills | 8 | Lead handling, presentations, closing |
-| 4 | Property Matching | Skills | 7 | Analysis, yields, CMA |
-| 5 | Transaction Management | Knowledge | 12 | Off-plan, secondary, documentation |
-| 6 | Objection Navigation | Skills | 7 | Framework, responses, resilience |
-| 7 | Relationship Stewardship | Skills | 4 | Communication, referrals, retention |
-| 8 | RERA Exam Prep | Knowledge | 8 | Exam preparation with question bank |
+```
+competencies
+├── id (uuid)
+├── slug (text) - URL-friendly identifier
+├── name (text) - Display name
+├── description (text) - Brief summary
+├── display_order (int) - Sort order
+└── learning_modules (relation)
+    ├── id (uuid)
+    ├── slug (text)
+    ├── title (text)
+    ├── content (text) - Module content
+    ├── duration_minutes (int)
+    └── display_order (int)
+```
 
-### Content Quality Metrics
+### Current Competencies
 
-- ✅ All learning objectives use action verbs (no "understand", "learn")
-- ✅ All modules have Introduction + Why This Matters + Key Takeaways
-- ✅ Skills modules have talk tracks and Common Mistakes sections
-- ✅ Coach Walkthrough sections have `<speak>` tags for TTS
-- ✅ Dubai market data verified (DLD 4%, Golden Visa AED 2M, etc.)
-- ✅ All developer and area names are real Dubai entities
+| # | Slug | Name | Modules |
+|---|------|------|---------|
+| 0 | prime-capital-identity | Prime Capital Identity | 4 |
+| 1 | market-intelligence | Market Intelligence | 3 |
+| 2 | client-discovery | Client Discovery | 3 |
+| 3 | property-matching | Property Matching | 0 |
+| 4 | objection-navigation | Objection Navigation | 0 |
+| 5 | transaction-excellence | Transaction Excellence | 0 |
+| 6 | relationship-building | Relationship Building | 0 |
+
+### Frontend Architecture
+
+```
+app/learn/
+├── learn.css              # Premium CSS system
+├── page.tsx               # Dashboard (competency list)
+├── [competency]/
+│   └── page.tsx           # Competency detail (module list)
+│   └── [module]/
+│       └── page.tsx       # Module content (with sidebar)
+```
 
 ---
 
@@ -249,9 +270,11 @@ All learning content has been generated, audited, and merged:
 
 | Component | Readiness | Next Step |
 |-----------|-----------|-----------|
-| **Learning Portal** | 100% | User acceptance testing |
+| **LMS Frontend** | 90% | Content population |
+| **LMS Content** | 15% | Migrate remaining modules |
+| **Quiz System** | 0% | Build quiz pages |
 | **Admin CMS** | 95% | Ready for use |
-| **Database Schema** | 90% | Hub schema pending |
+| **Database Schema** | 80% | Hub schema pending |
 | **Public Website** | 70% | Photography needed |
 | **Client Hub** | 30% | Schema + testing |
 
@@ -269,3 +292,15 @@ All learning content has been generated, audited, and merged:
 
 ✅ **Running:** http://localhost:3000  
 ✅ **Learning Portal:** http://localhost:3000/learn
+
+---
+
+## Key Files Changed (12 January 2026)
+
+| File | Purpose |
+|------|---------|
+| `app/learn/learn.css` | Premium CSS system (complete rebuild) |
+| `app/learn/page.tsx` | Dashboard with competency cards |
+| `app/learn/[competency]/page.tsx` | Competency detail with module list |
+| `app/learn/[competency]/[module]/page.tsx` | Module content with sidebar |
+| RLS Policies | Public read access for course catalog |

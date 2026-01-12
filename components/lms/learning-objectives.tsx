@@ -1,10 +1,11 @@
 /**
  * CATALYST - Learning Objectives
+ * Uses Prime Capital brand design tokens.
  */
 
-import { Text } from "@/components/core"
+import { Stack, Row, Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle2Icon } from "lucide-react"
+import { TargetIcon, CheckIcon } from "lucide-react"
 
 interface LearningObjectivesProps {
   objectives: string[]
@@ -14,19 +15,26 @@ export function LearningObjectives({ objectives }: LearningObjectivesProps) {
   if (!objectives || objectives.length === 0) return null
   
   return (
-    <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-900">
+    <Card className="border-success/20 bg-success/5">
       <CardContent className="p-6">
-        <Text size="xs" className="uppercase tracking-wider text-green-600 dark:text-green-400 font-semibold mb-4 flex items-center gap-2">
-          🎯 Learning Objectives
-        </Text>
-        <ul className="space-y-2">
-          {objectives.map((obj, i) => (
-            <li key={i} className="flex gap-3 items-start">
-              <CheckCircle2Icon className="h-5 w-5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
-              <span>{obj}</span>
-            </li>
-          ))}
-        </ul>
+        <Stack gap="md">
+          <Row gap="sm" align="center">
+            <TargetIcon className="h-5 w-5 text-success" />
+            <Text weight="semibold" className="text-foreground">
+              Learning Objectives
+            </Text>
+          </Row>
+          <ul className="space-y-3">
+            {objectives.map((obj, i) => (
+              <li key={i} className="flex gap-3 items-start">
+                <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-success/10 flex items-center justify-center">
+                  <CheckIcon className="h-3 w-3 text-success" />
+                </div>
+                <Text className="text-foreground/90">{obj}</Text>
+              </li>
+            ))}
+          </ul>
+        </Stack>
       </CardContent>
     </Card>
   )

@@ -1,183 +1,245 @@
 /**
- * CATALYST - Learn Dashboard Page
- *
- * Learning portal dashboard showing overall progress and courses.
- * Route: /learn
+ * CATALYST - Learn Dashboard
+ * 
+ * Course overview page showing all competencies.
+ * Premium design with refined visual hierarchy.
  */
 
 import Link from "next/link"
-import { Container, Stack, Grid, Row, Text, Title } from "@/components/core"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import {
+import { 
+  BookOpenIcon, 
+  ClockIcon, 
+  ChevronRightIcon,
+  LockIcon,
   PlayIcon,
-  BookOpenIcon,
   GraduationCapIcon,
-  TargetIcon,
   ArrowRightIcon,
 } from "lucide-react"
-import { LearnShell } from "./_surface"
-import { getLearnUser, getUserLearningStats } from "@/lib/learning"
 import { createClient } from "@/lib/supabase/server"
-import { DashboardStats } from "@/components/lms"
 
-// -----------------------------------------------------------------------------
-// Data Fetching
-// -----------------------------------------------------------------------------
+// =============================================================================
+// Types
+// =============================================================================
 
-async function getUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return user?.id ?? null
+interface Module {
+  id: string
+  slug: string
+  title: string
+  duration_minutes: number | null
+  display_order: number
 }
 
-// -----------------------------------------------------------------------------
+interface Competency {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  display_order: number
+  modules: Module[]
+}
+
+// =============================================================================
+// Data Fetching
+// =============================================================================
+
+async function getCompetenciesWithModules(): Promise<Competency[]> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from("competencies")
+    .select(`
+      id,
+      slug,
+      name,
+      description,
+      display_order,
+      learning_modules (
+        id,
+        slug,
+        title,
+        duration_minutes,
+        display_order
+      )
+    `)
+    .order("display_order", { ascending: true })
+  
+  if (error) {
+    console.error("Failed to fetch competencies:", error)
+    return []
+  }
+  
+  return (data as unknown as Competency[]).map(comp => ({
+    ...comp,
+    modules: ((comp as { learning_modules?: Module[] }).learning_modules || [])
+      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+  }))
+}
+
+// =============================================================================
 // Page Component
-// -----------------------------------------------------------------------------
+// =============================================================================
 
 export default async function LearnDashboardPage() {
-  const user = await getLearnUser()
-  const userId = await getUserId()
+  const competencies = await getCompetenciesWithModules()
   
-  // Get real progress stats from database
-  const stats = userId
-    ? await getUserLearningStats(userId)
-    : {
-        overallProgressPercent: 0,
-        completedCompetencies: 0,
-        totalCompetencies: 7,
-        completedModules: 0,
-        totalModules: 35,
-      }
+  const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
+  const totalDuration = competencies.reduce(
+    (sum, c) => sum + c.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0),
+    0
+  )
+  const availableCompetencies = competencies.filter(c => c.modules.length > 0)
   
-  const hasStarted = stats.completedModules > 0 || stats.overallProgressPercent > 0
-
+  // Find first competency with modules for CTA
+  const firstCompetency = availableCompetencies[0]
+  
   return (
-    <LearnShell user={user}>
-      <div className="min-h-[calc(100vh-3.5rem)]" style={{ backgroundColor: "#f5f5f5" }}>
-        <Container size="lg" className="py-8 sm:py-12">
-          <Stack gap="xl">
-            {/* Welcome Section */}
-            <Stack gap="md" className="text-center max-w-2xl mx-auto">
-              <Title size="h1" className="text-4xl sm:text-5xl">
-                Welcome back, {user.name}
-              </Title>
-              <Text size="lg" variant="muted">
-                Continue your journey to becoming a Prime Capital expert.
-              </Text>
-            </Stack>
-
-            {/* Onboarding Prompt (show only if not started) */}
-            {!hasStarted && (
-              <Card className="border-2">
-                <CardContent className="py-6">
-                  <Row gap="lg" align="center" justify="between" className="flex-col sm:flex-row">
-                    <Row gap="md" align="center">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted shrink-0">
-                        <GraduationCapIcon className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <Stack gap="xs">
-                        <Text weight="semibold" size="lg">
-                          New to the platform?
-                        </Text>
-                        <Text size="sm" variant="muted">
-                          Take a quick 2-minute tour to understand how your training works.
-                        </Text>
-                      </Stack>
-                    </Row>
-                    <Button variant="secondary" className="shrink-0">
-                      <PlayIcon className="h-4 w-4 mr-2" />
-                      Start Tour
-                    </Button>
-                  </Row>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Progress Overview */}
-            <Stack gap="md">
-              <Title size="h3">Your Progress</Title>
-              <DashboardStats />
-            </Stack>
-
-            {/* Your Courses */}
-            <Stack gap="md">
-              <Title size="h3">Your Courses</Title>
-              
-              {/* Main Course Card */}
-              <Card className="overflow-hidden">
-                {/* Hero Image */}
-                <div
-                  className="h-48 sm:h-64 bg-cover bg-center"
-                  style={{
-                    backgroundImage: "url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80')",
-                  }}
-                />
+    <div className="learn-shell">
+      {/* Header */}
+      <header className="learn-header">
+        <div className="learn-header__inner">
+          <div className="learn-header__left">
+            <Link href="/learn" className="learn-header__logo">
+              <span className="learn-header__logo-icon">
+                <GraduationCapIcon className="h-3.5 w-3.5" />
+              </span>
+              Prime Capital Learning
+            </Link>
+          </div>
+          <nav className="learn-header__nav">
+            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
+              Home
+            </Button>
+          </nav>
+        </div>
+      </header>
+      
+      {/* Main content */}
+      <main className="learn-main">
+        <div className="learn-content">
+          
+          {/* Hero Section */}
+          <section className="lms-hero">
+            <div className="lms-hero__content">
+              <div className="lms-hero__eyebrow">
+                <GraduationCapIcon className="h-3.5 w-3.5" />
+                Prime Capital Dubai
+              </div>
+              <h1 className="lms-hero__title">
+                Consultant Training Program
+              </h1>
+              <p className="lms-hero__description">
+                Master the skills and knowledge you need to succeed as a Prime Capital 
+                real estate consultant. Complete all competencies to earn your certification.
+              </p>
+              <div className="lms-hero__stats">
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{competencies.length}</span>
+                  <span className="lms-hero__stat-label">Competencies</span>
+                </div>
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{totalModules}</span>
+                  <span className="lms-hero__stat-label">Modules</span>
+                </div>
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{Math.round(totalDuration / 60) || '–'}h</span>
+                  <span className="lms-hero__stat-label">Duration</span>
+                </div>
+              </div>
+              {firstCompetency && (
+                <div className="lms-hero__actions">
+                  <Button 
+                    size="lg" 
+                    className="gap-2 bg-white text-primary-700 hover:bg-white/90"
+                    nativeButton={false}
+                    render={<Link href={`/learn/${firstCompetency.slug}`} />}
+                  >
+                    <PlayIcon className="h-4 w-4" />
+                    Start Learning
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
+          
+          {/* Competency List */}
+          <section className="lms-section">
+            <div className="lms-section__header">
+              <h2 className="lms-section__title">Your Learning Path</h2>
+              <span className="lms-section__subtitle">
+                {availableCompetencies.length} of {competencies.length} available
+              </span>
+            </div>
+            
+            <div className="lms-list">
+              {competencies.map((comp, index) => {
+                const hasModules = comp.modules.length > 0
+                const duration = comp.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0)
+                const isLocked = !hasModules
                 
-                <CardContent className="pt-6">
-                  <Stack gap="md">
-                    <Badge variant="secondary" className="w-fit">
-                      REQUIRED TRAINING
-                    </Badge>
-                    
-                    <Stack gap="sm">
-                      <Title size="h3">Real Estate Consultant Certification</Title>
-                      <Text variant="muted">
-                        Master the 7 core competencies and 35 key behaviours that define a Prime Capital consultant.
-                      </Text>
-                    </Stack>
-
-                    <Row gap="lg" className="flex-wrap">
-                      <Row gap="xs" align="center">
-                        <TargetIcon className="h-4 w-4 text-muted-foreground" />
-                        <Text size="sm" variant="muted">
-                          {stats.totalCompetencies} Competencies
-                        </Text>
-                      </Row>
-                      <Row gap="xs" align="center">
-                        <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
-                        <Text size="sm" variant="muted">
-                          {stats.totalModules} Behaviours
-                        </Text>
-                      </Row>
-                    </Row>
-
-                    <Stack gap="xs">
-                      <Row gap="sm" align="center" justify="between">
-                        <Text size="sm" variant="muted">
-                          Progress
-                        </Text>
-                        <Text size="sm" variant="muted">
-                          {hasStarted ? `${stats.overallProgressPercent}% complete` : "Not started"}
-                        </Text>
-                      </Row>
-                      <Progress value={stats.overallProgressPercent} className="h-2" />
-                    </Stack>
-
-                    <div className="pt-2">
-                      <Button size="lg" nativeButton={false} render={<Link href="/learn/course" />}>
-                        {hasStarted ? (
-                          <>
-                            Continue Course
-                            <ArrowRightIcon className="h-4 w-4 ml-2" />
-                          </>
-                        ) : (
-                          <>
-                            <PlayIcon className="h-4 w-4 mr-2" />
-                            Start Course
-                          </>
+                if (isLocked) {
+                  return (
+                    <div 
+                      key={comp.id}
+                      className="lms-card competency-card competency-card--locked"
+                    >
+                      <div className="competency-card__index">
+                        {index + 1}
+                      </div>
+                      <div className="competency-card__body">
+                        <h3 className="competency-card__title">{comp.name}</h3>
+                        {comp.description && (
+                          <p className="competency-card__description">{comp.description}</p>
                         )}
-                      </Button>
+                        <div className="competency-card__meta">
+                          <span className="competency-card__meta-item">
+                            <LockIcon className="h-3 w-3" />
+                            Coming Soon
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Stack>
-          </Stack>
-        </Container>
-      </div>
-    </LearnShell>
+                  )
+                }
+                
+                return (
+                  <Link
+                    key={comp.id}
+                    href={`/learn/${comp.slug}`}
+                    className="lms-card lms-card--clickable competency-card"
+                  >
+                    <div className="competency-card__index">
+                      {index + 1}
+                    </div>
+                    <div className="competency-card__body">
+                      <h3 className="competency-card__title">{comp.name}</h3>
+                      {comp.description && (
+                        <p className="competency-card__description">{comp.description}</p>
+                      )}
+                      <div className="competency-card__meta">
+                        <span className="competency-card__meta-item">
+                          <BookOpenIcon className="h-3 w-3" />
+                          {comp.modules.length} modules
+                        </span>
+                        {duration > 0 && (
+                          <span className="competency-card__meta-item">
+                            <ClockIcon className="h-3 w-3" />
+                            {duration} min
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="competency-card__action">
+                      <ArrowRightIcon className="h-4 w-4" />
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </section>
+          
+        </div>
+      </main>
+    </div>
   )
 }

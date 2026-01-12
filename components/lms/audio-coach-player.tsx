@@ -3,6 +3,7 @@
  * 
  * Plays AI coach demonstration audio with transcript support.
  * Shows "demonstrate then explain" format with transcript toggle.
+ * Uses Prime Capital brand design tokens.
  */
 
 "use client"
@@ -19,6 +20,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   HeadphonesIcon,
+  FileTextIcon,
 } from "lucide-react"
 import { MarkdownRenderer } from "./markdown-renderer"
 
@@ -76,19 +78,19 @@ export function AudioCoachPlayer({
   }
   
   return (
-    <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30">
+    <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/10">
       <CardContent className="p-6">
         <Stack gap="md">
           {/* Header */}
           <Row align="center" gap="md">
-            <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-              <HeadphonesIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <HeadphonesIcon className="h-6 w-6 text-primary" />
             </div>
             <Stack gap="none" className="flex-1">
-              <Text size="xs" className="uppercase tracking-wider text-purple-600 dark:text-purple-400 font-semibold">
-                Coach Demonstration
+              <Text size="xs" className="uppercase tracking-wider text-primary font-semibold">
+                Audio Coaching
               </Text>
-              <Title size="h4">{title}</Title>
+              <Title size="h4" className="font-serif">{title}</Title>
               <Text size="sm" className="text-muted-foreground">
                 {duration} • {type}
               </Text>
@@ -103,7 +105,7 @@ export function AudioCoachPlayer({
           
           {/* Audio Player */}
           {audioUrl ? (
-            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-4">
+            <div className="bg-background/70 rounded-lg p-4">
               <audio 
                 ref={audioRef}
                 src={audioUrl}
@@ -116,7 +118,7 @@ export function AudioCoachPlayer({
                   variant="ghost"
                   size="icon"
                   onClick={togglePlay}
-                  className="h-10 w-10 rounded-full bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-600"
+                  className="h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   {isPlaying ? (
                     <PauseIcon className="h-5 w-5" />
@@ -143,7 +145,7 @@ export function AudioCoachPlayer({
               </Row>
             </div>
           ) : (
-            <div className="bg-white/50 dark:bg-black/20 rounded-lg p-4 text-center">
+            <div className="bg-background/70 rounded-lg p-4 text-center">
               <Text className="text-muted-foreground">
                 🔊 Audio coming soon — view transcript below
               </Text>
@@ -154,9 +156,10 @@ export function AudioCoachPlayer({
           <Button
             variant="ghost"
             onClick={() => setShowTranscript(!showTranscript)}
-            className="gap-2"
+            className="gap-2 text-primary hover:text-primary"
           >
-            📜 {showTranscript ? "Hide" : "Show"} Transcript
+            <FileTextIcon className="h-4 w-4" />
+            {showTranscript ? "Hide" : "View"} Transcript
             {showTranscript ? (
               <ChevronUpIcon className="h-4 w-4" />
             ) : (
@@ -166,7 +169,7 @@ export function AudioCoachPlayer({
           
           {/* Transcript Content */}
           {showTranscript && (
-            <div className="bg-white dark:bg-black/40 rounded-lg p-4 border max-h-96 overflow-y-auto">
+            <div className="bg-background rounded-lg p-5 border border-border max-h-96 overflow-y-auto">
               <MarkdownRenderer 
                 content={transcript} 
                 className="prose-sm"

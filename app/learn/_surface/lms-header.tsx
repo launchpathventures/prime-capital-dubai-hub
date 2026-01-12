@@ -29,41 +29,36 @@ export function LMSHeader({
   showMenuButton = false,
 }: LMSHeaderProps) {
   return (
-    <header className="learn-header">
-      <div className="flex items-center gap-3">
+    <header className="lms-header">
+      <div className="lms-header__left">
         {/* Mobile menu button */}
         {showMenuButton && (
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
             onClick={onMenuClick}
-            className="lg:hidden text-white hover:bg-white/10"
+            className="lms-header__menu"
+            aria-label="Open menu"
           >
             <MenuIcon className="h-5 w-5" />
-            <span className="sr-only">Open menu</span>
-          </Button>
+          </button>
         )}
         
         {/* Brand */}
-        <Link href="/learn" className="learn-header__brand hover:opacity-80 transition-opacity">
-          <span className="learn-header__title">Prime Capital Learning</span>
-          <span className="learn-header__subtitle">Real Estate Consultant Training</span>
+        <Link href="/learn" className="lms-header__brand">
+          Prime Capital Learning
         </Link>
       </div>
       
       {/* Actions */}
-      <div className="learn-header__actions">
-        <Button
-          variant="outline"
-          size="sm"
-          className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white gap-2"
-          nativeButton={false}
-          render={<Link href="/hub" />}
-        >
-          <HomeIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">HUB</span>
-        </Button>
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        nativeButton={false}
+        render={<Link href="/" />}
+      >
+        <HomeIcon className="h-4 w-4" />
+        <span className="hidden sm:inline">Home</span>
+      </Button>
     </header>
   )
 }
