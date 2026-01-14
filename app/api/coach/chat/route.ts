@@ -8,7 +8,7 @@
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/lib/supabase/server"
-import { getCompetencies, getModule } from "@/lib/learning"
+import { getCompetencyWithModules, getModule } from "@/lib/learning"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -35,10 +35,25 @@ const anthropic = new Anthropic({
 // System Prompt Builder
 // -----------------------------------------------------------------------------
 
+interface ModuleInfo {
+  order: string
+  name: string
+  slug: string
+  description: string
+}
+
+interface CompetencyInfo {
+  name: string
+  slug: string
+  description: string
+  moduleCount: number
+  modules?: ModuleInfo[]
+}
+
 function buildSystemPrompt(
   context: ChatRequest["context"],
   moduleContent?: string,
-  competencyInfo?: { name: string; description: string; moduleCount: number }
+  competencyInfo?: CompetencyInfo
 ): string {
   const base = `You are the AI Coach for Prime Capital Dubai's real estate training program.
 
@@ -75,6 +90,12 @@ BEHAVIOR:
   }
 
   if (context.level === "competency" && competencyInfo) {
+    const moduleList = competencyInfo.modules
+      ? competencyInfo.modules
+          .map((m) => `  - [Module ${m.order}: ${m.name}](/learn/${competencyInfo.slug}/${m.slug})${m.description ? ` - ${m.description}` : ''}`)
+          .join('\n')
+      : 'No modules available'
+
     return `${base}
 
 CURRENT CONTEXT: Competency Level
@@ -83,11 +104,19 @@ You are helping the learner navigate ${competencyInfo.name} (${competencyInfo.mo
 COMPETENCY: ${competencyInfo.name}
 DESCRIPTION: ${competencyInfo.description}
 
+MODULES IN THIS COMPETENCY (with links):
+${moduleList}
+
+LINKING RULES:
+- When referencing a module, ALWAYS use the EXACT markdown link format from the list above
+- Copy the link exactly as shown, e.g.: [Module 0.1: Prime Capital Orientation](/learn/foundations/prime-capital-orientation)
+- This creates clickable links for learners
+
 BEHAVIOR:
 - Help learners understand what this competency covers
 - Recommend which module to start with based on their question
-- Summarize key themes across the competency
-- Link to specific modules: "See Module X.X: Title"`
+- Use clickable module links so learners can navigate directly
+- Summarize key themes across the competency`
   }
 
   // Course level
@@ -168,9 +197,7 @@ export async function POST(request: NextRequest) {
 
     // Build context
     let moduleContent: string | undefined
-    let competencyInfo:
-      | { name: string; description: string; moduleCount: number }
-      | undefined
+    let competencyInfo: CompetencyInfo | undefined
 
     if (
       context.level === "module" &&
@@ -184,13 +211,19 @@ export async function POST(request: NextRequest) {
     }
 
     if (context.level === "competency" && context.competencySlug) {
-      const competencies = await getCompetencies()
-      const comp = competencies.find((c) => c.slug === context.competencySlug)
-      if (comp) {
+      const compWithModules = await getCompetencyWithModules(context.competencySlug)
+      if (compWithModules) {
         competencyInfo = {
-          name: comp.name,
-          description: comp.description || "",
-          moduleCount: 10, // Approximate, would need to fetch modules
+          name: compWithModules.name,
+          slug: compWithModules.slug,
+          description: compWithModules.description || "",
+          moduleCount: compWithModules.moduleCount,
+          modules: compWithModules.modules.map((m) => ({
+            order: m.moduleNumber || m.displayOrder.toString(),
+            name: m.title,
+            slug: m.slug,
+            description: m.description || "",
+          })),
         }
       }
     }

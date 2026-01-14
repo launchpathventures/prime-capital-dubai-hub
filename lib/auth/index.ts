@@ -12,3 +12,11 @@ export {
 } from "./config"
 
 export { getURL } from "./get-url"
+
+export {
+  requireAuth,
+  requireAdmin,
+  getOptionalUser,
+  getUserWithProfile,
+  getUserForMenu,
+} from "./require-auth"

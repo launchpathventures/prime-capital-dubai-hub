@@ -1,16 +1,17 @@
 ---
-title: "Competency 0: Foundations"
+title: "Foundations"
 slug: "foundations"
 competencyNumber: 0
-description: "Essential onboarding for new Prime Capital consultants. Master company culture, professional standards, regulatory compliance, tools, and daily workflows."
-estimatedDuration: "4 hours"
-moduleCount: 5
+description: "Essential onboarding for new Prime Capital consultants. Master company culture, professional standards, regulatory compliance, tools, AI-assisted workflows, and daily productivity."
+estimatedDuration: "5 hours"
+moduleCount: 6
 learningObjectives:
   - "Articulate Prime Capital's brand positioning and target market"
   - "Apply professional standards and code of conduct"
   - "Navigate RERA compliance and broker licensing requirements"
   - "Utilize essential CRM and communication tools effectively"
   - "Implement daily workflow and productivity frameworks"
+  - "Leverage AI tools responsibly for research, communication, and client service"
 order: 0
 status: published
 videos: []
@@ -29,13 +30,14 @@ Welcome to Prime Capital Dubai. This competency establishes the foundation for y
 
 ## What You'll Learn
 
-This competency covers five essential modules:
+This competency covers six essential modules:
 
 1. **Prime Capital Orientation** — Our story, positioning, and what makes us different
 2. **Professional Standards** — Code of conduct and client interaction principles
 3. **Broker Licensing & Compliance** — Regulatory requirements and RERA compliance
 4. **Essential Tools Overview** — CRM, communication platforms, and daily tools
 5. **Daily Workflow & Productivity** — Morning routines, time-blocking, and pipeline management
+6. **Using AI in Your Daily Workflow** — Leveraging Google Gemini responsibly for research and communication
 
 ## Why This Matters
 
@@ -50,7 +52,7 @@ The foundations competency ensures you:
 
 ## Time Commitment
 
-**Estimated Duration:** 4 hours total (240 minutes)
+**Estimated Duration:** 5 hours total (300 minutes)
 
 You should complete this competency within your first 3 days at Prime Capital. Take your time to absorb the material — rushing through foundations creates problems later.
 

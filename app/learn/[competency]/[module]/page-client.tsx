@@ -9,17 +9,20 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { EssentialsView } from "@/components/lms"
 import type { EssentialsContent } from "@/lib/learning-types"
+import type { ScenarioLink } from "./page"
 
 interface ModulePageClientProps {
   essentials: EssentialsContent
   moduleSlug: string
   competencySlug: string
+  linkedScenarios: ScenarioLink[]
 }
 
 export function ModulePageClient({ 
   essentials, 
   moduleSlug, 
-  competencySlug 
+  competencySlug,
+  linkedScenarios,
 }: ModulePageClientProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -37,6 +40,7 @@ export function ModulePageClient({
       moduleSlug={moduleSlug}
       competencySlug={competencySlug}
       onSwitchMode={handleSwitchMode}
+      linkedScenarios={linkedScenarios}
     />
   )
 }

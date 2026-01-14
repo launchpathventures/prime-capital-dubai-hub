@@ -21,6 +21,8 @@ import {
   ClipboardCheckIcon,
   AwardIcon,
   SettingsIcon,
+  UsersIcon,
+  SparklesIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
@@ -43,7 +45,7 @@ interface Competency {
 
 interface LearnSidebarProps {
   /** Active section for highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "rera" | "certification" | "admin"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users"
   /** Competency data for course section */
   competencies?: Competency[]
   /** Current competency slug */
@@ -147,24 +149,39 @@ export function LearnSidebar({
                     className="learn-sidebar__competency"
                     data-expanded={isExpanded}
                   >
-                    <button
-                      className="learn-sidebar__competency-trigger"
-                      data-active={isActive}
-                      onClick={() => !comp.locked && toggleCompetency(comp.slug)}
-                      disabled={comp.locked}
-                    >
-                      <span 
-                        className="learn-sidebar__competency-number"
+                    <div className="learn-sidebar__competency-row">
+                      <Link
+                        href={comp.locked ? "#" : `/learn/${comp.slug}`}
+                        className="learn-sidebar__competency-link"
+                        data-active={isActive && !currentModule}
                         data-locked={comp.locked}
-                        data-complete={completedCount === comp.modules.length && comp.modules.length > 0}
+                        onClick={(e) => {
+                          if (comp.locked) {
+                            e.preventDefault()
+                          } else {
+                            onNavigate?.()
+                          }
+                        }}
                       >
-                        {comp.number}
-                      </span>
-                      <span className="learn-sidebar__competency-name">{comp.name}</span>
+                        <span 
+                          className="learn-sidebar__competency-number"
+                          data-locked={comp.locked}
+                          data-complete={completedCount === comp.modules.length && comp.modules.length > 0}
+                        >
+                          {comp.number}
+                        </span>
+                        <span className="learn-sidebar__competency-name">{comp.name}</span>
+                      </Link>
                       {!comp.locked && comp.modules.length > 0 && (
-                        <ChevronDownIcon className="learn-sidebar__competency-chevron" />
+                        <button
+                          className="learn-sidebar__competency-toggle"
+                          onClick={() => toggleCompetency(comp.slug)}
+                          aria-label={isExpanded ? "Collapse modules" : "Expand modules"}
+                        >
+                          <ChevronDownIcon className="learn-sidebar__competency-chevron" />
+                        </button>
                       )}
-                    </button>
+                    </div>
                     
                     {isExpanded && !comp.locked && (
                       <div className="learn-sidebar__modules">
@@ -222,6 +239,22 @@ export function LearnSidebar({
         </nav>
       </div>
       
+      {/* Apply Section */}
+      <div className="learn-sidebar__section">
+        <div className="learn-sidebar__heading">Apply</div>
+        <nav className="learn-sidebar__nav-list">
+          <Link 
+            href="/learn/prompts"
+            className="learn-sidebar__nav-item"
+            data-active={activeSection === "prompts"}
+            onClick={onNavigate}
+          >
+            <SparklesIcon className="learn-sidebar__nav-icon" />
+            <span>AI Prompts Library</span>
+          </Link>
+        </nav>
+      </div>
+      
       {/* Certification Section */}
       <div className="learn-sidebar__section">
         <div className="learn-sidebar__heading">Certification</div>
@@ -243,6 +276,15 @@ export function LearnSidebar({
         <div className="learn-sidebar__section learn-sidebar__section--admin">
           <div className="learn-sidebar__heading">Admin</div>
           <nav className="learn-sidebar__nav-list">
+            <Link 
+              href="/learn/admin/users"
+              className="learn-sidebar__nav-item"
+              data-active={activeSection === "admin-users"}
+              onClick={onNavigate}
+            >
+              <UsersIcon className="learn-sidebar__nav-icon" />
+              <span>User Management</span>
+            </Link>
             <Link 
               href="/learn/admin/certification"
               className="learn-sidebar__nav-item"

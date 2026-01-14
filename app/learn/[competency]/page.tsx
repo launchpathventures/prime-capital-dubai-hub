@@ -20,9 +20,12 @@ import {
   ClipboardCheckIcon,
   SparklesIcon,
   MessageSquareIcon,
+  HeadphonesIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../_surface/learn-shell"
+import { AudioPlayer, type AudioTrack } from "@/components/lms/audio-player"
 
 // =============================================================================
 // Types
@@ -132,6 +135,30 @@ async function getScenariosForCompetency(competencySlug: string): Promise<Scenar
   return data || []
 }
 
+async function getCompetencyAudio(competencyId: string): Promise<AudioTrack | null> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from("audio_transcripts")
+    .select("slug, title, type, duration, audio_url, transcript")
+    .eq("competency_id", competencyId)
+    .eq("type", "intro")
+    .single()
+  
+  if (error || !data) {
+    return null
+  }
+  
+  return {
+    slug: data.slug,
+    title: data.title,
+    type: (data.type as "intro" | "demo" | "walkthrough") || "intro",
+    duration: data.duration || "3 minutes",
+    audioUrl: data.audio_url,
+    transcript: data.transcript || "",
+  }
+}
+
 
 // =============================================================================
 // Page Component
@@ -154,9 +181,14 @@ export default async function CompetencyPage({ params }: PageProps) {
   
   const firstModule = currentCompetency.modules[0]
   
-  // Get quizzes and scenarios for this competency
-  const quizzes = await getQuizzesForCompetency(slug)
-  const scenarios = await getScenariosForCompetency(slug)
+  // Get quizzes, scenarios, and audio for this competency
+  const [quizzes, scenarios, competencyAudio, userRole, userMenu] = await Promise.all([
+    getQuizzesForCompetency(slug),
+    getScenariosForCompetency(slug),
+    getCompetencyAudio(currentCompetency.id),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   
   // Transform competencies for sidebar
   const sidebarCompetencies = allCompetencies.map((c, i) => ({
@@ -176,6 +208,8 @@ export default async function CompetencyPage({ params }: PageProps) {
       activeSection="course"
       competencies={sidebarCompetencies}
       currentCompetency={slug}
+      userRole={userRole}
+      user={userMenu ?? undefined}
       coachContext={{ 
         level: "competency",
         competencySlug: slug,
@@ -203,7 +237,7 @@ export default async function CompetencyPage({ params }: PageProps) {
               <span className="lms-hero__stat-label">Modules</span>
             </div>
             <div className="lms-hero__stat">
-              <span className="lms-hero__stat-value">{totalDuration}</span>
+              <span className="lms-hero__stat-value">{totalDuration || currentCompetency.modules.length * 25}</span>
               <span className="lms-hero__stat-label">Minutes</span>
             </div>
           </div>
@@ -222,6 +256,22 @@ export default async function CompetencyPage({ params }: PageProps) {
           )}
         </div>
       </section>
+      
+      {/* Competency Audio Introduction */}
+      {competencyAudio && (
+        <section className="lms-section">
+          <div className="lms-section__header">
+            <Row align="center" gap="sm">
+              <HeadphonesIcon className="h-5 w-5 text-primary" />
+              <h2 className="lms-section__title">Listen to Introduction</h2>
+            </Row>
+          </div>
+          <AudioPlayer 
+            track={competencyAudio} 
+            variant="full"
+          />
+        </section>
+      )}
       
       {/* Module List */}
       <section className="lms-section">
@@ -247,7 +297,7 @@ export default async function CompetencyPage({ params }: PageProps) {
                 <div className="competency-card__meta">
                   <span className="competency-card__meta-item">
                     <ClockIcon className="h-3 w-3" />
-                    {module.duration_minutes ? `${module.duration_minutes} min` : 'Coming soon'}
+                    {module.duration_minutes ? `${module.duration_minutes} min` : '5-10 min read'}
                   </span>
                 </div>
               </div>

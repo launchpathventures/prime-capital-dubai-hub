@@ -20,6 +20,7 @@ import {
   CheckCircle2Icon,
   XCircleIcon,
   ArrowRightIcon,
+  ArrowLeftIcon,
   RotateCcwIcon,
   CheckIcon,
   XIcon as XMarkIcon,
@@ -265,10 +266,21 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
   const showingFeedback = state === "showing-feedback"
   const correctIndex = currentQuestion.options.findIndex(opt => opt.correct)
   
+  // For RERA quizzes, link back to RERA index
+  const isRERAQuiz = quiz.slug.includes("rera")
+  const backHref = isRERAQuiz ? "/learn/quiz/rera" : backLink
+  
   return (
     <Stack gap="lg" className="max-w-2xl">
-      {/* Quiz Title */}
-      <Stack gap="xs">
+      {/* Back Link + Quiz Title */}
+      <Stack gap="sm">
+        <Link 
+          href={backHref}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          {isRERAQuiz ? "Back to RERA Quizzes" : backLabel}
+        </Link>
         <Text size="xs" className="uppercase tracking-wider text-muted-foreground">
           {quiz.title}
         </Text>

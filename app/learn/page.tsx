@@ -16,6 +16,7 @@ import {
   ArrowRightIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "./_surface/learn-shell"
 
 // =============================================================================
@@ -81,7 +82,11 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
 // =============================================================================
 
 export default async function LearnDashboardPage() {
-  const competencies = await getCompetenciesWithModules()
+  const [competencies, userRole, userMenu] = await Promise.all([
+    getCompetenciesWithModules(),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   
   const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
   const totalDuration = competencies.reduce(
@@ -110,7 +115,9 @@ export default async function LearnDashboardPage() {
     <LearnShell 
       activeSection="overview"
       competencies={sidebarCompetencies}
+      userRole={userRole}
       coachContext={{ level: "course" }}
+      user={userMenu ?? undefined}
     >
       <div className="learn-content">
         {/* Hero Section */}
@@ -137,7 +144,7 @@ export default async function LearnDashboardPage() {
                 <span className="lms-hero__stat-label">Modules</span>
               </div>
               <div className="lms-hero__stat">
-                <span className="lms-hero__stat-value">{Math.round(totalDuration / 60) || '–'}h</span>
+                <span className="lms-hero__stat-value">~{Math.round((totalDuration || totalModules * 25) / 60)}h</span>
                 <span className="lms-hero__stat-label">Duration</span>
               </div>
             </div>

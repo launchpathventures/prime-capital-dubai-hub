@@ -3,7 +3,7 @@
 /**
  * CATALYST - Scenario Accordion
  * 
- * Interactive accordion for displaying scenarios with copy-able AI prompts
+ * Interactive accordion for displaying scenarios with inline AI practice
  * and reflection-based completion tracking.
  */
 
@@ -23,6 +23,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScenarioReflection } from "./scenario-reflection"
+import { ScenarioPractice } from "./scenario-practice"
+import { completeScenario } from "@/lib/actions/scenario-actions"
 
 // =============================================================================
 // Types
@@ -104,6 +106,7 @@ function ScenarioItem({
   progress
 }: ScenarioItemProps) {
   const [copied, setCopied] = useState(false)
+  const [isPracticing, setIsPracticing] = useState(false)
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -114,6 +117,25 @@ function ScenarioItem({
     } catch (err) {
       console.error("Failed to copy:", err)
     }
+  }
+
+  const handleStartPractice = () => {
+    setIsPracticing(true)
+  }
+
+  const handlePracticeComplete = async (passed: boolean) => {
+    if (passed) {
+      // Auto-complete with generated reflection
+      await completeScenario(category, scenario.id, {
+        learned: "Completed AI roleplay practice with passing evaluation. Key skills demonstrated in handling client concerns.",
+        improve: "Continue practicing variations of this scenario to build confidence.",
+      })
+    }
+    setIsPracticing(false)
+  }
+
+  const handlePracticeCancel = () => {
+    setIsPracticing(false)
   }
 
   return (
@@ -211,39 +233,62 @@ function ScenarioItem({
             </div>
           </div>
 
-          {/* AI Prompt */}
+          {/* AI Practice Section */}
           {scenario.aiPrompt && (
             <div className="scenario-section scenario-section--prompt">
-              <div className="scenario-prompt__header">
-                <h4 className="scenario-section__title">
-                  <SparklesIcon className="h-4 w-4" />
-                  AI Practice Prompt
-                </h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopy}
-                  className="scenario-prompt__copy"
-                >
-                  {copied ? (
-                    <>
-                      <CheckIcon className="h-3.5 w-3.5 mr-1.5" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon className="h-3.5 w-3.5 mr-1.5" />
-                      Copy Prompt
-                    </>
-                  )}
-                </Button>
-              </div>
-              <p className="scenario-prompt__instruction">
-                Copy this prompt and paste it into ChatGPT, Claude, or any AI assistant to practice this scenario.
-              </p>
-              <pre className="scenario-prompt__code">
-                <code>{scenario.aiPrompt}</code>
-              </pre>
+              {isPracticing ? (
+                <ScenarioPractice
+                  scenario={scenario}
+                  category={category}
+                  onComplete={handlePracticeComplete}
+                  onCancel={handlePracticeCancel}
+                />
+              ) : (
+                <>
+                  {/* Practice CTA */}
+                  <div className="scenario-practice-cta">
+                    <div className="scenario-practice-cta__content">
+                      <h4 className="scenario-practice-cta__title">
+                        <SparklesIcon className="h-4 w-4" />
+                        Practice with AI
+                      </h4>
+                      <p className="scenario-practice-cta__description">
+                        Roleplay this scenario with an AI client. Get instant feedback on your approach.
+                      </p>
+                    </div>
+                    <Button onClick={handleStartPractice} className="scenario-practice-cta__button">
+                      <SparklesIcon className="h-4 w-4 mr-2" />
+                      Start Practice
+                    </Button>
+                  </div>
+
+                  {/* Fallback: Copy prompt for external AI */}
+                  <details className="scenario-prompt-fallback">
+                    <summary>Or copy prompt for external AI</summary>
+                    <pre className="scenario-prompt__code">
+                      <code>{scenario.aiPrompt}</code>
+                    </pre>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopy}
+                      className="scenario-prompt__copy"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckIcon className="h-3.5 w-3.5 mr-1.5" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <CopyIcon className="h-3.5 w-3.5 mr-1.5" />
+                          Copy Prompt
+                        </>
+                      )}
+                    </Button>
+                  </details>
+                </>
+              )}
             </div>
           )}
 

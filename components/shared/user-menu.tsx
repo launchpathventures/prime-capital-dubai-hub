@@ -2,7 +2,7 @@
  * CATALYST - User Menu Component
  *
  * User avatar with dropdown menu for account actions.
- * Displays user name, role, and provides navigation + sign out.
+ * Displays user name, role, and provides sign out.
  *
  * @see components/shared/signout.tsx for signout components with prefetch safety
  */
@@ -10,8 +10,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { UserIcon, LayoutDashboardIcon, UserCircleIcon, LogOutIcon } from "lucide-react"
+import { UserIcon, LogOutIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -167,19 +166,6 @@ export function UserMenu({ user: userProp, className }: UserMenuProps) {
               )}
             </div>
           </DropdownMenuLabel>
-        </DropdownMenuGroup>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuGroup>
-          <DropdownMenuItem render={<Link href="/app/dashboard" />}>
-            <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-            Dashboard
-          </DropdownMenuItem>
-          <DropdownMenuItem render={<Link href="/app/profile" />}>
-            <UserCircleIcon className="mr-2 h-4 w-4" />
-            Profile
-          </DropdownMenuItem>
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />

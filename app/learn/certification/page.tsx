@@ -22,6 +22,7 @@ import {
   InfoIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../_surface/learn-shell"
 
 // =============================================================================
@@ -99,7 +100,7 @@ async function getCompetencies(): Promise<Competency[]> {
       const { count: quizCount } = await supabase
         .from("quizzes")
         .select("*", { count: "exact", head: true })
-        .eq("competency_id", comp.id)
+        .eq("competency_slug", comp.slug)
       
       return {
         ...comp,
@@ -297,8 +298,12 @@ function PreparationTips() {
 // =============================================================================
 
 export default async function CertificationPage() {
-  const profile = await getUserProfile()
-  const competencies = await getCompetencies()
+  const [profile, competencies, userRole, userMenu] = await Promise.all([
+    getUserProfile(),
+    getCompetencies(),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   
   // Get progress (would be real progress tracking in production)
   const progress = profile 
@@ -321,7 +326,7 @@ export default async function CertificationPage() {
   const isCertified = profile?.certification_status === 'certified'
 
   return (
-    <LearnShell activeSection="certification">
+    <LearnShell activeSection="certification" userRole={userRole} user={userMenu ?? undefined}>
       <div className="learn-content">
         {/* Hero Section */}
         <section className="cert-hero">
@@ -421,6 +426,19 @@ export default async function CertificationPage() {
           <section className="cert-resources">
             <h3 className="cert-resources__title">Preparation Resources</h3>
             <div className="cert-resources__grid">
+              <Link href="/learn/certification/guide" className="cert-resource-card">
+                  <div className="cert-resource-card__icon">
+                    <ClipboardCheckIcon className="h-5 w-5" />
+                  </div>
+                  <div className="cert-resource-card__content">
+                    <span className="cert-resource-card__title">Preparation Guide</span>
+                    <span className="cert-resource-card__desc">
+                      What to expect on assessment day and how to prepare
+                    </span>
+                  </div>
+                  <ChevronRightIcon className="h-5 w-5 text-gray-400" />
+                </Link>
+              
               <Link href="/learn/scenarios" className="cert-resource-card">
                   <div className="cert-resource-card__icon">
                     <SparklesIcon className="h-5 w-5" />

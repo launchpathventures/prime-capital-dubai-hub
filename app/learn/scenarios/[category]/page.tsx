@@ -1,8 +1,8 @@
 /**
  * CATALYST - Scenario Category Page
  * 
- * Displays all scenarios within a category with expandable details.
- * Includes AI prompts that can be copied for practice.
+ * Displays all scenarios within a category as clickable cards.
+ * Each card links to a dedicated scenario detail page.
  * Uses LearnShell for consistent sidebar navigation.
  */
 
@@ -16,8 +16,9 @@ import {
   MessageSquareIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../../_surface/learn-shell"
-import { ScenarioAccordion } from "./_components/scenario-accordion"
+import { ScenarioCardList } from "./_components/scenario-card-list"
 import { getScenarioProgress } from "@/lib/actions/scenario-actions"
 
 // =============================================================================
@@ -157,7 +158,11 @@ const competencyLabels: Record<string, string> = {
 
 export default async function ScenarioCategoryPage({ params }: PageProps) {
   const { category: slug } = await params
-  const category = await getScenarioCategory(slug)
+  const [category, userRole, userMenu] = await Promise.all([
+    getScenarioCategory(slug),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   
   if (!category) {
     notFound()
@@ -169,15 +174,12 @@ export default async function ScenarioCategoryPage({ params }: PageProps) {
   // Get user's progress for this category
   const progress = await getScenarioProgress(slug)
   const completedIds = new Set(progress.map(p => p.scenarioId))
-  const progressMap = Object.fromEntries(
-    progress.map(p => [p.scenarioId, { learned: p.reflectionLearned, improve: p.reflectionImprove }])
-  )
   
   const completedCount = completedIds.size
   const totalCount = scenarios.length
 
   return (
-    <LearnShell activeSection="scenarios">
+    <LearnShell activeSection="scenarios" userRole={userRole} user={userMenu ?? undefined}>
       <div className="learn-content">
         {/* Back Link */}
         <Link href="/learn/scenarios" className="scenario-back">
@@ -258,11 +260,10 @@ export default async function ScenarioCategoryPage({ params }: PageProps) {
 
         {/* Scenario List */}
         <section className="scenario-list">
-          <ScenarioAccordion 
+          <ScenarioCardList 
             scenarios={scenarios} 
             category={slug}
             completedIds={completedIds}
-            progressMap={progressMap}
           />
         </section>
       </div>

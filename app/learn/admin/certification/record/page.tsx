@@ -25,7 +25,6 @@ import { revalidatePath } from "next/cache"
 interface UserProfile {
   id: string
   full_name: string | null
-  email: string | null
   certification_status: 'in_progress' | 'ready' | 'certified' | null
 }
 
@@ -36,9 +35,11 @@ interface UserProfile {
 async function getTrainees(): Promise<UserProfile[]> {
   const supabase = await createClient()
   
+  // Only show learners (not admins) who haven't been certified yet
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("id, full_name, email, certification_status")
+    .select("id, full_name, certification_status")
+    .eq("role", "learner")
     .in("certification_status", ["ready", "in_progress"])
     .order("full_name")
   
@@ -218,7 +219,7 @@ export default async function RecordCertificationPage() {
                   <option value="" disabled>Select trainee...</option>
                   {trainees.map((trainee) => (
                     <option key={trainee.id} value={trainee.id}>
-                      {trainee.full_name || trainee.email || "Unknown"} 
+                      {trainee.full_name || "Unknown"} 
                       {trainee.certification_status === 'ready' ? ' (Ready)' : ' (In Progress)'}
                     </option>
                   ))}

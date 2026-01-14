@@ -13,7 +13,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { SectionRenderer, ModuleToCRight, ReadingProgress, ModeSwitch, EssentialsView, EssentialsToCRight, AudioSection } from "@/components/lms"
+import { SectionRenderer, ModuleToCRight, ReadingProgress, EssentialsView, EssentialsToCRight, ModuleControlsBar } from "@/components/lms"
 import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
 import { 
   ChevronLeftIcon,
@@ -23,6 +23,7 @@ import {
   CheckCircleIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { ModuleCoachPrompt } from "@/components/lms/coach"
 import { ModulePageClient } from "./page-client"
 import { getAudioForModule, formatAudioDuration } from "@/lib/lms"
@@ -49,6 +50,13 @@ interface Competency {
   name: string
   display_order: number
   modules: Module[]
+}
+
+/** Minimal scenario data for linking */
+export interface ScenarioLink {
+  slug: string
+  title: string
+  scenarioCount: number | null
 }
 
 interface PageProps {
@@ -126,6 +134,32 @@ async function getRelatedQuiz(
   return anyQuiz
 }
 
+/**
+ * Get scenarios linked to a competency for the Practice with AI section.
+ */
+async function getScenariosForCompetency(
+  competencySlug: string
+): Promise<ScenarioLink[]> {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from("scenarios")
+    .select("slug, title, scenario_count")
+    .contains("competencies", [competencySlug])
+    .order("title")
+  
+  if (error) {
+    console.error("Failed to fetch scenarios:", error)
+    return []
+  }
+  
+  return (data || []).map(s => ({
+    slug: s.slug,
+    title: s.title,
+    scenarioCount: s.scenario_count,
+  }))
+}
+
 // =============================================================================
 // Page Component
 // =============================================================================
@@ -153,24 +187,28 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     ? currentCompetency.modules[currentModuleIndex + 1] 
     : null
   
-  // Determine mode: essentials if available, otherwise deep dive
+  // Determine mode: default to deep dive, essentials is opt-in
   const hasEssentials = module.essentials !== null
   const mode = modeParam === "deepdive" || modeParam === "essentials" 
     ? modeParam 
-    : (hasEssentials ? "essentials" : "deepdive")
+    : "deepdive"
   
   // Estimate durations
   const deepDiveDuration = module.duration_minutes ? `${module.duration_minutes} min` : "25 min"
   const essentialsDuration = "15 min" // TODO: Calculate from essentials content
   
-  // Get related quiz for this module
-  const relatedQuiz = await getRelatedQuiz(competencySlug, moduleSlug)
+  // Get related quiz and scenarios for this module
+  const [relatedQuiz, linkedScenarios] = await Promise.all([
+    getRelatedQuiz(competencySlug, moduleSlug),
+    getScenariosForCompetency(competencySlug),
+  ])
   
   // Get audio tracks for this module
   const audioData = await getAudioForModule(
     currentCompetency.display_order,
     currentModuleIndex
   )
+  const [userRole, userMenu] = await Promise.all([getUserRole(), getUserForMenu()])
   const audioTracks = audioData.map((track) => ({
     slug: track.slug,
     title: track.title,
@@ -199,6 +237,8 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
       competencies={sidebarCompetencies}
       currentCompetency={competencySlug}
       currentModule={moduleSlug}
+      userRole={userRole}
+      user={userMenu ?? undefined}
       coachContext={{ 
         level: "module",
         competencySlug,
@@ -234,26 +274,17 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
             </h1>
           </div>
           
-          {/* Mode Switch - contextual bar shown if essentials available */}
-          {hasEssentials && (
-            <ModeSwitch
-              hasEssentials={hasEssentials}
-              essentialsDuration={essentialsDuration}
-              deepDiveDuration={deepDiveDuration}
-              currentMode={mode}
-            />
-          )}
-          
-          {/* Audio Coach Section - shown if audio available */}
-          {audioTracks.length > 0 && (
-            <AudioSection
-              tracks={audioTracks}
-              className="mb-6"
-            />
-          )}
-          
-          {/* AI Coach - visible in both modes */}
+          {/* AI Coach - collapsible, visible in both modes */}
           <ModuleCoachPrompt moduleTitle={module.title} />
+          
+          {/* Combined Controls Bar - Audio + Mode Toggle */}
+          <ModuleControlsBar
+            audioTracks={audioTracks}
+            hasEssentials={hasEssentials}
+            essentialsDuration={essentialsDuration}
+            deepDiveDuration={deepDiveDuration}
+            currentMode={mode}
+          />
           
           {/* Module content */}
           {mode === "essentials" && module.essentials ? (
@@ -261,9 +292,10 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               essentials={module.essentials}
               moduleSlug={moduleSlug}
               competencySlug={competencySlug}
+              linkedScenarios={linkedScenarios}
             />
           ) : module.content ? (
-            <SectionRenderer content={module.content} />
+            <SectionRenderer content={module.content} linkedScenarios={linkedScenarios} />
           ) : (
             <div className="lms-card" style={{ padding: '1.75rem' }}>
               <div className="lms-prose">

@@ -3,27 +3,28 @@
  * 
  * Allows evaluators to record certification outcomes and view history.
  * Simplified interface focused on outcome recording.
+ * Uses LearnShell for consistent sidebar navigation.
  */
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Stack, Row, Text } from "@/components/core"
 import { 
-  GraduationCapIcon,
   AwardIcon,
   UserIcon,
-  CalendarIcon,
   ClipboardCheckIcon,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  SearchIcon,
   PlusIcon,
   BookOpenIcon,
   FileTextIcon,
+  UsersIcon,
+  TrendingUpIcon,
+  GraduationCapIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { LearnShell } from "@/app/learn/_surface/learn-shell"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 
 // =============================================================================
 // Types
@@ -52,8 +53,20 @@ interface CertificationAttempt {
 interface UserProfile {
   id: string
   full_name: string | null
-  email: string | null
   certification_status: 'in_progress' | 'ready' | 'certified' | null
+  created_at?: string
+  role?: string
+}
+
+interface LearnerWithProgress {
+  id: string
+  full_name: string | null
+  certification_status: 'in_progress' | 'ready' | 'certified' | null
+  created_at?: string
+  role?: string
+  modules_completed: number
+  total_modules: number
+  last_activity?: string
 }
 
 // =============================================================================
@@ -84,9 +97,11 @@ async function getCertificationAttempts(): Promise<CertificationAttempt[]> {
 async function getPendingTrainees(): Promise<UserProfile[]> {
   const supabase = await createClient()
   
+  // Only fetch learners (not admins) who are pending certification
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("id, full_name, email, certification_status")
+    .select("id, full_name, certification_status")
+    .eq("role", "learner")
     .in("certification_status", ["ready", "in_progress"])
     .order("full_name")
   
@@ -98,17 +113,70 @@ async function getPendingTrainees(): Promise<UserProfile[]> {
   return data || []
 }
 
+async function getAllLearners(): Promise<LearnerWithProgress[]> {
+  const supabase = await createClient()
+  
+  // Get all learners (role = 'learner')
+  // Note: email is not on user_profiles, only on auth.users
+  const { data: learners, error: learnersError } = await supabase
+    .from("user_profiles")
+    .select("id, full_name, certification_status, created_at, role")
+    .eq("role", "learner")
+    .order("created_at", { ascending: false })
+  
+  if (learnersError) {
+    console.error("Failed to fetch learners:", learnersError)
+    return []
+  }
+  
+  // Get total module count
+  const { count: totalModules } = await supabase
+    .from("learning_modules")
+    .select("*", { count: "exact", head: true })
+  
+  // Get progress for each learner
+  const learnersWithProgress: LearnerWithProgress[] = await Promise.all(
+    (learners || []).map(async (learner) => {
+      const { count: completedCount } = await supabase
+        .from("learning_progress")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", learner.id)
+        .eq("status", "completed")
+      
+      // Get last activity
+      const { data: lastActivity } = await supabase
+        .from("learning_progress")
+        .select("updated_at")
+        .eq("user_id", learner.id)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+      
+      return {
+        ...learner,
+        modules_completed: completedCount || 0,
+        total_modules: totalModules || 0,
+        last_activity: lastActivity?.[0]?.updated_at,
+      }
+    })
+  )
+  
+  return learnersWithProgress
+}
+
 async function getStats() {
   const supabase = await createClient()
   
+  // Only count learners (not admins)
   const { count: certifiedCount } = await supabase
     .from("user_profiles")
     .select("*", { count: "exact", head: true })
+    .eq("role", "learner")
     .eq("certification_status", "certified")
   
   const { count: pendingCount } = await supabase
     .from("user_profiles")
     .select("*", { count: "exact", head: true })
+    .eq("role", "learner")
     .in("certification_status", ["ready", "in_progress"])
   
   // Get pass rate from attempts (if table exists)
@@ -135,18 +203,69 @@ async function getStats() {
 function StatCard({ 
   label, 
   value, 
-  icon 
+  icon,
+  tooltip,
 }: { 
   label: string
   value: string | number 
-  icon: React.ReactNode 
+  icon: React.ReactNode
+  tooltip?: string
 }) {
   return (
-    <div className="cert-admin-stat">
+    <div className="cert-admin-stat" title={tooltip}>
       <div className="cert-admin-stat__icon">{icon}</div>
       <div className="cert-admin-stat__content">
         <span className="cert-admin-stat__value">{value}</span>
         <span className="cert-admin-stat__label">{label}</span>
+      </div>
+    </div>
+  )
+}
+
+function LearnerRow({ learner }: { learner: LearnerWithProgress }) {
+  const joinedDate = learner.created_at 
+    ? new Date(learner.created_at).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "—"
+  
+  const progressPercent = learner.total_modules > 0 
+    ? Math.round((learner.modules_completed / learner.total_modules) * 100)
+    : 0
+  
+  const statusLabel = {
+    certified: "Certified",
+    ready: "Ready",
+    in_progress: "In Progress",
+  }[learner.certification_status || "in_progress"] || "In Progress"
+  
+  return (
+    <div className="cert-admin-learner">
+      <div className="cert-admin-learner__name">
+        <UserIcon className="h-4 w-4 text-gray-400" />
+        <span>{learner.full_name || "Unknown"}</span>
+      </div>
+      <div className="cert-admin-learner__progress">
+        <div className="cert-admin-learner__progress-bar">
+          <div 
+            className="cert-admin-learner__progress-fill"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <span className="cert-admin-learner__progress-text">
+          {learner.modules_completed}/{learner.total_modules} modules
+        </span>
+      </div>
+      <div className={`cert-admin-learner__status cert-admin-learner__status--${learner.certification_status || 'in_progress'}`}>
+        {learner.certification_status === 'certified' && <CheckCircleIcon className="h-3.5 w-3.5" />}
+        {learner.certification_status === 'ready' && <GraduationCapIcon className="h-3.5 w-3.5" />}
+        {(!learner.certification_status || learner.certification_status === 'in_progress') && <TrendingUpIcon className="h-3.5 w-3.5" />}
+        <span>{statusLabel}</span>
+      </div>
+      <div className="cert-admin-learner__joined">
+        {joinedDate}
       </div>
     </div>
   )
@@ -211,40 +330,23 @@ function EmptyState() {
 // =============================================================================
 
 export default async function CertificationAdminPage() {
-  const [attempts, trainees, stats] = await Promise.all([
+  const [attempts, trainees, stats, learners, userRole, userMenu] = await Promise.all([
     getCertificationAttempts(),
     getPendingTrainees(),
     getStats(),
+    getAllLearners(),
+    getUserRole(),
+    getUserForMenu(),
   ])
 
   return (
-    <div className="learn-shell">
-      {/* Header */}
-      <header className="learn-header">
-        <div className="learn-header__inner">
-          <div className="learn-header__left">
-            <Link href="/learn" className="learn-header__logo">
-              <span className="learn-header__logo-icon">
-                <GraduationCapIcon className="h-3.5 w-3.5" />
-              </span>
-              Prime Capital Learning
-            </Link>
-            <nav className="learn-header__breadcrumb">
-              <Link href="/learn">Course</Link>
-              <span className="learn-header__breadcrumb-sep">›</span>
-              <span className="learn-header__breadcrumb-current">Certification Admin</span>
-            </nav>
-          </div>
-          <nav className="learn-header__nav">
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/learn/certification" />}>
-              Learner View
-            </Button>
-          </nav>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="learn-content">
+    <LearnShell 
+      activeSection="admin"
+      userRole={userRole}
+      user={userMenu ?? undefined}
+      coachContext={{ level: "course" }}
+    >
+      <div className="learn-content">
         {/* Title */}
         <div className="cert-admin-header">
           <div>
@@ -271,35 +373,68 @@ export default async function CertificationAdminPage() {
             label="Certified" 
             value={stats.certified}
             icon={<AwardIcon className="h-5 w-5" />}
+            tooltip="Learners who have passed certification"
           />
           <StatCard 
-            label="Pending" 
+            label="Awaiting Certification" 
             value={stats.pending}
             icon={<ClockIcon className="h-5 w-5" />}
+            tooltip="Learners with status 'in_progress' or 'ready' who haven't been certified yet"
           />
           <StatCard 
             label="Total Attempts" 
             value={stats.totalAttempts}
             icon={<ClipboardCheckIcon className="h-5 w-5" />}
+            tooltip="Number of certification assessments recorded"
           />
           <StatCard 
             label="Pass Rate" 
             value={stats.passRate !== null ? `${stats.passRate}%` : "—"}
             icon={<CheckCircleIcon className="h-5 w-5" />}
+            tooltip="Percentage of assessments that resulted in a pass"
           />
         </div>
+
+        {/* Learner Progress Report */}
+        <section className="cert-admin-section">
+          <div className="cert-admin-section__header">
+            <h2 className="cert-admin-section__title">
+              <UsersIcon className="h-5 w-5" />
+              All Learners
+            </h2>
+            <span className="cert-admin-section__count">{learners.length} total</span>
+          </div>
+          {learners.length > 0 ? (
+            <div className="cert-admin-learners">
+              <div className="cert-admin-learners__header">
+                <span>Name</span>
+                <span>Progress</span>
+                <span>Status</span>
+                <span>Joined</span>
+              </div>
+              {learners.map((learner) => (
+                <LearnerRow key={learner.id} learner={learner} />
+              ))}
+            </div>
+          ) : (
+            <div className="cert-admin-empty cert-admin-empty--small">
+              <UsersIcon className="h-8 w-8 text-gray-300" />
+              <p>No learners registered yet</p>
+            </div>
+          )}
+        </section>
 
         {/* Pending Trainees */}
         {trainees.length > 0 && (
           <section className="cert-admin-section">
-            <h2 className="cert-admin-section__title">Pending Trainees</h2>
+            <h2 className="cert-admin-section__title">Ready for Assessment</h2>
             <div className="cert-admin-trainees">
               {trainees.map((trainee) => (
                 <div key={trainee.id} className="cert-admin-trainee">
                   <div className="cert-admin-trainee__info">
                     <UserIcon className="h-4 w-4 text-gray-400" />
                     <span className="cert-admin-trainee__name">
-                      {trainee.full_name || trainee.email || "Unknown"}
+                      {trainee.full_name || "Unknown"}
                     </span>
                   </div>
                   <span className={`cert-admin-trainee__status cert-admin-trainee__status--${trainee.certification_status}`}>
@@ -376,7 +511,7 @@ export default async function CertificationAdminPage() {
             The system will automatically update the trainee's certification status based on the outcome.
           </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </LearnShell>
   )
 }

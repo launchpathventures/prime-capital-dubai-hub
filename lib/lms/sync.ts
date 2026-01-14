@@ -315,7 +315,17 @@ export async function syncModules(): Promise<number> {
           !f.startsWith("STATISTICS") &&
           !f.startsWith("quiz-") // Skip quiz files in competency folders
       )
-      .sort()
+      // Sort numerically by module number (e.g., 5.1, 5.2, ... 5.10, 5.11)
+      // Parse as "major.minor" to handle double-digit minor numbers
+      .sort((a, b) => {
+        const matchA = a.match(/^(\d+)\.(\d+)/)
+        const matchB = b.match(/^(\d+)\.(\d+)/)
+        if (!matchA || !matchB) return a.localeCompare(b)
+        const majorA = parseInt(matchA[1])
+        const majorB = parseInt(matchB[1])
+        if (majorA !== majorB) return majorA - majorB
+        return parseInt(matchA[2]) - parseInt(matchB[2])
+      })
 
     console.log(`  📁 ${competencySlug} (${files.length} modules)`)
 

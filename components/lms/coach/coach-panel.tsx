@@ -8,7 +8,7 @@
 "use client"
 
 import * as React from "react"
-import { XIcon, SendIcon, SparklesIcon } from "lucide-react"
+import { XIcon, SendIcon, SparklesIcon, RotateCcwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Stack, Row, Text } from "@/components/core"
 import { useCoach } from "./coach-provider"
@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 // -----------------------------------------------------------------------------
 
 export function CoachPanel() {
-  const { isOpen, closeCoach, context, sendMessage, isLoading, messages } =
+  const { isOpen, closeCoach, context, sendMessage, isLoading, messages, clearMessages } =
     useCoach()
   const [input, setInput] = React.useState("")
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
@@ -146,14 +146,27 @@ export function CoachPanel() {
                   </Text>
                 </Stack>
               </Row>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={closeCoach}
-                aria-label="Close coach"
-              >
-                <XIcon className="h-4 w-4" />
-              </Button>
+              <Row gap="xs">
+                {messages.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearMessages}
+                    aria-label="New chat"
+                    title="Start new chat"
+                  >
+                    <RotateCcwIcon className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeCoach}
+                  aria-label="Close coach"
+                >
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </Row>
             </Row>
           </div>
 

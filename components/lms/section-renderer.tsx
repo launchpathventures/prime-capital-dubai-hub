@@ -9,7 +9,8 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { Components } from "react-markdown"
 import Image from "next/image"
-import { Text } from "@/components/core"
+import Link from "next/link"
+import { Text, Stack } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { 
@@ -19,6 +20,8 @@ import {
   InfoIcon,
   CheckCircleIcon,
   FileTextIcon,
+  Bot,
+  ArrowRight,
 } from "lucide-react"
 
 // =============================================================================
@@ -44,9 +47,17 @@ interface Section {
   content: string
 }
 
+/** Minimal scenario data for linking */
+interface ScenarioLink {
+  slug: string
+  title: string
+  scenarioCount: number | null
+}
+
 interface SectionRendererProps {
   content: string
   className?: string
+  linkedScenarios?: ScenarioLink[]
 }
 
 // =============================================================================
@@ -102,7 +113,7 @@ function splitIntoSections(markdown: string): Section[] {
 // Main Component
 // =============================================================================
 
-export function SectionRenderer({ content, className }: SectionRendererProps) {
+export function SectionRenderer({ content, className, linkedScenarios = [] }: SectionRendererProps) {
   const sections = splitIntoSections(content)
   
   // Count sections with titles (for numbering)
@@ -139,6 +150,44 @@ export function SectionRenderer({ content, className }: SectionRendererProps) {
           </section>
         )
       })}
+      
+      {/* Practice with AI - shown after all content sections */}
+      {linkedScenarios.length > 0 && (
+        <section id="practice-with-ai" className="lms-section-card essentials-section--ai-practice">
+          <h2 className="lms-section-card__title">
+            <span className="lms-section-card__number">{++sectionNumber}</span>
+            <Bot className="essentials-section__icon" />
+            Practice with AI
+          </h2>
+          <div className="lms-section-card__content">
+            <Text size="sm" className="essentials-ai-practice__intro">
+              Ready to practice what you learned? Try these AI roleplay scenarios:
+            </Text>
+            <div className="essentials-ai-practice__grid">
+              {linkedScenarios.map((scenario) => (
+                <Link
+                  key={scenario.slug}
+                  href={`/learn/scenarios/${scenario.slug}`}
+                  className="essentials-ai-practice__card"
+                >
+                  <div className="essentials-ai-practice__icon">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div className="essentials-ai-practice__content">
+                    <span className="essentials-ai-practice__title">{scenario.title}</span>
+                    {scenario.scenarioCount && (
+                      <span className="essentials-ai-practice__count">
+                        {scenario.scenarioCount} practice scenarios
+                      </span>
+                    )}
+                  </div>
+                  <ArrowRight className="essentials-ai-practice__arrow" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

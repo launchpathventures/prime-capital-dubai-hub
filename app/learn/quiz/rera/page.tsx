@@ -2,12 +2,12 @@
  * CATALYST - RERA Exam Prep Index
  * 
  * Lists all RERA-related quizzes for exam preparation.
+ * Clean, focused design for quiz selection.
  */
 
 import Link from "next/link"
 import { 
   ClipboardCheckIcon,
-  GraduationCapIcon,
   ChevronRightIcon,
   BookOpenIcon,
   CalculatorIcon,
@@ -15,6 +15,7 @@ import {
   FileTextIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../../_surface/learn-shell"
 
 // =============================================================================
@@ -67,43 +68,44 @@ function getQuizIcon(slug: string) {
 // =============================================================================
 
 export default async function RERAQuizIndexPage() {
-  const quizzes = await getRERAQuizzes()
+  const [quizzes, userRole, userMenu] = await Promise.all([
+    getRERAQuizzes(),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   
   // Separate practice exams from topic quizzes
   const practiceExams = quizzes.filter(q => q.slug.includes("practice-exam"))
   const topicQuizzes = quizzes.filter(q => !q.slug.includes("practice-exam"))
   
   return (
-    <LearnShell activeSection="rera">
+    <LearnShell activeSection="rera" userRole={userRole} user={userMenu ?? undefined}>
       <div className="learn-content">
-        <div className="lms-page">
-          {/* Header */}
-          <div className="lms-page__header">
-            <div className="lms-page__eyebrow">
-              <GraduationCapIcon className="h-4 w-4" />
-              Exam Practice
-            </div>
-            <h1 className="lms-page__title">RERA Practice Quizzes</h1>
-            <p className="lms-page__description">
-              Prepare for your RERA certification exam with topic-focused quizzes 
-              and full-length practice exams.
-            </p>
-          </div>
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
+            RERA Practice Quizzes
+          </h1>
+          <p className="text-gray-500">
+            Prepare for your RERA certification exam with topic-focused quizzes 
+            and full-length practice exams.
+          </p>
+        </header>
         
         {/* Topic Quizzes */}
         {topicQuizzes.length > 0 && (
-          <div className="lms-section">
-            <h2 className="lms-section__title">Topic Quizzes</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Focus on specific areas of the RERA exam
-            </p>
+          <section className="mb-8">
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Topic Quizzes</h2>
+              <span className="text-sm text-gray-400">{topicQuizzes.length} quizzes</span>
+            </div>
             
-            <div className="grid gap-3">
+            <div className="space-y-2">
               {topicQuizzes.map(quiz => (
                 <Link
                   key={quiz.slug}
                   href={`/learn/quiz/${quiz.slug}`}
-                  className="lms-card lms-card--clickable group"
+                  className="lms-card lms-card--clickable block p-4 group"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary-50 text-primary-600 group-hover:bg-primary-100 transition-colors">
@@ -113,40 +115,37 @@ export default async function RERAQuizIndexPage() {
                       <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
                         {quiz.title}
                       </h3>
-                      {quiz.description && (
-                        <p className="text-sm text-gray-500 truncate">{quiz.description}</p>
-                      )}
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                      <div className="flex items-center gap-3 mt-0.5 text-sm text-gray-400">
                         {quiz.question_count && (
                           <span>{quiz.question_count} questions</span>
                         )}
                         {quiz.passing_score && (
-                          <span>{quiz.passing_score}% to pass</span>
+                          <span>• {quiz.passing_score}% to pass</span>
                         )}
                       </div>
                     </div>
-                    <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
+                    <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
         )}
         
         {/* Practice Exams */}
         {practiceExams.length > 0 && (
-          <div className="lms-section">
-            <h2 className="lms-section__title">Practice Exams</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Full-length simulated exams to test your readiness
-            </p>
+          <section>
+            <div className="flex items-baseline justify-between mb-4">
+              <h2 className="text-base font-semibold text-gray-900">Practice Exams</h2>
+              <span className="text-sm text-gray-400">{practiceExams.length} exams</span>
+            </div>
             
-            <div className="grid gap-3">
+            <div className="space-y-2">
               {practiceExams.map(quiz => (
                 <Link
                   key={quiz.slug}
                   href={`/learn/quiz/${quiz.slug}`}
-                  className="lms-card lms-card--clickable group"
+                  className="lms-card lms-card--clickable block p-4 group"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-50 text-amber-600 group-hover:bg-amber-100 transition-colors">
@@ -156,36 +155,33 @@ export default async function RERAQuizIndexPage() {
                       <h3 className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
                         {quiz.title}
                       </h3>
-                      {quiz.description && (
-                        <p className="text-sm text-gray-500 truncate">{quiz.description}</p>
-                      )}
-                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                      <div className="flex items-center gap-3 mt-0.5 text-sm text-gray-400">
                         {quiz.question_count && (
                           <span>{quiz.question_count} questions</span>
                         )}
                         {quiz.passing_score && (
-                          <span>{quiz.passing_score}% to pass</span>
+                          <span>• {quiz.passing_score}% to pass</span>
                         )}
                       </div>
                     </div>
-                    <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-primary-500 transition-colors" />
+                    <ChevronRightIcon className="h-5 w-5 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-0.5 transition-all" />
                   </div>
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
         )}
         
+        {/* Empty State */}
         {quizzes.length === 0 && (
-          <div className="lms-card text-center py-12">
-            <ClipboardCheckIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="font-medium text-gray-900 mb-2">No RERA quizzes available</h3>
+          <div className="lms-card p-12 text-center">
+            <ClipboardCheckIcon className="h-12 w-12 text-gray-200 mx-auto mb-4" />
+            <h3 className="font-medium text-gray-900 mb-1">No RERA quizzes available</h3>
             <p className="text-sm text-gray-500">
               Check back later for exam preparation materials.
             </p>
           </div>
         )}
-        </div>
       </div>
     </LearnShell>
   )

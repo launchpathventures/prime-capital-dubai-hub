@@ -138,6 +138,27 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
+    // Protect /learn/* routes (LMS requires authentication)
+    if (pathname.startsWith("/learn") && !user) {
+      const loginUrl = new URL("/auth/login", request.url)
+      loginUrl.searchParams.set("next", pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Admin routes within /learn require admin role
+    if (pathname.startsWith("/learn/admin") && user) {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+      if (profile?.role !== "admin") {
+        // Non-admin users redirected to learn home
+        return NextResponse.redirect(new URL("/learn", request.url))
+      }
+    }
+
     // Redirect authenticated users away from auth pages (except signout)
     if (pathname.startsWith("/auth") && !isSignoutPath(pathname) && user) {
       // Respect ?next parameter if provided, otherwise use default redirect

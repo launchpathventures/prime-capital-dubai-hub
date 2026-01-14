@@ -19,6 +19,7 @@ import {
   CoachTrigger,
   type CoachContext,
 } from "@/components/lms/coach"
+import type { UserMenuUser } from "@/components/shared/user-menu"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -41,7 +42,7 @@ interface Competency {
 interface LearnShellProps {
   children: React.ReactNode
   /** Active section for sidebar highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "rera" | "certification" | "admin"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users"
   /** Current competency slug for course section */
   currentCompetency?: string
   /** Current module slug for course section */
@@ -52,6 +53,8 @@ interface LearnShellProps {
   userRole?: "learner" | "admin"
   /** Coach context for AI Coach */
   coachContext?: CoachContext
+  /** User data for header menu */
+  user?: UserMenuUser
 }
 
 // -----------------------------------------------------------------------------
@@ -66,6 +69,7 @@ export function LearnShell({
   competencies = [],
   userRole = "learner",
   coachContext = { level: "course" },
+  user,
 }: LearnShellProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   
@@ -75,6 +79,7 @@ export function LearnShell({
         <LMSHeader 
           onMenuClick={() => setDrawerOpen(true)}
           showMenuButton={true}
+          user={user}
         />
         
         {/* Main area with sidebar and content */}

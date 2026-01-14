@@ -1,7 +1,7 @@
 ---
 competency: 7
 slug: relationship-stewardship
-title: "Competency 7: Relationship Stewardship"
+title: "Relationship Stewardship"
 description: "Master the art of building lasting client relationships through excellent communication, systematic follow-up, and natural referral generation."
 moduleCount: 4
 estimatedDuration: 83

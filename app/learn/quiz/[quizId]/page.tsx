@@ -6,12 +6,11 @@
  * Used for standalone quizzes like RERA practice exams.
  */
 
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { QuizPageClient } from "./quiz-page-client"
-import { GraduationCapIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { LearnShell } from "../../_surface/learn-shell"
 
 interface PageProps {
   params: Promise<{ quizId: string }>
@@ -48,12 +47,6 @@ interface Competency {
   number: number
   locked: boolean
   modules: Module[]
-}
-
-interface RERAQuiz {
-  slug: string
-  title: string
-  question_count: number
 }
 
 // -----------------------------------------------------------------------------
@@ -118,19 +111,6 @@ async function getCompetencies(): Promise<Competency[]> {
   }))
 }
 
-async function getRERAQuizzes(): Promise<RERAQuiz[]> {
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from("quizzes")
-    .select("slug, title, question_count")
-    .or("slug.ilike.%rera%,competency_slug.eq.rera-exam-prep")
-    .order("title")
-  
-  if (error) return []
-  return data || []
-}
-
 // -----------------------------------------------------------------------------
 // Page Component
 // -----------------------------------------------------------------------------
@@ -139,170 +119,35 @@ export default async function QuizPage({ params, searchParams }: PageProps) {
   const { quizId } = await params
   const { returnTo } = await searchParams
   
-  const [data, competencies, reraQuizzes] = await Promise.all([
+  const [data, competencies, userRole, userMenu] = await Promise.all([
     getQuizData(quizId),
     getCompetencies(),
-    getRERAQuizzes(),
+    getUserRole(),
+    getUserForMenu(),
   ])
   
   if (!data || data.questions.length === 0) {
     notFound()
   }
   
-  // Determine if this is a RERA quiz
-  const isRERAQuiz = data.quiz.slug.includes("rera") || data.quiz.competency_slug === "rera-exam-prep"
+  // Practice exams don't show immediate feedback, topic quizzes do
+  const isPracticeExam = data.quiz.slug.includes("practice-exam")
   
   return (
-    <div className="learn-shell learn-shell--with-sidebar">
-      {/* Header */}
-      <header className="learn-header">
-        <div className="learn-header__inner">
-          <div className="learn-header__left">
-            <Link href="/learn" className="learn-header__logo">
-              <span className="learn-header__logo-icon">
-                <GraduationCapIcon className="h-3.5 w-3.5" />
-              </span>
-              Prime Capital Learning
-            </Link>
-            <nav className="learn-header__breadcrumb">
-              <Link href="/learn">Course</Link>
-              <span className="learn-header__breadcrumb-sep">›</span>
-              {isRERAQuiz ? (
-                <span className="learn-header__breadcrumb-current">RERA Exam Practice</span>
-              ) : (
-                <>
-                  <Link href={`/learn/${data.quiz.competency_slug}`}>
-                    {data.quiz.competency_slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
-                  </Link>
-                  <span className="learn-header__breadcrumb-sep">›</span>
-                  <span className="learn-header__breadcrumb-current">Quiz</span>
-                </>
-              )}
-            </nav>
-          </div>
-          <nav className="learn-header__nav">
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
-              Home
-            </Button>
-          </nav>
-        </div>
-      </header>
-      
-      {/* Sidebar */}
-      <QuizSidebar 
-        competencies={competencies}
-        reraQuizzes={reraQuizzes}
-        currentQuizSlug={quizId}
-      />
-      
-      {/* Main Content */}
-      <main className="learn-content">
-        <div className="learn-content__inner">
-          <QuizPageClient 
-            quiz={data.quiz}
-            questions={data.questions}
-            returnTo={returnTo}
-            showImmediateFeedback={!isRERAQuiz}
-          />
-        </div>
-      </main>
-    </div>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// Quiz Sidebar Component
-// -----------------------------------------------------------------------------
-
-interface QuizSidebarProps {
-  competencies: Competency[]
-  reraQuizzes: RERAQuiz[]
-  currentQuizSlug: string
-}
-
-function QuizSidebar({ competencies, reraQuizzes, currentQuizSlug }: QuizSidebarProps) {
-  // Separate RERA quizzes into categories
-  const practiceExams = reraQuizzes.filter(q => q.slug.includes("practice-exam"))
-  const topicQuizzes = reraQuizzes.filter(q => !q.slug.includes("practice-exam"))
-  
-  return (
-    <aside className="learn-sidebar">
-      {/* Header */}
-      <div className="learn-sidebar__header">
-        <div className="learn-sidebar__label">Quiz Practice</div>
-        <Link 
-          href="/learn"
-          className="flex items-center gap-2 text-white/80 hover:text-white text-sm transition-colors"
-        >
-          ← Back to Dashboard
-        </Link>
+    <LearnShell 
+      activeSection="rera"
+      competencies={competencies}
+      userRole={userRole}
+      user={userMenu ?? undefined}
+    >
+      <div className="learn-content">
+        <QuizPageClient 
+          quiz={data.quiz}
+          questions={data.questions}
+          returnTo={returnTo}
+          showImmediateFeedback={!isPracticeExam}
+        />
       </div>
-      
-      {/* Navigation */}
-      <nav className="learn-sidebar__nav">
-        {/* RERA Practice Exams Section */}
-        {practiceExams.length > 0 && (
-          <div className="learn-competency" data-expanded="true">
-            <div className="learn-competency__trigger" data-active="true">
-              <span className="learn-competency__number">📝</span>
-              <div className="learn-competency__info">
-                <div className="learn-competency__name">RERA Practice Exams</div>
-                <div className="learn-competency__meta">{practiceExams.length} full exams</div>
-              </div>
-            </div>
-            <div className="learn-modules">
-              {practiceExams.map((quiz) => (
-                <Link
-                  key={quiz.slug}
-                  href={`/learn/quiz/${quiz.slug}`}
-                  className="learn-module"
-                  data-active={currentQuizSlug === quiz.slug}
-                >
-                  <span className="learn-module__icon" data-status={currentQuizSlug === quiz.slug ? "current" : "default"}>
-                    {quiz.question_count}
-                  </span>
-                  <span>{quiz.title}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* RERA Topic Quizzes Section */}
-        {topicQuizzes.length > 0 && (
-          <div className="learn-competency" data-expanded="true">
-            <div className="learn-competency__trigger">
-              <span className="learn-competency__number">📚</span>
-              <div className="learn-competency__info">
-                <div className="learn-competency__name">RERA Topic Quizzes</div>
-                <div className="learn-competency__meta">{topicQuizzes.length} topic quizzes</div>
-              </div>
-            </div>
-            <div className="learn-modules">
-              {topicQuizzes.map((quiz) => (
-                <Link
-                  key={quiz.slug}
-                  href={`/learn/quiz/${quiz.slug}`}
-                  className="learn-module"
-                  data-active={currentQuizSlug === quiz.slug}
-                >
-                  <span className="learn-module__icon" data-status={currentQuizSlug === quiz.slug ? "current" : "default"}>
-                    {quiz.question_count}
-                  </span>
-                  <span>{quiz.title}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
-      
-      {/* Footer */}
-      <div className="learn-sidebar__footer">
-        <div className="learn-sidebar__progress">
-          Practice makes perfect
-        </div>
-      </div>
-    </aside>
+    </LearnShell>
   )
 }

@@ -8,8 +8,9 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { MenuIcon, HomeIcon, GraduationCapIcon } from "lucide-react"
+import Image from "next/image"
+import { MenuIcon } from "lucide-react"
+import { UserMenu, type UserMenuUser } from "@/components/shared/user-menu"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -18,6 +19,8 @@ import { MenuIcon, HomeIcon, GraduationCapIcon } from "lucide-react"
 interface LMSHeaderProps {
   onMenuClick?: () => void
   showMenuButton?: boolean
+  /** User data for the user menu */
+  user?: UserMenuUser
 }
 
 // -----------------------------------------------------------------------------
@@ -27,6 +30,7 @@ interface LMSHeaderProps {
 export function LMSHeader({ 
   onMenuClick,
   showMenuButton = false,
+  user,
 }: LMSHeaderProps) {
   return (
     <header className="learn-header">
@@ -45,25 +49,21 @@ export function LMSHeader({
           
           {/* Brand */}
           <Link href="/learn" className="learn-header__logo">
-            <span className="learn-header__logo-icon">
-              <GraduationCapIcon className="h-3.5 w-3.5" />
-            </span>
-            Prime Capital Learning
+            <Image
+              src="/logo.svg"
+              alt="Prime Capital"
+              width={120}
+              height={40}
+              className="h-9 w-auto"
+              priority
+            />
+            <span className="learn-header__title">Academy</span>
           </Link>
         </div>
         
-        {/* Actions */}
+        {/* User Menu */}
         <nav className="learn-header__nav">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-            nativeButton={false}
-            render={<Link href="/" />}
-          >
-            <HomeIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Home</span>
-          </Button>
+          <UserMenu user={user} />
         </nav>
       </div>
     </header>

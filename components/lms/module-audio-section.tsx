@@ -1,25 +1,21 @@
 /**
  * CATALYST - Module Audio Section
  * 
- * Displays available audio content for a module.
- * Shows intro, demo, and walkthrough audio in an elegant card layout.
- * Integrates with the audio coach player for playback.
+ * Compact audio track bar with expandable player.
+ * Shows tracks as horizontal pills, expands to full player on click.
  */
 
 "use client"
 
 import { useState } from "react"
-import { Stack, Row, Text, Title } from "@/components/core"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Row, Text } from "@/components/core"
 import { 
   HeadphonesIcon, 
   PlayIcon, 
   BookOpenIcon,
   WrenchIcon,
   FootprintsIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
+  XIcon,
 } from "lucide-react"
 import { AudioCoachPlayer } from "./audio-coach-player"
 import { cn } from "@/lib/utils"
@@ -39,7 +35,7 @@ export interface AudioTrack {
 
 interface ModuleAudioSectionProps {
   tracks: AudioTrack[]
-  moduleTitle: string
+  moduleTitle?: string
   className?: string
   defaultExpanded?: boolean
 }
@@ -52,23 +48,32 @@ const AUDIO_TYPE_CONFIG = {
   intro: {
     icon: BookOpenIcon,
     label: "Introduction",
+    shortLabel: "Intro",
     description: "Get oriented with key concepts",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-50 dark:bg-blue-950/50",
+    borderColor: "border-blue-200 dark:border-blue-800",
+    hoverBg: "hover:bg-blue-100 dark:hover:bg-blue-900/50",
   },
   demo: {
     icon: WrenchIcon,
     label: "Demonstration",
+    shortLabel: "Demo",
     description: "Watch strong vs weak approaches",
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-950/50",
+    borderColor: "border-amber-200 dark:border-amber-800",
+    hoverBg: "hover:bg-amber-100 dark:hover:bg-amber-900/50",
   },
   walkthrough: {
     icon: FootprintsIcon,
     label: "Walkthrough",
+    shortLabel: "Walkthrough",
     description: "Step-by-step guided practice",
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
+    borderColor: "border-emerald-200 dark:border-emerald-800",
+    hoverBg: "hover:bg-emerald-100 dark:hover:bg-emerald-900/50",
   },
 }
 
@@ -78,13 +83,9 @@ const AUDIO_TYPE_CONFIG = {
 
 export function ModuleAudioSection({ 
   tracks, 
-  moduleTitle,
   className,
-  defaultExpanded = false,
 }: ModuleAudioSectionProps) {
-  const [expandedTrack, setExpandedTrack] = useState<string | null>(
-    defaultExpanded && tracks.length > 0 ? tracks[0].slug : null
-  )
+  const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
   
   if (tracks.length === 0) {
     return null
@@ -93,90 +94,88 @@ export function ModuleAudioSection({
   const toggleTrack = (slug: string) => {
     setExpandedTrack(expandedTrack === slug ? null : slug)
   }
+  
+  const selectedTrack = tracks.find(t => t.slug === expandedTrack)
+  const selectedConfig = selectedTrack ? AUDIO_TYPE_CONFIG[selectedTrack.type] : null
 
   return (
     <section className={cn("module-audio-section", className)}>
-      <Card className="border-primary/10 overflow-hidden">
-        <CardContent className="p-0">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-primary/10">
-            <Row align="center" gap="md">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <HeadphonesIcon className="h-5 w-5 text-primary" />
-              </div>
-              <Stack gap="none">
-                <Title size="h4" className="font-serif text-foreground">
-                  Audio Coach
-                </Title>
-                <Text size="sm" className="text-muted-foreground">
-                  {tracks.length} audio {tracks.length === 1 ? "lesson" : "lessons"} available
+      {/* Compact pill bar */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <Row align="center" gap="xs" className="text-muted-foreground shrink-0">
+          <HeadphonesIcon className="h-4 w-4" />
+          <Text size="sm" weight="medium">Audio Coach</Text>
+        </Row>
+        
+        <div className="flex items-center gap-2 flex-wrap">
+          {tracks.map((track) => {
+            const config = AUDIO_TYPE_CONFIG[track.type]
+            const Icon = config.icon
+            const isActive = expandedTrack === track.slug
+            
+            return (
+              <button
+                key={track.slug}
+                onClick={() => toggleTrack(track.slug)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
+                  "border",
+                  isActive 
+                    ? cn(config.bgColor, config.borderColor, config.color)
+                    : cn(
+                        "bg-muted/50 border-border text-muted-foreground",
+                        config.hoverBg,
+                        "hover:border-border/80"
+                      )
+                )}
+              >
+                <Icon className={cn("h-3.5 w-3.5", isActive && config.color)} />
+                <span>{config.shortLabel}</span>
+                {track.audioUrl && !isActive && (
+                  <PlayIcon className="h-3 w-3 opacity-50" />
+                )}
+                <span className="text-xs opacity-60">{track.duration}</span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+      
+      {/* Expanded player */}
+      {selectedTrack && selectedConfig && (
+        <div className={cn(
+          "mt-4 rounded-lg border overflow-hidden",
+          selectedConfig.borderColor,
+          selectedConfig.bgColor
+        )}>
+          <div className="p-4">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex items-center gap-2">
+                <selectedConfig.icon className={cn("h-5 w-5", selectedConfig.color)} />
+                <Text weight="medium" className={selectedConfig.color}>
+                  {selectedConfig.label}
                 </Text>
-              </Stack>
-            </Row>
+                <Text size="sm" className="text-muted-foreground">
+                  • {selectedConfig.description}
+                </Text>
+              </div>
+              <button
+                onClick={() => setExpandedTrack(null)}
+                className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              >
+                <XIcon className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+            <AudioCoachPlayer
+              title={selectedTrack.title}
+              duration={selectedTrack.duration}
+              type={selectedConfig.label}
+              transcript={selectedTrack.transcript}
+              audioUrl={selectedTrack.audioUrl}
+            />
           </div>
-          
-          {/* Track List */}
-          <div className="divide-y divide-border">
-            {tracks.map((track) => {
-              const config = AUDIO_TYPE_CONFIG[track.type]
-              const Icon = config.icon
-              const isExpanded = expandedTrack === track.slug
-              
-              return (
-                <div key={track.slug} className="group">
-                  {/* Track Header - Clickable */}
-                  <button
-                    onClick={() => toggleTrack(track.slug)}
-                    className="w-full px-6 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left"
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                      config.bgColor
-                    )}>
-                      <Icon className={cn("h-5 w-5", config.color)} />
-                    </div>
-                    
-                    <Stack gap="none" className="flex-1 min-w-0">
-                      <Text weight="medium" className="text-foreground">
-                        {config.label}
-                      </Text>
-                      <Text size="sm" className="text-muted-foreground truncate">
-                        {config.description} • {track.duration}
-                      </Text>
-                    </Stack>
-                    
-                    <Row align="center" gap="sm" className="shrink-0">
-                      {track.audioUrl && (
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <PlayIcon className="h-4 w-4 text-primary-foreground ml-0.5" />
-                        </div>
-                      )}
-                      {isExpanded ? (
-                        <ChevronUpIcon className="h-5 w-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </Row>
-                  </button>
-                  
-                  {/* Expanded Player */}
-                  {isExpanded && (
-                    <div className="px-6 pb-6 pt-2">
-                      <AudioCoachPlayer
-                        title={track.title}
-                        duration={track.duration}
-                        type={config.label}
-                        transcript={track.transcript}
-                        audioUrl={track.audioUrl}
-                      />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </section>
   )
 }

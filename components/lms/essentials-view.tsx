@@ -7,6 +7,7 @@
  * - Scripts (Apply)
  * - Images & Audio (Reference)
  * - Practice Scenario (Practice)
+ * - Linked Scenarios (Practice with AI)
  * - Reflection (Reflect)
  */
 
@@ -14,6 +15,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Stack, Row, Text, Title } from "@/components/core"
 import { 
@@ -26,22 +28,32 @@ import {
   MessageSquare, 
   HelpCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Bot,
 } from "lucide-react"
 import type { EssentialsContent } from "@/lib/learning-types"
+
+/** Minimal scenario data for linking */
+interface ScenarioLink {
+  slug: string
+  title: string
+  scenarioCount: number | null
+}
 
 interface EssentialsViewProps {
   essentials: EssentialsContent
   moduleSlug: string
   competencySlug: string
   onSwitchMode: () => void
+  linkedScenarios?: ScenarioLink[]
 }
 
 export function EssentialsView({ 
   essentials, 
   moduleSlug, 
   competencySlug,
-  onSwitchMode 
+  onSwitchMode,
+  linkedScenarios = [],
 }: EssentialsViewProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   
@@ -233,6 +245,44 @@ export function EssentialsView({
               <Text size="sm" className="text-muted-foreground">
                 {essentials.practice.success}
               </Text>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {/* Practice with AI - links to scenario bank */}
+      {linkedScenarios.length > 0 && (
+        <section id="practice-with-ai" className="lms-section-card essentials-section--ai-practice">
+          <h2 className="lms-section-card__title">
+            <span className="lms-section-card__number">{++sectionNumber}</span>
+            <Bot className="essentials-section__icon" />
+            Practice with AI
+          </h2>
+          <div className="lms-section-card__content">
+            <Text size="sm" className="essentials-ai-practice__intro">
+              Ready to practice what you learned? Try these AI roleplay scenarios:
+            </Text>
+            <div className="essentials-ai-practice__grid">
+              {linkedScenarios.map((scenario) => (
+                <Link
+                  key={scenario.slug}
+                  href={`/learn/scenarios/${scenario.slug}`}
+                  className="essentials-ai-practice__card"
+                >
+                  <div className="essentials-ai-practice__icon">
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <div className="essentials-ai-practice__content">
+                    <span className="essentials-ai-practice__title">{scenario.title}</span>
+                    {scenario.scenarioCount && (
+                      <span className="essentials-ai-practice__count">
+                        {scenario.scenarioCount} practice scenarios
+                      </span>
+                    )}
+                  </div>
+                  <ArrowRight className="essentials-ai-practice__arrow" />
+                </Link>
+              ))}
             </div>
           </div>
         </section>

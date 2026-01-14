@@ -1,8 +1,8 @@
 /**
  * CATALYST - Coach Inline Prompt
  *
- * Prominent AI Coach prompt that integrates into the content flow.
- * Shows clear branding, value prop, input, and example prompts.
+ * Compact AI Coach prompt - collapsed by default to reduce visual noise.
+ * Shows just the input; example prompts appear on focus/interaction.
  * 
  * Used by: Module pages (after title, before content)
  */
@@ -10,7 +10,7 @@
 "use client"
 
 import * as React from "react"
-import { SparklesIcon, ArrowRightIcon } from "lucide-react"
+import { SparklesIcon, ArrowRightIcon, ChevronDownIcon } from "lucide-react"
 import { useCoach } from "./coach-provider"
 import { cn } from "@/lib/utils"
 
@@ -48,7 +48,9 @@ export function CoachInlinePrompt({
 }: CoachInlinePromptProps) {
   const { openCoach, sendMessage } = useCoach()
   const [inputValue, setInputValue] = React.useState("")
+  const [isExpanded, setIsExpanded] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,16 +70,36 @@ export function CoachInlinePrompt({
       sendMessage(prompt)
     }, 100)
   }
+  
+  const handleFocus = () => {
+    setIsExpanded(true)
+  }
+  
+  // Collapse when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        if (!inputValue.trim()) {
+          setIsExpanded(false)
+        }
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [inputValue])
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         "coach-inline-prompt",
+        isExpanded && "coach-inline-prompt--expanded",
         className
       )}
     >
-      {/* Header with branding */}
-      <div className="coach-inline-prompt__header">
+      {/* Compact header - always visible */}
+      <div className="coach-inline-prompt__compact-header">
         <div className="coach-inline-prompt__brand">
           <span className="coach-inline-prompt__icon">
             <SparklesIcon className="h-4 w-4" />
@@ -85,18 +107,16 @@ export function CoachInlinePrompt({
           <span className="coach-inline-prompt__title">AI Coach</span>
           <span className="coach-inline-prompt__badge">Beta</span>
         </div>
-        <p className="coach-inline-prompt__description">
-          Get instant answers and explanations about this content
-        </p>
       </div>
 
-      {/* Input form */}
+      {/* Input form - always visible */}
       <form onSubmit={handleSubmit} className="coach-inline-prompt__form">
         <input
           ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          onFocus={handleFocus}
           placeholder={placeholder}
           className="coach-inline-prompt__input"
         />
@@ -110,8 +130,8 @@ export function CoachInlinePrompt({
         </button>
       </form>
 
-      {/* Example prompts */}
-      {examplePrompts.length > 0 && (
+      {/* Example prompts - shown when expanded */}
+      {isExpanded && examplePrompts.length > 0 && (
         <div className="coach-inline-prompt__examples">
           <span className="coach-inline-prompt__examples-label">Try asking:</span>
           <div className="coach-inline-prompt__examples-list">

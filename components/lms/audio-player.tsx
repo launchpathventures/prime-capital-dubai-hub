@@ -130,10 +130,11 @@ export function AudioPlayer({
     }
   }
   
-  const handleSeek = (value: number[]) => {
+  const handleSeek = (value: number | readonly number[]) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = value[0]
-      setCurrentTime(value[0])
+      const seekValue = Array.isArray(value) ? value[0] : value
+      audioRef.current.currentTime = seekValue
+      setCurrentTime(seekValue)
     }
   }
   
@@ -302,7 +303,7 @@ export function AudioPlayer({
 }
 
 // =============================================================================
-// Audio Section - Groups multiple tracks
+// Audio Section - Prominent "Start Here" with expandable tracks
 // =============================================================================
 
 interface AudioSectionProps {
@@ -311,35 +312,117 @@ interface AudioSectionProps {
 }
 
 export function AudioSection({ tracks, className }: AudioSectionProps) {
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null)
+  
   if (tracks.length === 0) return null
   
-  // Single track - show full player
-  if (tracks.length === 1) {
-    return (
-      <section className={className}>
-        <AudioPlayer track={tracks[0]} variant="full" />
-      </section>
-    )
+  const toggleTrack = (slug: string) => {
+    setExpandedSlug(expandedSlug === slug ? null : slug)
   }
   
-  // Multiple tracks - show header + list
+  const expandedTrack = tracks.find(t => t.slug === expandedSlug)
+  
+  // Calculate total duration
+  const totalMinutes = tracks.reduce((sum, t) => {
+    const match = t.duration.match(/(\d+):(\d+)/)
+    if (match) {
+      return sum + parseInt(match[1]) + parseInt(match[2]) / 60
+    }
+    return sum
+  }, 0)
+  const formattedTotal = totalMinutes < 1 
+    ? "< 1 min" 
+    : `${Math.round(totalMinutes)} min`
+  
   return (
-    <section className={cn("space-y-3", className)}>
-      <Row align="center" gap="sm" className="px-1">
-        <HeadphonesIcon className="h-4 w-4 text-primary" />
-        <Text size="sm" weight="medium" className="text-primary">
-          Audio Coach
-        </Text>
-        <Text size="sm" className="text-muted-foreground">
-          • {tracks.length} lessons
-        </Text>
-      </Row>
-      
-      <div className="space-y-2">
-        {tracks.map((track) => (
-          <AudioPlayer key={track.slug} track={track} variant="full" />
-        ))}
+    <section className={cn(
+      "audio-section rounded-xl overflow-hidden",
+      "bg-gradient-to-r from-primary/5 via-primary/8 to-primary/5",
+      "border border-primary/20",
+      className
+    )}>
+      {/* Header bar - always visible */}
+      <div className="px-4 py-3 flex items-center gap-4 flex-wrap">
+        {/* Icon + Title */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+            <HeadphonesIcon className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <Text weight="semibold" className="text-foreground">Audio Coach</Text>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary rounded">
+                Start Here
+              </span>
+            </div>
+            <Text size="xs" className="text-muted-foreground">
+              {tracks.length} {tracks.length === 1 ? "lesson" : "lessons"} • {formattedTotal} total
+            </Text>
+          </div>
+        </div>
+        
+        {/* Track pills */}
+        <div className="flex items-center gap-2 flex-wrap ml-auto">
+          {tracks.map((track) => {
+            const config = TYPE_CONFIG[track.type]
+            const Icon = config.icon
+            const isActive = expandedSlug === track.slug
+            
+            // Short labels for pills
+            const shortLabel = track.type === "intro" ? "Introduction" 
+              : track.type === "demo" ? "Demonstration" 
+              : "Walkthrough"
+            
+            return (
+              <button
+                key={track.slug}
+                onClick={() => toggleTrack(track.slug)}
+                className={cn(
+                  "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                  "border shadow-sm",
+                  isActive 
+                    ? cn(
+                        "bg-background border-primary/30 text-foreground shadow-md",
+                        "ring-2 ring-primary/20"
+                      )
+                    : cn(
+                        "bg-background/80 border-border/50 text-muted-foreground",
+                        "hover:bg-background hover:border-border hover:text-foreground hover:shadow-md"
+                      )
+                )}
+              >
+                <Icon className={cn(
+                  "h-4 w-4", 
+                  isActive ? config.color : "text-muted-foreground"
+                )} />
+                <span>{shortLabel}</span>
+                {track.audioUrl && (
+                  <span className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center",
+                    isActive 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-muted text-muted-foreground"
+                  )}>
+                    <PlayIcon className="h-3 w-3 ml-0.5" />
+                  </span>
+                )}
+                <span className="text-xs opacity-60">{track.duration}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
+      
+      {/* Expanded player */}
+      {expandedTrack && (
+        <div className="border-t border-primary/10 bg-background/50">
+          <AudioPlayer 
+            track={expandedTrack} 
+            variant="full"
+            showTranscriptByDefault={false}
+          />
+        </div>
+      )}
     </section>
   )
 }

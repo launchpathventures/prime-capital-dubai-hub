@@ -1,7 +1,7 @@
 /**
  * CATALYST - Learning Progress Page
  * 
- * Simple overview of learner's progress through the course.
+ * Clean overview of learner's progress through the course.
  * Shows module completion status based on quiz results and scenario reflections.
  */
 
@@ -9,12 +9,12 @@ import Link from "next/link"
 import { 
   CheckCircleIcon, 
   CircleIcon,
-  BookOpenIcon,
-  GraduationCapIcon,
   ArrowRightIcon,
   MessageSquareIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../_surface/learn-shell"
 import { getScenarioCompletionStats } from "@/lib/actions/scenario-actions"
 
@@ -147,9 +147,11 @@ async function getModulesWithProgress(): Promise<{
 // =============================================================================
 
 export default async function ProgressPage() {
-  const [{ modules, completed, competencies }, scenarioStats] = await Promise.all([
+  const [{ modules, completed, competencies }, scenarioStats, userRole, userMenu] = await Promise.all([
     getModulesWithProgress(),
     getScenarioCompletionStats(),
+    getUserRole(),
+    getUserForMenu(),
   ])
   
   const completedIds = new Set(completed.map(c => c.module_id))
@@ -173,139 +175,142 @@ export default async function ProgressPage() {
     <LearnShell 
       activeSection="progress"
       competencies={competencies}
+      userRole={userRole}
+      user={userMenu ?? undefined}
     >
       <div className="learn-content">
-        <div className="lms-page">
-          {/* Header */}
-          <div className="lms-page__header">
-            <div className="lms-page__eyebrow">
-              <GraduationCapIcon className="h-4 w-4" />
-              Learning Progress
-            </div>
-            <h1 className="lms-page__title">My Progress</h1>
-            <p className="lms-page__description">
-              Track your journey through the consultant training program.
-            </p>
-          </div>
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
+            My Progress
+          </h1>
+          <p className="text-gray-500">
+            Track your journey through the consultant training program.
+          </p>
+        </header>
         
-        {/* Progress Summary */}
-        <div className="lms-card lms-card--highlight">
-          <div className="flex items-center justify-between gap-6 flex-wrap">
+        {/* Progress Summary Card */}
+        <div className="lms-card p-6 mb-6 bg-gradient-to-br from-primary-50 to-white border-primary-100">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-100 text-primary-600">
+              <TrendingUpIcon className="h-6 w-6" />
+            </div>
             <div>
               <div className="text-3xl font-bold text-gray-900">{progressPercent}%</div>
-              <div className="text-sm text-gray-500">Overall Progress</div>
-            </div>
-            <div className="flex-1 max-w-md">
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary-500 rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-gray-500">
                 {completedCount} of {totalCount} modules completed
               </div>
             </div>
-            {completedCount < totalCount && (
-              <Link 
-                href="/learn"
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700"
-              >
-                Continue Learning
-                <ArrowRightIcon className="h-4 w-4" />
-              </Link>
-            )}
           </div>
+          
+          {/* Progress bar */}
+          <div className="h-2 bg-primary-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary-500 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          
+          {completedCount < totalCount && (
+            <Link 
+              href="/learn"
+              className="inline-flex items-center gap-2 mt-4 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+            >
+              Continue Learning
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          )}
         </div>
         
         {/* Scenario Practice Progress */}
         {scenarioStats.completedScenarios > 0 && (
-          <div className="lms-card">
-            <div className="flex items-center justify-between gap-6 flex-wrap">
+          <div className="lms-card p-5 mb-8">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 text-blue-600">
                   <MessageSquareIcon className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Scenario Practice</div>
                   <div className="text-sm text-gray-500">
-                    {scenarioStats.completedScenarios} scenario{scenarioStats.completedScenarios !== 1 ? 's' : ''} completed with reflections
+                    {scenarioStats.completedScenarios} scenario{scenarioStats.completedScenarios !== 1 ? 's' : ''} completed
                   </div>
                 </div>
               </div>
               <Link 
                 href="/learn/scenarios"
-                className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
               >
-                View All Scenarios
+                View All
                 <ArrowRightIcon className="h-4 w-4" />
               </Link>
             </div>
             
-            {/* Breakdown by category */}
             {scenarioStats.byCategory.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <div className="grid gap-2">
-                  {scenarioStats.byCategory.map((cat) => (
-                    <Link
-                      key={cat.category}
-                      href={`/learn/scenarios/${cat.category}`}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <span className="text-sm text-gray-700 capitalize">
-                        {cat.category.replace(/-/g, ' ')}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {cat.completed} completed
-                      </span>
-                    </Link>
-                  ))}
-                </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 grid gap-1">
+                {scenarioStats.byCategory.map((cat) => (
+                  <Link
+                    key={cat.category}
+                    href={`/learn/scenarios/${cat.category}`}
+                    className="flex items-center justify-between py-2 px-3 -mx-1 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="text-sm text-gray-700 capitalize">
+                      {cat.category.replace(/-/g, ' ')}
+                    </span>
+                    <span className="text-xs font-medium text-gray-400">
+                      {cat.completed} completed
+                    </span>
+                  </Link>
+                ))}
               </div>
             )}
           </div>
         )}
         
         {/* Competency Progress */}
-        <div className="lms-section">
-          <h2 className="lms-section__title">Progress by Competency</h2>
+        <section>
+          <h2 className="text-base font-semibold text-gray-900 mb-4">
+            Progress by Competency
+          </h2>
           
-          <div className="space-y-6">
-            {Object.entries(byCompetency).map(([slug, { name, modules: compModules }]) => {
-              const compCompleted = compModules.filter(m => completedIds.has(m.id)).length
-              const compPercent = Math.round((compCompleted / compModules.length) * 100)
+          <div className="space-y-4">
+            {competencies.map(({ slug, name }) => {
+              // Get full module data from byCompetency for completion status
+              const fullModules = byCompetency[slug]?.modules || []
+              const compCompleted = fullModules.filter(m => completedIds.has(m.id)).length
+              const compPercent = fullModules.length > 0 ? Math.round((compCompleted / fullModules.length) * 100) : 0
               
               return (
-                <div key={slug} className="lms-card">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">{name}</h3>
-                    <span className="text-sm text-gray-500">
-                      {compCompleted}/{compModules.length} complete
+                <div key={slug} className="lms-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-gray-900">{name}</h3>
+                    <span className="text-sm font-medium text-gray-400">
+                      {compCompleted}/{fullModules.length}
                     </span>
                   </div>
                   
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
                     <div 
                       className="h-full bg-primary-500 rounded-full transition-all"
                       style={{ width: `${compPercent}%` }}
                     />
                   </div>
                   
-                  <div className="grid gap-2">
-                    {compModules.map(m => {
+                  <div className="space-y-1">
+                    {fullModules.map(m => {
                       const isComplete = completedIds.has(m.id)
                       return (
                         <Link
                           key={m.id}
                           href={`/learn/${slug}/${m.slug}`}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex items-center gap-3 py-2 px-3 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group"
                         >
                           {isComplete ? (
-                            <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
+                            <CheckCircleIcon className="h-4 w-4 text-green-500 flex-shrink-0" />
                           ) : (
-                            <CircleIcon className="h-5 w-5 text-gray-300 flex-shrink-0" />
+                            <CircleIcon className="h-4 w-4 text-gray-300 flex-shrink-0" />
                           )}
-                          <span className={isComplete ? "text-gray-600" : "text-gray-900"}>
+                          <span className={`text-sm ${isComplete ? "text-gray-500" : "text-gray-700 group-hover:text-gray-900"}`}>
                             {m.title}
                           </span>
                         </Link>
@@ -316,8 +321,7 @@ export default async function ProgressPage() {
               )
             })}
           </div>
-        </div>
-        </div>
+        </section>
       </div>
     </LearnShell>
   )

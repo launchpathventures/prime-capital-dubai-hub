@@ -1,9 +1,9 @@
 # Scenario Bank
 ## Prime Capital — AI Roleplay Training Scenarios
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** January 2026  
-**Total Scenarios:** 75
+**Total Scenarios:** 83
 
 ---
 
@@ -44,6 +44,7 @@ This Scenario Bank provides structured practice situations for Prime Capital con
 | [Objections](objections.md) | 20 | Market concerns, fees, competition, delays, stalls |
 | [Closing](closing.md) | 10 | EOI commitment, overcoming hesitation, assumptive techniques |
 | [Difficult Situations](difficult-situations.md) | 10 | Ghosted clients, lost deals, angry clients, developer delays |
+| [AI Skills Practice](ai-skills.md) | 8 | Hands-on Gemini exercises — research, communication, productivity |
 
 ---
 

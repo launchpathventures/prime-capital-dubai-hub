@@ -18,6 +18,7 @@ export { DocumentFigure } from "./document-figure"
 export { AudioCoachPlayer } from "./audio-coach-player"
 export { AudioPlayer, AudioSection } from "./audio-player"
 export { ModuleAudioSection, AudioQuickLinks } from "./module-audio-section"
+export { ModuleControlsBar } from "./module-controls-bar"
 export { LearningObjectives } from "./learning-objectives"
 export { ResourceList } from "./resource-list"
 // KnowledgeCheckCTA is a server component - import directly, not from barrel
