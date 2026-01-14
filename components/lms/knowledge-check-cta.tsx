@@ -1,47 +1,75 @@
 /**
  * CATALYST - Knowledge Check CTA
+ * 
+ * Server component that fetches quiz data and renders the QuizSheet slide-over.
  * Uses Prime Capital brand design tokens.
  */
 
-import Link from "next/link"
-import { Row, Stack, Text } from "@/components/core"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ArrowRightIcon, ClipboardCheckIcon } from "lucide-react"
+import { createClient } from "@/lib/supabase/server"
+import { KnowledgeCheckClient } from "./knowledge-check-client"
 
 interface KnowledgeCheckCTAProps {
   quizId: string
 }
 
-export function KnowledgeCheckCTA({ quizId }: KnowledgeCheckCTAProps) {
+interface QuizQuestion {
+  id: string
+  question: string
+  question_text: string | null
+  options: Array<{ text: string; correct: boolean }>
+  explanation: string | null
+  display_order: number
+}
+
+interface Quiz {
+  slug: string
+  title: string
+  description: string | null
+  competency_slug: string
+  passing_score: number
+  question_count: number
+}
+
+async function getQuizData(quizSlug: string): Promise<{
+  quiz: Quiz
+  questions: QuizQuestion[]
+} | null> {
+  const supabase = await createClient()
+  
+  const { data: quiz, error: quizError } = await supabase
+    .from("quizzes")
+    .select("*")
+    .eq("slug", quizSlug)
+    .single()
+  
+  if (quizError || !quiz) return null
+  
+  const { data: questions, error: questionsError } = await supabase
+    .from("quiz_questions")
+    .select("*")
+    .eq("quiz_slug", quizSlug)
+    .order("display_order", { ascending: true })
+  
+  if (questionsError) return null
+  
+  return {
+    quiz,
+    questions: questions || [],
+  }
+}
+
+export async function KnowledgeCheckCTA({ quizId }: KnowledgeCheckCTAProps) {
+  const data = await getQuizData(quizId)
+  
+  // If no quiz data, don't render anything
+  if (!data || data.questions.length === 0) {
+    return null
+  }
+  
   return (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="py-6 px-6">
-        <Row align="center" justify="between" className="flex-col sm:flex-row gap-4">
-          <Row gap="md" align="center">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <ClipboardCheckIcon className="h-6 w-6 text-primary" />
-            </div>
-            <Stack gap="xs">
-              <Text weight="semibold" className="text-foreground">
-                Ready to test your knowledge?
-              </Text>
-              <Text size="sm" className="text-muted-foreground">
-                Complete a short quiz to reinforce what you&apos;ve learned.
-              </Text>
-            </Stack>
-          </Row>
-          <Button 
-            size="lg" 
-            className="gap-2 shrink-0" 
-            nativeButton={false}
-            render={<Link href={`/learn/quiz/${quizId}`} />}
-          >
-            Take Quiz
-            <ArrowRightIcon className="h-4 w-4" />
-          </Button>
-        </Row>
-      </CardContent>
-    </Card>
+    <KnowledgeCheckClient 
+      quiz={data.quiz}
+      questions={data.questions}
+    />
   )
 }

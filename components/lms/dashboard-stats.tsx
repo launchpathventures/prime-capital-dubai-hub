@@ -20,10 +20,10 @@ export async function DashboardStats() {
         label="Overall Complete"
       />
 
-      {/* Competencies */}
+      {/* Quizzes Passed */}
       <ProgressStatCard
-        value={`${stats.completedCompetencies ?? 0}/${stats.totalCompetencies ?? 7}`}
-        label="Competencies"
+        value={`${stats.passedQuizzes}/${stats.totalQuizzes}`}
+        label="Quizzes Passed"
       />
 
       {/* Behaviours / Modules */}

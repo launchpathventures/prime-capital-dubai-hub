@@ -140,3 +140,76 @@ export interface ProgressStats {
   currentStreak: number
   overallProgressPercent: number
 }
+
+// =============================================================================
+// ESSENTIALS TYPES
+// =============================================================================
+
+/** A key fact with specific numbers that clients ask about */
+export interface EssentialsFact {
+  fact: string
+  context?: string
+  source?: string
+}
+
+/** A client-facing script extracted verbatim */
+export interface EssentialsScript {
+  scenario: string
+  script: string
+  source?: string
+}
+
+/** An image from /public/images/lms/ */
+export interface EssentialsImage {
+  src: string
+  alt: string
+  caption: string
+  essential: boolean
+  context?: string
+}
+
+/** Reference to an audio transcript */
+export interface EssentialsAudio {
+  slug: string
+  title: string
+  duration: string
+  context: string
+}
+
+/** LPAR practice scenario */
+export interface EssentialsPractice {
+  situation: string
+  task: string
+  success: string
+}
+
+/** Complete essentials content structure */
+export interface EssentialsContent {
+  // LEARN: Core summary
+  tldr: string
+  keyFacts: EssentialsFact[]
+  scripts: EssentialsScript[]
+  
+  // VISUAL & AUDIO ASSETS
+  images: EssentialsImage[]
+  audio: EssentialsAudio[]
+  
+  // PRACTICE & APPLY
+  practice: EssentialsPractice
+  reflection: string
+  
+  // METADATA
+  generatedAt: string
+  sourceHash: string
+  promptVersion: string
+}
+
+/** Learning module with essentials status */
+export interface LearningModuleWithEssentials extends LearningModule {
+  essentials: EssentialsContent | null
+  essentialsGeneratedAt: string | null
+  essentialsSourceHash: string | null
+  essentialsPromptVersion: string | null
+  essentialsAvailable: boolean
+  essentialsStale: boolean
+}

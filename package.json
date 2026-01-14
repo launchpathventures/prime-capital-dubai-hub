@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync:lms": "npx tsx scripts/sync-lms-content.ts"
+    "sync:lms": "npx tsx scripts/sync-lms-content.ts",
+    "generate:audio": "npx tsx scripts/generate-audio.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@base-ui/react": "^1.0.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

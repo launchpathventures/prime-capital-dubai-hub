@@ -94,41 +94,127 @@ function getCompetencyFolders(contentDir: string): string[] {
 
 /**
  * Parse quiz questions from markdown content.
- * Questions are formatted as ### Question N with checkboxes for options.
+ * Supports multiple formats:
+ * 1. Checkbox: - [ ] Option / - [x] Correct option
+ * 2. Letter: A) Option with **Correct Answer:** B
+ * 3. Dash-letter: - A) Option text
  */
 function parseQuizQuestions(content: string): QuizQuestion[] {
   const questions: QuizQuestion[] = []
 
-  // Split by ### Question N
-  const questionBlocks = content.split(/###\s+Question\s+\d+/i).slice(1)
+  // Split by ### Question N or ## Question N
+  const questionBlocks = content.split(/##\s*#?\s*Question\s+\d+/i).slice(1)
 
   for (const block of questionBlocks) {
-    const lines = block.trim().split("\n")
+    // Extract question text - first bold text that's not a label
+    let question = ""
+    const boldMatch = block.match(/\*\*([^*]+)\*\*/)
+    if (boldMatch && !boldMatch[1].match(/^(Correct Answer|Explanation|Format|Time)/i)) {
+      question = boldMatch[1].trim()
+    }
+    
+    // If no bold question found, try first non-empty paragraph
+    if (!question) {
+      const firstPara = block.trim().split("\n")[0]?.trim()
+      if (firstPara && !firstPara.startsWith("-") && !firstPara.match(/^[A-D]\)/)) {
+        question = firstPara
+      }
+    }
 
-    // First bold text is the question
-    const questionMatch = block.match(/\*\*(.+?)\*\*/)
-    const question = questionMatch ? questionMatch[1] : ""
-
-    // Options are - [ ] or - [x] lines
     const options: Array<{ text: string; correct: boolean }> = []
-    for (const line of lines) {
-      const optionMatch = line.match(/^-\s+\[([ x])\]\s+(.+)/)
-      if (optionMatch) {
+    let correctAnswer: string | null = null
+
+    // Format 1: Checkbox style (- [ ] or - [x])
+    const checkboxMatches = [...block.matchAll(/^-\s+\[([ xX])\]\s+(.+)/gm)]
+    if (checkboxMatches.length > 0) {
+      for (const match of checkboxMatches) {
         options.push({
-          text: optionMatch[2].replace(/^[A-D]\)\s*/, ""),
-          correct: optionMatch[1] === "x",
+          text: match[2].replace(/^[A-D]\)\s*/, "").trim(),
+          correct: match[1].toLowerCase() === "x",
         })
       }
     }
 
-    // Explanation follows **Explanation**:
+    // Format 2: Letter style without dash (A) Option text)
+    if (options.length === 0) {
+      const letterMatches = [...block.matchAll(/^([A-D])\)\s*(.+)/gm)]
+      for (const match of letterMatches) {
+        options.push({
+          text: match[2].trim(),
+          correct: false,
+        })
+      }
+    }
+
+    // Format 3: Dash-letter style (- A) Option text)
+    if (options.length === 0) {
+      const dashLetterMatches = [...block.matchAll(/^-\s+([A-D])\)\s*(.+)/gm)]
+      for (const match of dashLetterMatches) {
+        options.push({
+          text: match[2].trim(),
+          correct: false,
+        })
+      }
+    }
+
+    // Find correct answer indicator (multiple formats)
+    if (options.length > 0 && !options.some(o => o.correct)) {
+      // Format: **Correct answer:** B or **Correct Answer:** B
+      const correctMatch = block.match(/\*\*Correct [Aa]nswer:?\*\*:?\s*([A-D])/i)
+      if (correctMatch) {
+        correctAnswer = correctMatch[1].toUpperCase()
+        const correctIndex = correctAnswer.charCodeAt(0) - 65
+        if (options[correctIndex]) {
+          options[correctIndex].correct = true
+        }
+      }
+    }
+
+    // Extract explanation (multiple patterns)
+    let explanation = ""
     const explanationMatch = block.match(
-      /\*\*Explanation\*\*:\s*([\s\S]+?)(?=---|\n\n###|$)/
+      /\*\*Explanation:?\*\*:?\s*([\s\S]+?)(?=---|\n\n##|\n\n###|$)/i
     )
-    const explanation = explanationMatch ? explanationMatch[1].trim() : ""
+    if (explanationMatch) {
+      explanation = explanationMatch[1].trim()
+    }
 
     if (question && options.length > 0) {
       questions.push({ question, options, explanation })
+    }
+  }
+
+  return questions
+}
+
+/**
+ * Parse quiz questions from YAML frontmatter.
+ * Some quiz files store questions directly in frontmatter.
+ */
+function parseQuestionsFromFrontmatter(
+  frontmatter: Record<string, unknown>
+): QuizQuestion[] {
+  const questions: QuizQuestion[] = []
+  const fmQuestions = frontmatter.questions as Array<{
+    question: string
+    options: Array<{ text: string; correct: boolean }>
+    explanation?: string
+  }> | undefined
+
+  if (!fmQuestions || !Array.isArray(fmQuestions)) {
+    return questions
+  }
+
+  for (const q of fmQuestions) {
+    if (q.question && Array.isArray(q.options)) {
+      questions.push({
+        question: q.question,
+        options: q.options.map(o => ({
+          text: o.text,
+          correct: Boolean(o.correct),
+        })),
+        explanation: q.explanation || "",
+      })
     }
   }
 
@@ -409,8 +495,11 @@ export async function syncQuizzes(): Promise<{ quizzes: number; questions: numbe
       folderCompetency || 
       quizSlug.split("-").slice(0, -1).join("-")
 
-    // Parse questions from markdown
-    const questions = parseQuizQuestions(content)
+    // Parse questions from markdown content first, then fall back to frontmatter
+    let questions = parseQuizQuestions(content)
+    if (questions.length === 0) {
+      questions = parseQuestionsFromFrontmatter(frontmatter)
+    }
 
     // Upsert quiz metadata
     const { error: quizError } = await supabase.from("quizzes").upsert(

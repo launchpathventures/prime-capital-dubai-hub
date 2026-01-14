@@ -97,9 +97,10 @@ export interface QuizResult {
 
 /**
  * Submit a quiz attempt and get results.
+ * Supports both quiz slug (new) and module ID (legacy) based submissions.
  */
 export async function submitQuizAttempt(
-  moduleId: string,
+  quizSlugOrModuleId: string,
   answers: QuizAnswer[]
 ): Promise<QuizResult> {
   const supabase = await createClient()
@@ -109,13 +110,49 @@ export async function submitQuizAttempt(
   } = await supabase.auth.getUser()
   if (!user) throw new Error("Not authenticated")
 
-  // Get correct answers
-  const { data: questions, error: qError } = await supabase
-    .from("quiz_questions")
-    .select("*")
-    .eq("module_id", moduleId)
+  // Determine if this is a quiz slug or module ID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(quizSlugOrModuleId)
+  
+  let questions
+  let passingScore = config.learning.quizPassThreshold
+  let quizSlug: string | null = null
+  let moduleId: string | null = null
 
-  if (qError) throw qError
+  if (isUuid) {
+    // Legacy: lookup by module_id
+    moduleId = quizSlugOrModuleId
+    const { data, error } = await supabase
+      .from("quiz_questions")
+      .select("*")
+      .eq("module_id", quizSlugOrModuleId)
+    if (error) throw error
+    questions = data
+  } else {
+    // New: lookup by quiz_slug
+    quizSlug = quizSlugOrModuleId
+    
+    // Get quiz metadata for passing score
+    const { data: quiz } = await supabase
+      .from("quizzes")
+      .select("passing_score")
+      .eq("slug", quizSlug)
+      .single()
+    
+    if (quiz?.passing_score) {
+      passingScore = quiz.passing_score / 100 // Convert percentage to decimal
+    }
+    
+    const { data, error } = await supabase
+      .from("quiz_questions")
+      .select("*")
+      .eq("quiz_slug", quizSlug)
+    if (error) throw error
+    questions = data
+  }
+
+  if (!questions || questions.length === 0) {
+    throw new Error("Quiz not found")
+  }
 
   // Calculate score
   let score = 0
@@ -140,12 +177,13 @@ export async function submitQuizAttempt(
   }
 
   const maxScore = questions.length
-  const passed = score / maxScore >= config.learning.quizPassThreshold
+  const passed = (score / maxScore) >= passingScore
 
   // Save attempt
   const { error: saveError } = await supabase.from("quiz_attempts").insert({
     user_id: user.id,
     module_id: moduleId,
+    quiz_slug: quizSlug,
     score,
     max_score: maxScore,
     passed,
@@ -156,8 +194,8 @@ export async function submitQuizAttempt(
 
   if (saveError) throw saveError
 
-  // If passed, mark module as complete
-  if (passed) {
+  // If passed and we have a module ID, mark module as complete
+  if (passed && moduleId) {
     await markModuleComplete(moduleId)
   }
 

@@ -1,458 +1,861 @@
-# LMS-013: AI Coach Chat Feature
+# LMS-013a: AI Coach Infrastructure
 
 **Status:** 📋 READY  
 **Priority:** High  
-**Estimated Time:** 4-5 days  
-**Dependencies:** LMS-006 (Module Experience), Supabase, Anthropic Claude API  
+**Estimated Time:** 2 days  
+**Dependencies:** Supabase, Anthropic Claude API  
+**Agent-Safe:** ✅ Yes — well-defined inputs/outputs, follows existing patterns
 
 ---
 
 ## Objective
 
-Build an AI-powered coaching chat feature that allows learners to:
+Build the backend infrastructure and core UI components for an AI coaching feature. This brief covers the **foundation only** — database, API, and isolated components that can be built without deep integration knowledge.
 
-1. **Ask questions** about learning material across the entire curriculum
-2. **Get contextual coaching** within specific modules
-3. **Role-play scenarios** with AI acting as different client personas
-4. **Receive feedback** on their understanding and application of concepts
-
-The AI Coach is universally available (accessible from any page) but context-aware (knows the current module when relevant).
+A separate brief (LMS-013b) covers integration and prompt tuning.
 
 ---
 
-## Key Principle: Context-First Coaching
+## What We're Building
 
-The AI Coach uses the module's `aiCoach` frontmatter to tailor its persona, focus areas, and coaching style. When accessed outside a module context, it defaults to a generalist "Prime Capital Training Coach" persona.
+An "Answer-First Explainer" that helps learners:
+1. **Find answers fast** — concise responses, not essays
+2. **Get simple explanations** — TL;DR for skimmers
+3. **Navigate the curriculum** — "Where is X covered?"
 
-### Context Hierarchy
-
-```
-1. Module-specific context (when viewing a module)
-   - aiCoach.persona from frontmatter
-   - aiCoach.focusAreas
-   - aiCoach.practiceScenarios
-   - Module content as reference material
-   
-2. Competency context (when on competency page)
-   - Competency-level aiCoach config from _index.md
-   - All modules in competency as reference
-   
-3. Global context (dashboard, course overview)
-   - General Prime Capital training coach
-   - Full curriculum as reference (high-level)
-```
+**NOT building in v1:**
+- Role play mode (v2)
+- Quiz mode (v2)
+- Conversation persistence (v2)
+- Manager dashboards (v2)
 
 ---
 
-## Wireframe: Chat Panel
+## Context Levels
 
-The chat panel is a slide-out drawer accessible from a floating button on all `/learn/*` pages.
+The coach behaves differently based on where the learner is:
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│                                                          [✕]   │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │  🎯 AI Coach                                           │   │
-│  │  Brand Communication Expert                            │   │
-│  │  Module: Prime Capital Positioning                     │   │
-│  └────────────────────────────────────────────────────────┘   │
-│                                                                │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │  [Coach Avatar]                                         │   │
-│  │                                                         │   │
-│  │  Welcome! I'm your Brand Communication Coach for       │   │
-│  │  this module. I can help you:                          │   │
-│  │                                                         │   │
-│  │  • Understand Prime Capital's positioning              │   │
-│  │  • Practice introducing the brand to skeptical clients │   │
-│  │  • Role-play differentiation conversations             │   │
-│  │                                                         │   │
-│  │  What would you like to explore?                       │   │
-│  └────────────────────────────────────────────────────────┘   │
-│                                                                │
-│  ┌─ Quick Actions ────────────────────────────────────────┐   │
-│  │  [Quiz Me] [Role Play] [Explain This] [Find in Course] │   │
-│  └────────────────────────────────────────────────────────┘   │
-│                                                                │
-│  ─────────────────────────────────────────────────────────────│
-│                                                                │
-│  ┌────────────────────────────────────────────────────────┐   │
-│  │                                                         │   │
-│  │  [Message input]                              [Send ➤] │   │
-│  │                                                         │   │
-│  └────────────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────────────┘
-```
-
-### Floating Trigger Button
-
-```
-┌──────────────────────────────────────────────────────┐
-│                                                       │
-│  [Page Content]                                       │
-│                                                       │
-│                                          ┌─────────┐ │
-│                                          │   🎯    │ │
-│                                          │  Coach  │ │
-│                                          └─────────┘ │
-└──────────────────────────────────────────────────────┘
-```
-
-Position: Fixed bottom-right, above any existing FAB patterns.
-
----
-
-## Chat Modes
-
-### 1. Ask Mode (Default)
-
-Free-form Q&A about the learning material.
-
-**System prompt context:**
-- Current module content (if applicable)
-- Module's aiCoach configuration
-- Relevant sections from other modules if needed
-
-**Example interactions:**
-- "What's the difference between advisory and transactional models?"
-- "How do I handle a client who says 'I can find properties on my own'?"
-- "What are the key statistics I need to remember for this module?"
-
-### 2. Quiz Mode
-
-The coach asks questions to test understanding.
-
-**Triggered by:** "Quiz me" button or asking "Test my knowledge"
-
-**Behavior:**
-- Generates questions based on current module/competency
-- Provides immediate feedback with explanations
-- Tracks performance in conversation (not persisted)
-
-### 3. Role Play Mode
-
-AI plays a client persona for practice.
-
-**Triggered by:** "Role play" button or asking for practice
-
-**Available scenarios** (from `aiCoach.practiceScenarios`):
-- "Introduce Prime Capital to skeptical investor"
-- "Explain difference from other agencies"
-- "Respond to 'why should I use you' question"
-
-**Behavior:**
-- AI adopts client persona (skeptical, busy, demanding, etc.)
-- Learner practices their responses
-- AI provides coaching feedback after the scenario
-
-### 4. Explain Mode
-
-Deep-dive explanation of specific concepts.
-
-**Triggered by:** "Explain this" button (uses current page section if available)
-
-**Behavior:**
-- Identifies the concept needing explanation
-- Provides layered explanation (simple → detailed)
-- Uses examples from the Dubai real estate context
-
----
-
-## Technical Architecture
-
-### API Route: `/api/coach/chat`
+| Level | Page | Coach Behavior |
+|-------|------|----------------|
+| **Course** | `/learn` | Navigator — helps find modules |
+| **Competency** | `/learn/[competency]` | Curator — recommends path, summarizes |
+| **Module** | `/learn/[competency]/[module]` | Expert — answers deeply, cites content |
 
 ```typescript
-// POST /api/coach/chat
-interface ChatRequest {
-  messages: Message[]
-  context: {
-    moduleSlug?: string
-    competencySlug?: string
-    currentSection?: string // heading/section user is viewing
-    mode: "ask" | "quiz" | "roleplay" | "explain"
-    scenarioId?: string // for role play mode
-  }
-}
-
-interface Message {
-  role: "user" | "assistant"
-  content: string
-}
-
-interface ChatResponse {
-  message: string
-  suggestions?: string[] // follow-up prompts
-  references?: Reference[] // links to relevant module sections
-}
-
-interface Reference {
-  moduleSlug: string
-  competencySlug: string
-  sectionHeading: string
-  relevance: number
-}
-```
-
-### System Prompt Construction
-
-```typescript
-function buildSystemPrompt(context: ChatContext): string {
-  const base = `You are an AI Coach for Prime Capital Dubai's real estate training program.
-Your role is to help agents learn and practice their skills.
-Always maintain a professional, supportive tone aligned with Prime Capital's brand values.`
-
-  if (context.module) {
-    const aiCoach = context.module.frontmatter?.aiCoach
-    return `${base}
-
-Current Role: ${aiCoach?.persona || "Training Coach"}
-Focus Areas: ${aiCoach?.focusAreas?.join(", ") || "General training"}
-
-Module Context:
-- Title: ${context.module.title}
-- Description: ${context.module.description}
-
-Reference Material:
-${context.module.content}
-
-${buildModeInstructions(context.mode)}`
-  }
-  
-  return `${base}
-
-You are a generalist Prime Capital Training Coach. Help the learner navigate 
-the curriculum and find relevant modules for their questions.`
-}
-```
-
-### Mode-Specific Instructions
-
-```typescript
-function buildModeInstructions(mode: string): string {
-  switch (mode) {
-    case "quiz":
-      return `Quiz Mode: Ask one question at a time about the module content.
-After the learner responds, provide feedback and explanation.
-Use a mix of factual recall and scenario-based questions.`
-
-    case "roleplay":
-      return `Role Play Mode: You are playing the role of a potential client.
-Adopt the specified persona and engage in realistic dialogue.
-After 3-5 exchanges, break character and provide coaching feedback.`
-
-    case "explain":
-      return `Explain Mode: Provide clear, layered explanations.
-Start with a simple summary, then offer to go deeper.
-Use concrete examples from Dubai real estate.`
-
-    default:
-      return `Ask Mode: Answer questions helpfully and accurately.
-Reference specific parts of the module content when relevant.
-If a question goes beyond current module, guide to relevant content.`
-  }
-}
+type CoachContext = 
+  | { level: "course" }
+  | { level: "competency"; competencySlug: string }
+  | { level: "module"; competencySlug: string; moduleSlug: string }
 ```
 
 ---
 
 ## Database Schema
 
-### New Table: `coach_conversations`
+### Migration: `20260113_coach_messages`
+
+Create file: `supabase/migrations/20260113000000_coach_messages.sql`
 
 ```sql
-create table coach_conversations (
+-- =============================================================================
+-- AI Coach: Session-based messaging (no persistence between sessions)
+-- We store messages temporarily for the session, then can analyze/delete
+-- =============================================================================
+
+-- For v1, we're NOT persisting conversations between sessions.
+-- This table is for analytics and rate limiting only.
+
+create table if not exists coach_usage (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) not null,
-  module_id uuid references learning_modules(id),
-  competency_id uuid references competencies(id),
   
-  -- Conversation state
-  messages jsonb not null default '[]',
-  mode text not null default 'ask',
+  -- Context
+  context_level text not null check (context_level in ('course', 'competency', 'module')),
+  competency_slug text,
+  module_slug text,
   
-  -- Analytics
-  message_count integer not null default 0,
-  started_at timestamptz default now(),
-  last_message_at timestamptz default now(),
+  -- Usage tracking
+  message_count integer not null default 1,
   
+  -- Timestamps
   created_at timestamptz default now()
 );
 
--- Index for user's recent conversations
-create index idx_coach_conversations_user 
-  on coach_conversations(user_id, last_message_at desc);
+-- Index for rate limiting queries
+create index idx_coach_usage_user_time 
+  on coach_usage(user_id, created_at desc);
 
--- RLS: Users can only see their own conversations
-alter table coach_conversations enable row level security;
+-- RLS
+alter table coach_usage enable row level security;
 
-create policy "Users can view own conversations"
-  on coach_conversations for select
-  using (auth.uid() = user_id);
-
-create policy "Users can insert own conversations"
-  on coach_conversations for insert
+create policy "Users can insert own usage"
+  on coach_usage for insert
   with check (auth.uid() = user_id);
 
-create policy "Users can update own conversations"
-  on coach_conversations for update
+create policy "Users can view own usage"
+  on coach_usage for select
   using (auth.uid() = user_id);
-```
 
-### Optional: `coach_feedback` (for role play scoring)
-
-```sql
-create table coach_feedback (
-  id uuid primary key default gen_random_uuid(),
-  conversation_id uuid references coach_conversations(id),
-  user_id uuid references auth.users(id) not null,
+-- Rate limiting function
+create or replace function check_coach_rate_limit(p_user_id uuid)
+returns boolean as $$
+declare
+  recent_count integer;
+begin
+  select count(*) into recent_count
+  from coach_usage
+  where user_id = p_user_id
+    and created_at > now() - interval '1 hour';
   
-  -- Role play specific
-  scenario_id text,
-  performance_score integer, -- 1-5
-  feedback_summary text,
-  strengths text[],
-  improvements text[],
-  
-  created_at timestamptz default now()
-);
+  -- 50 messages per hour limit
+  return recent_count < 50;
+end;
+$$ language plpgsql security definer;
 ```
 
 ---
 
-## Components
+## API Route
 
-### 1. CoachPanel (`components/lms/coach-panel.tsx`)
+### File: `app/api/coach/chat/route.ts`
 
-Main drawer component containing the chat interface.
+```typescript
+/**
+ * CATALYST - AI Coach Chat API
+ * 
+ * Handles chat requests with context-aware responses.
+ * Uses Claude API with streaming for fast responses.
+ */
 
-```tsx
-interface CoachPanelProps {
-  isOpen: boolean
-  onClose: () => void
+import { NextRequest } from "next/server"
+import Anthropic from "@anthropic-ai/sdk"
+import { createClient } from "@/lib/supabase/server"
+import { getCompetencies, getModuleBySlug } from "@/lib/learning"
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+interface ChatRequest {
+  messages: Array<{ role: "user" | "assistant"; content: string }>
   context: {
-    moduleSlug?: string
+    level: "course" | "competency" | "module"
     competencySlug?: string
-    aiCoach?: AICoachConfig
+    moduleSlug?: string
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Claude Client
+// -----------------------------------------------------------------------------
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+})
+
+// -----------------------------------------------------------------------------
+// System Prompt Builder
+// -----------------------------------------------------------------------------
+
+function buildSystemPrompt(
+  context: ChatRequest["context"],
+  moduleContent?: string,
+  competencyInfo?: { name: string; description: string; moduleCount: number }
+): string {
+  const base = `You are the AI Coach for Prime Capital Dubai's real estate training program.
+
+CRITICAL RULES:
+- Give CONCISE answers (30-50 words unless asked for more)
+- Focus ONLY on Dubai real estate and this training curriculum
+- Always cite which module covers a topic: "See Module X.X: Title"
+- If asked about something outside Dubai RE or the curriculum, politely decline
+- Add this disclaimer when giving specific advice: "⚠️ Verify critical details with current regulations."
+
+TONE:
+- Professional but approachable
+- Direct, not conversational
+- Confident but not pushy (matches Prime Capital brand)`
+
+  if (context.level === "module" && moduleContent) {
+    return `${base}
+
+CURRENT CONTEXT: Module Level
+You are an expert on this specific module. Answer questions using the content below.
+
+MODULE CONTENT:
+${moduleContent}
+
+BEHAVIOR:
+- Answer questions about this module in depth
+- Quote or paraphrase the content when relevant
+- If asked about other topics, briefly answer and suggest the relevant module`
+  }
+
+  if (context.level === "competency" && competencyInfo) {
+    return `${base}
+
+CURRENT CONTEXT: Competency Level
+You are helping the learner navigate ${competencyInfo.name} (${competencyInfo.moduleCount} modules).
+
+COMPETENCY: ${competencyInfo.name}
+DESCRIPTION: ${competencyInfo.description}
+
+BEHAVIOR:
+- Help learners understand what this competency covers
+- Recommend which module to start with based on their question
+- Summarize key themes across the competency
+- Link to specific modules: "See Module X.X: Title"`
+  }
+
+  // Course level
+  return `${base}
+
+CURRENT CONTEXT: Course Level
+You are helping the learner navigate the entire curriculum.
+
+BEHAVIOR:
+- Help learners find the right module for their question
+- Give brief topic overviews, then point to modules
+- Format responses as: "This is covered in Module X.X: Title"
+- If unsure which module, suggest the most likely competency`
+}
+
+// -----------------------------------------------------------------------------
+// Rate Limiting
+// -----------------------------------------------------------------------------
+
+async function checkRateLimit(userId: string): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("check_coach_rate_limit", {
+    p_user_id: userId,
+  })
+  if (error) {
+    console.error("Rate limit check failed:", error)
+    return true // Allow on error, log for monitoring
+  }
+  return data as boolean
+}
+
+async function logUsage(
+  userId: string,
+  context: ChatRequest["context"]
+): Promise<void> {
+  const supabase = await createClient()
+  await supabase.from("coach_usage").insert({
+    user_id: userId,
+    context_level: context.level,
+    competency_slug: context.competencySlug,
+    module_slug: context.moduleSlug,
+  })
+}
+
+// -----------------------------------------------------------------------------
+// Route Handler
+// -----------------------------------------------------------------------------
+
+export async function POST(request: NextRequest) {
+  try {
+    // Auth check
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Rate limit check
+    const withinLimit = await checkRateLimit(user.id)
+    if (!withinLimit) {
+      return Response.json(
+        { error: "Rate limit exceeded. Try again in an hour." },
+        { status: 429 }
+      )
+    }
+
+    // Parse request
+    const body: ChatRequest = await request.json()
+    const { messages, context } = body
+
+    if (!messages || messages.length === 0) {
+      return Response.json({ error: "Messages required" }, { status: 400 })
+    }
+
+    // Build context
+    let moduleContent: string | undefined
+    let competencyInfo: { name: string; description: string; moduleCount: number } | undefined
+
+    if (context.level === "module" && context.competencySlug && context.moduleSlug) {
+      const module = await getModuleBySlug(context.competencySlug, context.moduleSlug)
+      if (module) {
+        moduleContent = module.content
+      }
+    }
+
+    if (context.level === "competency" && context.competencySlug) {
+      const competencies = await getCompetencies()
+      const comp = competencies.find(c => c.slug === context.competencySlug)
+      if (comp) {
+        competencyInfo = {
+          name: comp.name,
+          description: comp.description || "",
+          moduleCount: comp.modules?.length || 0,
+        }
+      }
+    }
+
+    // Log usage
+    await logUsage(user.id, context)
+
+    // Stream response from Claude
+    const stream = await anthropic.messages.stream({
+      model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
+      max_tokens: 512, // Keep responses concise
+      temperature: 0.7,
+      system: buildSystemPrompt(context, moduleContent, competencyInfo),
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+      })),
+    })
+
+    // Return streaming response
+    const encoder = new TextEncoder()
+    const readable = new ReadableStream({
+      async start(controller) {
+        for await (const event of stream) {
+          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+            controller.enqueue(encoder.encode(event.delta.text))
+          }
+        }
+        controller.close()
+      },
+    })
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+      },
+    })
+  } catch (error) {
+    console.error("Coach chat error:", error)
+    return Response.json(
+      { error: "Failed to process request" },
+      { status: 500 }
+    )
   }
 }
 ```
 
-### 2. CoachTrigger (`components/lms/coach-trigger.tsx`)
+---
 
-Floating action button to open the coach panel.
+## Core Components
+
+### 1. Coach Context Provider
+
+**File:** `components/lms/coach/coach-provider.tsx`
 
 ```tsx
-interface CoachTriggerProps {
-  onClick: () => void
-  hasActiveConversation?: boolean
+/**
+ * CATALYST - Coach Context Provider
+ * 
+ * Manages coach state across the learn surface.
+ * Handles opening/closing, context, and message state.
+ */
+
+"use client"
+
+import * as React from "react"
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+export interface CoachContext {
+  level: "course" | "competency" | "module"
+  competencySlug?: string
+  moduleSlug?: string
+  competencyName?: string
+  moduleName?: string
 }
-```
 
-### 3. CoachMessages (`components/lms/coach-messages.tsx`)
-
-Message list with proper formatting for different content types.
-
-```tsx
-interface CoachMessagesProps {
-  messages: Message[]
-  isLoading?: boolean
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
 }
-```
 
-### 4. CoachInput (`components/lms/coach-input.tsx`)
-
-Input field with quick action buttons.
-
-```tsx
-interface CoachInputProps {
-  onSend: (message: string) => void
-  onModeChange: (mode: string) => void
-  currentMode: string
-  disabled?: boolean
-  suggestions?: string[]
-}
-```
-
-### 5. CoachProvider (`components/lms/coach-provider.tsx`)
-
-Context provider for coach state across the learn surface.
-
-```tsx
 interface CoachContextValue {
+  // Panel state
   isOpen: boolean
   openCoach: (context?: Partial<CoachContext>) => void
   closeCoach: () => void
-  currentContext: CoachContext
-  conversation: Conversation | null
+  
+  // Context
+  context: CoachContext
+  setContext: (context: CoachContext) => void
+  
+  // Messages (session only)
+  messages: Message[]
   sendMessage: (content: string) => Promise<void>
-  setMode: (mode: string) => void
+  clearMessages: () => void
+  
+  // Loading state
+  isLoading: boolean
 }
-```
 
----
+// -----------------------------------------------------------------------------
+// Context
+// -----------------------------------------------------------------------------
 
-## Integration Points
+const CoachContext = React.createContext<CoachContextValue | null>(null)
 
-### Learn Shell Integration
+export function useCoach() {
+  const context = React.useContext(CoachContext)
+  if (!context) {
+    throw new Error("useCoach must be used within CoachProvider")
+  }
+  return context
+}
 
-Add CoachProvider and CoachTrigger to LearnShell:
+// -----------------------------------------------------------------------------
+// Provider
+// -----------------------------------------------------------------------------
 
-```tsx
-// app/learn/_surface/learn-shell.tsx
-export function LearnShell({ children, ... }) {
+interface CoachProviderProps {
+  children: React.ReactNode
+  initialContext?: CoachContext
+}
+
+export function CoachProvider({ children, initialContext }: CoachProviderProps) {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [context, setContext] = React.useState<CoachContext>(
+    initialContext || { level: "course" }
+  )
+  const [messages, setMessages] = React.useState<Message[]>([])
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const openCoach = React.useCallback((newContext?: Partial<CoachContext>) => {
+    if (newContext) {
+      setContext(prev => ({ ...prev, ...newContext }))
+    }
+    setIsOpen(true)
+  }, [])
+
+  const closeCoach = React.useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const clearMessages = React.useCallback(() => {
+    setMessages([])
+  }, [])
+
+  const sendMessage = React.useCallback(async (content: string) => {
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content,
+    }
+    
+    setMessages(prev => [...prev, userMessage])
+    setIsLoading(true)
+
+    try {
+      const response = await fetch("/api/coach/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+          context: {
+            level: context.level,
+            competencySlug: context.competencySlug,
+            moduleSlug: context.moduleSlug,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get response")
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "",
+      }
+      
+      setMessages(prev => [...prev, assistantMessage])
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          
+          const chunk = decoder.decode(value)
+          setMessages(prev => {
+            const updated = [...prev]
+            const lastIdx = updated.length - 1
+            updated[lastIdx] = {
+              ...updated[lastIdx],
+              content: updated[lastIdx].content + chunk,
+            }
+            return updated
+          })
+        }
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error)
+      // Add error message
+      setMessages(prev => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+        },
+      ])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [messages, context])
+
+  const value: CoachContextValue = {
+    isOpen,
+    openCoach,
+    closeCoach,
+    context,
+    setContext,
+    messages,
+    sendMessage,
+    clearMessages,
+    isLoading,
+  }
+
   return (
-    <CoachProvider>
-      <div className="learn-shell">
-        {/* existing content */}
-        {children}
-        
-        {/* Coach trigger - always visible */}
-        <CoachTrigger />
-        
-        {/* Coach panel - slides in when open */}
-        <CoachPanel />
-      </div>
-    </CoachProvider>
+    <CoachContext.Provider value={value}>
+      {children}
+    </CoachContext.Provider>
   )
 }
 ```
 
-### Module Page Integration
+### 2. Coach Panel (Sidebar)
 
-Pass module context to coach when opening:
+**File:** `components/lms/coach/coach-panel.tsx`
 
 ```tsx
-// In module page component
-const { openCoach } = useCoach()
+/**
+ * CATALYST - Coach Panel
+ * 
+ * Slide-out sidebar for AI coach chat.
+ * Displays context, messages, and input.
+ */
 
-// When user clicks "Ask Coach" or opens panel
-openCoach({
-  moduleSlug: module.slug,
-  competencySlug: competency.slug,
-  aiCoach: module.frontmatter?.aiCoach,
-  currentSection: visibleSection, // from scroll position
-})
+"use client"
+
+import * as React from "react"
+import { XIcon, SendIcon, SparklesIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Stack, Row, Text } from "@/components/core"
+import { useCoach } from "./coach-provider"
+import { CoachMessages } from "./coach-messages"
+import { cn } from "@/lib/utils"
+
+// -----------------------------------------------------------------------------
+// Component
+// -----------------------------------------------------------------------------
+
+export function CoachPanel() {
+  const { isOpen, closeCoach, context, sendMessage, isLoading, messages } = useCoach()
+  const [input, setInput] = React.useState("")
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+
+  // Focus input when opening
+  React.useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isOpen])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim() || isLoading) return
+    
+    const message = input.trim()
+    setInput("")
+    await sendMessage(message)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit(e)
+    }
+  }
+
+  // Quick actions based on context
+  const quickActions = React.useMemo(() => {
+    if (context.level === "module") {
+      return [
+        { label: "Summarize Key Points", prompt: "Give me a quick summary of the key points in this module." },
+      ]
+    }
+    if (context.level === "competency") {
+      return [
+        { label: "Summarize This Competency", prompt: "What are the key things I'll learn in this competency?" },
+        { label: "Where Should I Start?", prompt: "Which module should I start with based on the most important concepts?" },
+      ]
+    }
+    return []
+  }, [context.level])
+
+  const contextLabel = React.useMemo(() => {
+    if (context.level === "module" && context.moduleName) {
+      return `Module: ${context.moduleName}`
+    }
+    if (context.level === "competency" && context.competencyName) {
+      return `Competency: ${context.competencyName}`
+    }
+    return "Course Overview"
+  }, [context])
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden",
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        onClick={closeCoach}
+      />
+      
+      {/* Panel */}
+      <div
+        className={cn(
+          "fixed right-0 top-0 z-50 h-full w-full max-w-md",
+          "bg-background border-l shadow-xl",
+          "transform transition-transform duration-300 ease-out",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <Stack className="h-full">
+          {/* Header */}
+          <div className="border-b p-4">
+            <Row align="center" justify="between">
+              <Row align="center" gap="sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                  <SparklesIcon className="h-4 w-4 text-primary" />
+                </div>
+                <Stack gap="none">
+                  <Text weight="medium">AI Coach</Text>
+                  <Text size="xs" variant="muted">{contextLabel}</Text>
+                </Stack>
+              </Row>
+              <Button variant="ghost" size="icon" onClick={closeCoach}>
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </Row>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {messages.length === 0 ? (
+              <Stack gap="md">
+                <Text variant="muted" className="text-center">
+                  Ask me anything about {context.level === "module" ? "this module" : "the curriculum"}.
+                </Text>
+                
+                {/* Quick Actions */}
+                {quickActions.length > 0 && (
+                  <Stack gap="sm">
+                    <Text size="xs" variant="muted" className="uppercase tracking-wide">
+                      Quick Actions
+                    </Text>
+                    {quickActions.map((action) => (
+                      <Button
+                        key={action.label}
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => sendMessage(action.prompt)}
+                      >
+                        {action.label}
+                      </Button>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            ) : (
+              <CoachMessages />
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="border-t p-4">
+            <form onSubmit={handleSubmit}>
+              <Stack gap="sm">
+                <div className="relative">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask a question..."
+                    rows={2}
+                    className={cn(
+                      "w-full resize-none rounded-lg border bg-background p-3 pr-12",
+                      "text-sm placeholder:text-muted-foreground",
+                      "focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    )}
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="absolute bottom-2 right-2"
+                    disabled={!input.trim() || isLoading}
+                  >
+                    <SendIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Text size="xs" variant="muted" className="text-center">
+                  ⚠️ For training purposes only. Verify critical details.
+                </Text>
+              </Stack>
+            </form>
+          </div>
+        </Stack>
+      </div>
+    </>
+  )
+}
 ```
 
-### Markdown Integration (Optional Enhancement)
+### 3. Coach Messages
 
-Add "Ask about this" hover buttons on key sections:
+**File:** `components/lms/coach/coach-messages.tsx`
 
 ```tsx
-// In markdown-renderer.tsx for key headings
-<div className="group relative">
-  <h2>{heading}</h2>
-  <button 
-    className="opacity-0 group-hover:opacity-100"
-    onClick={() => openCoach({ 
-      mode: "explain",
-      currentSection: heading 
-    })}
-  >
-    Ask Coach
-  </button>
-</div>
+/**
+ * CATALYST - Coach Messages
+ * 
+ * Renders the message list with proper formatting.
+ */
+
+"use client"
+
+import * as React from "react"
+import { Stack, Text } from "@/components/core"
+import { useCoach } from "./coach-provider"
+import { cn } from "@/lib/utils"
+import ReactMarkdown from "react-markdown"
+
+export function CoachMessages() {
+  const { messages, isLoading } = useCoach()
+  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to bottom
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  return (
+    <Stack gap="md">
+      {messages.map((message) => (
+        <div
+          key={message.id}
+          className={cn(
+            "rounded-lg p-3",
+            message.role === "user" 
+              ? "ml-8 bg-primary text-primary-foreground" 
+              : "mr-8 bg-muted"
+          )}
+        >
+          {message.role === "assistant" ? (
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          ) : (
+            <Text size="sm">{message.content}</Text>
+          )}
+        </div>
+      ))}
+      
+      {isLoading && messages[messages.length - 1]?.role === "user" && (
+        <div className="mr-8 rounded-lg bg-muted p-3">
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50" />
+            <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:0.1s]" />
+            <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:0.2s]" />
+          </div>
+        </div>
+      )}
+      
+      <div ref={messagesEndRef} />
+    </Stack>
+  )
+}
+```
+
+### 4. Coach Trigger (Floating Button)
+
+**File:** `components/lms/coach/coach-trigger.tsx`
+
+```tsx
+/**
+ * CATALYST - Coach Trigger
+ * 
+ * Floating action button to open the coach panel.
+ */
+
+"use client"
+
+import { SparklesIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useCoach } from "./coach-provider"
+import { cn } from "@/lib/utils"
+
+export function CoachTrigger() {
+  const { openCoach, isOpen } = useCoach()
+
+  return (
+    <Button
+      onClick={() => openCoach()}
+      size="lg"
+      className={cn(
+        "fixed bottom-6 right-6 z-30",
+        "h-14 w-14 rounded-full shadow-lg",
+        "transition-transform hover:scale-105",
+        isOpen && "hidden"
+      )}
+    >
+      <SparklesIcon className="h-6 w-6" />
+      <span className="sr-only">Open AI Coach</span>
+    </Button>
+  )
+}
+```
+
+### 5. Barrel Export
+
+**File:** `components/lms/coach/index.ts`
+
+```typescript
+/**
+ * CATALYST - Coach Components
+ */
+
+export { CoachProvider, useCoach } from "./coach-provider"
+export { CoachPanel } from "./coach-panel"
+export { CoachMessages } from "./coach-messages"
+export { CoachTrigger } from "./coach-trigger"
 ```
 
 ---
@@ -462,107 +865,71 @@ Add "Ask about this" hover buttons on key sections:
 Add to `.env.local`:
 
 ```bash
-# AI Coach Configuration
+# AI Coach (Anthropic Claude)
 ANTHROPIC_API_KEY=sk-ant-...
 COACH_MODEL=claude-sonnet-4-20250514
-COACH_MAX_TOKENS=1024
-COACH_TEMPERATURE=0.7
+```
+
+Add to `.env.example`:
+
+```bash
+# AI Coach (Anthropic Claude)
+ANTHROPIC_API_KEY=
+COACH_MODEL=claude-sonnet-4-20250514
+```
+
+---
+
+## Package Dependencies
+
+```bash
+pnpm add @anthropic-ai/sdk
 ```
 
 ---
 
 ## Deliverables Checklist
 
-### Phase 1: Foundation (Day 1-2)
-- [ ] Database migration for `coach_conversations`
-- [ ] API route `/api/coach/chat` with Claude integration
-- [ ] System prompt construction with context handling
-- [ ] Basic CoachPanel and CoachTrigger components
-- [ ] CoachProvider context for state management
+- [ ] Create migration file `supabase/migrations/20260113000000_coach_messages.sql`
+- [ ] Apply migration: `pnpm supabase db push`
+- [ ] Create API route `app/api/coach/chat/route.ts`
+- [ ] Create `components/lms/coach/` directory with all components
+- [ ] Add `@anthropic-ai/sdk` dependency
+- [ ] Add environment variables
+- [ ] Test API route with curl/Postman
 
-### Phase 2: Chat Interface (Day 2-3)
-- [ ] Message rendering with markdown support
-- [ ] Streaming response support
-- [ ] Quick action buttons (Quiz Me, Role Play, etc.)
-- [ ] Mode switching logic
-- [ ] Conversation persistence
+---
 
-### Phase 3: Integration (Day 3-4)
-- [ ] LearnShell integration
-- [ ] Module context passing
-- [ ] Competency context passing
-- [ ] Mobile responsive design
+## Testing the API
 
-### Phase 4: Advanced Features (Day 4-5)
-- [ ] Role play mode with personas
-- [ ] Quiz mode with feedback
-- [ ] "Find in course" reference linking
-- [ ] Conversation history (last 3 conversations)
-- [ ] Error handling and rate limiting
+```bash
+# Test with curl (replace token)
+curl -X POST http://localhost:3000/api/coach/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_SUPABASE_TOKEN" \
+  -d '{
+    "messages": [{"role": "user", "content": "What is the advisory model?"}],
+    "context": {"level": "course"}
+  }'
+```
 
 ---
 
 ## Success Criteria
 
-1. **Accessible**: Coach trigger visible on all `/learn/*` pages
-2. **Contextual**: Responses reflect current module/competency context
-3. **Responsive**: Works well on mobile (drawer pattern)
-4. **Fast**: Streaming responses, < 2s to first token
-5. **Helpful**: Learners can get answers without leaving the page
-6. **Practice-oriented**: Role play mode enables skill rehearsal
+1. ✅ API returns streaming responses from Claude
+2. ✅ Rate limiting works (50/hour)
+3. ✅ Usage is logged to `coach_usage` table
+4. ✅ Components render without errors
+5. ✅ Context provider manages state correctly
 
 ---
 
-## Out of Scope (v1)
+## Next Brief
 
-- Voice input/output
-- Integration with quiz system scoring
-- Manager visibility into coaching conversations
-- Custom persona creation
-- Multi-turn role play with persistence
-- Proactive coaching suggestions
-
----
-
-## Technical Notes
-
-### Claude API Configuration
-
-```typescript
-import Anthropic from "@anthropic-ai/sdk"
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
-
-// For streaming responses
-const stream = await anthropic.messages.stream({
-  model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
-  max_tokens: parseInt(process.env.COACH_MAX_TOKENS || "1024"),
-  temperature: parseFloat(process.env.COACH_TEMPERATURE || "0.7"),
-  system: buildSystemPrompt(context),
-  messages: messages,
-})
-```
-
-### Context Size Management
-
-Module content can be large. Strategy:
-1. For small modules (< 8k tokens): Include full content
-2. For large modules: Include summary + relevant sections based on user query
-3. Use embedding search to find relevant sections if query is specific
-
-### Rate Limiting
-
-- 10 messages per minute per user
-- 100 messages per hour per user
-- Store limits in Redis or Supabase
-
----
-
-## References
-
-- [Anthropic Claude API Docs](https://docs.anthropic.com/)
-- [Next.js Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
-- Current aiCoach frontmatter schema in module markdown files
-- [LMS-006](lms-006-module-experience.md) for module page architecture
+**LMS-013b: AI Coach Integration** covers:
+- LearnShell integration
+- Page-level entry points (header, bottom prompt)
+- Context passing from pages
+- Prompt tuning based on real usage
+- Mobile responsive polish

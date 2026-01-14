@@ -2,7 +2,7 @@
  * CATALYST - LMS Markdown Renderer
  * 
  * Rich markdown rendering for learning content.
- * Leverages CSS in learn.css for styling via .lms-content class.
+ * Leverages CSS in learn.css for styling via .lms-prose class.
  * 
  * Features:
  * - Tables with alternating rows and proper styling
@@ -10,11 +10,13 @@
  * - Pattern detection for Context:/Approach: callouts
  * - Scenario detection for practice sections
  * - Numbered lists with step indicators
+ * - H2 headings with IDs for scroll navigation
  */
 
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { Components } from "react-markdown"
+import Image from "next/image"
 import { Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -24,7 +26,24 @@ import {
   AlertTriangleIcon,
   InfoIcon,
   CheckCircleIcon,
+  FileTextIcon,
 } from "lucide-react"
+
+// =============================================================================
+// Utilities
+// =============================================================================
+
+/**
+ * Generate a URL-safe slug from heading text
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim()
+}
 
 interface MarkdownRendererProps {
   content: string
@@ -64,11 +83,14 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
     
     // Horizontal rules
     hr: HRComponent as any,
+    
+    // Images with document styling
+    img: ImageComponent as any,
   }
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
   return (
-    <div className={cn("lms-content", className)}>
+    <div className={cn("lms-prose", className)}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
@@ -204,8 +226,14 @@ function H1Component({ children }: { children: React.ReactNode }) {
 }
 
 function H2Component({ children }: { children: React.ReactNode }) {
+  const text = extractText(children)
+  const id = text ? slugify(text) : undefined
+  
   return (
-    <h2 className="text-2xl font-serif font-semibold mt-10 mb-4 pb-2 border-b border-border text-foreground">
+    <h2 
+      id={id}
+      className="text-2xl font-serif font-semibold mt-12 mb-4 pb-2 border-b border-border text-foreground scroll-mt-24"
+    >
       {children}
     </h2>
   )
@@ -237,6 +265,18 @@ function H3Component({ children }: { children: React.ReactNode }) {
         </div>
         <h3 className="text-xl font-serif font-semibold text-foreground">
           {text.replace(/^(key point|important):\s*/i, "")}
+        </h3>
+      </div>
+    )
+  }
+  
+  // Real Example / Example patterns
+  if (text?.match(/^(real\s+)?example/i)) {
+    return (
+      <div className="lms-example-header">
+        <span className="lms-example-header__badge">💡 Example</span>
+        <h3 className="lms-example-header__title">
+          {text.replace(/^(real\s+)?example:?\s*/i, "")}
         </h3>
       </div>
     )
@@ -354,6 +394,82 @@ function StrongComponent({ children }: { children: React.ReactNode }) {
 
 function HRComponent() {
   return <hr className="my-8 border-t border-border" />
+}
+
+// =============================================================================
+// IMAGES - Document Figure Style
+// =============================================================================
+
+interface ImageProps {
+  src?: string
+  alt?: string
+  title?: string
+}
+
+function ImageComponent({ src, alt, title }: ImageProps) {
+  if (!src) return null
+  
+  // Check if this is a document image (in /images/lms/documents/)
+  const isDocument = src.includes("/documents/") || src.includes("document")
+  
+  // Extract caption from title or alt
+  const caption = title || alt
+  
+  if (isDocument) {
+    return (
+      <figure className="my-8">
+        <div className="relative block w-full max-w-md mx-auto overflow-hidden rounded-lg border border-border bg-muted/30">
+          {/* Document badge */}
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+            <FileTextIcon className="h-3.5 w-3.5" />
+            Document
+          </div>
+          
+          {/* Image */}
+          <div className="relative aspect-[3/4] w-full">
+            <Image
+              src={src}
+              alt={alt || "Reference document"}
+              fill
+              className="object-contain p-4"
+              sizes="(max-width: 768px) 100vw, 400px"
+            />
+          </div>
+        </div>
+        
+        {caption && (
+          <figcaption className="mt-3 text-center">
+            <Text size="sm" className="text-muted-foreground">
+              {caption}
+            </Text>
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
+  
+  // Standard image
+  return (
+    <figure className="my-6">
+      <div className="relative w-full overflow-hidden rounded-lg">
+        <Image
+          src={src}
+          alt={alt || ""}
+          width={800}
+          height={450}
+          className="w-full h-auto"
+          sizes="(max-width: 768px) 100vw, 800px"
+        />
+      </div>
+      {caption && (
+        <figcaption className="mt-2 text-center">
+          <Text size="sm" className="text-muted-foreground">
+            {caption}
+          </Text>
+        </figcaption>
+      )}
+    </figure>
+  )
 }
 
 // =============================================================================

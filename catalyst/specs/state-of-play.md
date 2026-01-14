@@ -1,14 +1,81 @@
 # State of Play: Prime Capital Dubai Hub
 **Technical Audit Report**  
-**Date:** 12 January 2026  
-**Phase:** LMS Architecture Rebuild → Content Population  
-**Status:** LMS frontend completely rebuilt with premium design. Database schema migrated to Supabase. Ready for content population.
+**Date:** 13 January 2026  
+**Phase:** LMS Essentials System Implementation  
+**Status:** AI-powered Essentials extraction system built. Schema applied, API working. Now building Learner UX.
 
 ---
 
 ## Executive Summary
 
-The Prime Capital Dubai platform is a unified Next.js application combining a public website, learning management system (LMS), and client engagement hub. **Current state: LMS architecture rebuilt from first principles with world-class design.** Data now flows from Supabase with 7 competencies and 10 modules seeded. RLS policies fixed for public read access. **Next phase: Populate remaining module content, add quizzes, complete content migration.**
+The Prime Capital Dubai platform is a unified Next.js application combining a public website, learning management system (LMS), and client engagement hub. **Current state: Dual-mode Essentials system in active development.** Content has grown to 222K words across 124 files—too much for effective learning. We're building AI-powered "Essentials" mode that extracts key facts, scripts, and practice scenarios from each module.
+
+---
+
+## Recent Changes (13 January 2026)
+
+### ✅ LMS-012A: Essentials Schema & API (COMPLETE)
+
+Built AI-powered essentials extraction system:
+
+- **Database schema** - Added `essentials` JSONB column to `learning_modules`
+- **Type definitions** - `EssentialsContent`, `EssentialsFact`, `EssentialsScript`, etc.
+- **Extraction utilities** - `buildEssentialsPrompt()`, `parseEssentialsResponse()`
+- **API endpoint** - `POST /api/admin/generate-essentials`
+- **Content hashing** - Detects stale essentials when source content changes
+- **Successfully tested** - Module 1.2 essentials generated (4.2KB JSON)
+
+### 🔄 LMS-012C: Learner Essentials UX (IN PROGRESS)
+
+Building learner-facing experience for Essentials mode:
+
+- **ModeSwitch component** - Toggle between Essentials/Deep Dive
+- **EssentialsView component** - Renders TL;DR, key facts, scripts, audio, practice
+- **URL integration** - `?mode=essentials` query parameter support
+- **CSS styling** - Premium card-based design with LPAR framework indicators
+
+### ⏸️ LMS-012B: Admin Essentials UI (DEFERRED)
+
+**Decision:** Defer admin UI to future phase. Essentials can be generated via API/scripts.
+- Brief completed: `catalyst/briefs/lms-012b-admin-essentials-ui.md`
+- Will implement when batch generation/monitoring is needed
+
+---
+
+## Essentials System Architecture
+
+### Why Essentials?
+
+| Problem | Solution |
+|---------|----------|
+| 222K words is overwhelming | TL;DR + 4-5 key facts per module |
+| Abstract concepts hard to apply | Concrete scripts with exact phrasing |
+| No structured practice | Scenario-based exercises with rubrics |
+| Content drift from LPAR framework | AI extracts Learn-Practice-Apply-Reflect elements |
+
+### Schema (Applied via MCP)
+
+```sql
+ALTER TABLE learning_modules ADD COLUMN IF NOT EXISTS
+  essentials JSONB DEFAULT NULL,
+  essentials_generated_at TIMESTAMPTZ,
+  essentials_source_hash TEXT,
+  essentials_prompt_version TEXT;
+```
+
+### Essentials Content Structure
+
+```typescript
+interface EssentialsContent {
+  tldr: string                    // 2-sentence summary
+  keyFacts: EssentialsFact[]      // 4-5 must-know facts
+  scripts: EssentialsScript[]     // Ready-to-use phrases
+  images: EssentialsImage[]       // Referenced visuals
+  audio: EssentialsAudio[]        // TTS transcripts
+  practice: EssentialsPractice    // Scenario exercise
+  reflection: string[]            // Self-assessment questions
+}
+```
 
 ---
 

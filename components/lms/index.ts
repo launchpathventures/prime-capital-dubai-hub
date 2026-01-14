@@ -10,10 +10,22 @@ export { LearningPathway } from "./learning-pathway"
 
 // Module Learning Experience Components
 export { MarkdownRenderer } from "./markdown-renderer"
+export { SectionRenderer } from "./section-renderer"
+export { ModuleToC } from "./module-toc"
+export { ModuleToCRight } from "./module-toc-right"
+export { ReadingProgress } from "./reading-progress"
+export { DocumentFigure } from "./document-figure"
 export { AudioCoachPlayer } from "./audio-coach-player"
+export { AudioPlayer, AudioSection } from "./audio-player"
+export { ModuleAudioSection, AudioQuickLinks } from "./module-audio-section"
 export { LearningObjectives } from "./learning-objectives"
 export { ResourceList } from "./resource-list"
-export { KnowledgeCheckCTA } from "./knowledge-check-cta"
+// KnowledgeCheckCTA is a server component - import directly, not from barrel
+
+// Essentials Mode Components
+export { ModeSwitch } from "./mode-switch"
+export { EssentialsView } from "./essentials-view"
+export { EssentialsToCRight } from "./essentials-toc-right"
 
 // Dashboard Components
 export { DashboardStats } from "./dashboard-stats"
@@ -23,6 +35,7 @@ export { QuizProgress } from "./quiz-progress"
 export { QuizQuestion } from "./quiz-question"
 export { QuizResult } from "./quiz-result"
 export { QuizNextSteps } from "./quiz-next-steps"
+export { QuizSheet } from "./quiz-sheet"
 export { CompetencyProgressList } from "./competency-progress-list"
 
 // Loading Skeletons

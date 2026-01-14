@@ -2,21 +2,32 @@
  * CATALYST - Module Page
  * 
  * Shows module content with full sidebar navigation.
- * Sidebar shows all competencies with the current one expanded.
+ * Supports two modes:
+ * - Essentials: AI-extracted key facts, scripts, and practice scenarios
+ * - Deep Dive: Full markdown content
+ * 
+ * Mode is determined by URL query param: ?mode=essentials|deepdive
+ * Defaults to essentials if available, otherwise deep dive.
  */
 
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { SectionRenderer, ModuleToCRight, ReadingProgress, ModeSwitch, EssentialsView, EssentialsToCRight, AudioSection } from "@/components/lms"
+import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
 import { 
   ChevronLeftIcon,
   ChevronRightIcon,
   GraduationCapIcon,
   ClockIcon,
   CheckCircleIcon,
-  ArrowLeftIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { ModuleCoachPrompt } from "@/components/lms/coach"
+import { ModulePageClient } from "./page-client"
+import { getAudioForModule, formatAudioDuration } from "@/lib/lms"
+import { LearnShell } from "../../_surface/learn-shell"
+import type { EssentialsContent } from "@/lib/learning-types"
 
 // =============================================================================
 // Types
@@ -29,6 +40,7 @@ interface Module {
   content: string | null
   duration_minutes: number | null
   display_order: number
+  essentials: EssentialsContent | null
 }
 
 interface Competency {
@@ -41,6 +53,7 @@ interface Competency {
 
 interface PageProps {
   params: Promise<{ competency: string; module: string }>
+  searchParams: Promise<{ mode?: string }>
 }
 
 // =============================================================================
@@ -63,7 +76,8 @@ async function getAllCompetencies(): Promise<Competency[]> {
         title,
         content,
         duration_minutes,
-        display_order
+        display_order,
+        essentials
       )
     `)
     .order("display_order", { ascending: true })
@@ -80,12 +94,45 @@ async function getAllCompetencies(): Promise<Competency[]> {
   }))
 }
 
+/**
+ * Get quizzes for a competency to find one related to this module.
+ */
+async function getRelatedQuiz(
+  competencySlug: string,
+  moduleSlug: string
+): Promise<{ slug: string; title: string } | null> {
+  const supabase = await createClient()
+  
+  // Try to find quiz that references this module
+  const { data: exactMatch } = await supabase
+    .from("quizzes")
+    .select("slug, title")
+    .eq("competency_slug", competencySlug)
+    .ilike("related_module", `%${moduleSlug}%`)
+    .limit(1)
+    .single()
+  
+  if (exactMatch) return exactMatch
+  
+  // Fallback: get first quiz for this competency
+  const { data: anyQuiz } = await supabase
+    .from("quizzes")
+    .select("slug, title")
+    .eq("competency_slug", competencySlug)
+    .order("slug")
+    .limit(1)
+    .single()
+  
+  return anyQuiz
+}
+
 // =============================================================================
 // Page Component
 // =============================================================================
 
-export default async function ModulePage({ params }: PageProps) {
+export default async function ModulePage({ params, searchParams }: PageProps) {
   const { competency: competencySlug, module: moduleSlug } = await params
+  const { mode: modeParam } = await searchParams
   
   const allCompetencies = await getAllCompetencies()
   const currentCompetency = allCompetencies.find(c => c.slug === competencySlug)
@@ -106,81 +153,66 @@ export default async function ModulePage({ params }: PageProps) {
     ? currentCompetency.modules[currentModuleIndex + 1] 
     : null
   
+  // Determine mode: essentials if available, otherwise deep dive
+  const hasEssentials = module.essentials !== null
+  const mode = modeParam === "deepdive" || modeParam === "essentials" 
+    ? modeParam 
+    : (hasEssentials ? "essentials" : "deepdive")
+  
+  // Estimate durations
+  const deepDiveDuration = module.duration_minutes ? `${module.duration_minutes} min` : "25 min"
+  const essentialsDuration = "15 min" // TODO: Calculate from essentials content
+  
+  // Get related quiz for this module
+  const relatedQuiz = await getRelatedQuiz(competencySlug, moduleSlug)
+  
+  // Get audio tracks for this module
+  const audioData = await getAudioForModule(
+    currentCompetency.display_order,
+    currentModuleIndex
+  )
+  const audioTracks = audioData.map((track) => ({
+    slug: track.slug,
+    title: track.title,
+    type: track.type,
+    duration: formatAudioDuration(track.audioDurationSeconds),
+    audioUrl: track.audioUrl,
+    transcript: track.transcript,
+  }))
+  
+  // Transform competencies for sidebar
+  const sidebarCompetencies = allCompetencies.map((c, i) => ({
+    slug: c.slug,
+    name: c.name,
+    number: i + 1,
+    locked: c.modules.length === 0,
+    modules: c.modules.map(m => ({
+      slug: m.slug,
+      title: m.title,
+      status: "current" as const,
+    })),
+  }))
+  
   return (
-    <div className="learn-shell learn-shell--with-sidebar">
-      {/* Header */}
-      <header className="learn-header">
-        <div className="learn-header__inner">
-          <div className="learn-header__left">
-            <Link href="/learn" className="learn-header__logo">
-              <span className="learn-header__logo-icon">
-                <GraduationCapIcon className="h-3.5 w-3.5" />
-              </span>
-              Prime Capital Learning
-            </Link>
-            <nav className="learn-header__breadcrumb">
-              <Link href="/learn">Course</Link>
-              <span className="learn-header__breadcrumb-sep">›</span>
-              <Link href={`/learn/${currentCompetency.slug}`}>{currentCompetency.name}</Link>
-              <span className="learn-header__breadcrumb-sep">›</span>
-              <span className="learn-header__breadcrumb-current">{module.title}</span>
-            </nav>
-          </div>
-          <nav className="learn-header__nav">
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
-              Home
-            </Button>
-          </nav>
-        </div>
-      </header>
-      
-      {/* Main content with sidebar */}
-      <main className="learn-main">
-        {/* Sidebar */}
-        <aside className="learn-sidebar">
-          <div className="learn-sidebar__section">
-            <div className="learn-sidebar__heading">Competencies</div>
-            <nav className="learn-sidebar__list">
-              {allCompetencies.map((comp, index) => {
-                const isActive = comp.slug === competencySlug
-                const hasModules = comp.modules.length > 0
-                
-                return (
-                  <div key={comp.id} className="learn-sidebar__competency">
-                    <Link
-                      href={hasModules ? `/learn/${comp.slug}` : "#"}
-                      className={`learn-sidebar__competency-link ${isActive ? 'learn-sidebar__competency-link--active' : ''}`}
-                    >
-                      <span className="learn-sidebar__competency-number">{index + 1}</span>
-                      <span>{comp.name}</span>
-                    </Link>
-                    
-                    {/* Show modules if this is active competency */}
-                    {isActive && comp.modules.length > 0 && (
-                      <div className="learn-sidebar__modules">
-                        {comp.modules.map((mod) => {
-                          const isModuleActive = mod.slug === moduleSlug
-                          return (
-                            <Link
-                              key={mod.id}
-                              href={`/learn/${comp.slug}/${mod.slug}`}
-                              className={`learn-sidebar__module-link ${isModuleActive ? 'learn-sidebar__module-link--active' : ''}`}
-                              aria-current={isModuleActive ? "page" : undefined}
-                            >
-                              {mod.title}
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </nav>
-          </div>
-        </aside>
+    <LearnShell 
+      activeSection="course"
+      competencies={sidebarCompetencies}
+      currentCompetency={competencySlug}
+      currentModule={moduleSlug}
+      coachContext={{ 
+        level: "module",
+        competencySlug,
+        competencyName: currentCompetency.name,
+        moduleSlug,
+        moduleName: module.title,
+        moduleContent: module.content || undefined,
+      }}
+    >
+      {/* Content area with optional right ToC */}
+      <div className="learn-content-wrapper">
+        {/* Reading progress bar */}
+        <ReadingProgress />
         
-        {/* Content */}
         <div className="learn-content">
           
           {/* Module header */}
@@ -192,7 +224,7 @@ export default async function ModulePage({ params }: PageProps) {
                   <span>•</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     <ClockIcon className="h-3.5 w-3.5" />
-                    {module.duration_minutes} min read
+                    {mode === "essentials" ? essentialsDuration : deepDiveDuration}
                   </span>
                 </>
               )}
@@ -202,12 +234,39 @@ export default async function ModulePage({ params }: PageProps) {
             </h1>
           </div>
           
+          {/* Mode Switch - contextual bar shown if essentials available */}
+          {hasEssentials && (
+            <ModeSwitch
+              hasEssentials={hasEssentials}
+              essentialsDuration={essentialsDuration}
+              deepDiveDuration={deepDiveDuration}
+              currentMode={mode}
+            />
+          )}
+          
+          {/* Audio Coach Section - shown if audio available */}
+          {audioTracks.length > 0 && (
+            <AudioSection
+              tracks={audioTracks}
+              className="mb-6"
+            />
+          )}
+          
+          {/* AI Coach - visible in both modes */}
+          <ModuleCoachPrompt moduleTitle={module.title} />
+          
           {/* Module content */}
-          <div className="lms-card" style={{ padding: '1.75rem' }}>
-            <div className="lms-prose">
-              {module.content ? (
-                <p>{module.content}</p>
-              ) : (
+          {mode === "essentials" && module.essentials ? (
+            <ModulePageClient
+              essentials={module.essentials}
+              moduleSlug={moduleSlug}
+              competencySlug={competencySlug}
+            />
+          ) : module.content ? (
+            <SectionRenderer content={module.content} />
+          ) : (
+            <div className="lms-card" style={{ padding: '1.75rem' }}>
+              <div className="lms-prose">
                 <div className="lms-empty">
                   <div className="lms-empty__icon">
                     <GraduationCapIcon className="h-full w-full" />
@@ -217,10 +276,17 @@ export default async function ModulePage({ params }: PageProps) {
                     This module is being prepared. Check back soon for the full learning material.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
           
+          {/* Quiz CTA - shown if a related quiz exists */}
+          {relatedQuiz && (
+            <section id="knowledge-check" className="mt-8">
+              <KnowledgeCheckCTA quizId={relatedQuiz.slug} />
+            </section>
+          )}
+        
           {/* Navigation */}
           <nav className="lms-nav">
             <div className="lms-nav__prev">
@@ -248,7 +314,13 @@ export default async function ModulePage({ params }: PageProps) {
           </nav>
           
         </div>
-      </main>
-    </div>
+        
+        {/* Right ToC - mode-specific */}
+        {mode === "essentials" && module.essentials && (
+          <EssentialsToCRight essentials={module.essentials} hasQuiz={!!relatedQuiz} />
+        )}
+        {mode === "deepdive" && module.content && <ModuleToCRight content={module.content} hasQuiz={!!relatedQuiz} />}
+      </div>
+    </LearnShell>
   )
 }

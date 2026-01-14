@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button"
 import { 
   BookOpenIcon, 
   ClockIcon, 
-  ChevronRightIcon,
   LockIcon,
   PlayIcon,
   GraduationCapIcon,
   ArrowRightIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { LearnShell } from "./_surface/learn-shell"
 
 // =============================================================================
 // Types
@@ -93,153 +93,146 @@ export default async function LearnDashboardPage() {
   // Find first competency with modules for CTA
   const firstCompetency = availableCompetencies[0]
   
+  // Transform competencies for sidebar
+  const sidebarCompetencies = competencies.map((c, i) => ({
+    slug: c.slug,
+    name: c.name,
+    number: i + 1,
+    locked: c.modules.length === 0,
+    modules: c.modules.map(m => ({
+      slug: m.slug,
+      title: m.title,
+      status: "current" as const,
+    })),
+  }))
+  
   return (
-    <div className="learn-shell">
-      {/* Header */}
-      <header className="learn-header">
-        <div className="learn-header__inner">
-          <div className="learn-header__left">
-            <Link href="/learn" className="learn-header__logo">
-              <span className="learn-header__logo-icon">
-                <GraduationCapIcon className="h-3.5 w-3.5" />
-              </span>
-              Prime Capital Learning
-            </Link>
+    <LearnShell 
+      activeSection="overview"
+      competencies={sidebarCompetencies}
+      coachContext={{ level: "course" }}
+    >
+      <div className="learn-content">
+        {/* Hero Section */}
+        <section className="lms-hero">
+          <div className="lms-hero__content">
+            <div className="lms-hero__eyebrow">
+              <GraduationCapIcon className="h-3.5 w-3.5" />
+              Prime Capital Dubai
+            </div>
+            <h1 className="lms-hero__title">
+              Consultant Training Program
+            </h1>
+            <p className="lms-hero__description">
+              Master the skills and knowledge you need to succeed as a Prime Capital 
+              real estate consultant. Complete all competencies to earn your certification.
+            </p>
+            <div className="lms-hero__stats">
+              <div className="lms-hero__stat">
+                <span className="lms-hero__stat-value">{competencies.length}</span>
+                <span className="lms-hero__stat-label">Competencies</span>
+              </div>
+              <div className="lms-hero__stat">
+                <span className="lms-hero__stat-value">{totalModules}</span>
+                <span className="lms-hero__stat-label">Modules</span>
+              </div>
+              <div className="lms-hero__stat">
+                <span className="lms-hero__stat-value">{Math.round(totalDuration / 60) || '–'}h</span>
+                <span className="lms-hero__stat-label">Duration</span>
+              </div>
+            </div>
+            {firstCompetency && (
+              <div className="lms-hero__actions">
+                <Button 
+                  size="lg" 
+                  className="gap-2 bg-white text-primary-700 hover:bg-white/90"
+                  nativeButton={false}
+                  render={<Link href={`/learn/${firstCompetency.slug}`} />}
+                >
+                  <PlayIcon className="h-4 w-4" />
+                  Start Learning
+                </Button>
+              </div>
+            )}
           </div>
-          <nav className="learn-header__nav">
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/" />}>
-              Home
-            </Button>
-          </nav>
-        </div>
-      </header>
-      
-      {/* Main content */}
-      <main className="learn-main">
-        <div className="learn-content">
+        </section>
+        
+        {/* Competency List */}
+        <section className="lms-section">
+          <div className="lms-section__header">
+            <h2 className="lms-section__title">Your Learning Path</h2>
+            <span className="lms-section__subtitle">
+              {availableCompetencies.length} of {competencies.length} available
+            </span>
+          </div>
           
-          {/* Hero Section */}
-          <section className="lms-hero">
-            <div className="lms-hero__content">
-              <div className="lms-hero__eyebrow">
-                <GraduationCapIcon className="h-3.5 w-3.5" />
-                Prime Capital Dubai
-              </div>
-              <h1 className="lms-hero__title">
-                Consultant Training Program
-              </h1>
-              <p className="lms-hero__description">
-                Master the skills and knowledge you need to succeed as a Prime Capital 
-                real estate consultant. Complete all competencies to earn your certification.
-              </p>
-              <div className="lms-hero__stats">
-                <div className="lms-hero__stat">
-                  <span className="lms-hero__stat-value">{competencies.length}</span>
-                  <span className="lms-hero__stat-label">Competencies</span>
-                </div>
-                <div className="lms-hero__stat">
-                  <span className="lms-hero__stat-value">{totalModules}</span>
-                  <span className="lms-hero__stat-label">Modules</span>
-                </div>
-                <div className="lms-hero__stat">
-                  <span className="lms-hero__stat-value">{Math.round(totalDuration / 60) || '–'}h</span>
-                  <span className="lms-hero__stat-label">Duration</span>
-                </div>
-              </div>
-              {firstCompetency && (
-                <div className="lms-hero__actions">
-                  <Button 
-                    size="lg" 
-                    className="gap-2 bg-white text-primary-700 hover:bg-white/90"
-                    nativeButton={false}
-                    render={<Link href={`/learn/${firstCompetency.slug}`} />}
-                  >
-                    <PlayIcon className="h-4 w-4" />
-                    Start Learning
-                  </Button>
-                </div>
-              )}
-            </div>
-          </section>
-          
-          {/* Competency List */}
-          <section className="lms-section">
-            <div className="lms-section__header">
-              <h2 className="lms-section__title">Your Learning Path</h2>
-              <span className="lms-section__subtitle">
-                {availableCompetencies.length} of {competencies.length} available
-              </span>
-            </div>
+          <div className="lms-list">
+            {competencies.map((comp, index) => {
+              const hasModules = comp.modules.length > 0
+            const duration = comp.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0)
+            const isLocked = !hasModules
             
-            <div className="lms-list">
-              {competencies.map((comp, index) => {
-                const hasModules = comp.modules.length > 0
-                const duration = comp.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0)
-                const isLocked = !hasModules
-                
-                if (isLocked) {
-                  return (
-                    <div 
-                      key={comp.id}
-                      className="lms-card competency-card competency-card--locked"
-                    >
-                      <div className="competency-card__index">
-                        {index + 1}
-                      </div>
-                      <div className="competency-card__body">
-                        <h3 className="competency-card__title">{comp.name}</h3>
-                        {comp.description && (
-                          <p className="competency-card__description">{comp.description}</p>
-                        )}
-                        <div className="competency-card__meta">
-                          <span className="competency-card__meta-item">
-                            <LockIcon className="h-3 w-3" />
-                            Coming Soon
-                          </span>
-                        </div>
-                      </div>
+            if (isLocked) {
+              return (
+                <div 
+                  key={comp.id}
+                  className="lms-card competency-card competency-card--locked"
+                >
+                  <div className="competency-card__index">
+                    {index + 1}
+                  </div>
+                  <div className="competency-card__body">
+                    <h3 className="competency-card__title">{comp.name}</h3>
+                    {comp.description && (
+                      <p className="competency-card__description">{comp.description}</p>
+                    )}
+                    <div className="competency-card__meta">
+                      <span className="competency-card__meta-item">
+                        <LockIcon className="h-3 w-3" />
+                        Coming Soon
+                      </span>
                     </div>
-                  )
-                }
-                
-                return (
-                  <Link
-                    key={comp.id}
-                    href={`/learn/${comp.slug}`}
-                    className="lms-card lms-card--clickable competency-card"
-                  >
-                    <div className="competency-card__index">
-                      {index + 1}
-                    </div>
-                    <div className="competency-card__body">
-                      <h3 className="competency-card__title">{comp.name}</h3>
-                      {comp.description && (
-                        <p className="competency-card__description">{comp.description}</p>
-                      )}
-                      <div className="competency-card__meta">
-                        <span className="competency-card__meta-item">
-                          <BookOpenIcon className="h-3 w-3" />
-                          {comp.modules.length} modules
-                        </span>
-                        {duration > 0 && (
-                          <span className="competency-card__meta-item">
-                            <ClockIcon className="h-3 w-3" />
-                            {duration} min
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="competency-card__action">
-                      <ArrowRightIcon className="h-4 w-4" />
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-          
-        </div>
-      </main>
-    </div>
+                  </div>
+                </div>
+              )
+            }
+            
+            return (
+              <Link
+                key={comp.id}
+                href={`/learn/${comp.slug}`}
+                className="lms-card lms-card--clickable competency-card"
+              >
+                <div className="competency-card__index">
+                  {index + 1}
+                </div>
+                <div className="competency-card__body">
+                  <h3 className="competency-card__title">{comp.name}</h3>
+                  {comp.description && (
+                    <p className="competency-card__description">{comp.description}</p>
+                  )}
+                  <div className="competency-card__meta">
+                    <span className="competency-card__meta-item">
+                      <BookOpenIcon className="h-3 w-3" />
+                      {comp.modules.length} modules
+                    </span>
+                    {duration > 0 && (
+                      <span className="competency-card__meta-item">
+                        <ClockIcon className="h-3 w-3" />
+                        {duration} min
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="competency-card__action">
+                  <ArrowRightIcon className="h-4 w-4" />
+                </div>
+              </Link>
+            )
+          })}
+          </div>
+        </section>
+      </div>
+    </LearnShell>
   )
 }
