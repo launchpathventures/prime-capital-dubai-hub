@@ -24,6 +24,7 @@ import {
   UsersIcon,
   SparklesIcon,
   GraduationCapIcon,
+  MessageSquarePlusIcon,
 } from "lucide-react"
 import { TourSidebarLink } from "./academy-tour"
 
@@ -47,7 +48,7 @@ interface Competency {
 
 interface LearnSidebarProps {
   /** Active section for highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback"
   /** Competency data for course section */
   competencies?: Competency[]
   /** Current competency slug */
@@ -296,6 +297,15 @@ export function LearnSidebar({
             >
               <UsersIcon className="learn-sidebar__nav-icon" />
               <span>User Management</span>
+            </Link>
+            <Link 
+              href="/learn/admin/feedback"
+              className="learn-sidebar__nav-item"
+              data-active={activeSection === "admin-feedback"}
+              onClick={onNavigate}
+            >
+              <MessageSquarePlusIcon className="learn-sidebar__nav-icon" />
+              <span>Content Feedback</span>
             </Link>
             <Link 
               href="/learn/admin/certification"

@@ -4,6 +4,7 @@
  * Shell for the learning portal with header, sidebar, and content area.
  * Sidebar is always visible with navigation sections.
  * Includes AI Coach integration for contextual assistance.
+ * Includes Feedback system for content improvement.
  *
  * Accessibility:
  * - Skip link for keyboard users to bypass navigation
@@ -25,6 +26,12 @@ import {
   CoachTrigger,
   type CoachContext,
 } from "@/components/lms/coach"
+import {
+  FeedbackProvider,
+  FeedbackButton,
+  FeedbackModal,
+  FeedbackQuote,
+} from "@/components/lms/feedback"
 import type { UserMenuUser } from "@/components/shared/user-menu"
 
 // -----------------------------------------------------------------------------
@@ -48,7 +55,7 @@ interface Competency {
 interface LearnShellProps {
   children: React.ReactNode
   /** Active section for sidebar highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback"
   /** Current competency slug for course section */
   currentCompetency?: string
   /** Current module slug for course section */
@@ -61,6 +68,10 @@ interface LearnShellProps {
   coachContext?: CoachContext
   /** User data for header menu */
   user?: UserMenuUser
+  /** Whether feedback system is enabled */
+  feedbackEnabled?: boolean
+  /** Whether to show text highlight quote button (for module pages) */
+  showFeedbackQuote?: boolean
 }
 
 // -----------------------------------------------------------------------------
@@ -76,6 +87,8 @@ export function LearnShell({
   userRole = "learner",
   coachContext = { level: "course" },
   user,
+  feedbackEnabled = false,
+  showFeedbackQuote = false,
 }: LearnShellProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
   const drawerRef = React.useRef<HTMLDivElement>(null)
@@ -207,6 +220,15 @@ export function LearnShell({
         {/* AI Coach - always available */}
         <CoachTrigger />
         <CoachPanel />
+        
+        {/* Feedback System */}
+        <FeedbackProvider enabled={feedbackEnabled}>
+          <FeedbackButton />
+          <FeedbackModal />
+          {showFeedbackQuote && (
+            <FeedbackQuote containerSelector="#learn-main-content" />
+          )}
+        </FeedbackProvider>
       </div>
     </CoachProvider>
   )

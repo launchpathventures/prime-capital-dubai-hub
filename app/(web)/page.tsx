@@ -108,21 +108,20 @@ function HeroSection() {
             We move complexity out of sight.
           </h1>
 
-          <Text
+          <p
             className="text-white/90 text-[clamp(17px,2.2vw,22px)] font-light leading-relaxed max-w-[520px] mt-4"
             style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
           >
             Boutique real estate advisory for discerning investors.
-          </Text>
+          </p>
 
-          <Button
-            nativeButton={false}
-            size="lg"
-            className="btn-hover-lift mt-8 h-14 px-12 bg-white/95 text-[var(--web-ash)] hover:bg-white border-none rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
-            render={<Link href="/contact" />}
+          {/* DEBUG: Using plain link instead of Button to test */}
+          <Link 
+            href="/contact"
+            className="mt-8 h-14 px-12 bg-white/95 text-[var(--web-ash)] hover:bg-white border-none rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg inline-flex items-center justify-center"
           >
             Begin Your Journey
-          </Button>
+          </Link>
         </Stack>
       </Container>
 
