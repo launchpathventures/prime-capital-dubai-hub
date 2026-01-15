@@ -12,6 +12,9 @@
 
 import "./learn.css"
 
+// Force dynamic rendering - these routes use cookies for auth
+export const dynamic = "force-dynamic"
+
 // -----------------------------------------------------------------------------
 // Metadata
 // -----------------------------------------------------------------------------
