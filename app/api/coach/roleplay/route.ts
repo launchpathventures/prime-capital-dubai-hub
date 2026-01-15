@@ -242,17 +242,20 @@ export async function POST(request: NextRequest) {
 
     // Roleplay mode: streaming response
     try {
+      // For initial conversation start (no messages), we need to prompt Claude to begin
+      const apiMessages = messages.length > 0
+        ? messages.map((m) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+          }))
+        : [{ role: "user" as const, content: "Begin the roleplay. Start as the client and open the conversation based on the scenario." }]
+
       const stream = await anthropic.messages.stream({
         model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 384,
         temperature: 0.8,
         system: buildRoleplayPrompt(scenario),
-        messages: messages.length > 0
-          ? messages.map((m) => ({
-              role: m.role as "user" | "assistant",
-              content: m.content,
-            }))
-          : [], // Empty array for initial message - Claude will start the conversation
+        messages: apiMessages,
       })
 
       // Return streaming response
