@@ -2,12 +2,13 @@
  * CATALYST - Feedback List
  *
  * Server component that fetches and displays feedback items.
+ * Uses elegant empty state and card layouts.
  */
 
-import { Stack } from "@/components/core"
 import { createClient } from "@/lib/supabase/server"
 import { FeedbackCard } from "./feedback-card"
 import { type Feedback } from "@/lib/lms/feedback"
+import { MessageSquareIcon } from "lucide-react"
 
 type Props = {
   status?: string
@@ -34,17 +35,25 @@ export async function FeedbackList({ status, type }: Props) {
 
   if (!feedback?.length) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        No feedback found
+      <div className="feedback-empty">
+        <div className="feedback-empty__icon">
+          <MessageSquareIcon className="h-6 w-6" />
+        </div>
+        <h3 className="feedback-empty__title">No feedback found</h3>
+        <p className="feedback-empty__description">
+          {status || type
+            ? "Try adjusting your filters to see more results."
+            : "When learners submit feedback, it will appear here."}
+        </p>
       </div>
     )
   }
 
   return (
-    <Stack gap="md">
+    <div className="flex flex-col gap-4">
       {feedback.map((item) => (
         <FeedbackCard key={item.id} feedback={item as Feedback} />
       ))}
-    </Stack>
+    </div>
   )
 }

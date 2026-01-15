@@ -2,14 +2,12 @@
  * CATALYST - Feedback Card
  *
  * Individual feedback item display with status management.
+ * Elegant card design with visual status indicators.
  */
 
 "use client"
 
 import { useState, useTransition } from "react"
-import { Row, Stack, Text } from "@/components/core"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -19,6 +17,13 @@ import {
 } from "@/components/ui/select"
 import { updateFeedbackStatus, type Feedback } from "@/lib/lms/feedback"
 import { formatDistanceToNow } from "date-fns"
+import {
+  FileTextIcon,
+  MessageSquareIcon,
+  MicIcon,
+  PaperclipIcon,
+  ExternalLinkIcon,
+} from "lucide-react"
 
 type Props = {
   feedback: Feedback
@@ -43,86 +48,104 @@ export function FeedbackCard({ feedback }: Props) {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <Row justify="between" align="center" className="flex-wrap gap-2">
-          <Row gap="sm" align="center">
-            <Badge
-              variant={
-                feedback.feedback_type === "module" ? "default" : "secondary"
-              }
-            >
-              {feedback.feedback_type}
-            </Badge>
-            {feedback.competency_slug && (
-              <Text size="sm" variant="muted">
-                {feedback.competency_slug}/{feedback.module_slug}
-              </Text>
+    <article className={`feedback-card feedback-card--${status}`}>
+      {/* Header */}
+      <header className="feedback-card__header">
+        <div className="feedback-card__meta">
+          <span
+            className={`feedback-card__type feedback-card__type--${feedback.feedback_type}`}
+          >
+            {feedback.feedback_type === "module" ? (
+              <FileTextIcon className="h-3 w-3" />
+            ) : (
+              <MessageSquareIcon className="h-3 w-3" />
             )}
-          </Row>
+            {feedback.feedback_type}
+          </span>
+          {feedback.competency_slug && (
+            <span className="feedback-card__location">
+              {feedback.competency_slug}/{feedback.module_slug}
+            </span>
+          )}
+        </div>
 
-          <Row gap="sm" align="center">
-            <Text size="sm" variant="muted">
-              {formatDistanceToNow(new Date(feedback.created_at), {
-                addSuffix: true,
-              })}
-            </Text>
-            <Select
-              value={status}
-              onValueChange={(v) => v && handleStatusChange(v)}
-              disabled={isPending}
-            >
-              <SelectTrigger className="w-[130px] h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="complete">Complete</SelectItem>
-              </SelectContent>
-            </Select>
-          </Row>
-        </Row>
-      </CardHeader>
+        <div className="feedback-card__actions">
+          <span className="feedback-card__time">
+            {formatDistanceToNow(new Date(feedback.created_at), {
+              addSuffix: true,
+            })}
+          </span>
+          <Select
+            value={status}
+            onValueChange={(v) => v && handleStatusChange(v)}
+            disabled={isPending}
+          >
+            <SelectTrigger className="feedback-status-select h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new">New</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="complete">Complete</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </header>
 
-      <CardContent>
-        <Stack gap="sm">
-          {feedback.quoted_text && (
-            <div className="bg-muted p-2 rounded text-sm italic">
-              &ldquo;{feedback.quoted_text}&rdquo;
+      {/* Body */}
+      <div className="feedback-card__body">
+        {/* Quoted text */}
+        {feedback.quoted_text && (
+          <blockquote className="feedback-card__quote">
+            &ldquo;{feedback.quoted_text}&rdquo;
+          </blockquote>
+        )}
+
+        {/* Main text content */}
+        {feedback.text_content && (
+          <p className="feedback-card__text">{feedback.text_content}</p>
+        )}
+
+        {/* Voice transcription */}
+        {feedback.voice_transcription && (
+          <div className="feedback-card__transcription">
+            <div className="feedback-card__transcription-label">
+              <MicIcon className="h-3.5 w-3.5" />
+              Voice Transcription
             </div>
-          )}
+            <p className="feedback-card__transcription-text">
+              {feedback.voice_transcription}
+            </p>
+          </div>
+        )}
 
-          {feedback.text_content && <Text>{feedback.text_content}</Text>}
+        {/* Attachments */}
+        {feedback.attachments && feedback.attachments.length > 0 && (
+          <div className="feedback-card__attachments">
+            <PaperclipIcon className="h-4 w-4 text-gray-400" />
+            {feedback.attachments.map((path, idx) => (
+              <a
+                key={idx}
+                href={path}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="feedback-card__attachment"
+              >
+                Attachment {idx + 1}
+                <ExternalLinkIcon className="h-3 w-3" />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
 
-          {feedback.voice_transcription && (
-            <div className="text-sm">
-              <Text size="sm" variant="muted">
-                Voice transcription:
-              </Text>
-              <Text>{feedback.voice_transcription}</Text>
-            </div>
-          )}
-
-          {feedback.attachments && feedback.attachments.length > 0 && (
-            <div className="text-sm">
-              <Text size="sm" variant="muted">
-                Attachments: {feedback.attachments.length} file(s)
-              </Text>
-            </div>
-          )}
-
-          {feedback.page_url && (
-            <Text size="sm" variant="muted">
-              Page: {feedback.page_url}
-            </Text>
-          )}
-
-          <Text size="xs" variant="muted" className="font-mono">
-            ID: {feedback.id}
-          </Text>
-        </Stack>
-      </CardContent>
-    </Card>
+      {/* Footer */}
+      <footer className="feedback-card__footer">
+        <span className="feedback-card__page" title={feedback.page_url}>
+          {feedback.page_url}
+        </span>
+        <span className="feedback-card__id">ID: {feedback.id.slice(0, 8)}</span>
+      </footer>
+    </article>
   )
 }

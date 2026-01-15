@@ -29,7 +29,7 @@ interface CachedPrompt {
 // -----------------------------------------------------------------------------
 
 const promptCache = new Map<PromptType, CachedPrompt>()
-const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const CACHE_TTL = 1 * 60 * 1000 // 1 minute (shorter for faster updates)
 
 // -----------------------------------------------------------------------------
 // Default Prompts (Fallback)
@@ -72,14 +72,18 @@ BEHAVIOR:
 - Quote or paraphrase the content when relevant
 - If asked about other topics, briefly answer and suggest the relevant module`,
 
-  roleplay_character: `You are roleplaying as a client in a real estate consultation scenario.
+  roleplay_character: `You are playing a client in a real estate roleplay training exercise.
 
-BEHAVIOR RULES:
-- Stay 100% in character as this client
-- Express concerns naturally based on your persona
-- React realistically to the consultant's responses
-- Keep responses conversational (2-4 sentences typical)
-- Never break character unless user explicitly asks for coaching help`,
+ABSOLUTE RULES - NEVER BREAK THESE:
+1. NO asterisks, NO stage directions, NO actions like *leans forward*
+2. NO phonetic accents or misspellings - write clear, grammatically correct English
+3. MAXIMUM 2 sentences per response
+4. Speak naturally like a real professional would in a business meeting
+
+YOUR ROLE:
+- You are the CLIENT described in the scenario
+- Express your needs and concerns clearly
+- React appropriately to the consultant's responses`,
 
   roleplay_evaluation: `You are an expert evaluator for real estate sales training. Respond only with valid JSON.`,
 }

@@ -136,27 +136,27 @@ export default async function ScenariosIndexPage() {
 
       {/* How It Works */}
       <section className="scenario-intro">
-        <h2 className="scenario-intro__title">How AI Practice Works</h2>
+        <h2 className="scenario-intro__title">How It Works</h2>
         <div className="scenario-intro__steps">
           <div className="scenario-intro__step">
             <div className="scenario-intro__step-num">1</div>
             <div className="scenario-intro__step-content">
               <strong>Choose a scenario</strong>
-              <span>Select from situations you&apos;ll encounter with real clients</span>
+              <span>Select a situation you&apos;ll encounter with real clients</span>
             </div>
           </div>
           <div className="scenario-intro__step">
             <div className="scenario-intro__step-num">2</div>
             <div className="scenario-intro__step-content">
-              <strong>Copy the AI prompt</strong>
-              <span>Use with ChatGPT, Claude, or any AI assistant</span>
+              <strong>Review the brief</strong>
+              <span>Understand the client, their concerns, and your objective</span>
             </div>
           </div>
           <div className="scenario-intro__step">
             <div className="scenario-intro__step-num">3</div>
             <div className="scenario-intro__step-content">
-              <strong>Practice the conversation</strong>
-              <span>The AI plays the client while you practice your response</span>
+              <strong>Practice with AI</strong>
+              <span>Start a live roleplay conversation and get instant feedback</span>
             </div>
           </div>
         </div>
