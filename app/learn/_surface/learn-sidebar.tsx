@@ -316,6 +316,15 @@ export function LearnSidebar({
               <SettingsIcon className="learn-sidebar__nav-icon" />
               <span>Certification Admin</span>
             </Link>
+            <Link 
+              href="/learn/admin/prompts"
+              className="learn-sidebar__nav-item"
+              data-active={activeSection === "admin-prompts"}
+              onClick={onNavigate}
+            >
+              <SparklesIcon className="learn-sidebar__nav-icon" />
+              <span>AI Prompts</span>
+            </Link>
           </nav>
         </div>
       )}

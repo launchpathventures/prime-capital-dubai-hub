@@ -27,7 +27,6 @@ import {
   type Stat,
 } from "@/lib/content"
 import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react"
 import { AnimatedStatsSection } from "./_surface/animated-stats"
@@ -52,16 +51,6 @@ const propertyImages: Record<string, string> = {
 }
 
 export default async function HomePage() {
-  // DEBUG: Testing sections one by one
-  return (
-    <div className="web-homepage">
-      <HeroSection />
-    </div>
-  )
-}
-
-/* ORIGINAL CODE - TEMPORARILY COMMENTED OUT FOR DEBUGGING
-export default async function HomePage_ORIGINAL() {
   const [properties, testimonials, stats] = await Promise.all([
     getProperties(),
     getTestimonials(),
@@ -84,7 +73,6 @@ export default async function HomePage_ORIGINAL() {
     </div>
   )
 }
-*/
 
 // =============================================================================
 // HERO SECTION
@@ -492,14 +480,12 @@ function StrategyKitSection() {
               48 pages of institutional-grade research
             </Text>
 
-            <Button
-              nativeButton={false}
-              size="lg"
-              className="btn-hover-lift w-full h-[52px] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-              render={<Link href="/strategy-kit" />}
+            <Link
+              href="/strategy-kit"
+              className="btn-hover-lift w-full h-[52px] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] inline-flex items-center justify-center"
             >
               Download Now
-            </Button>
+            </Link>
 
             <Text className="text-[var(--web-serenity)] text-xs mt-4">
               No spam. Instant access.
@@ -539,14 +525,12 @@ function CTASection() {
             Let's discuss how Prime Capital can support your investment objectives.
           </Text>
 
-          <Button
-            nativeButton={false}
-            size="lg"
-            className="btn-hover-lift mt-4 h-14 px-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg"
-            render={<Link href="/contact" />}
+          <Link
+            href="/contact"
+            className="btn-hover-lift mt-4 h-14 px-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg inline-flex items-center justify-center"
           >
             Start a Conversation
-          </Button>
+          </Link>
 
           {/* Trust indicators */}
           <Row gap="xl" className="mt-12 flex-wrap justify-center">

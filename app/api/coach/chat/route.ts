@@ -15,6 +15,7 @@ import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/lib/supabase/server"
 import { getCompetencyWithModules, getModule } from "@/lib/learning"
 import { getCurriculumIndex, findRelevantModules } from "@/lib/lms/curriculum-index"
+import { getPrompts } from "@/lib/lms/ai-prompts"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -62,40 +63,24 @@ async function buildSystemPrompt(
   competencyInfo?: CompetencyInfo,
   userQuestion?: string
 ): Promise<string> {
-  const base = `You are the AI Coach for Prime Capital Dubai's real estate training program.
+  // Load prompts from database (with caching and fallback)
+  const prompts = await getPrompts([
+    "coach_base",
+    "coach_course",
+    "coach_competency",
+    "coach_module",
+  ])
 
-CRITICAL RULES:
-- Give CONCISE answers (30-50 words unless asked for more)
-- Focus ONLY on Dubai real estate and this training curriculum
-- Always cite which module covers a topic using markdown links: [Module X.X: Title](/learn/competency/module)
-- If asked about something outside Dubai RE or the curriculum, politely decline
-- Add this disclaimer when giving specific regulatory or legal advice: "⚠️ Verify critical details with current regulations."
-
-SCOPE LIMITATIONS:
-- You can ONLY help with learning about Dubai real estate
-- Decline requests for: code, general knowledge, jokes, personal advice, anything unrelated to Dubai RE
-- If the question is off-topic, say: "I'm focused on helping you learn about Dubai real estate. Is there something about the curriculum I can help with?"
-
-TONE:
-- Professional but approachable
-- Direct, not conversational
-- Confident but not pushy (matches Prime Capital brand)`
+  const base = prompts.coach_base
 
   // MODULE LEVEL - Deepest context with full content
   if (context.level === "module" && moduleContent) {
     return `${base}
 
-CURRENT CONTEXT: Module Level
-You are an expert on this specific module. Answer questions using the content below.
+${prompts.coach_module}
 
 MODULE CONTENT:
-${moduleContent.slice(0, 15000)}
-
-BEHAVIOR:
-- Answer questions about this module in depth
-- Quote or paraphrase the content when relevant
-- Use markdown links when referencing modules: [Module Title](/learn/competency/module)
-- If asked about other topics, briefly answer and suggest the relevant module`
+${moduleContent.slice(0, 15000)}`
   }
 
   // COMPETENCY LEVEL - Module list for navigation
@@ -108,8 +93,7 @@ BEHAVIOR:
 
     return `${base}
 
-CURRENT CONTEXT: Competency Level
-You are helping the learner navigate ${competencyInfo.name} (${competencyInfo.moduleCount} modules).
+${prompts.coach_competency}
 
 COMPETENCY: ${competencyInfo.name}
 DESCRIPTION: ${competencyInfo.description}
@@ -120,13 +104,7 @@ ${moduleList}
 LINKING RULES:
 - When referencing a module, ALWAYS use the EXACT markdown link format from the list above
 - Copy the link exactly as shown, e.g.: [Module 0.1: Prime Capital Orientation](/learn/foundations/prime-capital-orientation)
-- This creates clickable links for learners
-
-BEHAVIOR:
-- Help learners understand what this competency covers
-- Recommend which module to start with based on their question
-- Use clickable module links so learners can navigate directly
-- Summarize key themes across the competency`
+- This creates clickable links for learners`
   }
 
   // COURSE LEVEL - Full curriculum index with relevance search
@@ -149,8 +127,10 @@ Use these modules to guide your answer. Link to them using the exact format show
 
     return `${base}
 
-CURRENT CONTEXT: Course Level
-You are helping the learner navigate the entire curriculum (${curriculumIndex.totalCompetencies} competencies, ${curriculumIndex.totalModules} modules, ~${curriculumIndex.estimatedTotalHours} hours total).
+${prompts.coach_course}
+
+CURRICULUM OVERVIEW:
+${curriculumIndex.totalCompetencies} competencies, ${curriculumIndex.totalModules} modules, ~${curriculumIndex.estimatedTotalHours} hours total.
 
 ${curriculumIndex.promptText}
 ${relevantModulesText}
@@ -158,26 +138,15 @@ ${relevantModulesText}
 LINKING RULES:
 - When referencing a module, ALWAYS use markdown links: [Module X.X: Title](/learn/competency/module)
 - Copy the link format from the curriculum structure above
-- This creates clickable links for learners
-
-BEHAVIOR:
-- Help learners find the right module for their question
-- Use the MOST RELEVANT MODULES section to guide your answer when available
-- Give brief topic overviews, then point to specific modules with links
-- If a question spans multiple modules, list all relevant ones`
+- This creates clickable links for learners`
   } catch (error) {
     console.error("Failed to load curriculum index:", error)
     // Fallback if curriculum index fails
     return `${base}
 
-CURRENT CONTEXT: Course Level
-You are helping the learner navigate the curriculum.
+${prompts.coach_course}
 
-BEHAVIOR:
-- Help learners find the right module for their question
-- Give brief topic overviews, then point to modules
-- Format responses as: "This is covered in Module X.X: Title"
-- If unsure which module, suggest the most likely competency`
+Note: Curriculum index unavailable. Provide general guidance and suggest exploring the course structure.`
   }
 }
 

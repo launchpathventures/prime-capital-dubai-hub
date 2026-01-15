@@ -221,14 +221,16 @@ export function LearnShell({
         <CoachTrigger />
         <CoachPanel />
         
-        {/* Feedback System */}
-        <FeedbackProvider enabled={feedbackEnabled}>
-          <FeedbackButton />
-          <FeedbackModal />
-          {showFeedbackQuote && (
-            <FeedbackQuote containerSelector="#learn-main-content" />
-          )}
-        </FeedbackProvider>
+        {/* Feedback System - only rendered when enabled */}
+        {feedbackEnabled && (
+          <FeedbackProvider enabled={feedbackEnabled}>
+            <FeedbackButton />
+            <FeedbackModal />
+            {showFeedbackQuote && (
+              <FeedbackQuote containerSelector="#learn-main-content" />
+            )}
+          </FeedbackProvider>
+        )}
       </div>
     </CoachProvider>
   )
