@@ -43,7 +43,9 @@ export { CompetencyProgressList } from "./competency-progress-list"
 export { DashboardSkeleton } from "./skeletons/dashboard-skeleton"
 export { CompetencySkeleton } from "./skeletons/competency-skeleton"
 export { ModuleSkeleton } from "./skeletons/module-skeleton"
+export { ModuleContentSkeleton } from "./skeletons/module-content-skeleton"
 export { QuizSkeleton } from "./skeletons/quiz-skeleton"
+export { PageSkeleton } from "./skeletons/page-skeleton"
 
 // Empty State
 export { EmptyState } from "./empty-state"

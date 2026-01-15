@@ -8,9 +8,10 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export function ModuleSkeleton() {
   return (
-    <Stack gap="xl">
-      {/* Back link */}
-      <Skeleton className="h-5 w-48" />
+    <div className="learn-content">
+      <Stack gap="xl">
+        {/* Back link */}
+        <Skeleton className="h-5 w-48" />
       
       {/* Header */}
       <Stack gap="sm">
@@ -75,6 +76,7 @@ export function ModuleSkeleton() {
       
       {/* CTA */}
       <Skeleton className="h-12 w-full max-w-sm mx-auto" />
-    </Stack>
+      </Stack>
+    </div>
   )
 }

@@ -100,6 +100,28 @@
    These use Button/DropdownMenu components — no additional base styles needed
    ============================================================================= */
 
+/* =============================================================================
+   NAVIGATION-PROGRESS - Page navigation loading indicator
+   A thin progress bar at the top of the viewport
+   ============================================================================= */
+
+:where(.navigation-progress) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+:where(.navigation-progress__bar) {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.1s ease-out;
+  box-shadow: 0 0 8px oklch(from var(--color-primary) l c h / 0.5);
+}
+
 } /* End @layer components */
 
 /* =============================================================================

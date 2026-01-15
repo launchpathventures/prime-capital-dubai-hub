@@ -297,11 +297,12 @@
   transition: background var(--lms-transition-fast), color var(--lms-transition-fast);
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.25rem;
+  color: var(--gray-600);
 }
 
 .learn-sidebar__heading--collapsible:hover {
   background: var(--gray-100);
-  color: var(--gray-600);
+  color: var(--gray-900);
 }
 
 .learn-sidebar__heading--collapsible svg {

@@ -126,28 +126,27 @@ export function LearnSidebar({
       </div>
       
       {/* Course Content Section */}
-      {competencies.length > 0 && (
-        <div className="learn-sidebar__section">
-          <button 
-            className="learn-sidebar__heading learn-sidebar__heading--collapsible"
-            onClick={() => setCourseExpanded(!courseExpanded)}
-          >
-            <span className="flex items-center gap-1.5">
-              <GraduationCapIcon className="h-3.5 w-3.5" />
-              Course Content
-            </span>
-            {courseExpanded ? (
-              <ChevronDownIcon className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronRightIcon className="h-3.5 w-3.5" />
-            )}
-          </button>
-          
-          {courseExpanded && (
-            <nav className="learn-sidebar__competencies">
-              {competencies.map((comp) => {
-                const isExpanded = expandedCompetencies.has(comp.slug)
-                const isActive = currentCompetency === comp.slug
+      <div className="learn-sidebar__section">
+        <button 
+          className="learn-sidebar__heading learn-sidebar__heading--collapsible"
+          onClick={() => setCourseExpanded(!courseExpanded)}
+        >
+          <span className="flex items-center gap-1.5">
+            <GraduationCapIcon className="h-3.5 w-3.5" />
+            Course Content
+          </span>
+          {courseExpanded ? (
+            <ChevronDownIcon className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRightIcon className="h-3.5 w-3.5" />
+          )}
+        </button>
+        
+        {courseExpanded && competencies.length > 0 && (
+          <nav className="learn-sidebar__competencies">
+            {competencies.map((comp) => {
+              const isExpanded = expandedCompetencies.has(comp.slug)
+              const isActive = currentCompetency === comp.slug
                 const completedCount = comp.modules.filter(m => m.status === "complete").length
                 const isFullyComplete = completedCount === comp.modules.length && comp.modules.length > 0
                 
@@ -224,8 +223,22 @@ export function LearnSidebar({
               })}
             </nav>
           )}
-        </div>
-      )}
+        
+        {/* Fallback link when competencies aren't loaded */}
+        {courseExpanded && competencies.length === 0 && (
+          <nav className="learn-sidebar__nav-list">
+            <Link 
+              href="/learn"
+              className="learn-sidebar__nav-item"
+              data-active={activeSection === "course"}
+              onClick={onNavigate}
+            >
+              <BookOpenIcon className="learn-sidebar__nav-icon" />
+              <span>View Course</span>
+            </Link>
+          </nav>
+        )}
+      </div>
       
       {/* Practice Section */}
       <div className="learn-sidebar__section">

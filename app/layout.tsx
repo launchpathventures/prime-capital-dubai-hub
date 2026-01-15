@@ -21,6 +21,7 @@ import "@/design/shared.css"
 import { config } from "@/lib/config"
 import { ToastProvider } from "@/components/ui/toast"
 import { UrlToast } from "@/components/shared/url-toast"
+import { NavigationProgress } from "@/components/shared/navigation-progress"
 import { ThemeProvider } from "@/components/shared/theme-provider"
 import { Suspense } from "react"
 
@@ -84,6 +85,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <ToastProvider>
+            <Suspense fallback={null}>
+              <NavigationProgress />
+            </Suspense>
             {children}
             <Suspense fallback={null}>
               <UrlToast />
