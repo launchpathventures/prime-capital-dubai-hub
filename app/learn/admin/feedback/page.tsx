@@ -47,7 +47,7 @@ export default async function AdminFeedbackPage({
     >
       <Stack gap="lg" className="p-6 max-w-5xl mx-auto">
         <div>
-          <Title order={1}>Content Feedback</Title>
+          <Title size="h1">Content Feedback</Title>
           <Text variant="muted">
             Review and manage feedback from learners
           </Text>

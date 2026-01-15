@@ -69,7 +69,7 @@ export function FeedbackCard({ feedback }: Props) {
             </Text>
             <Select
               value={status}
-              onValueChange={handleStatusChange}
+              onValueChange={(v) => v && handleStatusChange(v)}
               disabled={isPending}
             >
               <SelectTrigger className="w-[130px] h-8">

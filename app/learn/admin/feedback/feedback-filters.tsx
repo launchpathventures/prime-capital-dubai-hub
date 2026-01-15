@@ -47,7 +47,7 @@ export function FeedbackFilters() {
 
   return (
     <Row gap="md" className="flex-wrap">
-      <Select value={status} onValueChange={(v) => updateFilter("status", v)}>
+      <Select value={status} onValueChange={(v) => v && updateFilter("status", v)}>
         <SelectTrigger className="w-[150px]">
           <SelectValue placeholder="Status" />
         </SelectTrigger>
@@ -59,7 +59,7 @@ export function FeedbackFilters() {
         </SelectContent>
       </Select>
 
-      <Select value={type} onValueChange={(v) => updateFilter("type", v)}>
+      <Select value={type} onValueChange={(v) => v && updateFilter("type", v)}>
         <SelectTrigger className="w-[150px]">
           <SelectValue placeholder="Type" />
         </SelectTrigger>
@@ -70,11 +70,12 @@ export function FeedbackFilters() {
         </SelectContent>
       </Select>
 
-      <Button variant="outline" asChild>
-        <a href={exportUrl} download>
-          <Download className="h-4 w-4 mr-2" />
-          Export Markdown
-        </a>
+      <Button
+        variant="outline"
+        render={<a href={exportUrl} download />}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        Export Markdown
       </Button>
     </Row>
   )
