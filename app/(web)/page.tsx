@@ -52,6 +52,17 @@ const propertyImages: Record<string, string> = {
 }
 
 export default async function HomePage() {
+  // TEMPORARY: Minimal page to debug production issue
+  return (
+    <div className="web-homepage" style={{ padding: "200px 40px", textAlign: "center" }}>
+      <h1>Prime Capital Dubai</h1>
+      <p>Homepage loading test - if you see this, the shell works.</p>
+    </div>
+  )
+}
+
+/* ORIGINAL CODE - TEMPORARILY COMMENTED OUT FOR DEBUGGING
+export default async function HomePage_ORIGINAL() {
   const [properties, testimonials, stats] = await Promise.all([
     getProperties(),
     getTestimonials(),
@@ -74,6 +85,7 @@ export default async function HomePage() {
     </div>
   )
 }
+*/
 
 // =============================================================================
 // HERO SECTION
