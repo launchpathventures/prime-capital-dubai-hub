@@ -712,6 +712,7 @@ function transformModule(row: any): LearningModule {
     displayOrder: row.display_order,
     content: row.content,
     frontmatter: row.frontmatter, // JSONB - all frontmatter fields
+    essentials: row.essentials, // JSONB - AI-generated essentials
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }

@@ -40,6 +40,9 @@ export interface LearningModule {
   // Access specific fields: module.frontmatter?.learningObjectives
   frontmatter: Record<string, unknown> | null
 
+  // AI-generated essentials (structured key facts, scripts, etc.)
+  essentials: Record<string, unknown> | null
+
   createdAt: string
   updatedAt: string
 }
@@ -204,8 +207,8 @@ export interface EssentialsContent {
   promptVersion: string
 }
 
-/** Learning module with essentials status */
-export interface LearningModuleWithEssentials extends LearningModule {
+/** Learning module with typed essentials and status info */
+export interface LearningModuleWithEssentials extends Omit<LearningModule, 'essentials'> {
   essentials: EssentialsContent | null
   essentialsGeneratedAt: string | null
   essentialsSourceHash: string | null
