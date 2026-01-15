@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Transpile @base-ui/react to fix production rendering issues
+  transpilePackages: ["@base-ui/react"],
   images: {
     remotePatterns: [
       {
