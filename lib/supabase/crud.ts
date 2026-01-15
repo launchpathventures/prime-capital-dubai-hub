@@ -13,7 +13,8 @@ export type CrudTableConfig = {
 
 export type CrudListOptions<T> = {
   select?: string
-  query?: (query: any) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
+  query?: (query: unknown) => unknown
 }
 
 export type CrudPagination = {
@@ -23,7 +24,8 @@ export type CrudPagination = {
 
 export type CrudMutationOptions<T> = {
   select?: string
-  query?: (query: any) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
+  query?: (query: unknown) => unknown
 }
 
 export type CrudUpsertOptions<T> = CrudMutationOptions<T> & {
@@ -54,26 +56,26 @@ export function createCrudClient<T extends Record<string, unknown>>(
   return {
     async list(options: CrudListOptions<T> = {}) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config).select(select)
-      if (options.query) query = options.query(query)
-      return await query
+      const query = getTableQuery(client, config).select(select)
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async getById(id: string | number, options: CrudListOptions<T> = {}) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config)
+      const query = getTableQuery(client, config)
         .select(select)
         .eq(primaryKey, id)
         .maybeSingle()
-      if (options.query) query = options.query(query)
-      return await query
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async create(payload: Partial<T> | Partial<T>[], options: CrudMutationOptions<T> = {}) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config).insert(payload).select(select)
-      if (options.query) query = options.query(query)
-      return await query
+      const query = getTableQuery(client, config).insert(payload).select(select)
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async update(
@@ -82,24 +84,24 @@ export function createCrudClient<T extends Record<string, unknown>>(
       options: CrudMutationOptions<T> = {}
     ) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config)
+      const query = getTableQuery(client, config)
         .update(values)
         .eq(primaryKey, id)
         .select(select)
         .maybeSingle()
-      if (options.query) query = options.query(query)
-      return await query
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async remove(id: string | number, options: CrudMutationOptions<T> = {}) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config)
+      const query = getTableQuery(client, config)
         .delete()
         .eq(primaryKey, id)
         .select(select)
         .maybeSingle()
-      if (options.query) query = options.query(query)
-      return await query
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async upsert(
@@ -107,14 +109,14 @@ export function createCrudClient<T extends Record<string, unknown>>(
       options: CrudUpsertOptions<T> = {}
     ) {
       const select = options.select || defaultSelect
-      let query = getTableQuery(client, config)
+      const query = getTableQuery(client, config)
         .upsert(payload, {
           onConflict: options.onConflict,
           ignoreDuplicates: options.ignoreDuplicates,
         })
         .select(select)
-      if (options.query) query = options.query(query)
-      return await query
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
 
     async listPage(
@@ -124,10 +126,9 @@ export function createCrudClient<T extends Record<string, unknown>>(
       const select = options.select || defaultSelect
       const from = (pagination.page - 1) * pagination.pageSize
       const to = from + pagination.pageSize - 1
-      let query = getTableQuery(client, config).select(select)
-      query = query.range(from, to)
-      if (options.query) query = options.query(query)
-      return await query
+      const query = getTableQuery(client, config).select(select).range(from, to)
+      const finalQuery = options.query ? options.query(query) : query
+      return await finalQuery
     },
   }
 }

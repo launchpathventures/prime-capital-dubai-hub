@@ -2,9 +2,10 @@
  * CATALYST - Learning Progress Page
  * 
  * Clean overview of learner's progress through the course.
- * Shows module completion status based on quiz results and scenario reflections.
+ * Shows module completion status based on learning_progress table.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { 
   CheckCircleIcon, 
@@ -15,8 +16,14 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { getCompetenciesForSidebar } from "@/lib/learning"
 import { LearnShell } from "../_surface/learn-shell"
 import { getScenarioCompletionStats } from "@/lib/actions/scenario-actions"
+
+export const metadata: Metadata = {
+  title: "My Progress | Learning Portal",
+  description: "Track your learning progress through the Prime Capital training program.",
+}
 
 // =============================================================================
 // Types
@@ -42,7 +49,6 @@ interface CompletedModule {
 async function getModulesWithProgress(): Promise<{
   modules: Module[]
   completed: CompletedModule[]
-  competencies: Array<{ slug: string; name: string; number: number; locked: boolean; modules: Array<{ slug: string; title: string; status: "complete" | "current" | "locked" }> }>
 }> {
   const supabase = await createClient()
   
@@ -59,39 +65,31 @@ async function getModulesWithProgress(): Promise<{
   
   if (modulesError) {
     console.error("Failed to fetch modules:", modulesError)
-    return { modules: [], completed: [], competencies: [] }
+    return { modules: [], completed: [] }
   }
   
-  // Get user's completed modules (from quiz results)
+  // Get user's completed modules from learning_progress
   const { data: { user } } = await supabase.auth.getUser()
   let completed: CompletedModule[] = []
   
   if (user) {
-    const { data: quizResults } = await supabase
-      .from("quiz_attempts")
-      .select("module_id, created_at")
+    const { data: progress } = await supabase
+      .from("learning_progress")
+      .select("module_id, completed_at")
       .eq("user_id", user.id)
-      .eq("passed", true)
-      .not("module_id", "is", null)
-      .order("created_at", { ascending: false })
+      .eq("status", "completed")
+      .not("completed_at", "is", null)
+      .order("completed_at", { ascending: false })
     
-    if (quizResults) {
-      // Dedupe by module_id, keeping the first (most recent) completion
-      const seen = new Set<string>()
-      completed = quizResults.filter(r => {
-        if (seen.has(r.module_id)) return false
-        seen.add(r.module_id)
-        return true
-      }).map(r => ({
+    if (progress) {
+      completed = progress.map(r => ({
         module_id: r.module_id,
-        completed_at: r.created_at,
+        completed_at: r.completed_at,
       }))
     }
   }
   
   // Transform to expected format
-  const completedIds = new Set(completed.map(c => c.module_id))
-  
   const transformedModules = (modules || []).map(m => {
     const comp = m.competency as unknown as { slug: string; name: string } | null
     return {
@@ -103,43 +101,7 @@ async function getModulesWithProgress(): Promise<{
     }
   })
   
-  // Build competency structure for sidebar
-  const competencyMap = new Map<string, { 
-    slug: string
-    name: string
-    display_order: number
-    modules: Array<{ slug: string; title: string; status: "complete" | "current" | "locked" }>
-  }>()
-  
-  for (const m of modules || []) {
-    const comp = m.competency as unknown as { slug: string; name: string; display_order: number } | null
-    if (!comp) continue
-    
-    if (!competencyMap.has(comp.slug)) {
-      competencyMap.set(comp.slug, {
-        slug: comp.slug,
-        name: comp.name,
-        display_order: comp.display_order,
-        modules: [],
-      })
-    }
-    
-    competencyMap.get(comp.slug)!.modules.push({
-      slug: m.slug,
-      title: m.title,
-      status: completedIds.has(m.id) ? "complete" : "current",
-    })
-  }
-  
-  const competencies = Array.from(competencyMap.values())
-    .sort((a, b) => a.display_order - b.display_order)
-    .map((c, i) => ({
-      ...c,
-      number: i + 1,
-      locked: false,
-    }))
-  
-  return { modules: transformedModules, completed, competencies }
+  return { modules: transformedModules, completed }
 }
 
 // =============================================================================
@@ -147,8 +109,9 @@ async function getModulesWithProgress(): Promise<{
 // =============================================================================
 
 export default async function ProgressPage() {
-  const [{ modules, completed, competencies }, scenarioStats, userRole, userMenu] = await Promise.all([
+  const [{ modules, completed }, competencies, scenarioStats, userRole, userMenu] = await Promise.all([
     getModulesWithProgress(),
+    getCompetenciesForSidebar(),
     getScenarioCompletionStats(),
     getUserRole(),
     getUserForMenu(),

@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Default response (may be replaced by Supabase cookie handling)
-  let response = NextResponse.next({ request: { headers: request.headers } })
+  const response = NextResponse.next({ request: { headers: request.headers } })
 
   // ---------------------------------------------------------------------------
   // Auth: Route Protection

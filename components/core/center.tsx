@@ -9,7 +9,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Box, type BoxProps } from "./_base"
 
-export interface CenterProps extends Omit<BoxProps, "inline"> {}
+export type CenterProps = Omit<BoxProps, "inline">
 
 const Center = React.forwardRef<HTMLElement, CenterProps>(
   ({ className, ...props }, ref) => (

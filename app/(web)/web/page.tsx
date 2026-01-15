@@ -146,6 +146,7 @@ function CapabilityItem({ children }: { children: React.ReactNode }) {
 export default function WebLandingPage() {
   const [mounted, setMounted] = useState(false)
   
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Initialization on mount
   useEffect(() => setMounted(true), [])
 
   const features = [

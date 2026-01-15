@@ -41,6 +41,36 @@
   background: var(--color-background);
 }
 
+/* Skip Link - hidden until focused */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--lms-radius-md);
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+  outline: none;
+}
+
+/* Main content wrapper for skip link target */
+.learn-main__content {
+  display: contents;
+}
+
+.learn-main__content:focus {
+  outline: none;
+}
+
 .learn-main {
   display: flex;
   flex: 1;
@@ -296,6 +326,7 @@
   color: var(--gray-600);
   text-decoration: none;
   transition: all var(--lms-transition-fast);
+  cursor: pointer;
 }
 
 .learn-sidebar__nav-item:hover {
@@ -437,9 +468,12 @@
   flex-shrink: 0;
 }
 
-.learn-sidebar__competency-number[data-complete="true"] {
-  background: var(--green-500);
-  color: white;
+.learn-sidebar__competency-complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green-500);
+  flex-shrink: 0;
 }
 
 .learn-sidebar__competency-number[data-locked="true"] {
@@ -1437,6 +1471,35 @@
   box-shadow: var(--lms-shadow-xl);
   animation: slideIn 0.25s ease-out;
   overflow-y: auto;
+}
+
+/* Drawer close button */
+.learn-drawer__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--lms-radius-sm);
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background var(--lms-transition-fast), color var(--lms-transition-fast);
+  z-index: 10;
+}
+
+.learn-drawer__close:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.learn-drawer__close:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .learn-drawer__panel .learn-sidebar {
@@ -8350,4 +8413,263 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* =============================================================================
+   Academy Tour - Summary Banner
+   ============================================================================= */
+
+.lms-tour-summary {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.lms-tour-summary__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, var(--primary-50) 0%, oklch(from var(--color-primary) l c h / 0.04) 100%);
+  border-radius: var(--lms-radius-md);
+  border: 1px solid oklch(from var(--color-primary) l c h / 0.12);
+}
+
+.lms-tour-summary__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  border-radius: 50%;
+  color: white;
+  flex-shrink: 0;
+}
+
+.lms-tour-summary__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.lms-tour-summary__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.125rem;
+}
+
+.lms-tour-summary__description {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.lms-tour-summary__button {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .lms-tour-summary__content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .lms-tour-summary__button {
+    width: 100%;
+  }
+}
+
+/* Dark mode */
+:root.dark .lms-tour-summary__content {
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.1) 0%, oklch(from var(--color-primary) l c h / 0.05) 100%);
+  border-color: oklch(from var(--color-primary) l c h / 0.15);
+}
+
+:root.dark .lms-tour-summary__title {
+  color: var(--gray-100);
+}
+
+:root.dark .lms-tour-summary__description {
+  color: var(--gray-400);
+}
+
+/* =============================================================================
+   Academy Tour - Modal
+   ============================================================================= */
+
+.tour-modal {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tour-modal__progress {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.tour-modal__progress-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gray-200);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--lms-transition-fast), transform var(--lms-transition-fast);
+}
+
+.tour-modal__progress-dot:hover {
+  background: var(--gray-300);
+}
+
+.tour-modal__progress-dot[data-active="true"] {
+  background: var(--primary-500);
+  transform: scale(1.25);
+}
+
+.tour-modal__progress-dot[data-complete="true"] {
+  background: var(--primary-300);
+}
+
+.tour-modal__slide {
+  padding: 1.5rem 1.5rem 0;
+  text-align: center;
+}
+
+.tour-modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  border-radius: 50%;
+  color: white;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 24px oklch(from var(--color-primary) l c h / 0.3);
+}
+
+.tour-modal__title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.tour-modal__description {
+  font-size: 0.9375rem;
+  color: var(--gray-500);
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.tour-modal__details {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  text-align: left;
+}
+
+.tour-modal__detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.tour-modal__detail-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--primary-500);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.tour-modal__tip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--gray-50);
+  border-radius: var(--lms-radius-sm);
+  margin-top: 0.5rem;
+}
+
+.tour-modal__tip-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.tour-modal__tip span {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.tour-modal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--gray-100);
+  margin-top: 1.5rem;
+}
+
+.tour-modal__counter {
+  font-size: 0.8125rem;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+/* Dark mode - Modal */
+:root.dark .tour-modal__progress-dot {
+  background: var(--gray-700);
+}
+
+:root.dark .tour-modal__progress-dot:hover {
+  background: var(--gray-600);
+}
+
+:root.dark .tour-modal__progress-dot[data-complete="true"] {
+  background: var(--primary-700);
+}
+
+:root.dark .tour-modal__title {
+  color: var(--gray-100);
+}
+
+:root.dark .tour-modal__description {
+  color: var(--gray-400);
+}
+
+:root.dark .tour-modal__detail {
+  color: var(--gray-300);
+}
+
+:root.dark .tour-modal__tip {
+  background: var(--gray-800);
+}
+
+:root.dark .tour-modal__tip-icon {
+  color: var(--gray-500);
+}
+
+:root.dark .tour-modal__tip span {
+  color: var(--gray-400);
+}
+
+:root.dark .tour-modal__nav {
+  border-top-color: var(--gray-800);
+}
+
+:root.dark .tour-modal__counter {
+  color: var(--gray-500);
 }

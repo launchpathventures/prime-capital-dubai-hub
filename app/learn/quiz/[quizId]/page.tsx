@@ -6,9 +6,11 @@
  * Used for standalone quizzes like RERA practice exams.
  */
 
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { getCompetenciesForSidebar } from "@/lib/learning"
 import { QuizPageClient } from "./quiz-page-client"
 import { LearnShell } from "../../_surface/learn-shell"
 
@@ -16,6 +18,36 @@ interface PageProps {
   params: Promise<{ quizId: string }>
   searchParams: Promise<{ returnTo?: string }>
 }
+
+// =============================================================================
+// Metadata
+// =============================================================================
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { quizId } = await params
+  const supabase = await createClient()
+  
+  const { data: quiz } = await supabase
+    .from("quizzes")
+    .select("title, description")
+    .eq("slug", quizId)
+    .single()
+  
+  if (!quiz) {
+    return {
+      title: "Quiz | Learning Portal",
+    }
+  }
+  
+  return {
+    title: `${quiz.title} | Learning Portal`,
+    description: quiz.description || `Test your knowledge with the ${quiz.title} quiz.`,
+  }
+}
+
+// =============================================================================
+// Types
+// =============================================================================
 
 interface QuizQuestion {
   id: string
@@ -81,36 +113,6 @@ async function getQuizData(quizSlug: string): Promise<{
   }
 }
 
-async function getCompetencies(): Promise<Competency[]> {
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from("competencies")
-    .select(`
-      slug,
-      name,
-      display_order,
-      learning_modules (slug, title, display_order)
-    `)
-    .order("display_order", { ascending: true })
-  
-  if (error) return []
-  
-  return (data || []).map((comp, index) => ({
-    slug: comp.slug,
-    name: comp.name,
-    number: index + 1,
-    locked: false,
-    modules: ((comp as { learning_modules?: { slug: string; title: string; display_order: number }[] }).learning_modules || [])
-      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-      .map(m => ({
-        slug: m.slug,
-        title: m.title,
-        status: "current" as const,
-      })),
-  }))
-}
-
 // -----------------------------------------------------------------------------
 // Page Component
 // -----------------------------------------------------------------------------
@@ -121,7 +123,7 @@ export default async function QuizPage({ params, searchParams }: PageProps) {
   
   const [data, competencies, userRole, userMenu] = await Promise.all([
     getQuizData(quizId),
-    getCompetencies(),
+    getCompetenciesForSidebar(),
     getUserRole(),
     getUserForMenu(),
   ])

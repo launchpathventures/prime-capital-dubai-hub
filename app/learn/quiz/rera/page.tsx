@@ -5,6 +5,7 @@
  * Clean, focused design for quiz selection.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { 
   ClipboardCheckIcon,
@@ -17,6 +18,11 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../../_surface/learn-shell"
+
+export const metadata: Metadata = {
+  title: "RERA Practice Exams | Learning Portal",
+  description: "Prepare for the RERA certification exam with practice questions.",
+}
 
 // =============================================================================
 // Types

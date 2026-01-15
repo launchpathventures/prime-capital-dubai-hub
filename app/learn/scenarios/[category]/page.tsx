@@ -225,7 +225,7 @@ export default async function ScenarioCategoryPage({ params }: PageProps) {
           <section className="scenario-objectives">
             <h2 className="scenario-objectives__title">
               <TargetIcon className="h-4 w-4" />
-              What You'll Practice
+              What You&apos;ll Practice
             </h2>
             <ul className="scenario-objectives__list">
               {objectives.map((obj, idx) => (

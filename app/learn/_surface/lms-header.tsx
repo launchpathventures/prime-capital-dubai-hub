@@ -19,6 +19,8 @@ import { UserMenu, type UserMenuUser } from "@/components/shared/user-menu"
 interface LMSHeaderProps {
   onMenuClick?: () => void
   showMenuButton?: boolean
+  /** Ref for the menu button to return focus after drawer closes */
+  menuButtonRef?: React.RefObject<HTMLButtonElement | null>
   /** User data for the user menu */
   user?: UserMenuUser
 }
@@ -30,6 +32,7 @@ interface LMSHeaderProps {
 export function LMSHeader({ 
   onMenuClick,
   showMenuButton = false,
+  menuButtonRef,
   user,
 }: LMSHeaderProps) {
   return (
@@ -39,6 +42,7 @@ export function LMSHeader({
           {/* Mobile menu button */}
           {showMenuButton && (
             <button
+              ref={menuButtonRef}
               onClick={onMenuClick}
               className="learn-header__menu"
               aria-label="Open menu"

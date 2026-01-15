@@ -8,7 +8,7 @@
 "use client"
 
 import { useState } from "react"
-import { Row, Text } from "@/components/core"
+import { Row, Stack, Text } from "@/components/core"
 import { 
   HeadphonesIcon, 
   PlayIcon, 

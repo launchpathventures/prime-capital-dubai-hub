@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2Icon, AlertCircleIcon, CheckCircleIcon, InfoIcon } from "lucide-react"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
-import { type AuthMode } from "@/lib/auth"
+import type { AuthMode } from "@/lib/auth/config"
 
 // -----------------------------------------------------------------------------
 // Types

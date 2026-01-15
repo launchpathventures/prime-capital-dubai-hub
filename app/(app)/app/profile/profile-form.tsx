@@ -11,7 +11,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
-import { getURL } from "@/lib/auth"
+import { getURL } from "@/lib/auth/get-url"
 import { Stack, Row, Text, Title, Grid } from "@/components/core"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -43,7 +43,7 @@ import {
   CopyIcon,
   LockIcon,
 } from "lucide-react"
-import { type AuthMode } from "@/lib/auth/config"
+import type { AuthMode } from "@/lib/auth/config"
 import { cn } from "@/lib/utils"
 
 // -----------------------------------------------------------------------------
@@ -184,8 +184,12 @@ function ProfileHeader({ user, isSupabase, localDisplayName }: { user: ProfileUs
   const displayName = localDisplayName || user.displayName || user.email.split("@")[0]
   const initials = getInitials(displayName)
 
-  // Calculate account age for fun stat
-  const accountAge = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+  // Calculate account age for fun stat - use stable creation date
+  const createdAt = new Date(user.createdAt).getTime()
+  const [accountAge, setAccountAge] = React.useState(0)
+  React.useEffect(() => {
+    setAccountAge(Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24)))
+  }, [createdAt])
   const accountAgeText = accountAge === 0 ? "Joined today" : accountAge === 1 ? "Joined 1 day ago" : `Joined ${accountAge} days ago`
 
   // Avatar dimensions for consistent spacing

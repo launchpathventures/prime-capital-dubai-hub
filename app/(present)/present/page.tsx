@@ -44,6 +44,7 @@ export default function PresentationsIndexPage() {
   const [mounted, setMounted] = useState(false)
   const { isOpen, isMobile, toggle, close } = useSidebarState()
   
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Initialization on mount
   useEffect(() => setMounted(true), [])
 
   // Alt+M keyboard shortcut to toggle menu (consistent with App/Docs layouts)

@@ -5,12 +5,18 @@
  * Sidebar is always visible with navigation sections.
  * Includes AI Coach integration for contextual assistance.
  *
+ * Accessibility:
+ * - Skip link for keyboard users to bypass navigation
+ * - Focus trap in mobile drawer
+ * - ARIA attributes for screen readers
+ *
  * Used by: /learn route group
  */
 
 "use client"
 
 import * as React from "react"
+import { XIcon } from "lucide-react"
 import { LMSHeader } from "./lms-header"
 import { LearnSidebar } from "./learn-sidebar"
 import {
@@ -72,13 +78,78 @@ export function LearnShell({
   user,
 }: LearnShellProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
+  const drawerRef = React.useRef<HTMLDivElement>(null)
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+
+  // Focus trap for mobile drawer
+  React.useEffect(() => {
+    if (!drawerOpen || !drawerRef.current) return
+
+    const drawer = drawerRef.current
+    const focusableElements = drawer.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0]
+    const lastElement = focusableElements[focusableElements.length - 1]
+
+    // Focus first element when drawer opens
+    firstElement?.focus()
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setDrawerOpen(false)
+        triggerRef.current?.focus()
+        return
+      }
+
+      if (e.key !== "Tab") return
+
+      if (e.shiftKey) {
+        // Shift+Tab: if on first element, wrap to last
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement?.focus()
+        }
+      } else {
+        // Tab: if on last element, wrap to first
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement?.focus()
+        }
+      }
+    }
+
+    drawer.addEventListener("keydown", handleKeyDown)
+    return () => drawer.removeEventListener("keydown", handleKeyDown)
+  }, [drawerOpen])
+
+  // Prevent body scroll when drawer is open
+  React.useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [drawerOpen])
   
   return (
     <CoachProvider initialContext={coachContext}>
       <div className="learn-shell learn-shell--with-sidebar">
+        {/* Skip Link - first focusable element */}
+        <a 
+          href="#learn-main-content" 
+          className="skip-link"
+        >
+          Skip to main content
+        </a>
+
         <LMSHeader 
           onMenuClick={() => setDrawerOpen(true)}
           showMenuButton={true}
+          menuButtonRef={triggerRef}
           user={user}
         />
         
@@ -93,16 +164,29 @@ export function LearnShell({
             userRole={userRole}
           />
           
-          {/* Mobile drawer */}
+          {/* Mobile drawer with focus trap */}
           <div 
+            ref={drawerRef}
             className="learn-drawer"
             data-open={drawerOpen}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
           >
             <div 
               className="learn-drawer__backdrop"
               onClick={() => setDrawerOpen(false)}
+              aria-hidden="true"
             />
             <div className="learn-drawer__panel">
+              {/* Close button as first focusable element */}
+              <button
+                className="learn-drawer__close"
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close navigation menu"
+              >
+                <XIcon className="h-5 w-5" />
+              </button>
               <LearnSidebar 
                 activeSection={activeSection}
                 competencies={competencies}
@@ -114,8 +198,10 @@ export function LearnShell({
             </div>
           </div>
           
-          {/* Content area - pages provide their own wrapper */}
-          {children}
+          {/* Content area with landmark for skip link */}
+          <div id="learn-main-content" tabIndex={-1} className="learn-main__content">
+            {children}
+          </div>
         </main>
         
         {/* AI Coach - always available */}

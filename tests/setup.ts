@@ -1,0 +1,24 @@
+/**
+ * CATALYST - Vitest Test Setup
+ */
+import '@testing-library/jest-dom'
+import { vi } from 'vitest'
+
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/',
+  redirect: vi.fn(),
+}))
+
+// Mock next/cache
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+}))

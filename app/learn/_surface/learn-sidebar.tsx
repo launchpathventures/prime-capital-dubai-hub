@@ -23,7 +23,9 @@ import {
   SettingsIcon,
   UsersIcon,
   SparklesIcon,
+  GraduationCapIcon,
 } from "lucide-react"
+import { TourSidebarLink } from "./academy-tour"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -118,6 +120,7 @@ export function LearnSidebar({
             <BarChart3Icon className="learn-sidebar__nav-icon" />
             <span>My Progress</span>
           </Link>
+          <TourSidebarLink onNavigate={onNavigate} />
         </nav>
       </div>
       
@@ -128,7 +131,10 @@ export function LearnSidebar({
             className="learn-sidebar__heading learn-sidebar__heading--collapsible"
             onClick={() => setCourseExpanded(!courseExpanded)}
           >
-            <span>Course Content</span>
+            <span className="flex items-center gap-1.5">
+              <GraduationCapIcon className="h-3.5 w-3.5" />
+              Course Content
+            </span>
             {courseExpanded ? (
               <ChevronDownIcon className="h-3.5 w-3.5" />
             ) : (
@@ -142,6 +148,7 @@ export function LearnSidebar({
                 const isExpanded = expandedCompetencies.has(comp.slug)
                 const isActive = currentCompetency === comp.slug
                 const completedCount = comp.modules.filter(m => m.status === "complete").length
+                const isFullyComplete = completedCount === comp.modules.length && comp.modules.length > 0
                 
                 return (
                   <div 
@@ -163,13 +170,18 @@ export function LearnSidebar({
                           }
                         }}
                       >
-                        <span 
-                          className="learn-sidebar__competency-number"
-                          data-locked={comp.locked}
-                          data-complete={completedCount === comp.modules.length && comp.modules.length > 0}
-                        >
-                          {comp.number}
-                        </span>
+                        {isFullyComplete ? (
+                          <span className="learn-sidebar__competency-complete">
+                            <CheckCircleIcon className="h-4 w-4" />
+                          </span>
+                        ) : (
+                          <span 
+                            className="learn-sidebar__competency-number"
+                            data-locked={comp.locked}
+                          >
+                            {comp.number}
+                          </span>
+                        )}
                         <span className="learn-sidebar__competency-name">{comp.name}</span>
                       </Link>
                       {!comp.locked && comp.modules.length > 0 && (

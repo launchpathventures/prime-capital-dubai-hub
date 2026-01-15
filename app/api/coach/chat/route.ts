@@ -204,9 +204,9 @@ export async function POST(request: NextRequest) {
       context.competencySlug &&
       context.moduleSlug
     ) {
-      const module = await getModule(context.competencySlug, context.moduleSlug)
-      if (module) {
-        moduleContent = module.content
+      const currentModule = await getModule(context.competencySlug, context.moduleSlug)
+      if (currentModule) {
+        moduleContent = currentModule.content
       }
     }
 

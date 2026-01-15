@@ -5,6 +5,7 @@
  * Shows readiness checklist and provides preparation materials.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Row, Text } from "@/components/core"
@@ -24,6 +25,11 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../_surface/learn-shell"
+
+export const metadata: Metadata = {
+  title: "Certification | Learning Portal",
+  description: "Prepare for your Prime Capital consultant certification assessment.",
+}
 
 // =============================================================================
 // Types
@@ -352,7 +358,7 @@ export default async function CertificationPage() {
             <AwardIcon className="h-12 w-12" />
           </div>
           <h2>Prime Capital Certified Consultant</h2>
-          <p>You're ready to work with clients. Keep developing your skills through practice.</p>
+          <p>You&apos;re ready to work with clients. Keep developing your skills through practice.</p>
           <Row gap="md" className="mt-6">
             <Button nativeButton={false} render={<Link href="/learn/scenarios" />}>
               Continue Practicing

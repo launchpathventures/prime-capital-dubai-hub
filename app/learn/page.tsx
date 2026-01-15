@@ -17,7 +17,9 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { getCompetenciesForSidebar } from "@/lib/learning"
 import { LearnShell } from "./_surface/learn-shell"
+import { AcademyTour } from "./_surface/academy-tour"
 
 // =============================================================================
 // Types
@@ -82,8 +84,9 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
 // =============================================================================
 
 export default async function LearnDashboardPage() {
-  const [competencies, userRole, userMenu] = await Promise.all([
+  const [competencies, sidebarCompetencies, userRole, userMenu] = await Promise.all([
     getCompetenciesWithModules(),
+    getCompetenciesForSidebar(),
     getUserRole(),
     getUserForMenu(),
   ])
@@ -97,19 +100,6 @@ export default async function LearnDashboardPage() {
   
   // Find first competency with modules for CTA
   const firstCompetency = availableCompetencies[0]
-  
-  // Transform competencies for sidebar
-  const sidebarCompetencies = competencies.map((c, i) => ({
-    slug: c.slug,
-    name: c.name,
-    number: i + 1,
-    locked: c.modules.length === 0,
-    modules: c.modules.map(m => ({
-      slug: m.slug,
-      title: m.title,
-      status: "current" as const,
-    })),
-  }))
   
   return (
     <LearnShell 
@@ -164,8 +154,11 @@ export default async function LearnDashboardPage() {
           </div>
         </section>
         
+        {/* Academy Tour */}
+        <AcademyTour />
+        
         {/* Competency List */}
-        <section className="lms-section">
+        <section className="lms-section" id="learning-path">
           <div className="lms-section__header">
             <h2 className="lms-section__title">Your Learning Path</h2>
             <span className="lms-section__subtitle">

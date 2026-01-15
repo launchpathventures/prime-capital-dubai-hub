@@ -846,3 +846,47 @@ export async function getLearnUser(): Promise<LearnUser> {
     role: "learner",
   }
 }
+
+// =============================================================================
+// SIDEBAR HELPERS
+// =============================================================================
+
+/**
+ * Module status for sidebar display
+ */
+export type ModuleStatus = "complete" | "current" | "locked"
+
+/**
+ * Sidebar-compatible competency format
+ */
+export interface SidebarCompetency {
+  slug: string
+  name: string
+  number: number
+  locked: boolean
+  modules: Array<{
+    slug: string
+    title: string
+    status: ModuleStatus
+  }>
+}
+
+/**
+ * Get competencies formatted for the learn sidebar with actual progress status.
+ * This is a convenience wrapper around getAllCompetenciesWithProgress().
+ */
+export async function getCompetenciesForSidebar(): Promise<SidebarCompetency[]> {
+  const competencies = await getAllCompetenciesWithProgress()
+  
+  return competencies.map((comp, index) => ({
+    slug: comp.slug,
+    name: comp.name,
+    number: index + 1,
+    locked: comp.modules.length === 0,
+    modules: comp.modules.map((mod) => ({
+      slug: mod.slug,
+      title: mod.title,
+      status: mod.isCompleted ? "complete" as ModuleStatus : "current" as ModuleStatus,
+    })),
+  }))
+}

@@ -35,15 +35,12 @@ export function generateSlug(title: string): string {
  * @example <Comment text="Section: Hero" /> → <!-- Section: Hero -->
  */
 export function Comment({ text }: { text: string }) {
-  const ref = React.useRef<HTMLSpanElement>(null)
-
-  React.useEffect(() => {
-    const span = ref.current
+  const callbackRef = React.useCallback((span: HTMLSpanElement | null) => {
     if (!span?.parentNode) return
     span.parentNode.replaceChild(document.createComment(` ${text} `), span)
   }, [text])
 
-  return React.createElement("span", { ref, hidden: true })
+  return React.createElement("span", { ref: callbackRef, hidden: true })
 }
 
 // -----------------------------------------------------------------------------

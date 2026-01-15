@@ -140,23 +140,23 @@ async function testEssentialsGeneration() {
     console.log(`   ${essentials.tldr}\n`)
     
     console.log(`🎯 Key Facts (${essentials.keyFacts.length}):`)
-    essentials.keyFacts.forEach((f, i) => {
+    essentials.keyFacts.forEach((f: { fact: string }, i: number) => {
       console.log(`   ${i + 1}. ${f.fact}`)
     })
     
     console.log(`\n📝 Scripts (${essentials.scripts.length}):`)
-    essentials.scripts.forEach((s, i) => {
+    essentials.scripts.forEach((s: { scenario: string; script: string }, i: number) => {
       console.log(`   ${i + 1}. [${s.scenario}]`)
       console.log(`      "${s.script.substring(0, 100)}..."`)
     })
     
     console.log(`\n🖼️ Images (${essentials.images.length}):`)
-    essentials.images.forEach((img, i) => {
+    essentials.images.forEach((img: { src: string; essential: boolean }, i: number) => {
       console.log(`   ${i + 1}. ${img.src} (essential: ${img.essential})`)
     })
     
     console.log(`\n🎧 Audio (${essentials.audio.length}):`)
-    essentials.audio.forEach((a, i) => {
+    essentials.audio.forEach((a: { title: string; duration: string }, i: number) => {
       console.log(`   ${i + 1}. ${a.title} (${a.duration})`)
     })
     

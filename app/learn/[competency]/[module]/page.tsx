@@ -10,10 +10,11 @@
  * Defaults to essentials if available, otherwise deep dive.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { SectionRenderer, ModuleToCRight, ReadingProgress, EssentialsView, EssentialsToCRight, ModuleControlsBar } from "@/components/lms"
+import { SectionRenderer, ModuleToCRight, ReadingProgress, EssentialsToCRight, ModuleControlsBar } from "@/components/lms"
 import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
 import { 
   ChevronLeftIcon,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { getCompetenciesForSidebar } from "@/lib/learning"
 import { ModuleCoachPrompt } from "@/components/lms/coach"
 import { ModulePageClient } from "./page-client"
 import { getAudioForModule, formatAudioDuration } from "@/lib/lms"
@@ -62,6 +64,40 @@ export interface ScenarioLink {
 interface PageProps {
   params: Promise<{ competency: string; module: string }>
   searchParams: Promise<{ mode?: string }>
+}
+
+// =============================================================================
+// Metadata
+// =============================================================================
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { competency: competencySlug, module: moduleSlug } = await params
+  const supabase = await createClient()
+  
+  const { data: competency } = await supabase
+    .from("competencies")
+    .select("name")
+    .eq("slug", competencySlug)
+    .single()
+  
+  const { data: moduleData } = await supabase
+    .from("learning_modules")
+    .select("title")
+    .eq("slug", moduleSlug)
+    .single()
+  
+  if (!moduleData) {
+    return {
+      title: "Module | Learning Portal",
+    }
+  }
+  
+  const competencyName = competency?.name || "Training"
+  
+  return {
+    title: `${moduleData.title} | ${competencyName}`,
+    description: `Learn about ${moduleData.title} in the ${competencyName} competency.`,
+  }
 }
 
 // =============================================================================
@@ -181,20 +217,20 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     notFound()
   }
   
-  const module = currentCompetency.modules[currentModuleIndex]
+  const currentModule = currentCompetency.modules[currentModuleIndex]
   const prevModule = currentModuleIndex > 0 ? currentCompetency.modules[currentModuleIndex - 1] : null
   const nextModule = currentModuleIndex < currentCompetency.modules.length - 1 
     ? currentCompetency.modules[currentModuleIndex + 1] 
     : null
   
   // Determine mode: default to deep dive, essentials is opt-in
-  const hasEssentials = module.essentials !== null
+  const hasEssentials = currentModule.essentials !== null
   const mode = modeParam === "deepdive" || modeParam === "essentials" 
     ? modeParam 
     : "deepdive"
   
   // Estimate durations
-  const deepDiveDuration = module.duration_minutes ? `${module.duration_minutes} min` : "25 min"
+  const deepDiveDuration = currentModule.duration_minutes ? `${currentModule.duration_minutes} min` : "25 min"
   const essentialsDuration = "15 min" // TODO: Calculate from essentials content
   
   // Get related quiz and scenarios for this module
@@ -208,7 +244,11 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     currentCompetency.display_order,
     currentModuleIndex
   )
-  const [userRole, userMenu] = await Promise.all([getUserRole(), getUserForMenu()])
+  const [sidebarCompetencies, userRole, userMenu] = await Promise.all([
+    getCompetenciesForSidebar(),
+    getUserRole(),
+    getUserForMenu(),
+  ])
   const audioTracks = audioData.map((track) => ({
     slug: track.slug,
     title: track.title,
@@ -216,19 +256,6 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     duration: formatAudioDuration(track.audioDurationSeconds),
     audioUrl: track.audioUrl,
     transcript: track.transcript,
-  }))
-  
-  // Transform competencies for sidebar
-  const sidebarCompetencies = allCompetencies.map((c, i) => ({
-    slug: c.slug,
-    name: c.name,
-    number: i + 1,
-    locked: c.modules.length === 0,
-    modules: c.modules.map(m => ({
-      slug: m.slug,
-      title: m.title,
-      status: "current" as const,
-    })),
   }))
   
   return (
@@ -244,8 +271,8 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
         competencySlug,
         competencyName: currentCompetency.name,
         moduleSlug,
-        moduleName: module.title,
-        moduleContent: module.content || undefined,
+        moduleName: currentModule.title,
+        moduleContent: currentModule.content || undefined,
       }}
     >
       {/* Content area with optional right ToC */}
@@ -258,8 +285,8 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
           {/* Module header */}
           <div className="lms-module-header">
             <div className="lms-module-header__meta">
-              <span>Module {module.display_order + 1} of {currentCompetency.modules.length}</span>
-              {module.duration_minutes && (
+              <span>Module {currentModule.display_order + 1} of {currentCompetency.modules.length}</span>
+              {currentModule.duration_minutes && (
                 <>
                   <span>•</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -270,12 +297,12 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               )}
             </div>
             <h1 className="lms-module-header__title">
-              {module.title}
+              {currentModule.title}
             </h1>
           </div>
           
           {/* AI Coach - collapsible, visible in both modes */}
-          <ModuleCoachPrompt moduleTitle={module.title} />
+          <ModuleCoachPrompt moduleTitle={currentModule.title} />
           
           {/* Combined Controls Bar - Audio + Mode Toggle */}
           <ModuleControlsBar
@@ -287,15 +314,15 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
           />
           
           {/* Module content */}
-          {mode === "essentials" && module.essentials ? (
+          {mode === "essentials" && currentModule.essentials ? (
             <ModulePageClient
-              essentials={module.essentials}
+              essentials={currentModule.essentials}
               moduleSlug={moduleSlug}
               competencySlug={competencySlug}
               linkedScenarios={linkedScenarios}
             />
-          ) : module.content ? (
-            <SectionRenderer content={module.content} linkedScenarios={linkedScenarios} />
+          ) : currentModule.content ? (
+            <SectionRenderer content={currentModule.content} linkedScenarios={linkedScenarios} />
           ) : (
             <div className="lms-card" style={{ padding: '1.75rem' }}>
               <div className="lms-prose">
@@ -348,10 +375,10 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
         </div>
         
         {/* Right ToC - mode-specific */}
-        {mode === "essentials" && module.essentials && (
-          <EssentialsToCRight essentials={module.essentials} hasQuiz={!!relatedQuiz} />
+        {mode === "essentials" && currentModule.essentials && (
+          <EssentialsToCRight essentials={currentModule.essentials} hasQuiz={!!relatedQuiz} />
         )}
-        {mode === "deepdive" && module.content && <ModuleToCRight content={module.content} hasQuiz={!!relatedQuiz} />}
+        {mode === "deepdive" && currentModule.content && <ModuleToCRight content={currentModule.content} hasQuiz={!!relatedQuiz} />}
       </div>
     </LearnShell>
   )

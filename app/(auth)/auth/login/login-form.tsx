@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2Icon, AlertCircleIcon, InfoIcon } from "lucide-react"
 import { toast } from "@/components/ui/toast"
-import { type AuthMode } from "@/lib/auth"
+import type { AuthMode } from "@/lib/auth/config"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 import Link from "next/link"
 

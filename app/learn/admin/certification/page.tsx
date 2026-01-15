@@ -319,7 +319,7 @@ function EmptyState() {
       <h3>No Certification Records Yet</h3>
       <p>
         Certification attempts will appear here once recorded.
-        Use the "Record Outcome" button after conducting an assessment.
+        Use the &ldquo;Record Outcome&rdquo; button after conducting an assessment.
       </p>
     </div>
   )
@@ -499,7 +499,7 @@ export default async function CertificationAdminPage() {
         <div className="cert-admin-info">
           <h4>Recording an Outcome</h4>
           <p>
-            After conducting a certification assessment, click "Record Outcome" to enter:
+            After conducting a certification assessment, click &ldquo;Record Outcome&rdquo; to enter:
           </p>
           <ul>
             <li>Trainee name and assessment date</li>
@@ -508,7 +508,7 @@ export default async function CertificationAdminPage() {
             <li>Recording URL and qualitative notes</li>
           </ul>
           <p>
-            The system will automatically update the trainee's certification status based on the outcome.
+            The system will automatically update the trainee&apos;s certification status based on the outcome.
           </p>
         </div>
       </div>

@@ -42,7 +42,8 @@ export type CrudClient<TModel> = {
 
 export type CrudRepositoryOptions<TModel, TCreate, TUpdate, TList> = {
   listSelect?: string
-  listQuery?: (query: any) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
+  listQuery?: (query: unknown) => unknown
   listMap?: (item: TModel) => TList
   createMap?: (payload: TCreate) => Partial<TModel>
   createDefaults?: Partial<TModel>

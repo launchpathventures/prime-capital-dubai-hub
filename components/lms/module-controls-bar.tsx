@@ -294,10 +294,11 @@ function CompactAudioPlayer({ track, config, onClose }: CompactPlayerProps) {
     setIsPlaying(!isPlaying)
   }
   
-  const handleSeek = (value: number[]) => {
+  const handleSeek = (value: number | readonly number[]) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = value[0]
-      setCurrentTime(value[0])
+      const seekTime = Array.isArray(value) ? value[0] : value
+      audioRef.current.currentTime = seekTime
+      setCurrentTime(seekTime)
     }
   }
   

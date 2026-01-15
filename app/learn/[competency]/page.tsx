@@ -6,15 +6,13 @@
  * Uses LearnShell for unified shell with sidebar.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Stack, Row, Text } from "@/components/core"
 import { 
-  BookOpenIcon, 
   ClockIcon, 
-  ChevronRightIcon,
-  GraduationCapIcon,
   PlayIcon,
   ArrowRightIcon,
   ClipboardCheckIcon,
@@ -24,6 +22,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { getCompetenciesForSidebar } from "@/lib/learning"
 import { LearnShell } from "../_surface/learn-shell"
 import { AudioPlayer, type AudioTrack } from "@/components/lms/audio-player"
 
@@ -50,6 +49,32 @@ interface Competency {
 
 interface PageProps {
   params: Promise<{ competency: string }>
+}
+
+// =============================================================================
+// Metadata
+// =============================================================================
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { competency: slug } = await params
+  const supabase = await createClient()
+  
+  const { data } = await supabase
+    .from("competencies")
+    .select("name, description")
+    .eq("slug", slug)
+    .single()
+  
+  if (!data) {
+    return {
+      title: "Competency | Learning Portal",
+    }
+  }
+  
+  return {
+    title: `${data.name} | Learning Portal`,
+    description: data.description || `Learn ${data.name} in the Prime Capital training program.`,
+  }
 }
 
 // =============================================================================
@@ -181,27 +206,15 @@ export default async function CompetencyPage({ params }: PageProps) {
   
   const firstModule = currentCompetency.modules[0]
   
-  // Get quizzes, scenarios, and audio for this competency
-  const [quizzes, scenarios, competencyAudio, userRole, userMenu] = await Promise.all([
+  // Get quizzes, scenarios, audio, and sidebar data for this competency
+  const [quizzes, scenarios, competencyAudio, sidebarCompetencies, userRole, userMenu] = await Promise.all([
     getQuizzesForCompetency(slug),
     getScenariosForCompetency(slug),
     getCompetencyAudio(currentCompetency.id),
+    getCompetenciesForSidebar(),
     getUserRole(),
     getUserForMenu(),
   ])
-  
-  // Transform competencies for sidebar
-  const sidebarCompetencies = allCompetencies.map((c, i) => ({
-    slug: c.slug,
-    name: c.name,
-    number: i + 1,
-    locked: c.modules.length === 0,
-    modules: c.modules.map(m => ({
-      slug: m.slug,
-      title: m.title,
-      status: "current" as const,
-    })),
-  }))
   
   return (
     <LearnShell 

@@ -5,6 +5,7 @@
  * Learners can browse and practice AI-powered conversations.
  */
 
+import { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { 
@@ -20,6 +21,11 @@ import {
 import { createClient } from "@/lib/supabase/server"
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { LearnShell } from "../_surface/learn-shell"
+
+export const metadata: Metadata = {
+  title: "Practice Scenarios | Learning Portal",
+  description: "Practice real-world client conversations with AI-powered roleplay scenarios.",
+}
 
 // =============================================================================
 // Types
@@ -115,7 +121,7 @@ export default async function ScenariosIndexPage() {
           <h1 className="scenario-hero__title">Practice Scenarios</h1>
           <p className="scenario-hero__description">
             Master client conversations through AI-powered roleplay. Practice handling 
-            real situations you'll encounter as a Prime Capital consultant.
+            real situations you&apos;ll encounter as a Prime Capital consultant.
           </p>
           <div className="scenario-hero__stats">
             <span className="scenario-hero__stat">
@@ -136,7 +142,7 @@ export default async function ScenariosIndexPage() {
             <div className="scenario-intro__step-num">1</div>
             <div className="scenario-intro__step-content">
               <strong>Choose a scenario</strong>
-              <span>Select from situations you'll encounter with real clients</span>
+              <span>Select from situations you&apos;ll encounter with real clients</span>
             </div>
           </div>
           <div className="scenario-intro__step">
@@ -205,8 +211,8 @@ export default async function ScenariosIndexPage() {
         <div className="scenario-cta__content">
           <h3 className="scenario-cta__title">Ready for Certification?</h3>
           <p className="scenario-cta__description">
-            Once you've practiced these scenarios and completed your modules, 
-            you'll be ready for your certification assessment with the founding team.
+            Once you&apos;ve practiced these scenarios and completed your modules, 
+            you&apos;ll be ready for your certification assessment with the founding team.
           </p>
           <Button 
             variant="default" 

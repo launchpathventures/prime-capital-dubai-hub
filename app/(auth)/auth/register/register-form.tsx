@@ -20,7 +20,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2Icon, AlertCircleIcon, InfoIcon } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
-import { getURL, type AuthMode } from "@/lib/auth"
+import { getURL } from "@/lib/auth/get-url"
+import type { AuthMode } from "@/lib/auth/config"
 
 // -----------------------------------------------------------------------------
 // Types

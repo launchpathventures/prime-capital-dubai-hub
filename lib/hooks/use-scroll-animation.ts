@@ -109,6 +109,7 @@ export function useCountUp(
   useEffect(() => {
     if (!isActive || hasStarted || isNaN(target)) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Animation trigger, intentional
     setHasStarted(true)
     const startTime = performance.now()
 
