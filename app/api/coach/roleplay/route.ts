@@ -8,6 +8,7 @@
 import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/lib/supabase/server"
+import { getPrompts } from "@/lib/lms/ai-prompts"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -68,8 +69,8 @@ function validateScenario(scenario: unknown): scenario is ScenarioContext {
 // System Prompts
 // -----------------------------------------------------------------------------
 
-function buildRoleplayPrompt(scenario: ScenarioContext): string {
-  return `You are roleplaying as a client in a real estate consultation scenario.
+async function buildRoleplayPrompt(scenario: ScenarioContext, characterPrompt: string): Promise<string> {
+  return `${characterPrompt}
 
 SCENARIO: ${scenario.title}
 
@@ -78,21 +79,6 @@ ${scenario.situation}
 
 YOUR CHARACTER (the client):
 ${scenario.persona}
-
-BEHAVIOR RULES:
-- Stay 100% in character as this client
-- Express concerns naturally based on your persona
-- React realistically to the consultant's responses
-- If they address your concerns well, show gradual openness
-- If they dismiss, deflect, or use pushy tactics, show skepticism or resistance
-- Keep responses conversational (2-4 sentences typical)
-- Never break character unless user explicitly asks for coaching help
-
-COACHING MODE (only if user asks "How am I doing?", "Can I get feedback?", or similar):
-- Briefly step out of character: "Stepping out of character for a moment..."
-- Provide constructive feedback on their approach so far
-- Reference what the scenario is testing
-- Then return: "Back in character as the client..."
 
 Start the conversation as the client, based on the scenario situation. The consultant (user) has just engaged with you.`
 }
@@ -179,6 +165,9 @@ export async function POST(request: NextRequest) {
       return new Response("Invalid or incomplete scenario data. Required: id, category, title, situation, persona, objective, challenges, approach", { status: 400 })
     }
 
+    // Load prompts from database
+    const prompts = await getPrompts(["roleplay_character", "roleplay_evaluation"])
+
     // Evaluation mode: non-streaming, returns JSON
     if (mode === "evaluate") {
       if (messages.length < 2) {
@@ -198,8 +187,7 @@ export async function POST(request: NextRequest) {
           model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
           max_tokens: 1024,
           temperature: 0.3,
-          system:
-            "You are an expert evaluator for real estate sales training. Respond only with valid JSON.",
+          system: prompts.roleplay_evaluation,
           messages: [
             {
               role: "user",
@@ -250,11 +238,14 @@ export async function POST(request: NextRequest) {
           }))
         : [{ role: "user" as const, content: "Begin the roleplay. Start as the client and open the conversation based on the scenario." }]
 
+      // Build the roleplay prompt with character from database
+      const roleplaySystemPrompt = await buildRoleplayPrompt(scenario, prompts.roleplay_character)
+
       const stream = await anthropic.messages.stream({
         model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 384,
         temperature: 0.8,
-        system: buildRoleplayPrompt(scenario),
+        system: roleplaySystemPrompt,
         messages: apiMessages,
       })
 

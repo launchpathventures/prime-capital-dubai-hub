@@ -48,7 +48,7 @@ interface Competency {
 
 interface LearnSidebarProps {
   /** Active section for highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback" | "admin-prompts"
   /** Competency data for course section */
   competencies?: Competency[]
   /** Current competency slug */

@@ -44,6 +44,8 @@ export default async function AdminFeedbackPage({
   return (
     <LearnShell
       user={{ name: profile?.full_name || user.email || "Admin", role: "admin" }}
+      activeSection="admin-feedback"
+      userRole="admin"
     >
       <Stack gap="lg" className="p-6 max-w-5xl mx-auto">
         <div>

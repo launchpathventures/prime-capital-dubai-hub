@@ -72,6 +72,7 @@ export function FeedbackFilters() {
 
       <Button
         variant="outline"
+        nativeButton={false}
         render={<a href={exportUrl} download />}
       >
         <Download className="h-4 w-4 mr-2" />
