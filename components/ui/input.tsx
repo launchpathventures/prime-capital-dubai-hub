@@ -14,6 +14,8 @@
  * @source shadcn/ui v3.6.2 + @base-ui/react v1.0.0
  */
 
+"use client"
+
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 import { XIcon } from "lucide-react"

@@ -14,6 +14,8 @@
  * @source shadcn/ui v3.6.2 + @base-ui/react v1.0.0
  */
 
+"use client"
+
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"

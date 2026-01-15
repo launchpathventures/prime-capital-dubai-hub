@@ -1,3 +1,225 @@
+# LMS-030: Scenario Roleplay Fix
+
+**Status:** 📋 READY  
+**Priority:** High  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** LMS-021 (Scenario Roleplay)  
+**Agent-Safe:** ✅ Yes — debugging and fixes
+
+---
+
+## Objective
+
+Diagnose and fix errors in the Scenario AI Roleplay feature. Users report errors when initiating roleplay practice within scenarios.
+
+---
+
+## Background
+
+### Current State
+
+- Scenario roleplay was implemented in LMS-021
+- API endpoint exists at `POST /api/coach/roleplay`
+- Component exists at `app/learn/scenarios/[category]/_components/scenario-practice.tsx`
+- Uses Claude API for roleplay and evaluation
+
+### Reported Issues
+
+1. **Error on roleplay initiation:** User gets error when clicking "Practice with AI"
+2. **Unknown specific error:** Need to investigate logs and test locally
+
+---
+
+## Diagnostic Steps
+
+### Step 1: Check Environment Variables
+
+Verify `ANTHROPIC_API_KEY` is configured:
+
+```bash
+# Check if key is set (don't print the actual key)
+echo $ANTHROPIC_API_KEY | head -c 10
+```
+
+### Step 2: Test API Endpoint Locally
+
+Create a test script or use curl:
+
+```bash
+# Start dev server
+pnpm dev
+
+# In another terminal, test the endpoint (requires auth cookie)
+curl -X POST http://localhost:3000/api/coach/roleplay \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [],
+    "scenario": {
+      "id": "test-1",
+      "category": "objections",
+      "title": "Test Scenario",
+      "situation": "A client is concerned about market timing.",
+      "persona": "Sarah, a cautious first-time investor from the UK.",
+      "objective": "Address timing concerns with market data.",
+      "challenges": "Client has read negative press about Dubai property.",
+      "approach": "Acknowledge concerns, provide context, share data."
+    },
+    "mode": "roleplay"
+  }'
+```
+
+### Step 3: Check Server Logs
+
+Look for errors in the terminal running `pnpm dev`:
+- API errors from Claude
+- Missing scenario fields
+- Authentication issues
+
+---
+
+## Potential Issues & Fixes
+
+### Issue 1: Missing or Invalid Scenario Fields
+
+**Problem:** The `ParsedScenario` type may not match what the API expects.
+
+**Check:** Compare types in:
+- `app/learn/scenarios/[category]/page.tsx` (ParsedScenario)
+- `app/api/coach/roleplay/route.ts` (ScenarioContext)
+
+**Current ParsedScenario:**
+```typescript
+interface ParsedScenario {
+  id: string
+  title: string
+  difficulty: number
+  situation: string
+  persona: string
+  objective: string
+  challenges: string
+  mistakes: string
+  approach: string
+  aiPrompt: string
+}
+```
+
+**Current ScenarioContext:**
+```typescript
+interface ScenarioContext {
+  id: string
+  category: string
+  title: string
+  situation: string
+  persona: string
+  objective: string
+  challenges: string
+  approach: string
+}
+```
+
+**Fix:** Ensure `scenario-practice.tsx` passes all required fields:
+
+```typescript
+// In buildScenarioContext()
+const buildScenarioContext = useCallback(() => {
+  return {
+    id: scenario.id,
+    category,
+    title: scenario.title,
+    situation: scenario.situation,
+    persona: scenario.persona,
+    objective: scenario.objective,
+    challenges: scenario.challenges,
+    approach: scenario.approach,
+  }
+}, [scenario, category])
+```
+
+### Issue 2: Empty Scenario Fields
+
+**Problem:** If any scenario field is empty/null, the AI prompt may fail.
+
+**Fix:** Add validation in the API route:
+
+```typescript
+// In route.ts, after parsing body
+if (!scenario.situation || !scenario.persona || !scenario.objective) {
+  return new Response("Incomplete scenario data", { status: 400 })
+}
+```
+
+### Issue 3: API Key Not Configured
+
+**Problem:** `ANTHROPIC_API_KEY` may not be set or is invalid.
+
+**Fix:** Add better error handling:
+
+```typescript
+// At the top of route.ts
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.error("ANTHROPIC_API_KEY is not configured")
+  return new Response("AI service not configured", { status: 503 })
+}
+```
+
+### Issue 4: Claude API Errors
+
+**Problem:** Claude API may be returning errors (rate limit, invalid model, etc.)
+
+**Fix:** Add try-catch with detailed error logging:
+
+```typescript
+try {
+  const stream = await anthropic.messages.stream({
+    // ...
+  })
+  // ...
+} catch (error) {
+  console.error("Claude API error:", error)
+  
+  // Check for specific error types
+  if (error instanceof Anthropic.APIError) {
+    if (error.status === 429) {
+      return new Response("Rate limit exceeded. Please try again later.", { status: 429 })
+    }
+    if (error.status === 401) {
+      return new Response("AI service authentication failed", { status: 503 })
+    }
+  }
+  
+  return new Response("Failed to start roleplay", { status: 500 })
+}
+```
+
+### Issue 5: Streaming Response Not Handled
+
+**Problem:** Client may not handle streaming correctly if response format changes.
+
+**Fix:** Verify the streaming response handling in `scenario-practice.tsx`:
+
+```typescript
+// Ensure proper error handling for non-ok responses
+if (!response.ok) {
+  const errorText = await response.text()
+  console.error("Roleplay error:", response.status, errorText)
+  throw new Error(errorText || "Failed to start")
+}
+
+// Ensure body exists before reading
+if (!response.body) {
+  throw new Error("No response body")
+}
+```
+
+---
+
+## Implementation
+
+### File: `app/api/coach/roleplay/route.ts`
+
+Update the route handler with improved error handling:
+
+```typescript
 /**
  * CATALYST - Scenario Roleplay API
  *
@@ -49,9 +271,9 @@ const anthropic = new Anthropic({
 
 function validateScenario(scenario: unknown): scenario is ScenarioContext {
   if (!scenario || typeof scenario !== "object") return false
-
+  
   const s = scenario as Record<string, unknown>
-
+  
   return (
     typeof s.id === "string" &&
     typeof s.category === "string" &&
@@ -147,7 +369,7 @@ EVALUATION CRITERIA:
 
 export async function POST(request: NextRequest) {
   try {
-    // Check API key first
+    // Check API key
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error("ANTHROPIC_API_KEY is not configured")
       return new Response("AI service not configured", { status: 503 })
@@ -163,7 +385,7 @@ export async function POST(request: NextRequest) {
       return new Response("Unauthorized", { status: 401 })
     }
 
-    // Parse request body
+    // Parse request
     let body: RoleplayRequest
     try {
       body = await request.json()
@@ -173,10 +395,10 @@ export async function POST(request: NextRequest) {
 
     const { messages, scenario, mode } = body
 
-    // Validate scenario with detailed error
+    // Validate scenario
     if (!validateScenario(scenario)) {
-      console.error("Invalid scenario data:", JSON.stringify(scenario, null, 2))
-      return new Response("Invalid or incomplete scenario data. Required: id, category, title, situation, persona, objective, challenges, approach", { status: 400 })
+      console.error("Invalid scenario data:", scenario)
+      return new Response("Invalid or incomplete scenario data", { status: 400 })
     }
 
     // Evaluation mode: non-streaming, returns JSON
@@ -247,12 +469,12 @@ export async function POST(request: NextRequest) {
         max_tokens: 384,
         temperature: 0.8,
         system: buildRoleplayPrompt(scenario),
-        messages: messages.length > 0
+        messages: messages.length > 0 
           ? messages.map((m) => ({
               role: m.role as "user" | "assistant",
               content: m.content,
             }))
-          : [], // Empty array for initial message - Claude will start the conversation
+          : [], // Empty array for initial message
       })
 
       // Return streaming response
@@ -284,7 +506,7 @@ export async function POST(request: NextRequest) {
       })
     } catch (error) {
       console.error("Claude API error:", error)
-
+      
       // Check for specific error types
       if (error instanceof Anthropic.APIError) {
         if (error.status === 429) {
@@ -294,7 +516,7 @@ export async function POST(request: NextRequest) {
           return new Response("AI service authentication failed", { status: 503 })
         }
       }
-
+      
       return new Response("Failed to start roleplay", { status: 500 })
     }
   } catch (error) {
@@ -302,3 +524,71 @@ export async function POST(request: NextRequest) {
     return new Response("Internal error", { status: 500 })
   }
 }
+```
+
+### File: `app/learn/scenarios/[category]/_components/scenario-practice.tsx`
+
+Update error handling in the component:
+
+```typescript
+// In startConversation useEffect
+try {
+  const response = await fetch("/api/coach/roleplay", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: [],
+      scenario: buildScenarioContext(),
+      mode: "roleplay",
+    }),
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error("Roleplay start failed:", response.status, errorText)
+    throw new Error(errorText || `Failed to start (${response.status})`)
+  }
+
+  if (!response.body) {
+    throw new Error("No response body received")
+  }
+
+  const reader = response.body.getReader()
+  // ... rest of streaming logic
+} catch (error) {
+  console.error("Failed to start practice:", error)
+  setMessages([
+    {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: error instanceof Error 
+        ? `Unable to start practice: ${error.message}. Please try again.`
+        : "I had trouble starting the practice session. Please try again.",
+    },
+  ])
+}
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Verify `ANTHROPIC_API_KEY` is set in `.env.local`
+- [ ] Test roleplay initiation on a scenario page
+- [ ] Test sending messages during roleplay
+- [ ] Test "How am I doing?" coaching mode
+- [ ] Test ending practice and getting evaluation
+- [ ] Test restart functionality
+- [ ] Check browser console for errors
+- [ ] Check server logs for API errors
+
+---
+
+## Success Criteria
+
+1. ✅ Roleplay starts without errors
+2. ✅ Streaming responses display correctly
+3. ✅ Coaching mode works when requested
+4. ✅ Evaluation returns structured feedback
+5. ✅ Clear error messages when something fails
+6. ✅ No console errors during normal operation

@@ -101,19 +101,32 @@ export function ScenarioPractice({
       setIsLoading(true)
 
       try {
+        const scenarioContext = buildScenarioContext()
+        
+        // Log what we're sending for debugging
+        console.log("Starting roleplay with scenario:", scenarioContext.title)
+
         const response = await fetch("/api/coach/roleplay", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: [],
-            scenario: buildScenarioContext(),
+            scenario: scenarioContext,
             mode: "roleplay",
           }),
         })
 
-        if (!response.ok) throw new Error("Failed to start")
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error("Roleplay start failed:", response.status, errorText)
+          throw new Error(errorText || `Failed to start (${response.status})`)
+        }
 
-        const reader = response.body?.getReader()
+        if (!response.body) {
+          throw new Error("No response body received")
+        }
+
+        const reader = response.body.getReader()
         const decoder = new TextDecoder()
 
         const assistantMessage: Message = {
@@ -123,26 +136,28 @@ export function ScenarioPractice({
         }
         setMessages([assistantMessage])
 
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            const chunk = decoder.decode(value, { stream: true })
-            setMessages((prev) => {
-              const updated = [...prev]
-              updated[0] = { ...updated[0], content: updated[0].content + chunk }
-              return updated
-            })
-          }
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          const chunk = decoder.decode(value, { stream: true })
+          setMessages((prev) => {
+            const updated = [...prev]
+            updated[0] = { ...updated[0], content: updated[0].content + chunk }
+            return updated
+          })
         }
       } catch (error) {
         console.error("Failed to start practice:", error)
+        const errorMessage = error instanceof Error ? error.message : "Unknown error"
         setMessages([
           {
             id: crypto.randomUUID(),
             role: "assistant",
-            content:
-              "I had trouble starting the practice session. Please try again.",
+            content: errorMessage.includes("503") || errorMessage.includes("not configured")
+              ? "AI service is not configured. Please contact support."
+              : errorMessage.includes("401") || errorMessage.includes("Unauthorized")
+              ? "Please log in to use AI practice."
+              : `Unable to start practice: ${errorMessage}. Please try again.`,
           },
         ])
       } finally {
