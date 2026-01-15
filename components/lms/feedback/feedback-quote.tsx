@@ -23,9 +23,12 @@ type SelectionInfo = {
 
 export function FeedbackQuote({ containerSelector }: Props) {
   const [selection, setSelection] = useState<SelectionInfo>(null)
-  const { open, setQuotedText } = useFeedback()
+  const { enabled, open, setQuotedText } = useFeedback()
 
   const handleSelectionChange = useCallback(() => {
+    // Skip if disabled
+    if (!enabled) return
+
     const sel = window.getSelection()
 
     if (!sel || sel.isCollapsed || !sel.toString().trim()) {
@@ -50,7 +53,7 @@ export function FeedbackQuote({ containerSelector }: Props) {
       text: sel.toString().trim(),
       rect,
     })
-  }, [containerSelector])
+  }, [containerSelector, enabled])
 
   const clearSelection = useCallback(() => {
     window.getSelection()?.removeAllRanges()
@@ -64,7 +67,8 @@ export function FeedbackQuote({ containerSelector }: Props) {
     }
   }, [handleSelectionChange])
 
-  if (!selection) return null
+  // Don't render if feedback is disabled or no selection
+  if (!enabled || !selection) return null
 
   const handleQuote = () => {
     setQuotedText(selection.text)

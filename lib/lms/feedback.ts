@@ -9,39 +9,10 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import type { Feedback, FeedbackInput } from "./feedback-types"
 
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-export type Feedback = {
-  id: string
-  user_id: string
-  feedback_type: "general" | "module"
-  competency_slug: string | null
-  module_slug: string | null
-  page_url: string | null
-  text_content: string | null
-  voice_transcription: string | null
-  quoted_text: string | null
-  audio_path: string | null
-  attachments: string[] | null
-  status: "new" | "in_progress" | "complete"
-  created_at: string
-  updated_at: string
-}
-
-export type FeedbackInput = {
-  feedbackType: "general" | "module"
-  competencySlug?: string
-  moduleSlug?: string
-  pageUrl: string
-  textContent?: string
-  voiceTranscription?: string
-  quotedText?: string
-  audioPath?: string
-  attachments?: string[]
-}
+// Re-export types for convenience (types are allowed in "use server" files)
+export type { Feedback, FeedbackInput }
 
 // -----------------------------------------------------------------------------
 // Settings
@@ -108,6 +79,7 @@ export async function submitFeedback(input: FeedbackInput): Promise<void> {
     quoted_text: input.quotedText || null,
     audio_path: input.audioPath || null,
     attachments: input.attachments || null,
+    urls: input.urls || null,
   })
 
   if (error) throw error
@@ -222,14 +194,24 @@ export async function uploadFeedbackAudio(
   } = await supabase.auth.getUser()
   if (!user) throw new Error("Not authenticated")
 
-  const file = formData.get("audio") as File
+  const file = formData.get("audio")
+  if (!file || !(file instanceof File)) {
+    throw new Error("No audio file provided or invalid file type")
+  }
+
   const filename = `${user.id}/${Date.now()}-recording.webm`
 
   const { error } = await supabase.storage
     .from("feedback")
-    .upload(filename, file)
+    .upload(filename, file, {
+      contentType: "audio/webm",
+      upsert: false,
+    })
 
-  if (error) throw error
+  if (error) {
+    console.error("Supabase storage upload error:", error)
+    throw new Error(`Upload failed: ${error.message}`)
+  }
 
   return filename
 }
@@ -248,15 +230,70 @@ export async function uploadFeedbackAttachment(
   } = await supabase.auth.getUser()
   if (!user) throw new Error("Not authenticated")
 
-  const file = formData.get("file") as File
-  const ext = file.name.split(".").pop()
+  const file = formData.get("file")
+  if (!file || !(file instanceof File)) {
+    throw new Error("No file provided or invalid file type")
+  }
+
+  const ext = file.name.split(".").pop() || "bin"
   const filename = `${user.id}/${Date.now()}-attachment.${ext}`
 
   const { error } = await supabase.storage
     .from("feedback")
-    .upload(filename, file)
+    .upload(filename, file, {
+      upsert: false,
+    })
 
-  if (error) throw error
+  if (error) {
+    console.error("Supabase storage upload error:", error)
+    throw new Error(`Upload failed: ${error.message}`)
+  }
 
   return filename
+}
+
+// -----------------------------------------------------------------------------
+// Get Signed URL for Feedback File
+// -----------------------------------------------------------------------------
+
+export async function getFeedbackFileUrl(path: string): Promise<string | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.storage
+    .from("feedback")
+    .createSignedUrl(path, 3600) // 1 hour expiry
+
+  if (error) {
+    console.error("Failed to create signed URL:", error)
+    return null
+  }
+
+  return data.signedUrl
+}
+
+// -----------------------------------------------------------------------------
+// Get Signed URLs for Multiple Files
+// -----------------------------------------------------------------------------
+
+export async function getFeedbackFileUrls(
+  paths: string[]
+): Promise<Record<string, string>> {
+  const supabase = await createClient()
+  const urls: Record<string, string> = {}
+
+  // Get signed URLs in parallel
+  const results = await Promise.all(
+    paths.map(async (path) => {
+      const { data, error } = await supabase.storage
+        .from("feedback")
+        .createSignedUrl(path, 3600)
+      return { path, url: error ? null : data?.signedUrl }
+    })
+  )
+
+  for (const { path, url } of results) {
+    if (url) urls[path] = url
+  }
+
+  return urls
 }

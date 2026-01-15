@@ -112,17 +112,17 @@ export function CoachPanel() {
       {/* Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/50 transition-opacity",
+          "fixed inset-0 z-[60] bg-black/50 transition-opacity",
           isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         )}
         onClick={closeCoach}
         aria-hidden="true"
       />
 
-      {/* Panel */}
+      {/* Panel - z-[70] to sit above feedback banner (z-50) */}
       <aside
         className={cn(
-          "fixed right-0 top-0 z-50 h-full w-full max-w-md",
+          "fixed right-0 top-0 z-[70] h-full w-full max-w-md",
           "bg-background border-l shadow-xl",
           "transform transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -217,31 +217,37 @@ export function CoachPanel() {
           <div className="border-t p-4">
             <form onSubmit={handleSubmit}>
               <Stack gap="sm">
-                <div className="relative">
+                <Row align="end" gap="sm" className="rounded-xl border bg-background p-2 focus-within:ring-2 focus-within:ring-primary/20">
                   <textarea
                     ref={inputRef}
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => {
+                      setInput(e.target.value)
+                      // Auto-resize textarea
+                      const target = e.target
+                      target.style.height = "auto"
+                      target.style.height = `${Math.min(target.scrollHeight, 120)}px`
+                    }}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    rows={2}
+                    rows={1}
                     className={cn(
-                      "w-full resize-none rounded-lg border bg-background p-3 pr-12",
+                      "max-h-[120px] min-h-[36px] flex-1 resize-none bg-transparent px-2 py-1.5",
                       "text-sm placeholder:text-muted-foreground",
-                      "focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      "focus:outline-none"
                     )}
                     disabled={isLoading}
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="absolute bottom-2 right-2"
+                    className="h-9 w-9 shrink-0 rounded-lg"
                     disabled={!input.trim() || isLoading}
                     aria-label="Send message"
                   >
                     <SendIcon className="h-4 w-4" />
                   </Button>
-                </div>
+                </Row>
                 <Text size="xs" variant="muted" className="text-center">
                   ⚠️ For training purposes only. Verify critical details.
                 </Text>

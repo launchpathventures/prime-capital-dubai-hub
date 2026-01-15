@@ -18,6 +18,7 @@ export function CoachTrigger() {
     <Button
       onClick={() => openCoach()}
       size="lg"
+      data-coach-trigger
       className={cn(
         "fixed bottom-6 right-6 z-30",
         "h-14 w-14 rounded-full shadow-lg",

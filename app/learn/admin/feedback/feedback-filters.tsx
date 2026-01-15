@@ -58,6 +58,7 @@ export function FeedbackFilters() {
             <SelectItem value="new">New</SelectItem>
             <SelectItem value="in_progress">In Progress</SelectItem>
             <SelectItem value="complete">Complete</SelectItem>
+            <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
 

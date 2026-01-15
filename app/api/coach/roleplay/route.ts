@@ -2,7 +2,16 @@
  * CATALYST - Scenario Roleplay API
  *
  * Handles roleplay practice and evaluation for scenarios.
- * Uses Claude API with streaming for roleplay, non-streaming for evaluation.
+ * Uses Claude API with streaming for natural conversation flow.
+ *
+ * IMPORTANT: Claude requires:
+ * 1. First message must be from "user" role
+ * 2. Messages must alternate between user and assistant
+ *
+ * Since the AI opens the conversation (as the client persona), we use a
+ * synthetic "begin roleplay" user message that's invisible to the UI.
+ * For follow-ups, we prepend this same synthetic message to maintain
+ * proper alternation.
  */
 
 import { NextRequest } from "next/server"
@@ -23,6 +32,7 @@ interface ScenarioContext {
   objective: string
   challenges: string
   approach: string
+  aiPrompt?: string  // The detailed AI simulation prompt from the scenario
 }
 
 interface RoleplayRequest {
@@ -31,11 +41,18 @@ interface RoleplayRequest {
   mode: "roleplay" | "evaluate"
 }
 
+type ClaudeMessage = { role: "user" | "assistant"; content: string }
+
+// Synthetic message to start the roleplay (invisible to UI)
+const ROLEPLAY_START_MESSAGE: ClaudeMessage = {
+  role: "user",
+  content: "Begin the roleplay. Start as the client based on the scenario.",
+}
+
 // -----------------------------------------------------------------------------
 // Claude Client
 // -----------------------------------------------------------------------------
 
-// Check API key at module load
 if (!process.env.ANTHROPIC_API_KEY) {
   console.warn("⚠️ ANTHROPIC_API_KEY is not configured - roleplay will not work")
 }
@@ -66,28 +83,79 @@ function validateScenario(scenario: unknown): scenario is ScenarioContext {
 }
 
 // -----------------------------------------------------------------------------
+// Message Formatting
+// -----------------------------------------------------------------------------
+
+/**
+ * Prepares messages for Claude API, ensuring proper alternation.
+ *
+ * Claude requires:
+ * - First message must be "user"
+ * - Messages must alternate user/assistant
+ *
+ * The client sends the visible conversation (starting with assistant's opening).
+ * We prepend a synthetic user message to satisfy Claude's requirements.
+ */
+function prepareMessagesForClaude(messages: ClaudeMessage[]): ClaudeMessage[] {
+  // Empty messages = start of conversation
+  if (messages.length === 0) {
+    return [ROLEPLAY_START_MESSAGE]
+  }
+
+  // If first message is from assistant (AI's opening), prepend synthetic start
+  if (messages[0].role === "assistant") {
+    return [ROLEPLAY_START_MESSAGE, ...messages]
+  }
+
+  // Messages already start with user (shouldn't happen, but handle gracefully)
+  return messages
+}
+
+/**
+ * Validates message alternation for debugging
+ */
+function validateMessageAlternation(messages: ClaudeMessage[]): boolean {
+  for (let i = 1; i < messages.length; i++) {
+    if (messages[i].role === messages[i - 1].role) {
+      console.error(`Message alternation error at index ${i}:`, {
+        prev: messages[i - 1].role,
+        curr: messages[i].role,
+      })
+      return false
+    }
+  }
+  return true
+}
+
+// -----------------------------------------------------------------------------
 // System Prompts
 // -----------------------------------------------------------------------------
 
-async function buildRoleplayPrompt(scenario: ScenarioContext, characterPrompt: string): Promise<string> {
+function buildRoleplayPrompt(scenario: ScenarioContext, characterPrompt: string): string {
+  // Use the detailed AI prompt from the scenario if available, otherwise fall back to persona
+  const characterContext = scenario.aiPrompt || scenario.persona
+  
   return `${characterPrompt}
 
-SCENARIO: ${scenario.title}
+---
 
-SITUATION:
-${scenario.situation}
+${characterContext}
 
-YOUR CHARACTER (the client):
-${scenario.persona}
+---
 
-Start the conversation as the client, based on the scenario situation. The consultant (user) has just engaged with you.`
+Remember: Stay in character. Respond naturally as this client would.`
 }
 
 function buildEvaluationPrompt(
   scenario: ScenarioContext,
   messages: Array<{ role: string; content: string }>
 ): string {
-  const conversationText = messages
+  // Filter out the synthetic start message for evaluation
+  const visibleMessages = messages.filter(
+    (m) => m.content !== ROLEPLAY_START_MESSAGE.content
+  )
+
+  const conversationText = visibleMessages
     .map((m) => `${m.role === "user" ? "CONSULTANT" : "CLIENT"}: ${m.content}`)
     .join("\n\n")
 
@@ -159,16 +227,21 @@ export async function POST(request: NextRequest) {
 
     const { messages, scenario, mode } = body
 
-    // Validate scenario with detailed error
+    // Validate scenario
     if (!validateScenario(scenario)) {
       console.error("Invalid scenario data:", JSON.stringify(scenario, null, 2))
-      return new Response("Invalid or incomplete scenario data. Required: id, category, title, situation, persona, objective, challenges, approach", { status: 400 })
+      return new Response(
+        "Invalid or incomplete scenario data. Required: id, category, title, situation, persona, objective, challenges, approach",
+        { status: 400 }
+      )
     }
 
     // Load prompts from database
     const prompts = await getPrompts(["roleplay_character", "roleplay_evaluation"])
 
-    // Evaluation mode: non-streaming, returns JSON
+    // -------------------------------------------------------------------------
+    // Evaluation Mode: Non-streaming JSON response
+    // -------------------------------------------------------------------------
     if (mode === "evaluate") {
       if (messages.length < 2) {
         return Response.json({
@@ -214,6 +287,15 @@ export async function POST(request: NextRequest) {
             })
           }
         }
+
+        return Response.json({
+          passed: false,
+          objectivesMet: [],
+          objectivesMissed: ["No evaluation content"],
+          overallFeedback: "We couldn't generate an evaluation. Please try again.",
+          strengths: [],
+          improvements: [],
+        })
       } catch (error) {
         console.error("Evaluation API error:", error)
         return Response.json({
@@ -228,28 +310,43 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Roleplay mode: streaming response
+    // -------------------------------------------------------------------------
+    // Roleplay Mode: Streaming response for natural conversation
+    // -------------------------------------------------------------------------
     try {
-      // For initial conversation start (no messages), we need to prompt Claude to begin
-      const apiMessages = messages.length > 0
-        ? messages.map((m) => ({
-            role: m.role as "user" | "assistant",
-            content: m.content,
-          }))
-        : [{ role: "user" as const, content: "Begin the roleplay. Start as the client and open the conversation based on the scenario." }]
+      // Prepare messages with proper alternation
+      const apiMessages = prepareMessagesForClaude(
+        messages.map((m) => ({ role: m.role, content: m.content }))
+      )
 
-      // Build the roleplay prompt with character from database
-      const roleplaySystemPrompt = await buildRoleplayPrompt(scenario, prompts.roleplay_character)
+      // Debug logging
+      console.log("Roleplay request:", {
+        scenario: scenario.title,
+        inputMessageCount: messages.length,
+        apiMessageCount: apiMessages.length,
+        firstRole: apiMessages[0]?.role,
+        lastRole: apiMessages[apiMessages.length - 1]?.role,
+      })
 
+      // Validate alternation
+      if (!validateMessageAlternation(apiMessages)) {
+        console.error("Message validation failed:", apiMessages)
+        return new Response("Invalid message sequence", { status: 400 })
+      }
+
+      // Build system prompt
+      const roleplaySystemPrompt = buildRoleplayPrompt(scenario, prompts.roleplay_character)
+
+      // Stream response for natural feel
       const stream = await anthropic.messages.stream({
         model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
-        max_tokens: 384,
-        temperature: 0.8,
+        max_tokens: 256,
+        temperature: 0.7,
         system: roleplaySystemPrompt,
         messages: apiMessages,
       })
 
-      // Return streaming response
+      // Convert to streaming response
       const encoder = new TextEncoder()
       const readable = new ReadableStream({
         async start(controller) {
@@ -279,17 +376,27 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error("Claude API error:", error)
 
-      // Check for specific error types
+      // Detailed error handling
       if (error instanceof Anthropic.APIError) {
+        console.error("Anthropic API Error:", {
+          status: error.status,
+          message: error.message,
+        })
+
         if (error.status === 429) {
-          return new Response("Rate limit exceeded. Please try again later.", { status: 429 })
+          return new Response("Rate limit exceeded. Please try again later.", {
+            status: 429,
+          })
         }
         if (error.status === 401) {
           return new Response("AI service authentication failed", { status: 503 })
         }
+        if (error.status === 400) {
+          return new Response(`AI request error: ${error.message}`, { status: 400 })
+        }
       }
 
-      return new Response("Failed to start roleplay", { status: 500 })
+      return new Response("Failed to get AI response", { status: 500 })
     }
   } catch (error) {
     console.error("Roleplay API error:", error)

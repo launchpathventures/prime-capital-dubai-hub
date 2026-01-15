@@ -3,6 +3,7 @@
  *
  * View and manage all feedback submissions.
  * Filter by status and type, update status, export to Markdown.
+ * Toggle feedback collection on/off.
  */
 
 import { Suspense } from "react"
@@ -10,7 +11,9 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { FeedbackFilters } from "./feedback-filters"
 import { FeedbackList } from "./feedback-list"
+import { FeedbackToggle } from "./feedback-toggle"
 import { LearnShell } from "@/app/learn/_surface"
+import { getFeedbackEnabled } from "@/lib/lms/feedback"
 import {
   MessageSquareIcon,
   AlertCircleIcon,
@@ -66,6 +69,9 @@ export default async function AdminFeedbackPage({
     .select("*", { count: "exact", head: true })
     .eq("feedback_type", "module")
 
+  // Get feedback enabled state
+  const feedbackEnabled = await getFeedbackEnabled()
+
   return (
     <LearnShell
       user={{ name: profile?.full_name || user.email || "Admin", role: "admin" }}
@@ -82,6 +88,9 @@ export default async function AdminFeedbackPage({
             </p>
           </div>
         </div>
+
+        {/* Toggle */}
+        <FeedbackToggle initialEnabled={feedbackEnabled} />
 
         {/* Stats */}
         <div className="cert-admin-stats">

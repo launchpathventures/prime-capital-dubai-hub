@@ -3,6 +3,7 @@
  *
  * Context provider for the feedback system.
  * Manages modal state, page context, and quoted text.
+ * Fetches enabled state from server on mount.
  */
 
 "use client"
@@ -12,9 +13,11 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react"
 import { usePathname } from "next/navigation"
+import { getFeedbackEnabled } from "@/lib/lms/feedback"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -28,12 +31,14 @@ type FeedbackContextType = {
 }
 
 type FeedbackState = {
+  enabled: boolean
   isOpen: boolean
   open: () => void
   close: () => void
   context: FeedbackContextType
   quotedText?: string
   setQuotedText: (text?: string) => void
+  refreshEnabled: () => Promise<void>
 }
 
 // -----------------------------------------------------------------------------
@@ -56,13 +61,20 @@ export function useFeedback() {
 
 type FeedbackProviderProps = {
   children: ReactNode
-  enabled: boolean
 }
 
-export function FeedbackProvider({ children, enabled }: FeedbackProviderProps) {
+export function FeedbackProvider({ children }: FeedbackProviderProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [quotedText, setQuotedText] = useState<string>()
+  const [enabled, setEnabled] = useState(false)
+
+  // Fetch enabled state on mount
+  useEffect(() => {
+    getFeedbackEnabled()
+      .then(setEnabled)
+      .catch(() => setEnabled(false))
+  }, [])
 
   // Parse context from pathname
   // Pattern: /learn/[competency]/[module]
@@ -90,20 +102,26 @@ export function FeedbackProvider({ children, enabled }: FeedbackProviderProps) {
     setQuotedText(undefined)
   }, [])
 
-  // Don't render provider if disabled
-  if (!enabled) {
-    return <>{children}</>
-  }
+  const refreshEnabled = useCallback(async () => {
+    try {
+      const value = await getFeedbackEnabled()
+      setEnabled(value)
+    } catch {
+      setEnabled(false)
+    }
+  }, [])
 
   return (
     <FeedbackContext.Provider
       value={{
+        enabled,
         isOpen,
         open,
         close,
         context: getContext(),
         quotedText,
         setQuotedText,
+        refreshEnabled,
       }}
     >
       {children}

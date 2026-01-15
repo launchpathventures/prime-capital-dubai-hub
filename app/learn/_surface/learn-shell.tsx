@@ -68,8 +68,6 @@ interface LearnShellProps {
   coachContext?: CoachContext
   /** User data for header menu */
   user?: UserMenuUser
-  /** Whether feedback system is enabled */
-  feedbackEnabled?: boolean
   /** Whether to show text highlight quote button (for module pages) */
   showFeedbackQuote?: boolean
 }
@@ -87,7 +85,6 @@ export function LearnShell({
   userRole = "learner",
   coachContext = { level: "course" },
   user,
-  feedbackEnabled = false,
   showFeedbackQuote = false,
 }: LearnShellProps) {
   const [drawerOpen, setDrawerOpen] = React.useState(false)
@@ -150,7 +147,8 @@ export function LearnShell({
   
   return (
     <CoachProvider initialContext={coachContext}>
-      <div className="learn-shell learn-shell--with-sidebar">
+      <FeedbackProvider>
+        <div className="learn-shell learn-shell--with-sidebar">
         {/* Skip Link - first focusable element */}
         <a 
           href="#learn-main-content" 
@@ -221,17 +219,14 @@ export function LearnShell({
         <CoachTrigger />
         <CoachPanel />
         
-        {/* Feedback System - only rendered when enabled */}
-        {feedbackEnabled && (
-          <FeedbackProvider enabled={feedbackEnabled}>
-            <FeedbackButton />
-            <FeedbackModal />
-            {showFeedbackQuote && (
-              <FeedbackQuote containerSelector="#learn-main-content" />
-            )}
-          </FeedbackProvider>
+        {/* Feedback System - provider wraps shell so useFeedback works in admin pages */}
+        <FeedbackButton />
+        <FeedbackModal />
+        {showFeedbackQuote && (
+          <FeedbackQuote containerSelector="#learn-main-content" />
         )}
-      </div>
+        </div>
+      </FeedbackProvider>
     </CoachProvider>
   )
 }

@@ -5,13 +5,13 @@
  *
  * Inline AI roleplay practice within scenario accordion.
  * User practices as consultant, AI plays the client persona.
+ * Supports voice input with Deepgram transcription for natural practice.
  */
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import {
   SparklesIcon,
-  SendIcon,
   XIcon,
   Loader2Icon,
   HelpCircleIcon,
@@ -19,7 +19,9 @@ import {
   AlertCircleIcon,
   RotateCcwIcon,
   ArrowRightIcon,
+  MicIcon,
 } from "lucide-react"
+import { VoiceInput } from "@/components/lms/voice-input"
 import type { ParsedScenario } from "./scenario-accordion"
 
 // =============================================================================
@@ -59,7 +61,6 @@ export function ScenarioPractice({
   onCancel,
 }: ScenarioPracticeProps) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null)
@@ -67,19 +68,11 @@ export function ScenarioPractice({
   const [sessionKey, setSessionKey] = useState(0)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
-
-  // Focus input when ready
-  useEffect(() => {
-    if (!isLoading && !isStarting && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [isLoading, isStarting])
 
   // Build scenario context for API
   const buildScenarioContext = useCallback(() => {
@@ -92,6 +85,7 @@ export function ScenarioPractice({
       objective: scenario.objective,
       challenges: scenario.challenges,
       approach: scenario.approach,
+      aiPrompt: scenario.aiPrompt, // The detailed AI simulation prompt
     }
   }, [scenario, category])
 
@@ -236,22 +230,6 @@ export function ScenarioPractice({
     },
     [messages, buildScenarioContext]
   )
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-
-    const message = input.trim()
-    setInput("")
-    sendMessage(message)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit(e)
-    }
-  }
 
   const requestCoaching = () => {
     sendMessage("How am I doing? Can I get some feedback on my approach so far?")
@@ -441,6 +419,14 @@ export function ScenarioPractice({
 
       {/* Messages */}
       <div className="scenario-practice__messages">
+        {/* Initial loading state - show while AI generates opening */}
+        {isStarting && messages.length === 0 && (
+          <div className="scenario-practice__starting">
+            <Loader2Icon className="h-5 w-5 animate-spin text-primary" />
+            <span>Client is joining the conversation...</span>
+          </div>
+        )}
+
         {messages.map((message) => (
           <div
             key={message.id}
@@ -453,6 +439,7 @@ export function ScenarioPractice({
           </div>
         ))}
 
+        {/* Loading indicator for follow-up messages */}
         {isLoading && messages.length > 0 && messages[messages.length - 1].role === "user" && (
           <div className="scenario-practice__message scenario-practice__message--assistant">
             <div className="scenario-practice__avatar">C</div>
@@ -469,17 +456,21 @@ export function ScenarioPractice({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="scenario-practice__input-form">
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your response as the consultant..."
-          className="scenario-practice__input"
-          rows={2}
+      {/* Voice hint - encourage natural practice */}
+      {messages.length === 1 && !isLoading && (
+        <div className="scenario-practice__voice-hint">
+          <MicIcon className="h-3.5 w-3.5" />
+          <span>Tap the mic to practice with your voice</span>
+        </div>
+      )}
+
+      {/* Input - integrated voice and text */}
+      <div className="scenario-practice__input-form">
+        <VoiceInput
+          onTranscript={(text) => sendMessage(text)}
+          onTextSubmit={(text) => sendMessage(text)}
           disabled={isLoading || isStarting}
+          placeholder="Type or speak your response..."
         />
         <div className="scenario-practice__input-actions">
           <Button
@@ -498,16 +489,8 @@ export function ScenarioPractice({
               "End Practice"
             )}
           </Button>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!input.trim() || isLoading || isStarting}
-          >
-            <SendIcon className="h-4 w-4 mr-1.5" />
-            Send
-          </Button>
         </div>
-      </form>
+      </div>
     </div>
   )
 }

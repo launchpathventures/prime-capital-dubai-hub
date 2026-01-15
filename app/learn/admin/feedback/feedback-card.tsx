@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { updateFeedbackStatus, type Feedback } from "@/lib/lms/feedback"
+import { STATUS_LABELS } from "@/lib/lms/feedback-types"
 import { formatDistanceToNow } from "date-fns"
 import {
   FileTextIcon,
@@ -23,13 +24,19 @@ import {
   MicIcon,
   PaperclipIcon,
   ExternalLinkIcon,
+  UserIcon,
+  LinkIcon,
+  YoutubeIcon,
+  BookOpenIcon,
 } from "lucide-react"
 
 type Props = {
   feedback: Feedback
+  fileUrls?: Record<string, string>
+  userName?: string | null
 }
 
-export function FeedbackCard({ feedback }: Props) {
+export function FeedbackCard({ feedback, fileUrls = {}, userName }: Props) {
   const [status, setStatus] = useState(feedback.status)
   const [isPending, startTransition] = useTransition()
 
@@ -52,6 +59,12 @@ export function FeedbackCard({ feedback }: Props) {
       {/* Header */}
       <header className="feedback-card__header">
         <div className="feedback-card__meta">
+          {userName && (
+            <span className="feedback-card__user">
+              <UserIcon className="h-3 w-3" />
+              {userName}
+            </span>
+          )}
           <span
             className={`feedback-card__type feedback-card__type--${feedback.feedback_type}`}
           >
@@ -81,12 +94,13 @@ export function FeedbackCard({ feedback }: Props) {
             disabled={isPending}
           >
             <SelectTrigger className="feedback-status-select h-8 text-xs">
-              <SelectValue />
+              <SelectValue>{STATUS_LABELS[status]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
               <SelectItem value="complete">Complete</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -119,29 +133,70 @@ export function FeedbackCard({ feedback }: Props) {
           </div>
         )}
 
-        {/* Attachments */}
-        {feedback.attachments && feedback.attachments.length > 0 && (
-          <div className="feedback-card__attachments">
-            <PaperclipIcon className="h-4 w-4 text-gray-400" />
-            {feedback.attachments.map((path, idx) => (
-              <a
-                key={idx}
-                href={path}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="feedback-card__attachment"
-              >
-                Attachment {idx + 1}
-                <ExternalLinkIcon className="h-3 w-3" />
-              </a>
-            ))}
+        {/* References section - attachments and URLs */}
+        {((feedback.attachments && feedback.attachments.length > 0) || 
+          (feedback.urls && feedback.urls.length > 0)) && (
+          <div className="feedback-card__references">
+            <div className="feedback-card__references-header">
+              <BookOpenIcon className="h-4 w-4" />
+              <span>Reference Materials</span>
+            </div>
+            
+            {/* Attachments */}
+            {feedback.attachments && feedback.attachments.length > 0 && (
+              <div className="feedback-card__attachments">
+                <PaperclipIcon className="h-4 w-4 text-gray-400" />
+                {feedback.attachments.map((path, idx) => {
+                  const url = fileUrls[path]
+                  if (!url) return null
+                  return (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="feedback-card__attachment"
+                    >
+                      Attachment {idx + 1}
+                      <ExternalLinkIcon className="h-3 w-3" />
+                    </a>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Reference URLs */}
+            {feedback.urls && feedback.urls.length > 0 && (
+              <div className="feedback-card__urls">
+                {feedback.urls.map((url, idx) => {
+                  const isYouTube = url.includes("youtube.com") || url.includes("youtu.be")
+                  return (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="feedback-card__url"
+                    >
+                      {isYouTube ? (
+                        <YoutubeIcon className="h-4 w-4 text-red-500" />
+                      ) : (
+                        <LinkIcon className="h-4 w-4 text-gray-400" />
+                      )}
+                      <span className="truncate">{url}</span>
+                      <ExternalLinkIcon className="h-3 w-3 shrink-0" />
+                    </a>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Footer */}
       <footer className="feedback-card__footer">
-        <span className="feedback-card__page" title={feedback.page_url}>
+        <span className="feedback-card__page" title={feedback.page_url ?? undefined}>
           {feedback.page_url}
         </span>
         <span className="feedback-card__id">ID: {feedback.id.slice(0, 8)}</span>
