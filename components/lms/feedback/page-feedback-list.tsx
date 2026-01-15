@@ -7,7 +7,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { Badge } from "@/components/ui/badge"
 import { getPageFeedback, type Feedback } from "@/lib/lms/feedback"
 import { formatDistanceToNow } from "date-fns"
@@ -20,18 +20,28 @@ type Props = {
 
 export function PageFeedbackList({ competencySlug, moduleSlug }: Props) {
   const [feedback, setFeedback] = useState<Feedback[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    getPageFeedback(competencySlug, moduleSlug)
-      .then(setFeedback)
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    let cancelled = false
+    
+    startTransition(() => {
+      getPageFeedback(competencySlug, moduleSlug)
+        .then((data) => {
+          if (!cancelled) {
+            setFeedback(data)
+            setHasLoaded(true)
+          }
+        })
+        .catch(console.error)
+    })
+    
+    return () => { cancelled = true }
   }, [competencySlug, moduleSlug])
 
-  if (loading || feedback.length === 0) {
+  if (!hasLoaded || isPending || feedback.length === 0) {
     return null
   }
 
@@ -94,6 +104,7 @@ function StatusBadge({ status }: { status: Feedback["status"] }) {
     new: { variant: "default" as const, label: "New" },
     in_progress: { variant: "secondary" as const, label: "In Progress" },
     complete: { variant: "outline" as const, label: "Complete" },
+    archived: { variant: "outline" as const, label: "Archived" },
   }
 
   const { variant, label } = config[status]

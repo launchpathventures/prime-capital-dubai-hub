@@ -16,7 +16,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/layout/logo"
-import { ThemeToggle, SurfaceSwitcher, HeaderPopoverProvider } from "@/components/shared"
+import { ThemeToggle, HeaderPopoverProvider } from "@/components/shared"
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -94,11 +94,10 @@ export function AuthHeader({
         <Logo />
       </div>
 
-      {/* Right: Theme toggle, Surface switcher */}
+      {/* Right: Theme toggle */}
       <HeaderPopoverProvider>
         <div className="auth-header-right">
           <ThemeToggle />
-          <SurfaceSwitcher />
         </div>
       </HeaderPopoverProvider>
     </header>

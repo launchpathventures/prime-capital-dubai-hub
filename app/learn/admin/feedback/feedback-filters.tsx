@@ -51,7 +51,13 @@ export function FeedbackFilters() {
         <Filter className="h-4 w-4 text-gray-400" />
         <Select value={status} onValueChange={(v) => v && updateFilter("status", v)}>
           <SelectTrigger className="w-[140px] h-9">
-            <SelectValue placeholder="Status" />
+            <SelectValue>
+              {status === "all" && "All Status"}
+              {status === "new" && "New"}
+              {status === "in_progress" && "In Progress"}
+              {status === "complete" && "Complete"}
+              {status === "archived" && "Archived"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
@@ -64,7 +70,11 @@ export function FeedbackFilters() {
 
         <Select value={type} onValueChange={(v) => v && updateFilter("type", v)}>
           <SelectTrigger className="w-[140px] h-9">
-            <SelectValue placeholder="Type" />
+            <SelectValue>
+              {type === "all" && "All Types"}
+              {type === "general" && "General"}
+              {type === "module" && "Module"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
