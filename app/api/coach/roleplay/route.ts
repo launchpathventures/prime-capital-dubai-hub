@@ -346,8 +346,10 @@ export async function POST(request: NextRequest) {
         messages: apiMessages,
       })
 
-      // Convert to streaming response
+      // Convert to streaming response with logging
       const encoder = new TextEncoder()
+      let fullResponse = "" // Accumulate for logging
+      
       const readable = new ReadableStream({
         async start(controller) {
           try {
@@ -356,12 +358,17 @@ export async function POST(request: NextRequest) {
                 event.type === "content_block_delta" &&
                 event.delta.type === "text_delta"
               ) {
-                controller.enqueue(encoder.encode(event.delta.text))
+                const text = event.delta.text
+                fullResponse += text
+                controller.enqueue(encoder.encode(text))
               }
             }
+            // Log the complete response from Claude
+            console.log("[Roleplay API] Complete AI response:", fullResponse)
             controller.close()
           } catch (streamError) {
             console.error("Stream error:", streamError)
+            console.log("[Roleplay API] Partial response before error:", fullResponse)
             controller.error(streamError)
           }
         },

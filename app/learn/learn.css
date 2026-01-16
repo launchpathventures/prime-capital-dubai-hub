@@ -1505,7 +1505,9 @@
   outline-offset: 2px;
 }
 
+/* Override sidebar styles inside mobile drawer */
 .learn-drawer__panel .learn-sidebar {
+  display: block !important; /* Override media query hiding */
   position: static;
   height: auto;
   min-height: 100%;

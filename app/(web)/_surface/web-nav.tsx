@@ -106,20 +106,20 @@ export function WebNav({ scrolled = false }: WebNavProps) {
         {mobileOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
       </Button>
 
-      {/* Mobile menu overlay + panel */}
+      {/* Mobile menu - uses inline Tailwind for reliability */}
       {mobileOpen && (
-        <>
+        <div className="fixed inset-0 z-[9999] md:hidden">
           {/* Backdrop */}
           <div
-            className="web-mobile-backdrop"
+            className="absolute inset-0 bg-black/50"
             onClick={closeMenu}
             aria-hidden="true"
           />
 
-          {/* Menu panel - includes header */}
-          <div className="web-mobile-panel">
-            {/* Mobile header */}
-            <div className="web-mobile-header">
+          {/* Menu panel */}
+          <div className="absolute top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between h-14 px-4 border-b">
               <Logo />
               <Button
                 variant="ghost"
@@ -134,17 +134,30 @@ export function WebNav({ scrolled = false }: WebNavProps) {
             {/* Navigation links */}
             <nav
               id="mobile-nav"
-              className="web-mobile-menu"
+              className="flex flex-col gap-1 p-4"
               aria-label="Mobile navigation"
             >
-              <NavItems mobile />
+              {webNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  {item.label}
+                </Link>
+              ))}
 
-              <Link href="/contact" className="web-mobile-menu-primary">
+              <Link 
+                href="/contact" 
+                onClick={closeMenu}
+                className="flex items-center justify-center mt-2 px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+              >
                 Get In Touch
               </Link>
             </nav>
           </div>
-        </>
+        </div>
       )}
     </>
   )

@@ -130,16 +130,19 @@ export function ScenarioPractice({
         }
         setMessages([assistantMessage])
 
+        let fullResponse = "" // For logging
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
           const chunk = decoder.decode(value, { stream: true })
+          fullResponse += chunk
           setMessages((prev) => {
             const updated = [...prev]
             updated[0] = { ...updated[0], content: updated[0].content + chunk }
             return updated
           })
         }
+        console.log("[Scenario Practice] Opening AI response received:", fullResponse)
       } catch (error) {
         console.error("Failed to start practice:", error)
         const errorMessage = error instanceof Error ? error.message : "Unknown error"
@@ -199,10 +202,12 @@ export function ScenarioPractice({
         setMessages((prev) => [...prev, assistantMessage])
 
         if (reader) {
+          let fullResponse = "" // For logging
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
             const chunk = decoder.decode(value, { stream: true })
+            fullResponse += chunk
             setMessages((prev) => {
               const updated = [...prev]
               const lastIndex = updated.length - 1
@@ -213,6 +218,7 @@ export function ScenarioPractice({
               return updated
             })
           }
+          console.log("[Scenario Practice] Follow-up AI response received:", fullResponse)
         }
       } catch (error) {
         console.error("Failed to send message:", error)

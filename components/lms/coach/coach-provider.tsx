@@ -149,11 +149,14 @@ export function CoachProvider({ children, initialContext }: CoachProviderProps) 
         setMessages((prev) => [...prev, assistantMessage])
 
         if (reader) {
+          let fullResponse = "" // For logging
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
 
-            const chunk = decoder.decode(value)
+            // IMPORTANT: { stream: true } prevents garbled multi-byte UTF-8 characters
+            const chunk = decoder.decode(value, { stream: true })
+            fullResponse += chunk
             setMessages((prev) => {
               const updated = [...prev]
               const lastIdx = updated.length - 1
@@ -164,6 +167,7 @@ export function CoachProvider({ children, initialContext }: CoachProviderProps) 
               return updated
             })
           }
+          console.log("[Coach] AI response complete:", fullResponse)
         }
       } catch (error) {
         console.error("Failed to send message:", error)

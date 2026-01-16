@@ -322,8 +322,10 @@ export async function POST(request: NextRequest) {
       })),
     })
 
-    // Return streaming response
+    // Return streaming response with logging
     const encoder = new TextEncoder()
+    let fullResponse = "" // For logging
+    
     const readable = new ReadableStream({
       async start(controller) {
         for await (const event of stream) {
@@ -331,9 +333,12 @@ export async function POST(request: NextRequest) {
             event.type === "content_block_delta" &&
             event.delta.type === "text_delta"
           ) {
-            controller.enqueue(encoder.encode(event.delta.text))
+            const text = event.delta.text
+            fullResponse += text
+            controller.enqueue(encoder.encode(text))
           }
         }
+        console.log("[Coach Chat API] Complete AI response:", fullResponse)
         controller.close()
       },
     })
