@@ -86,7 +86,7 @@ async function getCertificationAttempts(): Promise<CertificationAttempt[]> {
   
   if (error) {
     // Table might not exist yet
-    console.log("Certification attempts not available:", error.message)
+    console.warn("Certification attempts not available:", error.message)
     return []
   }
   
@@ -350,11 +350,11 @@ export default async function CertificationAdminPage() {
             </p>
           </div>
           <div className="cert-admin-header__actions">
-            <Button variant="outline" nativeButton={false} render={<Link href="/learn/admin/certification/resources" />}>
+            <Button variant="outline" render={<Link href="/learn/admin/certification/resources" />}>
               <BookOpenIcon className="h-4 w-4 mr-2" />
               Resources
             </Button>
-            <Button size="lg" nativeButton={false} render={<Link href="/learn/admin/certification/record" />}>
+            <Button size="lg" render={<Link href="/learn/admin/certification/record" />}>
               <PlusIcon className="h-4 w-4 mr-2" />
               Record Outcome
             </Button>

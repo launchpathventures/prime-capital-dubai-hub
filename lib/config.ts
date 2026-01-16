@@ -24,6 +24,14 @@ export const config = {
     showDocsInProduction: process.env.NEXT_PUBLIC_DOCS_ENABLED !== "false",
 
     /**
+     * Root surface redirect.
+     * When set, the root URL "/" redirects to this path (e.g., "/learn").
+     * Use this to temporarily make a different surface the "homepage" during development.
+     * Set to null or empty to use the web surface as the homepage.
+     */
+    rootRedirect: process.env.NEXT_PUBLIC_ROOT_REDIRECT || null,
+
+    /**
      * Website section toggles (can be overridden by JSON config)
      */
     properties: process.env.NEXT_PUBLIC_PROPERTIES_ENABLED !== "false",
@@ -78,9 +86,9 @@ export const config = {
    * Contact Information
    */
   contact: {
-    email: "hello@primecapitaldubai.com",
-    phone: "+971 4 XXX XXXX",
-    address: "Office XXX, DIFC, Dubai, UAE",
+    email: "admin@primecapitaldubai.com",
+    phone: "+971 58 5414720",
+    address: "API Business Suites, Office 101, Sheikh Zayed Rd, Al Barsha, Dubai",
   },
 
   /**
@@ -104,10 +112,12 @@ export const config = {
     support: null as string | null,
     /** Strategy Kit PDF download */
     strategyKit: "/downloads/strategy-kit.pdf",
+    /** Calendly scheduling link */
+    calendly: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/tahirmajithia/30min",
   },
 
   /**
-   * Form IDs (Fillout.com)
+   * Form IDs (Fillout.com) - DEPRECATED: Use LeadForm component instead
    */
   forms: {
     contact: process.env.NEXT_PUBLIC_CONTACT_FORM_ID || "",

@@ -34,7 +34,6 @@ export default async function PropertiesPage() {
               available opportunities.
             </Text>
             <Button
-              nativeButton={false}
               className="mt-4 h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/contact" />}
             >
@@ -222,7 +221,6 @@ function CTASection() {
               We'll respond within 24 hours.
             </Text>
             <Button
-              nativeButton={false}
               size="lg"
               className="btn-hover-lift w-full h-14 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/contact" />}

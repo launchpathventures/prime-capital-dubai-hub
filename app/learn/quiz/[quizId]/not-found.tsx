@@ -36,7 +36,6 @@ export default function QuizNotFound() {
           
           <Button 
             size="lg"
-            nativeButton={false}
             render={<Link href="/learn" />}
           >
             Back to Learning Dashboard

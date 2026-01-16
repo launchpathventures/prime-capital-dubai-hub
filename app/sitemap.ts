@@ -8,6 +8,7 @@
 import type { MetadataRoute } from "next"
 
 import { config } from "@/lib/config"
+import { getProperties, getTeamMembers } from "@/lib/content"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = config.app.url
@@ -58,14 +59,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // TODO: Add dynamic pages (properties/[slug], team/[slug]) from database
-  // const properties = await getProperties()
-  // const propertyPages = properties.map(p => ({
-  //   url: `${baseUrl}/properties/${p.slug}`,
-  //   lastModified: p.updated_at,
-  //   changeFrequency: "weekly" as const,
-  //   priority: 0.8,
-  // }))
+  // Dynamic property pages
+  const propertyPages: MetadataRoute.Sitemap = []
+  if (config.features.properties) {
+    try {
+      const properties = await getProperties()
+      properties.forEach((property) => {
+        propertyPages.push({
+          url: `${baseUrl}/properties/${property.slug}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly",
+          priority: 0.8,
+        })
+      })
+    } catch {
+      // Properties not available, skip
+    }
+  }
 
-  return [...staticPages]
+  // Dynamic team member pages
+  const teamPages: MetadataRoute.Sitemap = []
+  if (config.features.team) {
+    try {
+      const team = await getTeamMembers()
+      team.forEach((member) => {
+        teamPages.push({
+          url: `${baseUrl}/team/${member.slug}`,
+          lastModified: new Date(),
+          changeFrequency: "monthly",
+          priority: 0.6,
+        })
+      })
+    } catch {
+      // Team not available, skip
+    }
+  }
+
+  return [...staticPages, ...propertyPages, ...teamPages]
 }

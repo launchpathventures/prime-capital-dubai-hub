@@ -114,7 +114,6 @@ export function LearningPathway({ competencies }: LearningPathwayProps) {
             <Button 
               size="lg" 
               className="gap-2"
-              nativeButton={false}
               render={<Link href={firstIncomplete ? `/learn/${firstIncomplete.slug}` : "/learn"} />}
             >
               {firstIncomplete ? "Continue Learning" : "Review Your Progress"}

@@ -355,10 +355,10 @@ export default async function CertificationPage() {
           <h2>Prime Capital Certified Consultant</h2>
           <p>You&apos;re ready to work with clients. Keep developing your skills through practice.</p>
           <Row gap="md" className="mt-6">
-            <Button nativeButton={false} render={<Link href="/learn/scenarios" />}>
+            <Button render={<Link href="/learn/scenarios" />}>
               Continue Practicing
             </Button>
-            <Button variant="outline" nativeButton={false} render={<Link href="/learn" />}>
+            <Button variant="outline" render={<Link href="/learn" />}>
               Review Materials
             </Button>
           </Row>

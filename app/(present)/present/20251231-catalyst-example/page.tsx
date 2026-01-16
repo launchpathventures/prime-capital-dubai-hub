@@ -764,7 +764,6 @@ export default function CatalystExamplePresentation() {
               <Button
                 size="lg"
                 className="h-16 px-8 text-lg rounded-full bg-primary hover:bg-primary/90 shadow-xl hover:scale-105 transition-transform text-primary-foreground"
-                nativeButton={false}
                 render={<Link href="/docs" />}
               >
                 <BookOpenIcon className="mr-2 h-5 w-5" />

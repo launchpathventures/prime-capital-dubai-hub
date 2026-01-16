@@ -101,7 +101,6 @@ export default function AdminProjectsPage() {
           variant="ghost" 
           size="sm" 
           className="w-fit gap-1"
-          nativeButton={false}
           render={<Link href="/app/hub" />}
         >
           <ArrowLeftIcon className="h-3 w-3" />
@@ -171,7 +170,6 @@ export default function AdminProjectsPage() {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            nativeButton={false}
                             render={<Link href={`/hub/projects/${project.slug}`} />}
                           >
                             <ExternalLinkIcon className="h-4 w-4" />

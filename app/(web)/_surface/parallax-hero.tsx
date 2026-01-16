@@ -20,6 +20,8 @@ interface ParallaxHeroProps {
   className?: string
   /** Children to render inside the hero */
   children: React.ReactNode
+  /** Priority loading for LCP optimization */
+  priority?: boolean
 }
 
 export function ParallaxHero({
@@ -28,6 +30,7 @@ export function ParallaxHero({
   intensity = 0.15,
   className = "",
   children,
+  priority = false,
 }: ParallaxHeroProps) {
   const [offset, setOffset] = React.useState(0)
   const [isMobile, setIsMobile] = React.useState(true) // Default to mobile (no parallax SSR)
@@ -70,16 +73,27 @@ export function ParallaxHero({
   }, [isMobile, intensity])
 
   return (
-    <section
-      ref={heroRef}
-      className={`relative overflow-hidden ${className}`}
-      style={{
-        // Static background for mobile, parallax for desktop
-        backgroundImage: isMobile ? `${overlay}, url('${imageUrl}')` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center 30%",
-      }}
-    >
+    <>
+      {/* Preload hero image for LCP optimization */}
+      {priority && (
+        <link
+          rel="preload"
+          as="image"
+          href={imageUrl}
+          // @ts-expect-error - fetchpriority is valid but not in types yet
+          fetchpriority="high"
+        />
+      )}
+      <section
+        ref={heroRef}
+        className={`relative overflow-hidden ${className}`}
+        style={{
+          // Static background for mobile, parallax for desktop
+          backgroundImage: isMobile ? `${overlay}, url('${imageUrl}')` : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center 30%",
+        }}
+      >
       {/* Parallax background layer - only rendered on desktop */}
       {!isMobile && (
         <div
@@ -95,8 +109,9 @@ export function ParallaxHero({
         />
       )}
 
-      {/* Content layer - children rendered directly for proper absolute positioning */}
-      {children}
-    </section>
+        {/* Content layer - children rendered directly for proper absolute positioning */}
+        {children}
+      </section>
+    </>
   )
 }

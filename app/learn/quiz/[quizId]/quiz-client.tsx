@@ -186,7 +186,6 @@ export function QuizClient({ quiz, questions }: QuizClientProps) {
               <Button 
                 size="lg" 
                 className="w-full gap-2"
-                nativeButton={false}
                 render={<Link href={`/learn/${quiz.competency_slug}`} />}
               >
                 Continue Learning
@@ -209,7 +208,6 @@ export function QuizClient({ quiz, questions }: QuizClientProps) {
                 variant="ghost" 
                 size="lg" 
                 className="w-full"
-                nativeButton={false}
                 render={<Link href="/learn" />}
               >
                 Back to Dashboard

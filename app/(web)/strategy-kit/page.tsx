@@ -6,6 +6,7 @@
  */
 
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
+import { LeadForm } from "@/components/shared/lead-form"
 import { CheckIcon, DownloadIcon } from "lucide-react"
 
 export const metadata = {
@@ -93,29 +94,11 @@ function HeroSection() {
               </Text>
             </div>
 
-            <form className="space-y-4">
-              <div>
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
-                />
-              </div>
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  className="w-full px-4 py-3 border border-[var(--web-serenity)]/40 rounded-[2px] text-[15px] text-[var(--web-ash)] placeholder:text-[var(--web-spruce)]/50 focus:outline-none focus:border-[var(--web-spruce)] transition-colors"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full h-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors flex items-center justify-center gap-2"
-              >
-                <DownloadIcon className="h-4 w-4" />
-                Download Strategy Kit
-              </button>
-            </form>
+            <LeadForm 
+              mode="download" 
+              theme="light" 
+              downloadAsset="Dubai Investment Strategy Kit"
+            />
 
             <Text className="text-[var(--web-spruce)] text-[11px] font-light text-center mt-4">
               No spam. Unsubscribe anytime.

@@ -462,7 +462,6 @@ function CTASection() {
           </Text>
 
           <Button
-            nativeButton={false}
             size="lg"
             className="btn-hover-lift mt-4 h-14 px-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
             render={<Link href="/contact" />}

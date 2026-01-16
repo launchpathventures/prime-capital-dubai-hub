@@ -165,7 +165,6 @@ export default function HubDashboardPage() {
                     variant="ghost" 
                     size="sm" 
                     className="gap-1"
-                    nativeButton={false}
                     render={<Link href="/hub/projects" />}
                   >
                     View all
@@ -206,7 +205,6 @@ export default function HubDashboardPage() {
               <Button 
                 variant="outline" 
                 className="gap-2"
-                nativeButton={false}
                 render={<Link href="/hub/tasks" />}
               >
                 <CheckSquareIcon className="h-4 w-4" />
@@ -215,7 +213,6 @@ export default function HubDashboardPage() {
               <Button 
                 variant="outline" 
                 className="gap-2"
-                nativeButton={false}
                 render={<Link href="/hub/questions" />}
               >
                 <MessageCircleIcon className="h-4 w-4" />
@@ -224,7 +221,6 @@ export default function HubDashboardPage() {
               <Button 
                 variant="outline" 
                 className="gap-2"
-                nativeButton={false}
                 render={<Link href="/app/hub" />}
               >
                 <FolderIcon className="h-4 w-4" />

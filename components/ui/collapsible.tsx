@@ -7,7 +7,6 @@
  * @usage When using a custom render element (to avoid nested buttons):
  *   <CollapsibleTrigger
  *     render={<div role="button" tabIndex={0} />}
- *     nativeButton={false}  // Required to suppress Base-UI warning
  *   >
  *
  * @animation Uses CSS height transition with Base-UI's --collapsible-panel-height

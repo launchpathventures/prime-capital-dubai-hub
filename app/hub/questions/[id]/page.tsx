@@ -239,7 +239,6 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
           <Text variant="muted">The question you&apos;re looking for doesn&apos;t exist.</Text>
           <Button 
             variant="outline"
-            nativeButton={false}
             render={<Link href="/hub/questions" />}
           >
             Back to {hubConfig.labels.questions}
@@ -281,7 +280,6 @@ export default function QuestionDetailPage({ params }: QuestionDetailPageProps) 
           variant="ghost" 
           size="sm" 
           className="w-fit gap-1"
-          nativeButton={false}
           render={<Link href="/hub/questions" />}
         >
           <ArrowLeftIcon className="h-3 w-3" />

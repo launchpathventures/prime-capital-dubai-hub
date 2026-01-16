@@ -95,15 +95,15 @@ async function SuccessContent({
       </Stack>
       <Stack gap="sm">
         {showContinue ? (
-          <Button className="w-full" nativeButton={false} render={<Link href={redirectTo} />}>
+          <Button className="w-full" render={<Link href={redirectTo} />}>
             Continue to app
           </Button>
         ) : (
-          <Button className="w-full" nativeButton={false} render={<Link href="/auth/login" />}>
+          <Button className="w-full" render={<Link href="/auth/login" />}>
             Sign in again
           </Button>
         )}
-        <Button variant="ghost" className="w-full" nativeButton={false} render={<Link href="/" />}>
+        <Button variant="ghost" className="w-full" render={<Link href="/" />}>
           Back to home
         </Button>
       </Stack>

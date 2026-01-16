@@ -15,6 +15,7 @@
  * 8. Contact CTA
  */
 
+import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { config } from "@/lib/config"
@@ -51,6 +52,11 @@ const propertyImages: Record<string, string> = {
 }
 
 export default async function HomePage() {
+  // Handle root redirect if configured (e.g., redirect "/" to "/learn" during dev)
+  if (config.features.rootRedirect) {
+    redirect(config.features.rootRedirect)
+  }
+
   const [properties, testimonials, stats] = await Promise.all([
     getProperties(),
     getTestimonials(),
@@ -85,6 +91,7 @@ function HeroSection() {
       imageUrl="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
       overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)"
       intensity={0.15}
+      priority
       className="web-hero min-h-dvh flex flex-col justify-center items-center text-center"
     >
       <Container size="lg" className="relative z-10 px-4">
@@ -363,9 +370,10 @@ function AreasSection() {
           {/* Area Tiles */}
           <Grid cols={2} className="md:grid-cols-3 lg:grid-cols-6 gap-4">
             {areas.map((area) => (
-              <div
+              <Link
                 key={area.name}
-                className="area-tile relative h-[200px] rounded-[2px] overflow-hidden group"
+                href={`/properties?area=${encodeURIComponent(area.name)}`}
+                className="area-tile relative h-[200px] rounded-[2px] overflow-hidden group block focus:outline-none focus:ring-2 focus:ring-[var(--web-serenity)] focus:ring-offset-2"
               >
                 <Image
                   src={areaImages[area.name] || areaImages["Dubai Marina"]}
@@ -388,7 +396,7 @@ function AreasSection() {
                     {area.description}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </Grid>
         </Stack>

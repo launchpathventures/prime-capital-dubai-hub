@@ -176,7 +176,6 @@ export default function PresentationsIndexPage() {
                 <Button
                   size="lg"
                   className="h-11 rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105"
-                  nativeButton={false}
                   render={<Link href={examplePresentation.href} />}
                 >
                   <PlayIcon className="mr-2 h-4 w-4" />
@@ -186,7 +185,6 @@ export default function PresentationsIndexPage() {
                   size="lg"
                   variant="outline"
                   className="h-11 rounded-full px-6 hover:scale-105 transition-all"
-                  nativeButton={false}
                   render={<Link href="/docs" />}
                 >
                   Read the Docs

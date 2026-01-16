@@ -156,7 +156,6 @@ export default function AdminTasksPage() {
           variant="ghost" 
           size="sm" 
           className="w-fit gap-1"
-          nativeButton={false}
           render={<Link href="/app/hub" />}
         >
           <ArrowLeftIcon className="h-3 w-3" />

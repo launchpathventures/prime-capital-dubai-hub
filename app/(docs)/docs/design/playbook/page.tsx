@@ -94,7 +94,6 @@ function PlaybookStep({ number, title, purpose, color, defaultOpen = false, chil
       <div className={cn("rounded-xl border", colors.border)}>
         <CollapsibleTrigger
           render={<div role="button" tabIndex={0} />}
-          nativeButton={false}
           className="w-full cursor-pointer rounded-t-xl p-5 hover:bg-muted/50 transition-colors"
         >
           <Row gap="md" className="items-start justify-between">

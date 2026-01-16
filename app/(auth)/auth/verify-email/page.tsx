@@ -68,7 +68,7 @@ async function VerifyEmailContent({
             Your email has been verified successfully.
           </Text>
         </Stack>
-        <Button className="w-full" nativeButton={false} render={<Link href={redirectTo} />}>
+        <Button className="w-full" render={<Link href={redirectTo} />}>
           Continue to app
         </Button>
       </Stack>
@@ -90,7 +90,7 @@ async function VerifyEmailContent({
         </Text>
       </Stack>
       <Stack gap="sm">
-        <Button variant="outline" className="w-full" nativeButton={false} render={<Link href="/auth/login" />}>
+        <Button variant="outline" className="w-full" render={<Link href="/auth/login" />}>
           Back to sign in
         </Button>
       </Stack>

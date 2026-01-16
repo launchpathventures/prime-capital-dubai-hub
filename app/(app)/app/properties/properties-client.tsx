@@ -194,7 +194,6 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            nativeButton={false}
                             render={<Link href={`/properties/${property.slug}`} target="_blank" />}
                           >
                             <ExternalLinkIcon className="h-4 w-4" />

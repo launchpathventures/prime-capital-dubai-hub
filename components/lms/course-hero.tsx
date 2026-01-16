@@ -53,7 +53,6 @@ export function CourseHero({ firstCompetencySlug }: CourseHeroProps) {
             <Button 
               size="lg" 
               className="gap-2 bg-background text-primary hover:bg-background/90"
-              nativeButton={false}
               render={<Link href={`/learn/${firstCompetencySlug}`} />}
             >
               Start Learning

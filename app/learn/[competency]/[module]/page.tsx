@@ -319,7 +319,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
           <nav className="lms-nav">
             <div className="lms-nav__prev">
               {prevModule && (
-                <Button variant="ghost" nativeButton={false} render={<Link href={`/learn/${currentCompetency.slug}/${prevModule.slug}`} />}>
+                <Button variant="ghost" render={<Link href={`/learn/${currentCompetency.slug}/${prevModule.slug}`} />}>
                   <ChevronLeftIcon className="h-4 w-4 mr-1" />
                   Previous
                 </Button>
@@ -328,12 +328,12 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
             
             <div className="lms-nav__next">
               {nextModule ? (
-                <Button nativeButton={false} render={<Link href={`/learn/${currentCompetency.slug}/${nextModule.slug}`} />}>
+                <Button render={<Link href={`/learn/${currentCompetency.slug}/${nextModule.slug}`} />}>
                   Next Module
                   <ChevronRightIcon className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button variant="outline" className="gap-2" nativeButton={false} render={<Link href={`/learn/${currentCompetency.slug}`} />}>
+                <Button variant="outline" className="gap-2" render={<Link href={`/learn/${currentCompetency.slug}`} />}>
                   <CheckCircleIcon className="h-4 w-4" />
                   Finish Competency
                 </Button>

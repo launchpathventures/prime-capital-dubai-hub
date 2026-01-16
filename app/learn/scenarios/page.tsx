@@ -210,7 +210,6 @@ export default async function ScenariosIndexPage() {
           <Button 
             variant="default" 
             size="sm" 
-            nativeButton={false} 
             render={<Link href="/learn/certification" />}
           >
             View Certification Requirements

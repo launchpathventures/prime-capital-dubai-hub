@@ -73,7 +73,6 @@ export function ExamplePrompt({
 
       <CollapsibleTrigger
         render={<div role="button" tabIndex={0} />}
-        nativeButton={false}
         className={cn(
           "flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer",
           "hover:bg-muted/30 transition-colors",

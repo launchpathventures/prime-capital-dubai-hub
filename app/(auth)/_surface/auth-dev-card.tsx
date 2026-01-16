@@ -76,7 +76,6 @@ export function AuthDevCard({ mode }: AuthDevCardProps) {
                 variant={isActive ? "default" : "outline"}
                 size="sm"
                 className="shadow-none"
-                nativeButton={false}
                 render={<Link href={href} />}
               >
                 <Icon className="h-3.5 w-3.5" />

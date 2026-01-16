@@ -28,7 +28,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         </Text>
       </Stack>
       {action && (
-        <Button nativeButton={false} render={<Link href={action.href} />}>
+        <Button render={<Link href={action.href} />}>
           {action.label}
         </Button>
       )}

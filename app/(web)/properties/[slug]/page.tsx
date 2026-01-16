@@ -159,7 +159,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 {formatPriceRange(property.priceFrom, property.priceTo, property.currency)}
               </div>
               <Button
-                nativeButton={false}
                 className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
                 render={<Link href="/contact" />}
               >
@@ -355,7 +354,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   Contact us for more details, viewings, or investment analysis.
                 </Text>
                 <Button
-                  nativeButton={false}
                   className="w-full h-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
                   render={<Link href="/contact" />}
                 >

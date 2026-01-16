@@ -43,6 +43,14 @@ export function WebShell({ children }: WebShellProps) {
 
   return (
     <Shell className="web-shell flex-col">
+      {/* Skip link for accessibility */}
+      <a
+        href="#main-content"
+        className="skip-link sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[10000] focus:px-4 focus:py-2 focus:bg-white focus:text-[var(--web-ash)] focus:rounded focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--web-serenity)]"
+      >
+        Skip to main content
+      </a>
+
       {/* Fixed header wrapper - full width background, constrained content */}
       <div className="web-header-wrapper" data-scrolled={scrolled}>
         <Header variant="web" data-scrolled={scrolled}>
@@ -52,7 +60,11 @@ export function WebShell({ children }: WebShellProps) {
       </div>
 
       {/* Main content */}
-      <Shell.Content>{children}</Shell.Content>
+      <Shell.Content>
+        <main id="main-content" tabIndex={-1} className="outline-none">
+          {children}
+        </main>
+      </Shell.Content>
       
       {/* Footer */}
       <WebFooter />

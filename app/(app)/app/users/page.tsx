@@ -271,7 +271,7 @@ function UserRow({ learner }: UserRowProps) {
       
       {/* Actions */}
       <Row gap="xs" justify="end">
-        <Button variant="ghost" size="sm" nativeButton={false} render={<Link href={`/app/progress?user=${learner.id}`} />}>
+        <Button variant="ghost" size="sm" render={<Link href={`/app/progress?user=${learner.id}`} />}>
           <TrendingUpIcon className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="sm">

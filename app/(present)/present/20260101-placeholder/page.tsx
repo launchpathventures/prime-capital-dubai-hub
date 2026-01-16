@@ -88,11 +88,11 @@ export default function PlaceholderPresentation() {
               <code className="rounded bg-muted px-2 py-1 text-sm">label</code>.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="outline" nativeButton={false} render={<Link href="/present" />}>
+              <Button variant="outline" render={<Link href="/present" />}>
                 <ArrowLeftIcon className="mr-2 h-4 w-4" />
                 Presentations
               </Button>
-              <Button nativeButton={false} render={<Link href="/docs" />}>
+              <Button render={<Link href="/docs" />}>
                 View the Docs
               </Button>
             </div>

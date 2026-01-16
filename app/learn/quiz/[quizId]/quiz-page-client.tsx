@@ -510,7 +510,6 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
             variant={isPassed ? "default" : "outline"}
             size="lg" 
             className="w-full gap-2"
-            nativeButton={false}
             render={<Link href={backHref} />}
           >
             {isPassed ? "Continue Learning" : (isRERAQuiz ? "Back to RERA Quizzes" : backLabel)}
@@ -521,7 +520,6 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
             variant="ghost" 
             size="lg" 
             className="w-full"
-            nativeButton={false}
             render={<Link href="/learn" />}
           >
             Back to Dashboard

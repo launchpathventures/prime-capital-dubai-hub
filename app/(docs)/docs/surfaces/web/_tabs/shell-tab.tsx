@@ -129,11 +129,11 @@ export function LayoutTab() {
   </Header.Nav>
   
   <Header.Actions>
-    <Button variant="ghost" asChild>
-      <Link href="/auth/login">Sign In</Link>
+    <Button variant="ghost" render={<Link href="/auth/login" />}>
+      Sign In
     </Button>
-    <Button asChild>
-      <Link href="/auth/register">Get Started</Link>
+    <Button render={<Link href="/auth/register" />}>
+      Get Started
     </Button>
   </Header.Actions>
 </Header>`}

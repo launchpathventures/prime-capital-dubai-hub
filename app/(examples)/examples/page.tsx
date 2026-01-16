@@ -224,7 +224,6 @@ export default function ExamplesOverviewPage() {
                     variant="outline"
                     size="sm"
                     className="shrink-0"
-                    nativeButton={false}
                     render={<Link href="/docs" />}
                   >
                     Learn More

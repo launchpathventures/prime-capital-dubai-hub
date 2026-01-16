@@ -21,12 +21,16 @@
  * - --radius-md, --border-width, --ring-width
  * - --duration-fast, --ease-out, --opacity-disabled
  *
- * @source shadcn/ui + base-ui
+ * COMPOSITION:
+ * - Use `render` prop for custom elements (Base UI pattern)
+ * - Example: <Button render={<Link href="/somewhere" />}>Click</Button>
+ *
+ * @source shadcn/ui (modified for Base UI compatibility)
  */
 
 "use client"
 
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -68,19 +72,35 @@ const buttonVariants = cva("", {
   },
 })
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
-  return (
-    <ButtonPrimitive
-      data-slot="button"
-      className={cn("ui-button", buttonVariants({ variant, size }), className)}
-      {...props}
-    />
-  )
+interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  render?: React.ReactElement<React.HTMLAttributes<HTMLElement>>
 }
 
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "default", size = "default", render, children, ...props }, ref) => {
+    const buttonClassName = cn("ui-button", buttonVariants({ variant, size }), className)
+    const buttonProps = {
+      "data-slot": "button" as const,
+      className: buttonClassName,
+      ref,
+      ...props,
+    }
+
+    // If render prop provided, clone the element with button props merged
+    if (render) {
+      return React.cloneElement(render, {
+        ...buttonProps,
+        className: cn(buttonClassName, render.props.className),
+        children,
+      })
+    }
+
+    return <button {...buttonProps}>{children}</button>
+  }
+)
+Button.displayName = "Button"
+
 export { Button, buttonVariants }
+export type { ButtonProps }

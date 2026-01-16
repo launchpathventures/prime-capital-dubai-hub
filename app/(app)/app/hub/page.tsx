@@ -52,7 +52,6 @@ export default function AdminHubPage() {
           </Stack>
           <Button 
             className="gap-2"
-            nativeButton={false}
             render={<Link href="/hub" />}
           >
             View Hub
@@ -103,7 +102,6 @@ export default function AdminHubPage() {
                   variant="outline" 
                   size="sm" 
                   className="gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/projects" />}
                 >
                   <PlusIcon className="h-3 w-3" />
@@ -128,7 +126,6 @@ export default function AdminHubPage() {
                   variant="ghost" 
                   size="sm" 
                   className="w-full mt-2 gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/projects" />}
                 >
                   Manage {hubConfig.labels.projects}
@@ -150,7 +147,6 @@ export default function AdminHubPage() {
                   variant="outline" 
                   size="sm" 
                   className="gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/tasks" />}
                 >
                   <PlusIcon className="h-3 w-3" />
@@ -175,7 +171,6 @@ export default function AdminHubPage() {
                   variant="ghost" 
                   size="sm" 
                   className="w-full mt-2 gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/tasks" />}
                 >
                   Manage {hubConfig.labels.tasks}
@@ -197,7 +192,6 @@ export default function AdminHubPage() {
                   variant="outline" 
                   size="sm" 
                   className="gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/questions" />}
                 >
                   <PlusIcon className="h-3 w-3" />
@@ -222,7 +216,6 @@ export default function AdminHubPage() {
                   variant="ghost" 
                   size="sm" 
                   className="w-full mt-2 gap-1"
-                  nativeButton={false}
                   render={<Link href="/app/hub/questions" />}
                 >
                   Manage {hubConfig.labels.questions}

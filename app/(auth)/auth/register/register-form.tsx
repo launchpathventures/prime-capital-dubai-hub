@@ -198,7 +198,6 @@ export function RegisterForm({ mode, redirectTo }: RegisterFormProps) {
         <Button 
           variant="outline" 
           className="mt-2"
-          nativeButton={false}
           render={<Link href="/auth/login" />}
         >
           Back to sign in

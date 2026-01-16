@@ -127,7 +127,7 @@ export default function ApproachPage() {
                   The documentation covers everything from setup to deployment.
                 </Text>
               </Stack>
-              <Button nativeButton={false} render={<Link href="/docs" />}>
+              <Button render={<Link href="/docs" />}>
                 <BookOpenIcon className="h-4 w-4" />
                 Read the Docs
                 <ArrowRightIcon className="h-4 w-4" />

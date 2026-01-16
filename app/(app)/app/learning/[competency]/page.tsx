@@ -284,7 +284,6 @@ function ModuleRow({ module, competencySlug, index }: ModuleRowProps) {
             <Button
               variant="ghost"
               size="sm"
-              nativeButton={false}
               render={<Link href={`/learn/${competencySlug}/${module.slug}`} target="_blank" />}
             >
               <EyeIcon className="h-4 w-4" />

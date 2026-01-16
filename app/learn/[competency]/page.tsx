@@ -241,7 +241,6 @@ export default async function CompetencyPage({ params }: PageProps) {
               <Button 
                 size="lg" 
                 className="gap-2 bg-white text-primary-700 hover:bg-white/90"
-                nativeButton={false}
                 render={<Link href={`/learn/${currentCompetency.slug}/${firstModule.slug}`} />}
               >
                 <PlayIcon className="h-4 w-4" />

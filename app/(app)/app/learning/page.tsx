@@ -230,7 +230,6 @@ function CompetencyRow({ competency }: CompetencyRowProps) {
             <Button
               variant="ghost"
               size="sm"
-              nativeButton={false}
               render={<Link href={`/app/learning/${competency.slug}`} />}
             >
               <EditIcon className="h-4 w-4 mr-1" />

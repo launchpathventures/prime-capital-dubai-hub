@@ -44,7 +44,6 @@ export default async function DashboardPage() {
             </Text>
           </Stack>
           <Button
-            nativeButton={false}
             variant="outline"
             render={<Link href="/" target="_blank" />}
           >
@@ -97,7 +96,6 @@ export default async function DashboardPage() {
                 <Button 
                   variant="outline" 
                   className="justify-start w-full" 
-                  nativeButton={false} 
                   render={<Link href="/app/properties" />}
                 >
                   <BuildingIcon className="h-4 w-4" />
@@ -107,7 +105,6 @@ export default async function DashboardPage() {
                 <Button 
                   variant="outline" 
                   className="justify-start w-full" 
-                  nativeButton={false} 
                   render={<Link href="/app/team" />}
                 >
                   <UsersIcon className="h-4 w-4" />
@@ -117,7 +114,6 @@ export default async function DashboardPage() {
                 <Button 
                   variant="outline" 
                   className="justify-start w-full" 
-                  nativeButton={false} 
                   render={<Link href="/app/testimonials" />}
                 >
                   <MessageSquareQuoteIcon className="h-4 w-4" />
@@ -127,7 +123,6 @@ export default async function DashboardPage() {
                 <Button 
                   variant="outline" 
                   className="justify-start w-full" 
-                  nativeButton={false} 
                   render={<Link href="/app/site-settings" />}
                 >
                   <SettingsIcon className="h-4 w-4" />
@@ -179,7 +174,6 @@ export default async function DashboardPage() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  nativeButton={false} 
                   render={<Link href="/app/properties" />}
                 >
                   View All
@@ -210,7 +204,6 @@ export default async function DashboardPage() {
                       <Button 
                         variant="ghost" 
                         size="icon-sm"
-                        nativeButton={false}
                         render={<Link href={`/properties/${property.slug}`} target="_blank" />}
                       >
                         <ExternalLinkIcon className="h-4 w-4" />

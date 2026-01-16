@@ -244,7 +244,6 @@ export default function WebLandingPage() {
               <Button
                 size="lg"
                 className="h-12 rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all"
-                nativeButton={false}
                 render={<Link href="/docs" />}
               >
                 <RocketIcon className="mr-2 h-5 w-5" />
@@ -254,7 +253,6 @@ export default function WebLandingPage() {
                 size="lg"
                 variant="outline"
                 className="h-12 rounded-full px-8 hover:scale-105 transition-all"
-                nativeButton={false}
                 render={<Link href="/examples" />}
               >
                 View Examples
@@ -376,7 +374,6 @@ export default function WebLandingPage() {
               <Button
                 variant="outline"
                 className="w-fit"
-                nativeButton={false}
                 render={<Link href="/docs" />}
               >
                 Explore the Docs
@@ -475,7 +472,6 @@ export default function WebLandingPage() {
                   <Button
                     size="lg"
                     className="h-12 rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all"
-                    nativeButton={false}
                     render={<Link href="/docs" />}
                   >
                     Start Building
@@ -485,7 +481,6 @@ export default function WebLandingPage() {
                     size="lg"
                     variant="outline"
                     className="h-12 rounded-full px-8 hover:scale-105 transition-all"
-                    nativeButton={false}
                     render={<Link href="/" />}
                   >
                     Learn More

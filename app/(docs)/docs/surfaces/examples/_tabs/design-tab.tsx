@@ -195,7 +195,7 @@ export function DesignTab() {
 
         {/* View Examples CTA */}
         <section className="text-center">
-          <Button size="lg" nativeButton={false} render={<Link href="/examples" />}>
+          <Button size="lg" render={<Link href="/examples" />}>
             Browse All Examples
             <ArrowRightIcon className="h-4 w-4" />
           </Button>
@@ -243,7 +243,7 @@ function ExampleCard({
       </CardHeader>
       <CardContent>
         {status === "complete" ? (
-          <Button variant="outline" size="sm" nativeButton={false} render={<Link href={href} />}>
+          <Button variant="outline" size="sm" render={<Link href={href} />}>
             View Example
             <ArrowRightIcon className="h-3 w-3" />
           </Button>

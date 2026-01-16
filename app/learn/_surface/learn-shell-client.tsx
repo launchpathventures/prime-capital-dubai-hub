@@ -162,11 +162,15 @@ export function LearnShellClient({
   }, [drawerOpen])
 
   // Scroll content to top on navigation
+  // Some pages use .learn-content-wrapper (module pages with ToC)
+  // Other pages scroll via window/document
   React.useEffect(() => {
-    const contentEl = document.querySelector(".learn-content-wrapper")
-    if (contentEl) {
-      contentEl.scrollTo({ top: 0, behavior: "instant" })
+    const contentWrapper = document.querySelector(".learn-content-wrapper")
+    if (contentWrapper) {
+      contentWrapper.scrollTo({ top: 0, behavior: "instant" })
     }
+    // Always also scroll window - handles pages without the wrapper
+    window.scrollTo({ top: 0, behavior: "instant" })
   }, [pathname])
   
   return (

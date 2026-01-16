@@ -130,20 +130,12 @@ export function WebFooter() {
             © {currentYear} Prime Capital Dubai LLC. All rights reserved.
           </Text>
 
-          <Row gap="lg">
-            <Link
-              href="/terms/privacy"
-              className="text-[var(--web-serenity)] text-[14px] font-light hover:text-[var(--web-off-white)] transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-[var(--web-serenity)] text-[14px] font-light hover:text-[var(--web-off-white)] transition-colors"
-            >
-              Terms of Service
-            </Link>
-          </Row>
+          <Link
+            href="/terms"
+            className="text-[var(--web-serenity)] text-[14px] font-light hover:text-[var(--web-off-white)] transition-colors"
+          >
+            Terms of Service
+          </Link>
         </div>
       </Container>
     </footer>

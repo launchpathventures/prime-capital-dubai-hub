@@ -209,7 +209,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           variant="ghost" 
           size="sm" 
           className="w-fit gap-1"
-          nativeButton={false}
           render={<Link href="/hub/projects" />}
         >
           <ArrowLeftIcon className="h-3 w-3" />
@@ -235,7 +234,6 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 <Button 
                   variant="outline" 
                   className="gap-2"
-                  nativeButton={false}
                   render={<Link href={`/hub/questions?project=${project.slug}`} />}
                 >
                   <MessageCircleIcon className="h-4 w-4" />

@@ -76,7 +76,6 @@ export function HubHeader() {
                   "gap-2",
                   active && "bg-secondary"
                 )}
-                nativeButton={false}
                 render={<Link href={item.href} />}
               >
                 <Icon className="h-4 w-4" />
@@ -87,7 +86,7 @@ export function HubHeader() {
         </nav>
 
         <Row className="ml-auto items-center gap-2">
-          <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/app/dashboard" />}>
+          <Button variant="ghost" size="sm" render={<Link href="/app/dashboard" />}>
             Admin
           </Button>
         </Row>

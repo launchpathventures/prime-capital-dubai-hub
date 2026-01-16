@@ -33,7 +33,6 @@ export default async function TeamPage() {
               We're preparing our team profiles. Contact us to connect directly with our advisors.
             </Text>
             <Button
-              nativeButton={false}
               className="mt-4 h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/contact" />}
             >
@@ -116,7 +115,6 @@ function TeamGridSection({ team }: { team: Awaited<ReturnType<typeof getTeamMemb
               Team profiles are being prepared. Contact us to connect with our advisors.
             </Text>
             <Button
-              nativeButton={false}
               className="border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)] rounded-[2px]"
               variant="outline"
               render={<Link href="/contact" />}
@@ -149,14 +147,22 @@ function TeamGridSection({ team }: { team: Awaited<ReturnType<typeof getTeamMemb
 function CTASection() {
   return (
     <section
-      className="py-[var(--web-section-gap)]"
+      className="py-[var(--web-section-gap)] relative"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.97) 0%, rgba(63,65,66,0.98) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundColor: "#4a5a5e", // Blue-slate, consistent with other CTAs
       }}
     >
-      <Container size="md">
+      {/* Subtle cityscape silhouette */}
+      <div 
+        className="absolute inset-0 opacity-[0.08]"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+        }}
+      />
+      
+      <Container size="md" className="relative z-10">
         <Stack gap="lg" align="center" className="text-center">
           <Title
             as="h2"
@@ -170,7 +176,6 @@ function CTASection() {
           </Text>
 
           <Button
-            nativeButton={false}
             size="lg"
             className="btn-hover-lift mt-4 h-14 px-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
             render={<Link href="/contact" />}
@@ -179,6 +184,9 @@ function CTASection() {
           </Button>
         </Stack>
       </Container>
+      
+      {/* Bottom separator line for visual break with footer */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
     </section>
   )
 }

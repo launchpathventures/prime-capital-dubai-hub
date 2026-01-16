@@ -135,7 +135,6 @@ export default function AdminQuestionsPage() {
           variant="ghost" 
           size="sm" 
           className="w-fit gap-1"
-          nativeButton={false}
           render={<Link href="/app/hub" />}
         >
           <ArrowLeftIcon className="h-3 w-3" />
@@ -210,7 +209,6 @@ export default function AdminQuestionsPage() {
                           <Button 
                             variant="ghost" 
                             size="icon"
-                            nativeButton={false}
                             render={<Link href={`/hub/questions/${question.id}`} />}
                           >
                             <ExternalLinkIcon className="h-4 w-4" />

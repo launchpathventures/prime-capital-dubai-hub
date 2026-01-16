@@ -182,7 +182,6 @@ export function TeamClient({ members }: TeamClientProps) {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            nativeButton={false}
                             render={<Link href={`/team/${member.slug}`} target="_blank" />}
                           >
                             <ExternalLinkIcon className="h-4 w-4" />

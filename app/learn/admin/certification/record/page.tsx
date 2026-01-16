@@ -374,7 +374,6 @@ export default async function RecordCertificationPage() {
             <div className="cert-record-actions">
               <Button 
                 variant="ghost" 
-                nativeButton={false}
                 render={<Link href="/learn/admin/certification" />}
               >
                 Cancel

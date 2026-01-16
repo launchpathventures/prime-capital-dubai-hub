@@ -46,7 +46,6 @@ export default async function CertificationGuidePage() {
             variant="ghost" 
             size="sm" 
             className="gap-2 text-muted-foreground hover:text-foreground"
-            nativeButton={false}
             render={<Link href="/learn/certification" />}
           >
             <ArrowLeftIcon className="h-4 w-4" />
@@ -68,7 +67,7 @@ export default async function CertificationGuidePage() {
                 Work through AI scenarios to prepare for your assessment.
               </p>
             </div>
-            <Button nativeButton={false} render={<Link href="/learn/scenarios" />}>
+            <Button render={<Link href="/learn/scenarios" />}>
               Practice Scenarios
             </Button>
           </div>

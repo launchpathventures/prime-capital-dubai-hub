@@ -130,7 +130,6 @@ export default async function LearnDashboardPage() {
                 <Button 
                   size="lg" 
                   className="gap-2 bg-white text-primary-700 hover:bg-white/90"
-                  nativeButton={false}
                   render={<Link href={`/learn/${firstCompetency.slug}`} />}
                 >
                   <PlayIcon className="h-4 w-4" />

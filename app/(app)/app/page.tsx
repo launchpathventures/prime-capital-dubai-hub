@@ -66,7 +66,7 @@ export default function AppLandingPage() {
             </Text>
 
             <Stack gap="sm" className="items-center pt-2">
-              <Button size="lg" nativeButton={false} render={<Link href="/auth/login" />}>
+              <Button size="lg" render={<Link href="/auth/login" />}>
                 <ArrowRightIcon className="h-4 w-4" />
                 Try the Sign in Flow
               </Button>
@@ -147,10 +147,10 @@ export default function AppLandingPage() {
               Explore the sidebar to see example pages, or
             </Text>
             <Row gap="sm" className="flex-wrap justify-center">
-              <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/app/approach" />}>
+              <Button variant="outline" size="sm" render={<Link href="/app/approach" />}>
                 Learn the Approach
               </Button>
-              <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/docs" />}>
+              <Button variant="outline" size="sm" render={<Link href="/docs" />}>
                 Read the Docs
               </Button>
             </Row>

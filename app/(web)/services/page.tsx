@@ -395,7 +395,6 @@ function GoldenVisaSection() {
             </div>
 
             <Button
-              nativeButton={false}
               size="lg"
               className="w-full sm:w-auto h-14 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
               render={<Link href="/contact" />}
@@ -476,7 +475,6 @@ function CTASection() {
           </Text>
 
           <Button
-            nativeButton={false}
             size="lg"
             className="btn-hover-lift mt-2 h-12 px-10 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
             render={<Link href="/contact" />}
