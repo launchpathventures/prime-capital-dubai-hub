@@ -5,9 +5,6 @@
  * Agents can copy these directly and use them in their daily work.
  */
 
-import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../_surface/learn-shell"
 import { PromptLibrary } from "./_components/prompt-library"
 
 // =============================================================================
@@ -15,17 +12,8 @@ import { PromptLibrary } from "./_components/prompt-library"
 // =============================================================================
 
 export default async function PromptsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const [userRole, userMenu] = await Promise.all([getUserRole(), getUserForMenu()])
-
   return (
-    <LearnShell 
-      activeSection="prompts" 
-      userRole={userRole}
-      user={userMenu ?? undefined}
-    >
-      <div className="learn-prompts">
+    <div className="learn-prompts">
         <header className="learn-prompts__header">
           <h1 className="learn-prompts__title">AI Prompts Library</h1>
           <p className="learn-prompts__subtitle">
@@ -34,7 +22,6 @@ export default async function PromptsPage() {
         </header>
         
         <PromptLibrary />
-      </div>
-    </LearnShell>
+    </div>
   )
 }

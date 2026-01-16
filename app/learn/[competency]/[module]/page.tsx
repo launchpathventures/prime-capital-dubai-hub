@@ -14,7 +14,9 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { SectionRenderer, ModuleToCRight, ReadingProgress, EssentialsToCRight, ModuleControlsBar } from "@/components/lms"
+import { ReadingProgress } from "@/components/lms"
+import { ModuleContentSwitcher } from "@/components/lms/module-content-switcher"
+import { ModuleToCSwitcher } from "@/components/lms/module-toc-switcher"
 import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
 import { 
   ChevronLeftIcon,
@@ -24,12 +26,7 @@ import {
   CheckCircleIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { getCompetenciesForSidebar } from "@/lib/learning"
-import { ModuleCoachPrompt } from "@/components/lms/coach"
-import { ModulePageClient } from "./page-client"
 import { getAudioForModule, formatAudioDuration } from "@/lib/lms"
-import { LearnShell } from "../../_surface/learn-shell"
 import type { EssentialsContent } from "@/lib/learning-types"
 
 // =============================================================================
@@ -244,11 +241,6 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     currentCompetency.display_order,
     currentModuleIndex
   )
-  const [sidebarCompetencies, userRole, userMenu] = await Promise.all([
-    getCompetenciesForSidebar(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
   const audioTracks = audioData.map((track) => ({
     slug: track.slug,
     title: track.title,
@@ -259,22 +251,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
   }))
   
   return (
-    <LearnShell 
-      activeSection="course"
-      competencies={sidebarCompetencies}
-      currentCompetency={competencySlug}
-      currentModule={moduleSlug}
-      userRole={userRole}
-      user={userMenu ?? undefined}
-      coachContext={{ 
-        level: "module",
-        competencySlug,
-        competencyName: currentCompetency.name,
-        moduleSlug,
-        moduleName: currentModule.title,
-        moduleContent: currentModule.content || undefined,
-      }}
-    >
+    <>
       {/* Content area with optional right ToC */}
       <div className="learn-content-wrapper">
         {/* Reading progress bar */}
@@ -301,28 +278,20 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
             </h1>
           </div>
           
-          {/* AI Coach - collapsible, visible in both modes */}
-          <ModuleCoachPrompt moduleTitle={currentModule.title} />
-          
-          {/* Combined Controls Bar - Audio + Mode Toggle */}
-          <ModuleControlsBar
-            audioTracks={audioTracks}
-            hasEssentials={hasEssentials}
-            essentialsDuration={essentialsDuration}
-            deepDiveDuration={deepDiveDuration}
-            currentMode={mode}
-          />
-          
-          {/* Module content */}
-          {mode === "essentials" && currentModule.essentials ? (
-            <ModulePageClient
-              essentials={currentModule.essentials}
+          {/* AI Coach + Mode Toggle + Content - all handled by client component for instant switching */}
+          {(currentModule.essentials || currentModule.content) ? (
+            <ModuleContentSwitcher
+              moduleTitle={currentModule.title}
               moduleSlug={moduleSlug}
               competencySlug={competencySlug}
+              essentials={currentModule.essentials}
+              deepDiveContent={currentModule.content}
+              audioTracks={audioTracks}
+              essentialsDuration={essentialsDuration}
+              deepDiveDuration={deepDiveDuration}
               linkedScenarios={linkedScenarios}
+              initialMode={mode}
             />
-          ) : currentModule.content ? (
-            <SectionRenderer content={currentModule.content} linkedScenarios={linkedScenarios} />
           ) : (
             <div className="lms-card" style={{ padding: '1.75rem' }}>
               <div className="lms-prose">
@@ -374,12 +343,14 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
           
         </div>
         
-        {/* Right ToC - mode-specific */}
-        {mode === "essentials" && currentModule.essentials && (
-          <EssentialsToCRight essentials={currentModule.essentials} hasQuiz={!!relatedQuiz} />
-        )}
-        {mode === "deepdive" && currentModule.content && <ModuleToCRight content={currentModule.content} hasQuiz={!!relatedQuiz} />}
+        {/* Right ToC - switches based on mode in URL */}
+        <ModuleToCSwitcher
+          essentials={currentModule.essentials}
+          deepDiveContent={currentModule.content}
+          hasQuiz={!!relatedQuiz}
+          initialMode={mode}
+        />
       </div>
-    </LearnShell>
+    </>
   )
 }

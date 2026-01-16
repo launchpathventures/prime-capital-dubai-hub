@@ -149,7 +149,23 @@ function CollapsibleSidebarNav({
   }, [showSearch])
 
   // Determine if items are grouped or flat
-  const isGrouped = items.length > 0 && "items" in items[0]
+  // Handle edge case where items might be empty or undefined
+  const isGrouped = items && items.length > 0 && "items" in items[0]
+
+  // Early return if no items
+  if (!items || items.length === 0) {
+    return (
+      <nav
+        data-slot="sidebar-nav"
+        className={cn("layout-sidebar-nav", "flex min-h-0 flex-1 flex-col", className)}
+        {...props}
+      >
+        <div className="px-3 py-4 text-sm text-muted-foreground">
+          No navigation items
+        </div>
+      </nav>
+    )
+  }
 
   // Filter items based on search query
   const filteredItems = React.useMemo(() => {

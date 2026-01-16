@@ -9,10 +9,7 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { getCompetenciesForSidebar } from "@/lib/learning"
 import { QuizPageClient } from "./quiz-page-client"
-import { LearnShell } from "../../_surface/learn-shell"
 
 interface PageProps {
   params: Promise<{ quizId: string }>
@@ -67,20 +64,6 @@ interface Quiz {
   question_count: number
 }
 
-interface Module {
-  slug: string
-  title: string
-  status: "complete" | "current" | "locked"
-}
-
-interface Competency {
-  slug: string
-  name: string
-  number: number
-  locked: boolean
-  modules: Module[]
-}
-
 // -----------------------------------------------------------------------------
 // Data Fetching
 // -----------------------------------------------------------------------------
@@ -121,12 +104,7 @@ export default async function QuizPage({ params, searchParams }: PageProps) {
   const { quizId } = await params
   const { returnTo } = await searchParams
   
-  const [data, competencies, userRole, userMenu] = await Promise.all([
-    getQuizData(quizId),
-    getCompetenciesForSidebar(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const data = await getQuizData(quizId)
   
   if (!data || data.questions.length === 0) {
     notFound()
@@ -136,20 +114,13 @@ export default async function QuizPage({ params, searchParams }: PageProps) {
   const isPracticeExam = data.quiz.slug.includes("practice-exam")
   
   return (
-    <LearnShell 
-      activeSection="rera"
-      competencies={competencies}
-      userRole={userRole}
-      user={userMenu ?? undefined}
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         <QuizPageClient 
           quiz={data.quiz}
           questions={data.questions}
           returnTo={returnTo}
           showImmediateFeedback={!isPracticeExam}
         />
-      </div>
-    </LearnShell>
+    </div>
   )
 }

@@ -51,6 +51,8 @@ interface ModuleControlsBarProps {
   hasEssentials: boolean
   /** Current mode from server */
   currentMode?: "essentials" | "deepdive"
+  /** Callback when mode changes (if provided, component is controlled) */
+  onModeChange?: (mode: "essentials" | "deepdive") => void
   /** Additional classes */
   className?: string
 }
@@ -96,6 +98,7 @@ export function ModuleControlsBar({
   deepDiveDuration = "25 min",
   hasEssentials,
   currentMode: serverMode,
+  onModeChange,
   className
 }: ModuleControlsBarProps) {
   const router = useRouter()
@@ -108,9 +111,14 @@ export function ModuleControlsBar({
   const currentMode = serverMode || urlMode || "deepdive"
   
   const setMode = (mode: "essentials" | "deepdive") => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set("mode", mode)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    // If controlled, use callback; otherwise use router
+    if (onModeChange) {
+      onModeChange(mode)
+    } else {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("mode", mode)
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }
   }
   
   const toggleAudio = (slug: string) => {

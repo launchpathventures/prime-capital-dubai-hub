@@ -3,6 +3,8 @@
  * 
  * Course overview page showing all competencies.
  * Premium design with refined visual hierarchy.
+ * 
+ * Shell is provided by layout.tsx - this page only renders content.
  */
 
 import Link from "next/link"
@@ -16,9 +18,6 @@ import {
   ArrowRightIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { getCompetenciesForSidebar } from "@/lib/learning"
-import { LearnShell } from "./_surface/learn-shell"
 import { AcademyTour } from "./_surface/academy-tour"
 
 // =============================================================================
@@ -84,12 +83,7 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
 // =============================================================================
 
 export default async function LearnDashboardPage() {
-  const [competencies, sidebarCompetencies, userRole, userMenu] = await Promise.all([
-    getCompetenciesWithModules(),
-    getCompetenciesForSidebar(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const competencies = await getCompetenciesWithModules()
   
   const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
   const totalDuration = competencies.reduce(
@@ -102,15 +96,8 @@ export default async function LearnDashboardPage() {
   const firstCompetency = availableCompetencies[0]
   
   return (
-    <LearnShell 
-      activeSection="overview"
-      competencies={sidebarCompetencies}
-      userRole={userRole}
-      coachContext={{ level: "course" }}
-      user={userMenu ?? undefined}
-    >
-      <div className="learn-content">
-        {/* Hero Section */}
+    <div className="learn-content">
+      {/* Hero Section */}
         <section className="lms-hero">
           <div className="lms-hero__content">
             <div className="lms-hero__eyebrow">
@@ -233,6 +220,5 @@ export default async function LearnDashboardPage() {
           </div>
         </section>
       </div>
-    </LearnShell>
   )
 }

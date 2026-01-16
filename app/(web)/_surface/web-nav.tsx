@@ -137,7 +137,7 @@ export function WebNav({ scrolled = false }: WebNavProps) {
               className="web-mobile-menu"
               aria-label="Mobile navigation"
             >
-              <NavItems />
+              <NavItems mobile />
 
               <Link href="/contact" className="web-mobile-menu-primary">
                 Get In Touch
@@ -156,14 +156,20 @@ export function WebNav({ scrolled = false }: WebNavProps) {
 
 interface NavItemsProps {
   scrolled?: boolean
+  /** Whether rendering for mobile (applies explicit mobile styles) */
+  mobile?: boolean
 }
 
 /** Renders the main navigation items — used in both desktop and mobile */
-function NavItems({ scrolled }: NavItemsProps) {
+function NavItems({ scrolled, mobile }: NavItemsProps) {
   return (
     <>
       {webNavItems.map((item) => (
-        <Link key={item.href} href={item.href}>
+        <Link 
+          key={item.href} 
+          href={item.href}
+          className={mobile ? "web-mobile-nav-link" : undefined}
+        >
           {item.label}
         </Link>
       ))}

@@ -8,11 +8,10 @@
 
 import { Suspense } from "react"
 import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { requireAdmin } from "@/lib/auth/require-auth"
 import { FeedbackFilters } from "./feedback-filters"
 import { FeedbackList } from "./feedback-list"
 import { FeedbackToggle } from "./feedback-toggle"
-import { LearnShell } from "@/app/learn/_surface"
 import { getFeedbackEnabled } from "@/lib/lms/feedback"
 import {
   MessageSquareIcon,
@@ -26,27 +25,10 @@ export default async function AdminFeedbackPage({
 }: {
   searchParams: Promise<{ status?: string; type?: string }>
 }) {
+  // Require admin access
+  await requireAdmin()
+
   const supabase = await createClient()
-
-  // Check auth
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    redirect("/auth/login?redirectTo=/learn/admin/feedback")
-  }
-
-  // Check admin role
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single()
-
-  if (profile?.role !== "admin") {
-    redirect("/learn")
-  }
-
   const params = await searchParams
 
   // Get feedback counts for stats
@@ -73,12 +55,7 @@ export default async function AdminFeedbackPage({
   const feedbackEnabled = await getFeedbackEnabled()
 
   return (
-    <LearnShell
-      user={{ name: profile?.full_name || user.email || "Admin", role: "admin" }}
-      activeSection="admin-feedback"
-      userRole="admin"
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Header */}
         <div className="cert-admin-header">
           <div>
@@ -150,7 +127,6 @@ export default async function AdminFeedbackPage({
             <FeedbackList status={params.status} type={params.type} />
           </Suspense>
         </section>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

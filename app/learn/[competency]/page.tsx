@@ -21,9 +21,6 @@ import {
   HeadphonesIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { getCompetenciesForSidebar } from "@/lib/learning"
-import { LearnShell } from "../_surface/learn-shell"
 import { AudioPlayer, type AudioTrack } from "@/components/lms/audio-player"
 
 // =============================================================================
@@ -206,30 +203,15 @@ export default async function CompetencyPage({ params }: PageProps) {
   
   const firstModule = currentCompetency.modules[0]
   
-  // Get quizzes, scenarios, audio, and sidebar data for this competency
-  const [quizzes, scenarios, competencyAudio, sidebarCompetencies, userRole, userMenu] = await Promise.all([
+  // Get quizzes, scenarios, and audio for this competency
+  const [quizzes, scenarios, competencyAudio] = await Promise.all([
     getQuizzesForCompetency(slug),
     getScenariosForCompetency(slug),
     getCompetencyAudio(currentCompetency.id),
-    getCompetenciesForSidebar(),
-    getUserRole(),
-    getUserForMenu(),
   ])
   
   return (
-    <LearnShell 
-      activeSection="course"
-      competencies={sidebarCompetencies}
-      currentCompetency={slug}
-      userRole={userRole}
-      user={userMenu ?? undefined}
-      coachContext={{ 
-        level: "competency",
-        competencySlug: slug,
-        competencyName: currentCompetency.name,
-      }}
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Hero Section */}
         <section className="lms-hero lms-hero--compact">
           <div className="lms-hero__content">
@@ -400,7 +382,6 @@ export default async function CompetencyPage({ params }: PageProps) {
           </Stack>
         </section>
       )}
-      </div>
-    </LearnShell>
+    </div>
   )
 }

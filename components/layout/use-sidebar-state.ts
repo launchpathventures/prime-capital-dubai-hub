@@ -52,9 +52,12 @@ export function useSidebarState(
 
   const [isOpen, setIsOpen] = React.useState(defaultOpen)
   const [isMobile, setIsMobile] = React.useState(false)
+  const [hasMounted, setHasMounted] = React.useState(false)
 
-  // Track viewport size
+  // Track viewport size after mount (avoids SSR hydration mismatch)
   React.useEffect(() => {
+    setHasMounted(true)
+    
     const checkMobile = () => {
       const mobile = window.innerWidth < MOBILE_BREAKPOINT
       setIsMobile(mobile)
@@ -76,5 +79,6 @@ export function useSidebarState(
   const open = React.useCallback(() => setIsOpen(true), [])
   const close = React.useCallback(() => setIsOpen(false), [])
 
-  return { isOpen, isMobile, toggle, open, close }
+  // Only report as mobile after client has mounted to avoid hydration issues
+  return { isOpen, isMobile: hasMounted && isMobile, toggle, open, close }
 }

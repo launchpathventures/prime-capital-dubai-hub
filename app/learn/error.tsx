@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { Stack, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { AlertTriangleIcon, RefreshCwIcon } from "lucide-react"
+import { trackComponentError } from "@/lib/error-tracking"
 
 export default function Error({
   error,
@@ -13,8 +14,8 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log error to monitoring service
-    console.error("LMS Error:", error)
+    // Track error to monitoring service
+    trackComponentError(error, "LearnErrorBoundary", error.digest)
   }, [error])
 
   return (

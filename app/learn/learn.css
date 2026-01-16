@@ -81,6 +81,8 @@
   display: flex;
   flex: 1;
   min-width: 0;
+  overflow-y: auto;
+  height: calc(100dvh - var(--lms-header-height));
 }
 
 .learn-content {

@@ -23,8 +23,7 @@ import {
   GraduationCapIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { LearnShell } from "@/app/learn/_surface/learn-shell"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
+import { requireAdmin } from "@/lib/auth/require-auth"
 
 // =============================================================================
 // Types
@@ -330,23 +329,18 @@ function EmptyState() {
 // =============================================================================
 
 export default async function CertificationAdminPage() {
-  const [attempts, trainees, stats, learners, userRole, userMenu] = await Promise.all([
+  // Require admin access
+  await requireAdmin()
+
+  const [attempts, trainees, stats, learners] = await Promise.all([
     getCertificationAttempts(),
     getPendingTrainees(),
     getStats(),
     getAllLearners(),
-    getUserRole(),
-    getUserForMenu(),
   ])
 
   return (
-    <LearnShell 
-      activeSection="admin"
-      userRole={userRole}
-      user={userMenu ?? undefined}
-      coachContext={{ level: "course" }}
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Title */}
         <div className="cert-admin-header">
           <div>
@@ -511,7 +505,6 @@ export default async function CertificationAdminPage() {
             The system will automatically update the trainee&apos;s certification status based on the outcome.
           </p>
         </div>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

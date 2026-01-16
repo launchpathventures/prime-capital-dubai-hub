@@ -16,17 +16,7 @@ import {
   FileTextIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../../_surface/learn-shell"
 
-export const metadata: Metadata = {
-  title: "RERA Practice Exams | Learning Portal",
-  description: "Prepare for the RERA certification exam with practice questions.",
-}
-
-// =============================================================================
-// Types
-// =============================================================================
 
 interface Quiz {
   slug: string
@@ -74,19 +64,14 @@ function getQuizIcon(slug: string) {
 // =============================================================================
 
 export default async function RERAQuizIndexPage() {
-  const [quizzes, userRole, userMenu] = await Promise.all([
-    getRERAQuizzes(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const quizzes = await getRERAQuizzes()
   
   // Separate practice exams from topic quizzes
   const practiceExams = quizzes.filter(q => q.slug.includes("practice-exam"))
   const topicQuizzes = quizzes.filter(q => !q.slug.includes("practice-exam"))
   
   return (
-    <LearnShell activeSection="rera" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Header */}
         <header className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
@@ -188,7 +173,6 @@ export default async function RERAQuizIndexPage() {
             </p>
           </div>
         )}
-      </div>
-    </LearnShell>
+    </div>
   )
 }

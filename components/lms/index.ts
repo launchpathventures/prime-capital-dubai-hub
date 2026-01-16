@@ -27,6 +27,8 @@ export { ResourceList } from "./resource-list"
 export { ModeSwitch } from "./mode-switch"
 export { EssentialsView } from "./essentials-view"
 export { EssentialsToCRight } from "./essentials-toc-right"
+export { ModuleContentSwitcher } from "./module-content-switcher"
+export { ModuleToCSwitcher } from "./module-toc-switcher"
 
 // Dashboard Components
 export { DashboardStats } from "./dashboard-stats"

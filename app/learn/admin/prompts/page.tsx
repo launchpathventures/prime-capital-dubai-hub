@@ -5,10 +5,8 @@
  */
 
 import { Metadata } from "next"
-import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "@/app/learn/_surface/learn-shell"
+import { requireAdmin } from "@/lib/auth/require-auth"
 import { PromptEditor } from "./_components/prompt-editor"
 import { SparklesIcon } from "lucide-react"
 
@@ -55,25 +53,13 @@ async function getPrompts(): Promise<Prompt[]> {
 // =============================================================================
 
 export default async function AdminPromptsPage() {
-  const [userRole, userMenu] = await Promise.all([
-    getUserRole(),
-    getUserForMenu(),
-  ])
-
-  // Admin only
-  if (userRole !== "admin") {
-    redirect("/learn")
-  }
+  // Require admin access
+  await requireAdmin()
 
   const prompts = await getPrompts()
 
   return (
-    <LearnShell
-      activeSection="admin"
-      userRole={userRole}
-      user={userMenu ?? undefined}
-    >
-      <div className="admin-prompts">
+    <div className="admin-prompts">
         <header className="admin-prompts__header">
           <div className="admin-prompts__header-icon">
             <SparklesIcon className="h-6 w-6" />
@@ -98,7 +84,6 @@ export default async function AdminPromptsPage() {
             ))
           )}
         </div>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

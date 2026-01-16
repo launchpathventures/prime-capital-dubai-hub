@@ -15,9 +15,7 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { getCompetenciesForSidebar } from "@/lib/learning"
-import { LearnShell } from "../_surface/learn-shell"
 import { getScenarioCompletionStats } from "@/lib/actions/scenario-actions"
 
 export const metadata: Metadata = {
@@ -109,12 +107,10 @@ async function getModulesWithProgress(): Promise<{
 // =============================================================================
 
 export default async function ProgressPage() {
-  const [{ modules, completed }, competencies, scenarioStats, userRole, userMenu] = await Promise.all([
+  const [{ modules, completed }, competencies, scenarioStats] = await Promise.all([
     getModulesWithProgress(),
     getCompetenciesForSidebar(),
     getScenarioCompletionStats(),
-    getUserRole(),
-    getUserForMenu(),
   ])
   
   const completedIds = new Set(completed.map(c => c.module_id))
@@ -135,13 +131,7 @@ export default async function ProgressPage() {
   }, {} as Record<string, { name: string; modules: Module[] }>)
   
   return (
-    <LearnShell 
-      activeSection="progress"
-      competencies={competencies}
-      userRole={userRole}
-      user={userMenu ?? undefined}
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Header */}
         <header className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
@@ -285,7 +275,6 @@ export default async function ProgressPage() {
             })}
           </div>
         </section>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

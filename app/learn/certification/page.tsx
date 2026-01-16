@@ -23,8 +23,6 @@ import {
   InfoIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../_surface/learn-shell"
 
 export const metadata: Metadata = {
   title: "Certification | Learning Portal",
@@ -304,11 +302,9 @@ function PreparationTips() {
 // =============================================================================
 
 export default async function CertificationPage() {
-  const [profile, competencies, userRole, userMenu] = await Promise.all([
+  const [profile, competencies] = await Promise.all([
     getUserProfile(),
     getCompetencies(),
-    getUserRole(),
-    getUserForMenu(),
   ])
   
   // Get progress (would be real progress tracking in production)
@@ -332,8 +328,7 @@ export default async function CertificationPage() {
   const isCertified = profile?.certification_status === 'certified'
 
   return (
-    <LearnShell activeSection="certification" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Hero Section */}
         <section className="cert-hero">
           <div className="cert-hero__icon">
@@ -504,7 +499,6 @@ export default async function CertificationPage() {
             </div>
           </>
         )}
-      </div>
-    </LearnShell>
+    </div>
   )
 }

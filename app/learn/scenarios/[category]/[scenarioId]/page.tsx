@@ -17,8 +17,6 @@ import {
   LightbulbIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../../../_surface/learn-shell"
 import { ScenarioDetailClient } from "./_components/scenario-detail-client"
 import { getScenarioProgress } from "@/lib/actions/scenario-actions"
 
@@ -162,11 +160,7 @@ function formatList(text: string): string[] {
 
 export default async function ScenarioDetailPage({ params }: PageProps) {
   const { category: categorySlug, scenarioId } = await params
-  const [category, userRole, userMenu] = await Promise.all([
-    getScenarioCategory(categorySlug),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const category = await getScenarioCategory(categorySlug)
 
   if (!category) {
     notFound()
@@ -192,8 +186,7 @@ export default async function ScenarioDetailPage({ params }: PageProps) {
   const personaName = personaItems.find(p => p.label === "Name")?.value || "The Client"
 
   return (
-    <LearnShell activeSection="scenarios" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content scenario-detail">
+    <div className="learn-content scenario-detail">
         {/* Back Link */}
         <Link href={`/learn/scenarios/${categorySlug}`} className="scenario-back">
           <ChevronLeftIcon className="h-4 w-4" />
@@ -339,7 +332,6 @@ export default async function ScenarioDetailPage({ params }: PageProps) {
               : undefined
           }
         />
-      </div>
-    </LearnShell>
+    </div>
   )
 }

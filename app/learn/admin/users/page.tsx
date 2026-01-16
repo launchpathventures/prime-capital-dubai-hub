@@ -2,27 +2,19 @@
  * CATALYST - User Management Admin Page
  * 
  * Allows admins to view all users, add new users, and edit user details.
- * Uses LearnShell for consistent navigation.
  */
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { 
   UsersIcon,
-  UserPlusIcon,
-  PencilIcon,
   MailIcon,
   ShieldIcon,
   GraduationCapIcon,
-  CalendarIcon,
   CheckCircleIcon,
   ClockIcon,
   TrendingUpIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { LearnShell } from "@/app/learn/_surface/learn-shell"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { redirect } from "next/navigation"
+import { requireAdmin } from "@/lib/auth/require-auth"
 import { revalidatePath } from "next/cache"
 import { UserEditForm } from "./user-edit-form"
 import { AddUserForm } from "./add-user-form"
@@ -117,29 +109,17 @@ export async function inviteUser(formData: FormData) {
 // =============================================================================
 
 export default async function UsersAdminPage() {
-  const [users, userRole, userMenu] = await Promise.all([
-    getAllUsers(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
-  
-  // Redirect non-admins
-  if (userRole !== 'admin') {
-    redirect('/learn')
-  }
+  // Require admin access
+  await requireAdmin()
+
+  const users = await getAllUsers()
   
   const learnerCount = users.filter(u => u.role === 'learner').length
   const adminCount = users.filter(u => u.role === 'admin').length
   const certifiedCount = users.filter(u => u.certification_status === 'certified').length
 
   return (
-    <LearnShell 
-      activeSection="admin-users"
-      userRole={userRole}
-      user={userMenu ?? undefined}
-      coachContext={{ level: "course" }}
-    >
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Header */}
         <div className="cert-admin-header">
           <div>
@@ -214,8 +194,7 @@ export default async function UsersAdminPage() {
             </div>
           )}
         </section>
-      </div>
-    </LearnShell>
+    </div>
   )
 }
 

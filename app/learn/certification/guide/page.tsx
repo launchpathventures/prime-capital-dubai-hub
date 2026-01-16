@@ -9,9 +9,7 @@ import { promises as fs } from "fs"
 import path from "path"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowLeftIcon, DownloadIcon } from "lucide-react"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../../_surface/learn-shell"
+import { ArrowLeftIcon } from "lucide-react"
 import { MarkdownRenderer } from "@/components/lms/markdown-renderer"
 
 // =============================================================================
@@ -38,15 +36,10 @@ async function getGuideContent(): Promise<string> {
 // =============================================================================
 
 export default async function CertificationGuidePage() {
-  const [content, userRole, userMenu] = await Promise.all([
-    getGuideContent(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const content = await getGuideContent()
   
   return (
-    <LearnShell activeSection="certification" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Back Navigation */}
         <div className="mb-6">
           <Button 
@@ -80,7 +73,6 @@ export default async function CertificationGuidePage() {
             </Button>
           </div>
         </div>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

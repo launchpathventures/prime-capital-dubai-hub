@@ -2,15 +2,16 @@
  * CATALYST - Learn Route Group Layout
  *
  * Root layout for the learn route group.
- * Imports learn.css for surface-specific styles.
- * Each page renders its own LearnShell with appropriate configuration.
+ * Renders a persistent shell (header + sidebar) so only
+ * content refreshes during navigation.
  *
  * AUTH:
  * - /learn routes should be protected (learner or admin role)
- * - Individual pages handle user data fetching for shell
+ * - Shell fetches user data for header menu
  */
 
 import "./learn.css"
+import { LearnLayoutShell } from "./_surface/learn-layout-shell"
 
 // Force dynamic rendering - these routes use cookies for auth
 export const dynamic = "force-dynamic"
@@ -28,10 +29,14 @@ export const metadata = {
 // Layout Component
 // -----------------------------------------------------------------------------
 
-export default function LearnLayout({
+export default async function LearnLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <LearnLayoutShell>
+      {children}
+    </LearnLayoutShell>
+  )
 }

@@ -16,8 +16,6 @@ import {
   MessageSquareIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../../_surface/learn-shell"
 import { ScenarioCardList } from "./_components/scenario-card-list"
 import { getScenarioProgress } from "@/lib/actions/scenario-actions"
 
@@ -158,11 +156,7 @@ const competencyLabels: Record<string, string> = {
 
 export default async function ScenarioCategoryPage({ params }: PageProps) {
   const { category: slug } = await params
-  const [category, userRole, userMenu] = await Promise.all([
-    getScenarioCategory(slug),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const category = await getScenarioCategory(slug)
   
   if (!category) {
     notFound()
@@ -179,8 +173,7 @@ export default async function ScenarioCategoryPage({ params }: PageProps) {
   const totalCount = scenarios.length
 
   return (
-    <LearnShell activeSection="scenarios" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Back Link */}
         <Link href="/learn/scenarios" className="scenario-back">
           <ChevronLeftIcon className="h-4 w-4" />
@@ -266,7 +259,6 @@ export default async function ScenarioCategoryPage({ params }: PageProps) {
             completedIds={completedIds}
           />
         </section>
-      </div>
-    </LearnShell>
+    </div>
   )
 }

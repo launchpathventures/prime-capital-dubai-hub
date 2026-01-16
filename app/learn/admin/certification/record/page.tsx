@@ -15,6 +15,7 @@ import {
   CheckCircleIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { requireAdmin } from "@/lib/auth/require-auth"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
@@ -159,6 +160,9 @@ function ScoreInput({
 // =============================================================================
 
 export default async function RecordCertificationPage() {
+  // Require admin access
+  await requireAdmin()
+
   const trainees = await getTrainees()
 
   return (

@@ -19,8 +19,6 @@ import {
   SparklesIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
-import { LearnShell } from "../_surface/learn-shell"
 
 export const metadata: Metadata = {
   title: "Practice Scenarios | Learning Portal",
@@ -99,11 +97,7 @@ const competencyLabels: Record<string, string> = {
 // =============================================================================
 
 export default async function ScenariosIndexPage() {
-  const [categories, userRole, userMenu] = await Promise.all([
-    getScenarioCategories(),
-    getUserRole(),
-    getUserForMenu(),
-  ])
+  const categories = await getScenarioCategories()
   
   const totalScenarios = categories.reduce(
     (sum, cat) => sum + (cat.scenario_count || 0), 
@@ -111,8 +105,7 @@ export default async function ScenariosIndexPage() {
   )
 
   return (
-    <LearnShell activeSection="scenarios" userRole={userRole} user={userMenu ?? undefined}>
-      <div className="learn-content">
+    <div className="learn-content">
         {/* Hero Section */}
         <section className="scenario-hero">
           <div className="scenario-hero__icon">
@@ -225,7 +218,6 @@ export default async function ScenariosIndexPage() {
           </Button>
         </div>
       </section>
-      </div>
-    </LearnShell>
+    </div>
   )
 }
