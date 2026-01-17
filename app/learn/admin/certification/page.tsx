@@ -79,7 +79,7 @@ async function getCertificationAttempts(): Promise<CertificationAttempt[]> {
     .from("certification_attempts")
     .select(`
       *,
-      user_profile:user_profiles(full_name, email)
+      user_profile:user_profiles!certification_attempts_user_id_fkey(full_name, email)
     `)
     .order("created_at", { ascending: false })
     .limit(50)
