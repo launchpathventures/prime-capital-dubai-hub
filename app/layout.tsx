@@ -22,6 +22,7 @@ import { config } from "@/lib/config"
 import { ToastProvider } from "@/components/ui/toast"
 import { UrlToast } from "@/components/shared/url-toast"
 import { ThemeProvider } from "@/components/shared/theme-provider"
+import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 
 // -----------------------------------------------------------------------------
@@ -90,6 +91,7 @@ export default function RootLayout({
               <UrlToast />
             </Suspense>
           </ToastProvider>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
