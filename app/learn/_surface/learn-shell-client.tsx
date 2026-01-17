@@ -14,6 +14,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
+import { track } from "@vercel/analytics"
 import { XIcon } from "lucide-react"
 import { LMSHeader } from "./lms-header"
 import { LearnSidebar } from "./learn-sidebar"
@@ -109,6 +110,16 @@ export function LearnShellClient({
   // Derive active section and course params from pathname
   const activeSection = getActiveSection(pathname)
   const { competency: currentCompetency, module: currentModule } = extractCourseParams(pathname)
+
+  // Track Learn surface navigation for analytics
+  React.useEffect(() => {
+    track("learn_page_view", {
+      section: activeSection,
+      competency: currentCompetency || "none",
+      module: currentModule || "none",
+      path: pathname,
+    })
+  }, [pathname, activeSection, currentCompetency, currentModule])
 
   // Focus trap for mobile drawer
   React.useEffect(() => {

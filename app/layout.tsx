@@ -91,7 +91,7 @@ export default function RootLayout({
               <UrlToast />
             </Suspense>
           </ToastProvider>
-          <Analytics />
+          <Analytics debug={process.env.NODE_ENV === "development"} />
         </ThemeProvider>
       </body>
     </html>
