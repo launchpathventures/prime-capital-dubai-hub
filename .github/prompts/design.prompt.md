@@ -1,3 +1,3 @@
 description: Catalyst: Design visual identity
 
-@catalyst/commands/design.md
+@.catalyst/commands/design.md

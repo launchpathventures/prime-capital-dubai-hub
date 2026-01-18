@@ -1,3 +1,3 @@
 description: Catalyst: Create brand guide
 
-@catalyst/commands/create-brand.md
+@.catalyst/commands/create-brand.md

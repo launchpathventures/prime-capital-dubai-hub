@@ -80,8 +80,7 @@ export function ParallaxHero({
           rel="preload"
           as="image"
           href={imageUrl}
-          // @ts-expect-error - fetchpriority is valid but not in types yet
-          fetchpriority="high"
+          fetchPriority="high"
         />
       )}
       <section

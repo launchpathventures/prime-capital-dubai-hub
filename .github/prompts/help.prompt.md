@@ -1,3 +1,3 @@
 description: Catalyst: Show commands
 
-@catalyst/commands/help.md
+@.catalyst/commands/help.md

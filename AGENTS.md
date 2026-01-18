@@ -1,36 +1,62 @@
 # CATALYST - AI Agent Instructions
 
-**Catalyst is the AI-first way to ship production-ready outcomes in weeks instead of months.**
+**Build the right thing, fast.**
 
-It combines a repeatable delivery method (how you run the project) with a development kit (this repo). The method keeps you aligned as speed increases; the kit makes that method fast to execute.
+This is a Catalyst project — a method and a kit working together. The method keeps you aligned as speed increases; the kit makes that method fast to execute. If you're an AI agent, read `.catalyst/PLAYBOOK.md` to know how to operate as a Catalyst agent.
 
-If you're an AI agent, this file tells you how to work in this codebase. If you need to understand *why* Catalyst works this way, see `catalyst/CATALYST.md`.
+If you're an AI agent, this file tells you how to work in this codebase.
 
 ---
 
 ## Documentation Index
 
-Primary source of truth for repo conventions. Read this first, then consult specific docs as needed.
+Catalyst separates **method** (how to work) from **project** (what you're building):
 
-Always read the relevant docs based on your current task:
+### Method Documentation (`.catalyst/`)
+
+Upstream Catalyst method — replaceable on upgrade.
 
 | Task | Read | For |
 |------|------|-----|
-| **Understanding Catalyst** | `catalyst/CATALYST.md` | Framework overview, philosophy, architecture |
-| **Understanding terminology** | `catalyst/GLOSSARY.md` | Naming conventions, architecture terms |
-| **Managing surfaces** | `catalyst/SURFACES.md` | Creating, configuring, deleting surfaces |
-| **Layout & CSS patterns** | `catalyst/PATTERNS.md` | Centering, overflow, responsive rules |
+| **Understanding Catalyst** | `.catalyst/CATALYST.md` | Framework overview, philosophy, architecture |
+| **Operating as an agent** | `.catalyst/PLAYBOOK.md` | Minimal runbook for AI agents |
+| **Understanding terminology** | `.catalyst/GLOSSARY.md` | Naming conventions, architecture terms |
+| **Using slash commands** | `.catalyst/commands/COMMANDS.md` | Available commands, creating new commands |
+| **Managing surfaces** | `.catalyst/SURFACES.md` | Creating, configuring, deleting surfaces |
+| **Layout & CSS patterns** | `.catalyst/PATTERNS.md` | Centering, overflow, responsive rules |
+| **Updating project state** | `.catalyst/STATE.md` | When/how to update state, field definitions |
+| **Working on briefs** | `.catalyst/BRIEFS.md` | Brief structure, workflow, and how to create briefs |
+| **Writing Catalyst docs** | `.catalyst/DOCS.md` | Standards and patterns for Catalyst documentation |
+| **Common AI mistakes** | `.catalyst/LEARNINGS.md` | Patterns AI agents get wrong — read before coding |
+
+### Project Documentation (`catalyst/`)
+
+Project-specific artifacts — owned by this project.
+
+| Task | Read | For |
+|------|------|-----|
+| **Checking project state** | `catalyst/project-state.md` | Current stage, focus, blockers, health |
+| **Project specs** | `catalyst/specs/` | Vision, experience, brand, architecture |
+| **Project briefs** | `catalyst/briefs/` | PRDs and work items |
+
+### Kit Documentation (codebase)
+
+| Task | Read | For |
+|------|------|-----|
 | **Creating components** | `components/COMPONENTS.md` | Available components, folder rules |
 | **Styling & animations** | `design/DESIGN.md` | CSS files, color tokens, animation classes |
 | **Using utilities/hooks** | `lib/HELPERS.md` | Utility functions, scroll helpers |
-| **Working with surfaces** | `app/(surface)/SURFACE.md` | Surface-specific docs (WEB.md, APP.md, etc.) |
+| **Working with surfaces** | `app/({surface})/{SURFACE}.md` | Surface-specific docs (e.g., WEB.md, APP.md, etc.) |
 | **Authentication** | `app/(auth)/AUTH.md` | Auth modes, routes, Supabase integration |
+| **Working with modules** | `modules/MODULES.md` | Module architecture, import rules, creating/removing modules |
 
 ---
 
 ## ⚠️ Important Callouts
 
-Common mistakes to avoid. Read these before writing code:
+Common mistakes to avoid. Read these before writing code.
+
+For the full list of AI learnings, see `.catalyst/LEARNINGS.md`.
 
 ### Use Core Components First
 - **Use `Stack`, `Row`, `Grid`** for layout with multiple children
@@ -38,9 +64,9 @@ Common mistakes to avoid. Read these before writing code:
 - **Use `Container`, `Section`** for page structure
 - **Read `components/core/CORE.md`** for available components and props
 
-### But Don't Over-Engineer
+### Don't Over-Engineer
 - **Don't wrap single elements** in `Stack` or `Row` for positioning — use `<div className="...">` or `Center`
-- **Don't use `Stack` for positioning containers** — use `<div className="relative">` 
+- **Don't use `Stack` for positioning containers** — use `<div className="relative">`
 - **Don't reinvent existing UI components** — use `Badge` not styled `Text inline`
 - **Rule:** If Core makes intent clearer, use it. If it adds indirection, don't.
 
@@ -52,7 +78,7 @@ Common mistakes to avoid. Read these before writing code:
 ### Layout & CSS
 - **Never use `justify-center` on scrollable containers** — content gets clipped on small screens
 - **Never use `min-h-screen` for sidebar layouts** — use `h-screen` + `overflow-hidden`
-- **Read `catalyst/PATTERNS.md`** for layout patterns and CSS fixes
+- **Read `.catalyst/PATTERNS.md`** for layout patterns and CSS fixes
 
 ### CSS Variables (Critical)
 - **Always use `--color-` prefix** — `var(--color-background)` not `var(--background)`
@@ -78,6 +104,23 @@ Common mistakes to avoid. Read these before writing code:
 - **Install dev dependencies:** `pnpm add -D <package>`
 - **Run scripts:** `pnpm dev`, `pnpm build`, `pnpm lint`
 - **After installing:** commit `pnpm-lock.yaml` to avoid CI failures
+
+### Supabase Projects (Multiple MCP Servers)
+This workspace has multiple Supabase projects configured via MCP:
+
+| MCP Server | Project | Purpose |
+|------------|---------|---------|
+| `supabase` | `ebirxyrjwaulyqizcbcs` | Catalyst main project |
+| `supabase-stev` | `erumyprjlubhvzrzmpdj` | Steven Leckie website |
+
+**At the start of each session:**
+- Ask which Supabase project the user is working with
+- Use the correct MCP server tools (e.g., `mcp_supabase_*` vs `mcp_supabase-stev_*`)
+- Don't assume — the default `supabase` tools point to Catalyst, not Steven Leckie
+
+**Environment variables:**
+- Catalyst: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Steven Leckie: `SL_SUPABASE_URL`, `SL_SUPABASE_ANON_KEY`
 
 ---
 
@@ -148,6 +191,7 @@ Keep it minimal in production builds.
 | `(docs)` | DocsShell | Documentation |
 | `(examples)` | ExamplesShell | Reference implementations |
 | `(present)` | SlidesShell | Slide presentations |
+| `(catalyst)` | CatalystShell | Project status and briefs dashboard |
 
 Each route group has a `_surface/` folder containing its shell, styles, and surface-specific components. The underscore prefix marks it as a private folder (ignored by Next.js routing).
 
@@ -160,6 +204,25 @@ Each route group has a `_surface/` folder containing its shell, styles, and surf
 ## Folder Architecture
 
 ```
+.catalyst/                          # METHOD (upstream, replaceable)
+├── CATALYST.md                     # Framework overview
+├── PLAYBOOK.md                     # AI agent runbook
+├── GLOSSARY.md                     # Terminology
+├── PATTERNS.md                     # Layout patterns
+├── SURFACES.md                     # Surface management
+├── BRIEFS.md                       # Brief workflow
+├── STATE.md                        # State management guidance
+├── LEARNINGS.md                    # Common AI mistakes
+├── CHANGELOG.md                    # Method version history
+├── commands/                       # Slash command definitions
+└── prompts/                        # AI prompts
+
+catalyst/                           # PROJECT (yours)
+├── project-state.md                # Current stage, focus, health
+├── specs/                          # Vision, experience, brand, architecture
+├── briefs/                         # PRDs and work items
+└── inspiration/                    # Visual references
+
 app/
 ├── globals.css, layout.tsx         # Root layout, always loaded
 ├── (web)/                          # Marketing surface
@@ -214,19 +277,12 @@ design/                             # SHARED styles only
 ├── helpers.css                     # Utilities
 └── print.css                       # Print styles
 
-catalyst/                           # Method docs & project artefacts
-├── CATALYST.md                     # Framework overview
-├── GLOSSARY.md                     # Terminology
-├── PATTERNS.md                     # Layout patterns
-├── SURFACES.md                     # Surface management
-├── prompts/                        # AI prompts (starter, project, coding)
-├── specs/                          # Project specs (vision, architecture, etc.)
-└── briefs/                         # AI agent briefs for larger tasks
-
 lib/                                # Utilities & config
 ```
 
 **Key conventions:**
+- `.catalyst/` — Method folder (upstream, don't edit)
+- `catalyst/` — Project folder (yours)
 - `_surface/` — Private folder for surface-specific code (shell, components, utils)
 - `(group)/` — Route groups, no URL segment
 - Each surface is self-contained — delete folder to remove entire surface
@@ -285,6 +341,128 @@ All components need a namespace/prefix for CSS targeting and DevTools identifica
 
 ---
 
+# Core Docs vs Briefs
+
+Catalyst separates **stable project definitions** from **individual work items**:
+
+## Project State (`/catalyst/project-state.md`)
+Track where the project is right now. Updated frequently as the project progresses.
+
+| Field | Purpose |
+|-------|---------|
+| `stage` | Current delivery stage: POC, MVP, MMP, or PROD |
+| `project_version` | Version of the thing you're building |
+| `catalyst_version` | Catalyst baseline version used by this project |
+| `catalyst_ref` | Optional git SHA/tag for reproducibility |
+| `focus` | What the team is working on right now (1-2 sentences) |
+| `target` | Current target milestone or date |
+| `health` | Project health: green, yellow, or red |
+| `blockers` | List of current blockers (if any) |
+| `goals` | High-level outcomes the project is working toward |
+
+**Dashboard:** View project state at `/catalyst`
+
+**⚠️ Keep state current:** Read `.catalyst/STATE.md` for full guidance. Check state at the start of work, update at the end. Every brief should align with focus and goals.
+
+## Core Project Documents (`/catalyst/specs/`)
+Foundational documents that define the project. Created once, updated based on their purpose.
+
+| Document | Purpose | Update Frequency |
+|----------|---------|------------------|
+| `project-vision.md` | North star, success criteria, decision principles | Rarely |
+| `project-experience.md` | Users, journeys, features | Occasionally |
+| `project-brand.md` | Voice, visuals, communication style | Rarely |
+| `project-architecture.md` | Technical stack, patterns, conventions | Ongoing |
+
+**Visual references:** `/catalyst/inspiration/` folder for any inspiration (described in brand doc).
+
+## Briefs (`/catalyst/briefs/`)
+Individual PRDs for specific features or phases. Created as needed.
+
+- The first brief (building the POC) is effectively the first PRD
+- Each subsequent brief scopes a specific piece of work
+- Use `/brief` command or read `.catalyst/BRIEFS.md` to create new briefs
+
+**Key distinction:** State tracks where you are. Specs define the project. Briefs define individual work items.
+
+---
+
+# Briefs Convention
+
+Briefs live in `/catalyst/briefs/`. They use a **state prefix** for easy sorting:
+
+```
+{state}-{date}_{brief-name}.md
+```
+
+**Examples:**
+- `_blocked-20260107_payment.md` — Stuck, needs human attention
+- `_review-20260107_auth-flow.md` — Done, awaiting human review
+- `active-20260107_api-work.md` — Currently being worked on
+- `approved-20260106_new-feature.md` — Ready to pick up
+- `backlog-20260105_future-idea.md` — Not started yet
+
+**States:** `_blocked`, `_review`, `active`, `approved`, `backlog`
+
+| State | Meaning | Alphabetical Position |
+|-------|---------|----------------------|
+| `_blocked` | Stuck, needs human attention | 1st (top) |
+| `_review` | Done, awaiting human review | 2nd |
+| `active` | Currently being worked on | 3rd |
+| `approved` | Scoped and ready to start | 4th |
+| `backlog` | Draft, not yet prioritised | 5th |
+
+**Changing state:** Just rename the file. No tooling required.
+
+**Completed/Archived briefs:** Move to subfolders:
+- `complete/` — Finished briefs (use `complete-` prefix)
+- `archive/` — Canned briefs (use `archive-` prefix)
+
+**Optional frontmatter:**
+```yaml
+---
+title: "Human Readable Title"
+assignee: "@username"
+stage: mvp
+tags: [auth, api]
+---
+```
+
+**Dashboard:** View all briefs at `/catalyst/briefs`
+
+---
+
+## Brief Workflow for AI Agents
+
+When working on briefs, AI agents **must** update the brief state:
+
+### Starting Work
+1. Check that the brief is `approved-` or `backlog-`
+2. **Rename the file:** `approved-` → `active-` or `backlog-` → `active-`
+3. Begin implementation
+
+### Completing Work
+1. Finish implementation
+2. **Rename the file:** `active-` → `_review-`
+3. Summarise what was done and what needs human review
+
+### If Blocked
+1. **Rename the file:** `active-` → `_blocked-`
+2. Document what you're blocked on in the brief or conversation
+
+### Human Review Flow
+After a human reviews `_review-` briefs:
+- **Approved:** Human moves to `complete/` folder with `complete-` prefix
+- **Changes needed:** Human renames back to `active-` with notes
+
+### Reminders for Humans
+- Check `/catalyst/briefs` dashboard for `_blocked-` and `_review-` briefs
+- These sort at the top of the folder — easy to spot
+- Rename briefs promptly to keep the dashboard accurate
+- Move completed briefs to `complete/` folder periodically
+
+---
+
 # What NOT to Do
 
 Ensure you keep code simple and well structured:
@@ -314,6 +492,6 @@ If a terminal command fails:
 import { config } from "@/lib/config"
 
 config.app.name           // "Catalyst"
-config.links.github       // GitHub repo URL
+config.links.repo       // Git repo URL (or null if not set up yet)
 config.features.showDocsInProduction
 ```

@@ -1,3 +1,3 @@
 description: Catalyst: Debug an issue
 ---
-@catalyst/commands/debug.md
+@.catalyst/commands/debug.md
