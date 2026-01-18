@@ -105,6 +105,8 @@ export function ModuleControlsBar({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [expandedAudio, setExpandedAudio] = useState<string | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
   
   // Derive mode from server or URL
   const urlMode = searchParams.get("mode")
@@ -122,7 +124,44 @@ export function ModuleControlsBar({
   }
   
   const toggleAudio = (slug: string) => {
-    setExpandedAudio(expandedAudio === slug ? null : slug)
+    if (expandedAudio === slug) {
+      // Same track - toggle play/pause
+      if (audioRef.current) {
+        if (isPlaying) {
+          audioRef.current.pause()
+          setIsPlaying(false)
+        } else {
+          audioRef.current.play()
+          setIsPlaying(true)
+        }
+      }
+    } else {
+      // Different track - switch to it (will auto-play)
+      setExpandedAudio(slug)
+      setIsPlaying(true)
+    }
+  }
+  
+  const handleHeroClick = () => {
+    if (expandedAudio) {
+      // Track is selected - toggle play/pause
+      if (audioRef.current) {
+        if (isPlaying) {
+          audioRef.current.pause()
+          setIsPlaying(false)
+        } else {
+          audioRef.current.play()
+          setIsPlaying(true)
+        }
+      }
+    } else {
+      // No track selected - start first track
+      const firstTrack = audioTracks[0]
+      if (firstTrack) {
+        setExpandedAudio(firstTrack.slug)
+        setIsPlaying(true)
+      }
+    }
   }
   
   const expandedTrack = audioTracks.find(t => t.slug === expandedAudio)
@@ -187,54 +226,116 @@ export function ModuleControlsBar({
         </div>
       )}
       
-      {/* Audio Section - with "Start here" prompt */}
+      {/* Audio Coach Card - Prominent, unmissable */}
       {hasAudio && (
-        <div className="module-controls__audio-section">
-          <div className="module-controls__audio-header">
-            <HeadphonesIcon className="h-4 w-4" />
-            <span className="module-controls__audio-title">Listen First</span>
-            <span className="module-controls__audio-badge">Start here</span>
-            <span className="module-controls__audio-meta">{audioTracks.length} {audioTracks.length === 1 ? 'lesson' : 'lessons'} • {totalAudioDuration}</span>
-          </div>
-          
-          <div className="module-controls__audio-tracks">
-            {audioTracks.map((track) => {
-              const config = AUDIO_TYPE_CONFIG[track.type]
-              const Icon = config.icon
-              const isActive = expandedAudio === track.slug
+        <div className="audio-coach-card">
+          {/* Main hero area */}
+          <div className="audio-coach-card__hero">
+            {/* Left: Play button with waveform */}
+            <div className="audio-coach-card__player">
+              <button
+                onClick={handleHeroClick}
+                className={cn(
+                  "audio-coach-card__play-btn",
+                  isPlaying && "audio-coach-card__play-btn--active"
+                )}
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+              >
+                {isPlaying ? (
+                  <PauseIcon className="h-6 w-6" />
+                ) : (
+                  <PlayIcon className="h-6 w-6 ml-0.5" />
+                )}
+              </button>
               
-              return (
-                <button
-                  key={track.slug}
-                  onClick={() => toggleAudio(track.slug)}
-                  className={cn(
-                    "module-controls__audio-track",
-                    isActive && "module-controls__audio-track--active",
-                    isActive && config.bgColor,
-                    isActive && config.borderColor,
-                    isActive && config.color
-                  )}
-                >
-                  <Icon className={cn("h-4 w-4", isActive ? config.color : "text-gray-500")} />
-                  <span className="module-controls__audio-track-label">{config.shortLabel}</span>
-                  <span className="module-controls__audio-track-duration">{track.duration}</span>
-                  {track.audioUrl && (
-                    <PlayIcon className={cn(
-                      "h-3.5 w-3.5 module-controls__audio-track-play",
-                      isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                    )} />
-                  )}
-                </button>
-              )
-            })}
+              {/* Animated waveform bars */}
+              <div className={cn(
+                "audio-coach-card__waveform",
+                isPlaying && "audio-coach-card__waveform--playing"
+              )}>
+                <span className="audio-coach-card__bar" style={{ animationDelay: "0ms" }} />
+                <span className="audio-coach-card__bar" style={{ animationDelay: "150ms" }} />
+                <span className="audio-coach-card__bar" style={{ animationDelay: "300ms" }} />
+                <span className="audio-coach-card__bar" style={{ animationDelay: "450ms" }} />
+                <span className="audio-coach-card__bar" style={{ animationDelay: "200ms" }} />
+              </div>
+            </div>
+            
+            {/* Center: Title and value prop */}
+            <div className="audio-coach-card__content">
+              <div className="audio-coach-card__header">
+                <HeadphonesIcon className="h-4 w-4 text-primary" />
+                <span className="audio-coach-card__title">Listen First</span>
+                <span className="audio-coach-card__badge">Start Here</span>
+              </div>
+              <p className="audio-coach-card__description">
+                {audioTracks.length === 1 
+                  ? "Quick audio intro — sets the context for what you'll read"
+                  : `${audioTracks.length} audio lessons to guide your learning`
+                }
+              </p>
+            </div>
           </div>
           
-          {/* Compact inline player - same style as competency page */}
+          {/* Track selector - only show if multiple tracks */}
+          {audioTracks.length > 1 && (
+            <div className="audio-coach-card__tracks">
+              {audioTracks.map((track, index) => {
+                const config = AUDIO_TYPE_CONFIG[track.type]
+                const Icon = config.icon
+                const isActive = expandedAudio === track.slug
+                
+                return (
+                  <button
+                    key={track.slug}
+                    onClick={() => toggleAudio(track.slug)}
+                    className={cn(
+                      "audio-coach-card__track",
+                      isActive && "audio-coach-card__track--active"
+                    )}
+                    data-type={track.type}
+                  >
+                    <span className="audio-coach-card__track-number">
+                      {index + 1}
+                    </span>
+                    <div className="audio-coach-card__track-info">
+                      <span className="audio-coach-card__track-label">{config.label}</span>
+                      <span className="audio-coach-card__track-meta">
+                        <Icon className={cn("h-3.5 w-3.5", config.color)} />
+                        {track.duration}
+                      </span>
+                    </div>
+                    {isActive && isPlaying && (
+                      <span className="audio-coach-card__track-playing">
+                        <span className="audio-coach-card__track-playing-dot" />
+                        Playing
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          
+          {/* Inline player - auto-expanded for single track */}
           {expandedTrack && expandedConfig && (
             <CompactAudioPlayer 
               track={expandedTrack} 
               config={expandedConfig}
-              onClose={() => setExpandedAudio(null)}
+              audioRef={audioRef}
+              isPlaying={isPlaying}
+              onPlayPause={() => {
+                if (audioRef.current) {
+                  if (isPlaying) {
+                    audioRef.current.pause()
+                    setIsPlaying(false)
+                  } else {
+                    audioRef.current.play()
+                    setIsPlaying(true)
+                  }
+                }
+              }}
+              onEnded={() => setIsPlaying(false)}
             />
           )}
         </div>
@@ -244,31 +345,30 @@ export function ModuleControlsBar({
 }
 
 // =============================================================================
-// Compact Audio Player - Simple inline player with auto-play
+// Compact Audio Player - Simple inline player with shared state
 // =============================================================================
 
 interface CompactPlayerProps {
   track: AudioTrack
   config: typeof AUDIO_TYPE_CONFIG.intro
-  onClose: () => void
+  audioRef: React.RefObject<HTMLAudioElement | null>
+  isPlaying: boolean
+  onPlayPause: () => void
+  onEnded: () => void
 }
 
-function CompactAudioPlayer({ track, config, onClose }: CompactPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+function CompactAudioPlayer({ track, config, audioRef, isPlaying, onPlayPause, onEnded }: CompactPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const audioRef = useRef<HTMLAudioElement>(null)
   
-  // Auto-play when mounted
+  // Auto-play when mounted or track changes
   useEffect(() => {
     if (audioRef.current && track.audioUrl) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true)
-      }).catch(() => {
+      audioRef.current.play().catch(() => {
         // Browser blocked autoplay, that's ok
       })
     }
-  }, [track.audioUrl])
+  }, [track.slug, track.audioUrl, audioRef])
   
   useEffect(() => {
     const audio = audioRef.current
@@ -276,10 +376,7 @@ function CompactAudioPlayer({ track, config, onClose }: CompactPlayerProps) {
     
     const handleLoadedMetadata = () => setDuration(audio.duration)
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime)
-    const handleEnded = () => {
-      setIsPlaying(false)
-      onClose()
-    }
+    const handleEnded = () => onEnded()
     
     audio.addEventListener("loadedmetadata", handleLoadedMetadata)
     audio.addEventListener("timeupdate", handleTimeUpdate)
@@ -290,17 +387,7 @@ function CompactAudioPlayer({ track, config, onClose }: CompactPlayerProps) {
       audio.removeEventListener("timeupdate", handleTimeUpdate)
       audio.removeEventListener("ended", handleEnded)
     }
-  }, [track.audioUrl, onClose])
-  
-  const togglePlay = () => {
-    if (!audioRef.current) return
-    if (isPlaying) {
-      audioRef.current.pause()
-    } else {
-      audioRef.current.play()
-    }
-    setIsPlaying(!isPlaying)
-  }
+  }, [track.audioUrl, audioRef, onEnded])
   
   const handleSeek = (value: number | readonly number[]) => {
     if (audioRef.current) {
@@ -331,7 +418,7 @@ function CompactAudioPlayer({ track, config, onClose }: CompactPlayerProps) {
       <Row align="center" gap="sm" className="module-controls__inline-player-row">
         {/* Play/Pause */}
         <button
-          onClick={togglePlay}
+          onClick={onPlayPause}
           disabled={!track.audioUrl}
           className={cn(
             "module-controls__inline-player-btn",

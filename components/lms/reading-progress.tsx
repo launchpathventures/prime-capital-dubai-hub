@@ -13,16 +13,28 @@ export function ReadingProgress() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    // The scrolling container is .learn-content-wrapper, not the window
+    const scrollContainer = document.querySelector(".learn-content-wrapper")
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const prog = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0
-      setProgress(prog)
+      if (scrollContainer) {
+        const scrollTop = scrollContainer.scrollTop
+        const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight
+        const prog = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0
+        setProgress(prog)
+      } else {
+        // Fallback to window scroll
+        const scrollTop = window.scrollY
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight
+        const prog = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0
+        setProgress(prog)
+      }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    const target = scrollContainer || window
+    target.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll()
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => target.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (

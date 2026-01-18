@@ -1524,6 +1524,42 @@
   to { transform: translateX(0); }
 }
 
+/* Audio Coach Card animations */
+@keyframes audio-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px oklch(from var(--color-primary) l c h / 0.3),
+      0 0 0 0 oklch(from var(--color-primary) l c h / 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 4px 12px oklch(from var(--color-primary) l c h / 0.3),
+      0 0 0 8px oklch(from var(--color-primary) l c h / 0);
+  }
+}
+
+@keyframes waveform-bounce {
+  0%, 100% {
+    height: 0.5rem;
+    opacity: 0.5;
+  }
+  50% {
+    height: 1.5rem;
+    opacity: 1;
+  }
+}
+
+@keyframes audio-pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
 @media (max-width: 1024px) {
   .learn-sidebar {
     display: none;
@@ -2603,102 +2639,262 @@
 }
 
 /* =============================================================================
-   Audio Section - Secondary, compact
+   Audio Coach Card - Prominent, unmissable audio section
    ============================================================================= */
 
-.module-controls__audio-section {
-  padding: 0.75rem 1rem;
-  background: var(--gray-50);
-  border: 1px solid var(--color-border);
-  border-radius: var(--lms-radius-md);
+.audio-coach-card {
+  background: linear-gradient(135deg, 
+    oklch(from var(--color-primary) l c h / 0.08) 0%, 
+    oklch(from var(--color-primary) l c h / 0.04) 50%,
+    var(--gray-50) 100%
+  );
+  border: 1px solid oklch(from var(--color-primary) l c h / 0.2);
+  border-radius: var(--lms-radius-lg);
+  overflow: hidden;
 }
 
-.module-controls__audio-header {
+.audio-coach-card__hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.audio-coach-card__player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.audio-coach-card__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--lms-transition);
+  box-shadow: 
+    0 4px 12px oklch(from var(--color-primary) l c h / 0.3),
+    0 0 0 0 oklch(from var(--color-primary) l c h / 0.2);
+  animation: audio-pulse 2s ease-in-out infinite;
+}
+
+.audio-coach-card__play-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 6px 20px oklch(from var(--color-primary) l c h / 0.4),
+    0 0 0 4px oklch(from var(--color-primary) l c h / 0.1);
+}
+
+.audio-coach-card__play-btn--active {
+  animation: none;
+  background: var(--color-primary);
+}
+
+/* Waveform visualization */
+.audio-coach-card__waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 2rem;
+}
+
+.audio-coach-card__bar {
+  width: 3px;
+  height: 0.5rem;
+  background: var(--color-primary);
+  border-radius: 2px;
+  opacity: 0.4;
+  transition: all var(--lms-transition);
+}
+
+.audio-coach-card__waveform--playing .audio-coach-card__bar {
+  animation: waveform-bounce 0.6s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+.audio-coach-card__waveform--playing .audio-coach-card__bar:nth-child(1) { animation-delay: 0ms; }
+.audio-coach-card__waveform--playing .audio-coach-card__bar:nth-child(2) { animation-delay: 150ms; }
+.audio-coach-card__waveform--playing .audio-coach-card__bar:nth-child(3) { animation-delay: 300ms; }
+.audio-coach-card__waveform--playing .audio-coach-card__bar:nth-child(4) { animation-delay: 450ms; }
+.audio-coach-card__waveform--playing .audio-coach-card__bar:nth-child(5) { animation-delay: 200ms; }
+
+.audio-coach-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.audio-coach-card__header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.625rem;
-  color: var(--gray-600);
+  margin-bottom: 0.25rem;
 }
 
-.module-controls__audio-title {
-  font-size: 0.8125rem;
+.audio-coach-card__title {
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--gray-900);
 }
 
-.module-controls__audio-badge {
+.audio-coach-card__badge {
   font-size: 0.625rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.125rem 0.5rem;
+  padding: 0.1875rem 0.5rem;
   background: var(--color-primary);
   color: white;
   border-radius: 9999px;
 }
 
-.module-controls__audio-meta {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  margin-left: auto;
-}
-
-.module-controls__audio-tracks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.module-controls__audio-track {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
+.audio-coach-card__description {
   font-size: 0.8125rem;
-  font-weight: 500;
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.audio-coach-card__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.audio-coach-card__duration {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Track selector for multiple tracks - prominent cards */
+.audio-coach-card__tracks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid oklch(from var(--color-primary) l c h / 0.1);
+  background: linear-gradient(180deg, 
+    oklch(from var(--color-background) l c h / 0.7) 0%,
+    var(--color-background) 100%
+  );
+}
+
+.audio-coach-card__track {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
   color: var(--gray-700);
   background: var(--color-background);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--lms-radius-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--lms-radius-lg);
   cursor: pointer;
-  transition: all var(--lms-transition-fast);
+  transition: all var(--lms-transition);
+  text-align: left;
   position: relative;
 }
 
-.module-controls__audio-track:hover {
-  border-color: var(--gray-300);
-  box-shadow: var(--lms-shadow-sm);
+.audio-coach-card__track:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--lms-shadow-md);
+  transform: translateY(-1px);
 }
 
-.module-controls__audio-track:hover .module-controls__audio-track-play {
-  opacity: 1;
+.audio-coach-card__track--active {
+  border-color: var(--color-primary);
+  background: oklch(from var(--color-primary) l c h / 0.05);
+  box-shadow: 
+    var(--lms-shadow-md),
+    0 0 0 3px oklch(from var(--color-primary) l c h / 0.1);
 }
 
-.module-controls__audio-track--active {
-  border-color: var(--color-primary); /* Active state - additional colors via Tailwind */
+/* Numbered badge */
+.audio-coach-card__track-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: oklch(from var(--color-primary) l c h / 0.1);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all var(--lms-transition-fast);
 }
 
-.module-controls__audio-track-label {
-  font-weight: 500;
+.audio-coach-card__track:hover .audio-coach-card__track-number,
+.audio-coach-card__track--active .audio-coach-card__track-number {
+  background: var(--color-primary);
+  color: white;
 }
 
-.module-controls__audio-track-duration {
+/* Track info */
+.audio-coach-card__track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.audio-coach-card__track-label {
+  display: block;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.125rem;
+}
+
+.audio-coach-card__track-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+/* Playing indicator */
+.audio-coach-card__track-playing {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-primary);
+  padding: 0.25rem 0.5rem;
+  background: oklch(from var(--color-primary) l c h / 0.1);
+  border-radius: 9999px;
+}
+
+.audio-coach-card__track-playing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  animation: audio-pulse-dot 1.5s ease-in-out infinite;
+}
+
+.audio-coach-card__track-duration {
   font-size: 0.6875rem;
   color: var(--gray-400);
   font-weight: 400;
 }
 
-.module-controls__audio-track-play {
-  transition: opacity var(--lms-transition-fast);
-}
-
-/* Compact inline player - simple row */
+/* Compact inline player - fits inside Coach Card */
 .module-controls__inline-player {
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: var(--lms-radius-md);
-  border: 1px solid;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid oklch(from var(--color-primary) l c h / 0.1);
+  background: oklch(from var(--color-background) l c h / 0.7);
 }
 
 .module-controls__inline-player-row {
@@ -2771,16 +2967,29 @@
     grid-template-columns: 1fr;
   }
   
-  .module-controls__audio-tracks {
-    flex-direction: column;
+  .audio-coach-card__hero {
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
   
-  .module-controls__audio-track {
-    justify-content: space-between;
+  .audio-coach-card__content {
+    flex-basis: calc(100% - 6rem);
+  }
+  
+  .audio-coach-card__meta {
+    display: none;
+  }
+  
+  .audio-coach-card__tracks {
+    grid-template-columns: 1fr;
+  }
+  
+  .audio-coach-card__track {
+    padding: 0.75rem;
   }
 }
 
-/* Dark mode */
+/* Dark mode - Mode tabs */
 :root.dark .module-controls__mode-tab {
   background: var(--gray-900);
   border-color: var(--gray-800);
@@ -2809,23 +3018,52 @@
   color: var(--gray-200);
 }
 
-:root.dark .module-controls__audio-section {
-  background: var(--gray-900);
-  border-color: var(--gray-800);
+/* Dark mode - Audio Coach Card */
+:root.dark .audio-coach-card {
+  background: linear-gradient(135deg, 
+    oklch(from var(--color-primary) l c h / 0.12) 0%, 
+    oklch(from var(--color-primary) l c h / 0.06) 50%,
+    var(--gray-900) 100%
+  );
+  border-color: oklch(from var(--color-primary) l c h / 0.25);
 }
 
-:root.dark .module-controls__audio-title {
-  color: var(--gray-200);
+:root.dark .audio-coach-card__title {
+  color: var(--gray-100);
 }
 
-:root.dark .module-controls__audio-track {
+:root.dark .audio-coach-card__description {
+  color: var(--gray-400);
+}
+
+:root.dark .audio-coach-card__tracks {
+  background: linear-gradient(180deg,
+    oklch(from var(--gray-900) l c h / 0.8) 0%,
+    var(--gray-900) 100%
+  );
+  border-color: oklch(from var(--color-primary) l c h / 0.15);
+}
+
+:root.dark .audio-coach-card__track {
   background: var(--gray-800);
   border-color: var(--gray-700);
-  color: var(--gray-200);
 }
 
-:root.dark .module-controls__audio-track:hover {
-  border-color: var(--gray-600);
+:root.dark .audio-coach-card__track:hover {
+  border-color: var(--color-primary);
+}
+
+:root.dark .audio-coach-card__track-label {
+  color: var(--gray-100);
+}
+
+:root.dark .audio-coach-card__track-meta {
+  color: var(--gray-500);
+}
+
+:root.dark .module-controls__inline-player {
+  background: oklch(from var(--gray-900) l c h / 0.8);
+  border-color: oklch(from var(--color-primary) l c h / 0.15);
 }
 
 /* Essentials View Container - inherits width from parent like deep dive */

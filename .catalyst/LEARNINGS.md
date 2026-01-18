@@ -103,6 +103,27 @@ Format: Each entry has a date, priority (low/medium/high/tbc), and clear before/
 
 ---
 
+## LMS Content
+
+### Regenerate essentials after editing module content (2026-01-18, high)
+
+**Problem:** Editing a module's deep dive content (e.g., `0.3-broker-licensing.md`) without regenerating the essentials. The essentials become stale and show outdated information to learners.
+
+**Instead:** After editing any LMS module content, regenerate essentials for that module:
+
+```bash
+npx tsx scripts/generate-all-essentials.ts --module <slug> --force
+```
+
+Example: After editing `0.3-broker-licensing.md`:
+```bash
+npx tsx scripts/generate-all-essentials.ts --module broker-licensing --force
+```
+
+The script detects staleness via content hashing, but `--force` ensures regeneration even if the hash check fails.
+
+---
+
 <!--
 Add new learnings above this line.
 Format:

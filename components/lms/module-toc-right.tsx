@@ -72,18 +72,29 @@ export function ModuleToCRight({ content, hasQuiz, className }: ModuleToCRightPr
     return extracted
   }, [content, hasQuiz])
 
-  // Reading progress
+  // Reading progress - listens to the scroll container, not window
   useEffect(() => {
+    const scrollContainer = document.querySelector(".learn-content-wrapper")
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const prog = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0
-      setProgress(prog)
+      if (scrollContainer) {
+        const scrollTop = scrollContainer.scrollTop
+        const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight
+        const prog = scrollHeight > 0 ? Math.min((scrollTop / scrollHeight) * 100, 100) : 0
+        setProgress(prog)
+      } else {
+        // Fallback to window scroll
+        const scrollTop = window.scrollY
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight
+        const prog = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0
+        setProgress(prog)
+      }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
+    const target = scrollContainer || window
+    target.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll()
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => target.removeEventListener("scroll", handleScroll)
   }, [])
 
   // Scroll-spy
@@ -125,9 +136,20 @@ export function ModuleToCRight({ content, hasQuiz, className }: ModuleToCRightPr
   const handleClick = useCallback((id: string) => {
     const element = document.getElementById(id)
     if (element) {
-      const yOffset = -100
-      const y = element.getBoundingClientRect().top + window.scrollY + yOffset
-      window.scrollTo({ top: y, behavior: "smooth" })
+      // The scrolling container is .learn-content-wrapper, not the window
+      const scrollContainer = document.querySelector(".learn-content-wrapper")
+      if (scrollContainer) {
+        const yOffset = -100
+        const containerRect = scrollContainer.getBoundingClientRect()
+        const elementRect = element.getBoundingClientRect()
+        const y = elementRect.top - containerRect.top + scrollContainer.scrollTop + yOffset
+        scrollContainer.scrollTo({ top: y, behavior: "smooth" })
+      } else {
+        // Fallback to window scroll if container not found
+        const yOffset = -100
+        const y = element.getBoundingClientRect().top + window.scrollY + yOffset
+        window.scrollTo({ top: y, behavior: "smooth" })
+      }
     }
   }, [])
 

@@ -86,6 +86,7 @@ export async function getCompetencyWithModules(
     `
     )
     .eq("slug", slug)
+    .order("display_order", { ascending: true, referencedTable: "learning_modules" })
     .single()
 
   if (error) {
@@ -108,7 +109,7 @@ export async function getCompetenciesWithProgress(
 ): Promise<CompetencyWithProgress[]> {
   const supabase = await createClient()
 
-  // Get competencies with modules
+  // Get competencies with modules (both ordered by display_order)
   const { data: competencies, error: compError } = await supabase
     .from("competencies")
     .select(
@@ -118,6 +119,7 @@ export async function getCompetenciesWithProgress(
     `
     )
     .order("display_order", { ascending: true })
+    .order("display_order", { ascending: true, referencedTable: "learning_modules" })
 
   if (compError) throw compError
 
@@ -170,7 +172,7 @@ export async function getAllCompetenciesWithProgress(): Promise<CompetencyWithPr
     // Get current user (if authenticated)
     const { data: { user } } = await supabase.auth.getUser()
     
-    // Get competencies with modules
+    // Get competencies with modules (both ordered by display_order)
     const { data: competencies, error: compError } = await supabase
       .from("competencies")
       .select(
@@ -180,6 +182,7 @@ export async function getAllCompetenciesWithProgress(): Promise<CompetencyWithPr
       `
       )
       .order("display_order", { ascending: true })
+      .order("display_order", { ascending: true, referencedTable: "learning_modules" })
 
     if (compError) {
       console.error("Error fetching competencies:", compError)

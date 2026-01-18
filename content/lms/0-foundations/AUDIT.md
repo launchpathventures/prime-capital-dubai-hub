@@ -73,6 +73,24 @@
 - [x] All `order` values are sequential: 1, 2, 3, 4, 5
 - [x] All slugs are lowercase-hyphenated
 
+## Content Updates (January 18, 2026)
+
+### 0.3-broker-licensing.md — Client Feedback Incorporation
+Based on 8 pieces of client feedback correcting factual inaccuracies:
+
+| Change | Description |
+|--------|-------------|
+| Commission structure | Off-plan: Developer pays (buyer pays no commission). Secondary: 2% each side |
+| AML threshold | Specified CASH transactions only over AED 55,000 |
+| Brokerage scope | Added commercial to permitted sale/purchase activities |
+| Cooling-off period | Removed 14-day cooling-off section (inaccurate in practice) |
+| Leasehold areas | Added examples: Jumeirah, Wasl, Deira, Bur Dubai, Silicon Oasis, DIP |
+| Transaction flow | Added Oqood registration step for off-plan purchases |
+| Golden Visa | Updated to reference sister company for visa processing |
+| New sections | Added Investor Visa and Retirement Visa sections |
+
+**Brief:** `active-20260118_c0-broker-licensing-updates.md`
+
 ## Previous Audit Notes (January 9, 2026)
 
 Previous audit fixed "Learn about" → "Articulate" in Module 0.1 description.

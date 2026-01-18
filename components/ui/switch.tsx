@@ -26,10 +26,13 @@ function Switch({
 }: SwitchPrimitive.Root.Props & {
   size?: "sm" | "default"
 }) {
+  // suppressHydrationWarning: Base UI generates internal IDs that can mismatch
+  // between server/client with streaming SSR. The mismatch is cosmetic only.
   return (
     <SwitchPrimitive.Root
       data-slot="switch"
       data-size={size}
+      suppressHydrationWarning
       className={cn(
         "ui-switch",
         "data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 dark:data-checked:bg-primary border-transparent shadow-xs aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 data-disabled:cursor-not-allowed data-disabled:opacity-50",
