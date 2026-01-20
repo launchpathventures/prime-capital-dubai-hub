@@ -116,3 +116,6 @@ export function AdminBreadcrumb({
     </nav>
   )
 }
+
+// Alias for backward compatibility
+export { AdminBreadcrumb as AppBreadcrumb }
