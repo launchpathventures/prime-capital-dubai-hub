@@ -21,7 +21,7 @@ Authentication pages for sign in, registration, and password recovery.
 AUTH_MODE=supabase              # demo | password | supabase | custom
 AUTH_PASSWORD=secret            # For password mode
 AUTH_CUSTOM_ENDPOINT=https://   # For custom mode
-NEXT_PUBLIC_AUTH_REDIRECT_TO=/admin/dashboard
+NEXT_PUBLIC_AUTH_REDIRECT_TO=/learn
 SUPABASE_SERVICE_ROLE_KEY=...   # Required for account deletion
 ```
 
@@ -79,7 +79,7 @@ AUTH_PASSWORD=your-secret-password
 # Custom mode  
 AUTH_CUSTOM_ENDPOINT=https://api.example.com/auth
 
-# Redirect after login (default: /app)
+# Redirect after login (default: /learn)
 NEXT_PUBLIC_AUTH_REDIRECT_TO=/dashboard
 ```
 
