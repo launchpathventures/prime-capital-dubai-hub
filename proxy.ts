@@ -34,7 +34,7 @@ const AUTH_MODE = process.env.AUTH_MODE as
   | undefined
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD
 const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT
-const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/app/dashboard"
+const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/admin/dashboard"
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -90,8 +90,8 @@ export async function proxy(request: NextRequest) {
     const sessionCookie = request.cookies.get("catalyst_auth_session")
     const isAuthenticated = sessionCookie?.value === "authenticated"
 
-    // Protect /app/* routes
-    if (pathname.startsWith("/app/") && !isAuthenticated) {
+    // Protect /admin/* routes
+    if (pathname.startsWith("/admin") && !isAuthenticated) {
       const loginUrl = new URL("/auth/login", request.url)
       loginUrl.searchParams.set("next", pathname)
       return NextResponse.redirect(loginUrl)
@@ -131,8 +131,8 @@ export async function proxy(request: NextRequest) {
     const { data } = await supabase.auth.getUser()
     const user = data.user
 
-    // Protect /app/* routes
-    if (pathname.startsWith("/app/") && !user) {
+    // Protect /admin/* routes
+    if (pathname.startsWith("/admin") && !user) {
       const loginUrl = new URL("/auth/login", request.url)
       loginUrl.searchParams.set("next", pathname)
       return NextResponse.redirect(loginUrl)

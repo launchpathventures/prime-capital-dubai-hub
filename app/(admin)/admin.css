@@ -1,0 +1,354 @@
+/**
+ * Admin Styles
+ *
+ * Styles specific to the authenticated admin pages.
+ * Sidebar design inspired by the Learn surface for consistency.
+ */
+
+@import "tailwindcss/theme" layer(theme);
+
+/* =============================================================================
+   Design Tokens
+   ============================================================================= */
+
+:root {
+  --admin-header-height: 3.5rem;
+  --admin-sidebar-width: 16rem;
+  --admin-content-max: 80rem;
+  --admin-radius-sm: 0.5rem;
+  --admin-radius-md: 0.75rem;
+  --admin-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --admin-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =============================================================================
+   Shell Layout
+   ============================================================================= */
+
+.admin-shell {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--color-background);
+}
+
+.admin-shell__sidebar {
+  position: sticky;
+  top: 0;
+  width: var(--admin-sidebar-width);
+  height: 100dvh;
+  flex-shrink: 0;
+  background: var(--gray-50);
+  border-right: 1px solid var(--gray-150, var(--gray-200));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .admin-shell__sidebar {
+    display: none;
+  }
+}
+
+.admin-shell__sidebar-header {
+  height: var(--admin-header-height);
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--gray-150, var(--gray-200));
+  flex-shrink: 0;
+}
+
+.admin-shell__mobile-sidebar {
+  background: var(--gray-50);
+}
+
+.admin-shell__mobile-sidebar .admin-shell__sidebar-header {
+  border-bottom: 1px solid var(--gray-150, var(--gray-200));
+}
+
+.admin-shell__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =============================================================================
+   Header
+   ============================================================================= */
+
+.admin-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--admin-header-height);
+  background: oklch(from var(--color-background) l c h / 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid oklch(from var(--gray-200) l c h / 0.6);
+}
+
+.admin-shell__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .admin-shell__header-inner {
+    padding: 0 1.5rem;
+  }
+}
+
+.admin-shell__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.admin-shell__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.admin-shell__menu-btn {
+  display: flex;
+}
+
+@media (min-width: 1025px) {
+  .admin-shell__menu-btn {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   Content
+   ============================================================================= */
+
+.admin-shell__content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .admin-shell__content {
+    padding: 2rem 2.5rem;
+  }
+}
+
+.admin-shell__content > * {
+  max-width: var(--admin-content-max);
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* =============================================================================
+   Sidebar Navigation
+   ============================================================================= */
+
+.admin-sidebar {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: var(--gray-200);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-300);
+}
+
+.admin-sidebar__section {
+  margin-bottom: 1.5rem;
+}
+
+.admin-sidebar__section:last-child {
+  margin-bottom: 0;
+}
+
+.admin-sidebar__section--bottom {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.admin-sidebar__section--highlight {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.admin-sidebar__heading {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-400);
+  margin-bottom: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.admin-sidebar__nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-sidebar__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--admin-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: all var(--admin-transition-fast);
+  cursor: pointer;
+}
+
+.admin-sidebar__nav-item:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.admin-sidebar__nav-item[data-active="true"] {
+  background: var(--color-background);
+  color: var(--color-primary);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.04);
+}
+
+.admin-sidebar__nav-item--external {
+  color: var(--color-primary);
+}
+
+.admin-sidebar__nav-item--external:hover {
+  background: oklch(from var(--color-primary) l c h / 0.08);
+  color: var(--color-primary);
+}
+
+.admin-sidebar__nav-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.admin-sidebar__nav-item[data-active="true"] .admin-sidebar__nav-icon {
+  opacity: 1;
+}
+
+.admin-sidebar__external-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+/* =============================================================================
+   Dark Mode Overrides
+   ============================================================================= */
+
+:root.dark .admin-shell__sidebar {
+  background: var(--gray-900);
+  border-color: var(--gray-800);
+}
+
+:root.dark .admin-shell__sidebar-header {
+  border-color: var(--gray-800);
+}
+
+:root.dark .admin-sidebar__heading {
+  color: var(--gray-500);
+}
+
+:root.dark .admin-sidebar__nav-item {
+  color: var(--gray-400);
+}
+
+:root.dark .admin-sidebar__nav-item:hover {
+  background: var(--gray-800);
+  color: var(--gray-100);
+}
+
+:root.dark .admin-sidebar__nav-item[data-active="true"] {
+  background: var(--gray-800);
+  color: var(--color-primary);
+}
+
+:root.dark .admin-sidebar__section--bottom,
+:root.dark .admin-sidebar__section--highlight {
+  border-color: var(--gray-800);
+}
+
+/* =============================================================================
+   Content Patterns (backwards compatibility)
+   ============================================================================= */
+
+/* Legacy app-content styles for pages using old patterns */
+.app-content {
+  --app-content-width: 80rem;
+  --app-content-padding: 1rem;
+  --app-content-padding-md: 1.5rem;
+}
+
+:where(.app-content) {
+  padding: var(--app-content-padding);
+
+  @media (min-width: 768px) {
+    padding: var(--app-content-padding-md);
+  }
+}
+
+:where(.app-content:has(> .app-bleed)) {
+  padding: 0;
+}
+
+:where(.app-content > *) {
+  max-width: var(--app-content-width);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.app-section {
+  --_pad: var(--app-content-padding);
+  max-width: calc(var(--app-content-width) + var(--_pad) * 2);
+  margin-inline: auto;
+  width: 100%;
+  padding-inline: var(--_pad);
+
+  @media (min-width: 768px) {
+    --_pad: var(--app-content-padding-md);
+  }
+}
+
+.app-bleed {
+  max-width: none;
+  width: 100%;
+}
+
+:where(.app-bleed > *) {
+  max-width: none;
+  width: 100%;
+}

@@ -50,7 +50,7 @@ import { LabelValue, StatCard } from "@/components/shared"
 // Get current surface from pathname (for custom logic)
 import { getSurfaceFromPath, surfaces } from "@/components/shared"
 
-const surface = getSurfaceFromPath("/app/dashboard")
+const surface = getSurfaceFromPath("/admin/dashboard")
 // { id: "app", label: "App", href: "/app", icon: LayoutDashboardIcon }
 
 // Coordinate header popovers (wrap in Header.Actions)

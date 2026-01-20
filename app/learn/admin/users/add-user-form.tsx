@@ -62,7 +62,7 @@ export function AddUserForm() {
     <div className="admin-users-modal-backdrop" onClick={() => setIsOpen(false)}>
       <div className="admin-users-modal" onClick={(e) => e.stopPropagation()}>
         <div className="admin-users-modal__header">
-          <h3>Invite New User</h3>
+          <h3>Add New User</h3>
           <button onClick={() => setIsOpen(false)} className="admin-users-modal__close">
             <XIcon className="h-5 w-5" />
           </button>
@@ -71,7 +71,9 @@ export function AddUserForm() {
         <form onSubmit={handleSubmit}>
           <div className="admin-users-modal__body">
             <p className="admin-users-modal__intro">
-              Send an email invitation to a new user. They will receive a link to set their password.
+              Create a new user account with the default password: <strong>Prime$1234!</strong>
+              <br />
+              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>They should change this after their first login.</span>
             </p>
             
             <div className="admin-users-modal__field">
@@ -118,7 +120,7 @@ export function AddUserForm() {
             
             {success && (
               <div className="admin-users-modal__success">
-                Invitation sent successfully!
+                User created successfully!
               </div>
             )}
           </div>
@@ -129,7 +131,7 @@ export function AddUserForm() {
             </Button>
             <Button type="submit" disabled={isLoading || success}>
               <SendIcon className="h-4 w-4 mr-2" />
-              {isLoading ? "Sending..." : "Send Invitation"}
+              {isLoading ? "Creating..." : "Create User"}
             </Button>
           </div>
         </form>

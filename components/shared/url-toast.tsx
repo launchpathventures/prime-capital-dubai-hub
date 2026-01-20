@@ -111,8 +111,8 @@ export function UrlToast() {
       // Clear the hash and redirect to profile page
       setTimeout(() => {
         window.history.replaceState(null, "", window.location.pathname)
-        if (!pathname.includes("/app/profile")) {
-          router.push("/app/profile")
+        if (!pathname.includes("/admin/profile")) {
+          router.push("/admin/profile")
         }
       }, 100)
     }

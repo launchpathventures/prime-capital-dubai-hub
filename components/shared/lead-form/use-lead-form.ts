@@ -161,6 +161,8 @@ export function useLeadForm({
         hasQuestions: data.hasQuestions,
         questionsText: data.questionsText,
         scheduledMeeting: data.scheduledMeeting,
+        calendlyEventId: data.calendlyEventId,
+        calendlyInviteeId: data.calendlyInviteeId,
         formMode: mode,
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",

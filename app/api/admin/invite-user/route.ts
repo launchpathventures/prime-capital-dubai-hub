@@ -1,13 +1,16 @@
 /**
- * CATALYST - Admin Invite User API
+ * CATALYST - Admin Create User API
  * 
- * API route for admins to invite new users.
- * Uses Supabase Admin API to send invitation emails.
+ * API route for admins to create new users.
+ * Uses Supabase Admin API to create users with a default password.
  */
 
 import { createClient } from "@supabase/supabase-js"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+
+// Default password for new users created through admin panel
+const DEFAULT_PASSWORD = "Prime$1234!"
 
 export async function POST(request: Request) {
   // First check if current user is admin
@@ -49,13 +52,15 @@ export async function POST(request: Request) {
     }
   })
   
-  // Invite user by email
-  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
-    data: {
+  // Create user with default password
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email,
+    password: DEFAULT_PASSWORD,
+    email_confirm: true, // Auto-confirm email so they can login immediately
+    user_metadata: {
       full_name: fullName,
       role: role,
     },
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
   })
   
   if (error) {

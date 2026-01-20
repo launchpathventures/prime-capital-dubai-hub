@@ -22,6 +22,7 @@ import {
   GridIcon,
   HomeIcon,
   LockIcon,
+  GraduationCapIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -39,7 +40,8 @@ export type Surface = {
 export const surfaces: Surface[] = [
   { id: "home", label: "Home", href: "/", icon: HomeIcon },
   { id: "web", label: "Web", href: "/web", icon: GlobeIcon },
-  { id: "app", label: "App", href: "/app", icon: LayoutDashboardIcon },
+  { id: "admin", label: "Admin", href: "/admin", icon: LayoutDashboardIcon },
+  { id: "learn", label: "Learn", href: "/learn", icon: GraduationCapIcon },
   { id: "auth", label: "Auth", href: "/auth", icon: LockIcon },
   { id: "present", label: "Present", href: "/present", icon: PresentationIcon },
   { id: "examples", label: "Examples", href: "/examples", icon: GridIcon },
@@ -48,7 +50,7 @@ export const surfaces: Surface[] = [
 
 /**
  * Get the current surface based on pathname.
- * Matches the most specific path first (e.g., /app/dashboard matches "app").
+ * Matches the most specific path first (e.g., /admin/dashboard matches "admin").
  */
 export function getSurfaceFromPath(pathname: string): Surface {
   // Check surfaces in reverse order (most specific paths first)

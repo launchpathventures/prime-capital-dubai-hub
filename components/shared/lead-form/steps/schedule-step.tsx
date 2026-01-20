@@ -60,7 +60,19 @@ export function ScheduleStep({
     // Listen for Calendly events
     const handleCalendlyEvent = (e: MessageEvent) => {
       if (e.data.event === "calendly.event_scheduled") {
-        onUpdate({ scheduledMeeting: true })
+        // Extract booking IDs from event payload URIs
+        const eventUri = e.data.payload?.event?.uri || ""
+        const inviteeUri = e.data.payload?.invitee?.uri || ""
+        
+        // Extract just the ID (last segment of the URI)
+        const eventId = eventUri.split("/").pop() || null
+        const inviteeId = inviteeUri.split("/").pop() || null
+        
+        onUpdate({ 
+          scheduledMeeting: true,
+          calendlyEventId: eventId,
+          calendlyInviteeId: inviteeId,
+        })
         onSubmit()
       }
     }

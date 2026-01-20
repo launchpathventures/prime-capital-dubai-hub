@@ -14,11 +14,13 @@
 import { useState, useEffect } from "react"
 
 export interface UTMParams {
+  source?: string
   utmSource?: string
   utmMedium?: string
   utmCampaign?: string
   utmContent?: string
   utmTerm?: string
+  manychat?: string
 }
 
 /**
@@ -34,11 +36,13 @@ export function useUTMParams(): UTMParams {
     const searchParams = new URLSearchParams(window.location.search)
 
     setParams({
+      source: searchParams.get("source") || undefined,
       utmSource: searchParams.get("utm_source") || undefined,
       utmMedium: searchParams.get("utm_medium") || undefined,
       utmCampaign: searchParams.get("utm_campaign") || undefined,
       utmContent: searchParams.get("utm_content") || undefined,
       utmTerm: searchParams.get("utm_term") || undefined,
+      manychat: searchParams.get("manychat") || undefined,
     })
   }, [])
 
@@ -55,10 +59,12 @@ export function getUTMParams(): UTMParams {
   const searchParams = new URLSearchParams(window.location.search)
 
   return {
+    source: searchParams.get("source") || undefined,
     utmSource: searchParams.get("utm_source") || undefined,
     utmMedium: searchParams.get("utm_medium") || undefined,
     utmCampaign: searchParams.get("utm_campaign") || undefined,
     utmContent: searchParams.get("utm_content") || undefined,
     utmTerm: searchParams.get("utm_term") || undefined,
+    manychat: searchParams.get("manychat") || undefined,
   }
 }

@@ -21,7 +21,7 @@ Authentication pages for sign in, registration, and password recovery.
 AUTH_MODE=supabase              # demo | password | supabase | custom
 AUTH_PASSWORD=secret            # For password mode
 AUTH_CUSTOM_ENDPOINT=https://   # For custom mode
-NEXT_PUBLIC_AUTH_REDIRECT_TO=/app/dashboard
+NEXT_PUBLIC_AUTH_REDIRECT_TO=/admin/dashboard
 SUPABASE_SERVICE_ROLE_KEY=...   # Required for account deletion
 ```
 
@@ -162,7 +162,7 @@ By default, Supabase requires verification from **both** the old and new email a
 
 ### Route Protection Architecture
 
-**Route protection for /app/* subpages** (all modes):
+**Route protection for /admin/* subpages** (all modes):
 - `proxy.ts` — Checks auth, redirects to `/auth/login` if no user
 - `/app` itself is a public landing page, NOT protected
 
@@ -177,7 +177,7 @@ By default, Supabase requires verification from **both** the old and new email a
 
 The auth system handles:
 - Session validation via `supabase.auth.getUser()` in proxy
-- Route protection for `/app/*` subpages
+- Route protection for `/admin/*` subpages
 - Redirect authenticated users away from `/auth/*` (except signout/reset-password)
 
 ### Email Confirmation Detection

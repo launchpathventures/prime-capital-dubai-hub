@@ -159,7 +159,7 @@ export async function createProperty(input: PropertyInput): Promise<ActionResult
       .single()
     
     if (error) throw error
-    revalidatePath("/app/properties")
+    revalidatePath("/admin/properties")
     revalidatePath("/properties")
     return { success: true, data }
   } catch (error) {
@@ -179,7 +179,7 @@ export async function updateProperty(id: string, input: Partial<PropertyInput>):
       .single()
     
     if (error) throw error
-    revalidatePath("/app/properties")
+    revalidatePath("/admin/properties")
     revalidatePath("/properties")
     revalidatePath(`/properties/${data.slug}`)
     return { success: true, data }
@@ -198,7 +198,7 @@ export async function deleteProperty(id: string): Promise<ActionResult> {
       .eq("id", id)
     
     if (error) throw error
-    revalidatePath("/app/properties")
+    revalidatePath("/admin/properties")
     revalidatePath("/properties")
     return { success: true, data: undefined }
   } catch (error) {
@@ -254,7 +254,7 @@ export async function createTeamMember(input: TeamMemberInput): Promise<ActionRe
       .single()
     
     if (error) throw error
-    revalidatePath("/app/team")
+    revalidatePath("/admin/team")
     revalidatePath("/team")
     return { success: true, data }
   } catch (error) {
@@ -274,7 +274,7 @@ export async function updateTeamMember(id: string, input: Partial<TeamMemberInpu
       .single()
     
     if (error) throw error
-    revalidatePath("/app/team")
+    revalidatePath("/admin/team")
     revalidatePath("/team")
     revalidatePath(`/team/${data.slug}`)
     return { success: true, data }
@@ -293,7 +293,7 @@ export async function deleteTeamMember(id: string): Promise<ActionResult> {
       .eq("id", id)
     
     if (error) throw error
-    revalidatePath("/app/team")
+    revalidatePath("/admin/team")
     revalidatePath("/team")
     return { success: true, data: undefined }
   } catch (error) {
@@ -349,7 +349,7 @@ export async function createTestimonial(input: TestimonialInput): Promise<Action
       .single()
     
     if (error) throw error
-    revalidatePath("/app/testimonials")
+    revalidatePath("/admin/testimonials")
     revalidatePath("/")
     return { success: true, data }
   } catch (error) {
@@ -369,7 +369,7 @@ export async function updateTestimonial(id: string, input: Partial<TestimonialIn
       .single()
     
     if (error) throw error
-    revalidatePath("/app/testimonials")
+    revalidatePath("/admin/testimonials")
     revalidatePath("/")
     return { success: true, data }
   } catch (error) {
@@ -387,7 +387,7 @@ export async function deleteTestimonial(id: string): Promise<ActionResult> {
       .eq("id", id)
     
     if (error) throw error
-    revalidatePath("/app/testimonials")
+    revalidatePath("/admin/testimonials")
     revalidatePath("/")
     return { success: true, data: undefined }
   } catch (error) {
@@ -443,7 +443,7 @@ export async function createStat(input: StatInput): Promise<ActionResult<StatRow
       .single()
     
     if (error) throw error
-    revalidatePath("/app/stats")
+    revalidatePath("/admin/stats")
     revalidatePath("/")
     return { success: true, data }
   } catch (error) {
@@ -463,7 +463,7 @@ export async function updateStat(id: string, input: Partial<StatInput>): Promise
       .single()
     
     if (error) throw error
-    revalidatePath("/app/stats")
+    revalidatePath("/admin/stats")
     revalidatePath("/")
     return { success: true, data }
   } catch (error) {
@@ -481,7 +481,7 @@ export async function deleteStat(id: string): Promise<ActionResult> {
       .eq("id", id)
     
     if (error) throw error
-    revalidatePath("/app/stats")
+    revalidatePath("/admin/stats")
     revalidatePath("/")
     return { success: true, data: undefined }
   } catch (error) {
@@ -514,22 +514,116 @@ export async function updateSiteSetting(key: string, value: Record<string, unkno
     const supabase = await createClient()
     const { data, error } = await supabase
       .from("site_settings")
-      .upsert({ 
-        key, 
-        value, 
-        updated_at: new Date().toISOString() 
-      }, { 
-        onConflict: "key" 
+      .upsert({
+        key,
+        value,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: "key"
       })
       .select()
       .single()
-    
+
     if (error) throw error
-    revalidatePath("/app/site-settings")
+    revalidatePath("/admin/site-settings")
     revalidatePath("/")
     return { success: true, data }
   } catch (error) {
     console.error("Error updating site setting:", error)
     return { success: false, error: "Failed to update site setting" }
+  }
+}
+
+// =============================================================================
+// IMAGE UPLOADS
+// =============================================================================
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+
+/**
+ * Upload an image to Supabase storage for CMS content.
+ * Returns the public URL of the uploaded image.
+ */
+export async function uploadCmsImage(
+  formData: FormData,
+  folder: "properties" | "team"
+): Promise<ActionResult<string>> {
+  try {
+    const supabase = await createClient()
+
+    const file = formData.get("file")
+    if (!file || !(file instanceof File)) {
+      return { success: false, error: "No file provided" }
+    }
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return { success: false, error: "Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image." }
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return { success: false, error: "File too large. Maximum size is 10MB." }
+    }
+
+    // Generate unique filename
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
+    const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+
+    // Upload to Supabase storage
+    const { error: uploadError } = await supabase.storage
+      .from("cms")
+      .upload(filename, file, {
+        cacheControl: "3600",
+        upsert: false,
+      })
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError)
+      return { success: false, error: `Upload failed: ${uploadError.message}` }
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("cms")
+      .getPublicUrl(filename)
+
+    return { success: true, data: urlData.publicUrl }
+  } catch (error) {
+    console.error("Error uploading image:", error)
+    return { success: false, error: "Failed to upload image" }
+  }
+}
+
+/**
+ * Delete an image from Supabase storage.
+ * Extracts the path from the full URL.
+ */
+export async function deleteCmsImage(imageUrl: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+
+    // Extract path from URL (everything after /cms/)
+    const match = imageUrl.match(/\/cms\/(.+)$/)
+    if (!match) {
+      return { success: false, error: "Invalid image URL" }
+    }
+
+    const path = match[1]
+
+    const { error } = await supabase.storage
+      .from("cms")
+      .remove([path])
+
+    if (error) {
+      console.error("Delete error:", error)
+      return { success: false, error: `Delete failed: ${error.message}` }
+    }
+
+    return { success: true, data: undefined }
+  } catch (error) {
+    console.error("Error deleting image:", error)
+    return { success: false, error: "Failed to delete image" }
   }
 }

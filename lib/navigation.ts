@@ -72,34 +72,34 @@ export const appNavItems: NavGroup[] = [
     label: "Overview",
     icon: LayoutDashboardIcon,
     items: [
-      { label: "Dashboard", href: "/app/dashboard" },
+      { label: "Dashboard", href: "/admin/dashboard" },
     ],
   },
   {
     label: "Website Content",
     icon: LayersIcon,
     items: [
-      { label: "Properties", href: "/app/properties" },
-      { label: "Team", href: "/app/team" },
-      { label: "Testimonials", href: "/app/testimonials" },
-      { label: "Stats", href: "/app/stats" },
+      { label: "Properties", href: "/admin/properties" },
+      { label: "Team", href: "/admin/team" },
+      { label: "Testimonials", href: "/admin/testimonials" },
+      { label: "Stats", href: "/admin/stats" },
     ],
   },
   {
     label: "Learning",
     icon: GraduationCapIcon,
     items: [
-      { label: "Modules", href: "/app/learning/modules" },
-      { label: "Users", href: "/app/learning/users" },
-      { label: "Progress", href: "/app/learning/progress" },
+      { label: "Modules", href: "/admin/learning/modules" },
+      { label: "Users", href: "/admin/learning/users" },
+      { label: "Progress", href: "/admin/learning/progress" },
     ],
   },
   {
     label: "Settings",
     icon: SettingsIcon,
     items: [
-      { label: "Site Settings", href: "/app/site-settings" },
-      { label: "Profile", href: "/app/profile" },
+      { label: "Site Settings", href: "/admin/site-settings" },
+      { label: "Profile", href: "/admin/profile" },
     ],
   },
 ]
@@ -149,8 +149,8 @@ export type AppPageInfo = {
  * Uses appNavItems to look up section and page labels.
  *
  * @example
- * const info = getAppPageInfo("/app/settings")
- * // { section: "Manage", page: "Settings", sectionHref: "/app/settings", pageHref: "/app/settings" }
+ * const info = getAppPageInfo("/admin/settings")
+ * // { section: "Manage", page: "Settings", sectionHref: "/admin/settings", pageHref: "/admin/settings" }
  */
 export function getAppPageInfo(pathname: string): AppPageInfo | null {
   for (const group of appNavItems) {

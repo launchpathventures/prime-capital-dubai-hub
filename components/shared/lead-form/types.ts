@@ -81,14 +81,18 @@ export interface LeadFormData {
 
   // Step 6: Schedule (Calendly)
   scheduledMeeting?: boolean
+  calendlyEventId?: string    // e.g., "ABC123"
+  calendlyInviteeId?: string  // e.g., "XYZ789"
 
   // Meta (auto-captured)
   formMode: FormMode
+  source?: string
   utmSource?: string
   utmMedium?: string
   utmCampaign?: string
   utmContent?: string
   utmTerm?: string
+  manychat?: string
   submittedAt: string
   pageUrl: string
 }

@@ -7,6 +7,7 @@
 export { CopyButton, type CopyButtonProps } from "./copy-button"
 export { DevCard, DevCardBadge } from "./dev-card"
 export { HeaderPopoverProvider, useHeaderPopover } from "./header-popover-context"
+export { ImageUpload } from "./image-upload"
 export { LabelValue, labelValueVariants, type LabelValueProps } from "./label-value"
 export { LeadForm } from "./lead-form"
 export { MarkdownViewer, type MarkdownViewerProps } from "./markdown-viewer"

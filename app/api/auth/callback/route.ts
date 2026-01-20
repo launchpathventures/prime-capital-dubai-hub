@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     console.error("[Auth Callback] Supabase error:", errorParam, errorDescription)
     // For email change, redirect to profile with helpful message
     if (type === "email_change") {
-      return redirectWithToast(origin, "/app/profile", "email-link-expired")
+      return redirectWithToast(origin, "/admin/profile", "email-link-expired")
     }
     return NextResponse.redirect(`${origin}/auth/login?error=${errorParam}`)
   }
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         if (user) {
           // User is authenticated - email change likely completed
           // The error might be "code already used" from clicking same link twice
-          return redirectWithToast(origin, "/app/profile", "email-updated")
+          return redirectWithToast(origin, "/admin/profile", "email-updated")
         }
       }
       return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_error`)
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     })
     if (error) {
       console.error("[Auth Callback] OTP verification error:", error.message)
-      return redirectWithToast(origin, "/app/profile", "auth-error")
+      return redirectWithToast(origin, "/admin/profile", "auth-error")
     }
   }
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
   // For recovery flow, redirect to profile page (authenticated) instead of auth page
   // This avoids the auth layout redirect issue
   if (type === "recovery") {
-    return redirectWithToast(origin, "/app/profile", "password-ready")
+    return redirectWithToast(origin, "/admin/profile", "password-ready")
   }
   
   return redirectWithToast(origin, next, toast)
