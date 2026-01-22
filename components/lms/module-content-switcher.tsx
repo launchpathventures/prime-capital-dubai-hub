@@ -30,6 +30,10 @@ export interface ScenarioLink {
 interface ModuleContentSwitcherProps {
   /** Module title for coach prompt */
   moduleTitle: string
+  /** Module slug for URLs */
+  moduleSlug?: string
+  /** Competency slug for URLs */
+  competencySlug?: string
   /** Essentials content (AI-generated summary) */
   essentials: EssentialsContent | null
   /** Deep dive content (full markdown) */
@@ -58,6 +62,8 @@ interface ModuleContentSwitcherProps {
 
 export function ModuleContentSwitcher({
   moduleTitle,
+  moduleSlug: _moduleSlug,
+  competencySlug: _competencySlug,
   essentials,
   deepDiveContent,
   audioTracks = [],
