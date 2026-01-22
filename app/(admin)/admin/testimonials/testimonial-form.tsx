@@ -6,7 +6,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Stack, Row, Text } from "@/components/core"
+import { Stack } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -73,7 +73,7 @@ export function TestimonialForm({ testimonial, open, onOpenChange }: Testimonial
           toast.error(result.error)
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)

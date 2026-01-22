@@ -8,7 +8,7 @@
  */
 
 import * as React from "react"
-import { Badge, badgeVariants } from "@/components/ui/badge"
+import { badgeVariants } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { VariantProps } from "class-variance-authority"
 

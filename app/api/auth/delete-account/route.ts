@@ -5,7 +5,7 @@
  * Requires SUPABASE_SERVICE_ROLE_KEY in environment.
  */
 
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { createClient as createAdminClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
@@ -13,7 +13,7 @@ import { cookies } from "next/headers"
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     // Verify service role key is configured
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {

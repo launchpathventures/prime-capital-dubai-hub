@@ -138,11 +138,25 @@ export async function proxy(request: NextRequest) {
     const { data } = await supabase.auth.getUser()
     const user = data.user
 
-    // Protect /admin/* routes
-    if (pathname.startsWith("/admin") && !user) {
-      const loginUrl = new URL("/auth/login", request.url)
-      loginUrl.searchParams.set("next", pathname)
-      return NextResponse.redirect(loginUrl)
+    // Protect /admin/* routes - require authentication AND admin role
+    if (pathname.startsWith("/admin")) {
+      if (!user) {
+        const loginUrl = new URL("/auth/login", request.url)
+        loginUrl.searchParams.set("next", pathname)
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // Admin routes require admin role
+      const { data: adminProfile } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single()
+
+      if (adminProfile?.role !== "admin") {
+        // Non-admin users redirected to learn home
+        return NextResponse.redirect(new URL("/learn", request.url))
+      }
     }
 
     // Protect /learn/* routes (LMS requires authentication)

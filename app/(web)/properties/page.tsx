@@ -68,6 +68,7 @@ export default async function PropertiesPage() {
     description: p.description || "",
     featured: p.featured,
     status: p.completionStatus,
+    coverImage: p.coverImage,
   }))
 
   return (
@@ -106,7 +107,7 @@ function HeroSection({
     <section
       className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2800&auto=format&fit=crop')`,
+        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/properties.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

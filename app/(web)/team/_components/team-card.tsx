@@ -2,12 +2,13 @@
  * CATALYST - Team Card Component (Client)
  *
  * Interactive team member card with social links.
- * Client component to support onClick handlers for stopping event propagation.
+ * Client component to support onClick handlers for navigation.
+ * Uses div wrapper with onClick to avoid nested <a> tags (hydration error).
  */
 
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Text } from "@/components/core"
 import { ArrowRightIcon, LinkedinIcon, MailIcon, UserIcon } from "lucide-react"
@@ -25,11 +26,23 @@ interface TeamMember {
 }
 
 export function TeamCard({ member }: { member: TeamMember }) {
+  const router = useRouter()
+  
+  const handleCardClick = () => {
+    router.push(`/team/${member.slug}`)
+  }
+
   return (
-    <Link href={`/team/${member.slug}`} className="group block">
+    <div 
+      onClick={handleCardClick}
+      className="group block cursor-pointer"
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && handleCardClick()}
+    >
       <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
-        {/* Image */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--web-serenity)]/20">
+        {/* Image - square aspect ratio for compact cards */}
+        <div className="relative aspect-square overflow-hidden bg-[var(--web-serenity)]/20">
           {member.photo ? (
             <Image
               src={member.photo}
@@ -96,6 +109,6 @@ export function TeamCard({ member }: { member: TeamMember }) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }

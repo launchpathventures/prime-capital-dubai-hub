@@ -10,7 +10,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { config } from "@/lib/config"
-import { Container, Stack, Row, Grid, Text } from "@/components/core"
+import { Container, Stack, Grid, Text } from "@/components/core"
 
 // Navigation columns
 const navColumns = [

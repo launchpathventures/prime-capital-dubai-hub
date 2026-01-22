@@ -33,28 +33,22 @@ const DEFAULT_CALENDLY_URL = "https://calendly.com/tahirmajithia/30min"
 
 export function LeadForm({
   mode,
-  downloadAsset,
   successMessage,
   onSuccess,
   className,
   theme = "light",
+  redirectUrl,
+  redirectDelay,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   
   const {
     currentStep,
-    currentStepIndex,
-    totalSteps,
     data,
     isSubmitting,
-    error,
     nextStep,
-    prevStep,
-    canGoBack,
     updateData,
     submit,
-    progress,
-    availableSteps,
   } = useLeadForm({ mode, onSuccess })
 
   // Scroll to top of form when step changes
@@ -163,6 +157,8 @@ export function LeadForm({
             mode={mode}
             downloadAsset={downloadAsset}
             customMessage={successMessage}
+            redirectUrl={redirectUrl}
+            redirectDelay={redirectDelay}
           />
         )
 

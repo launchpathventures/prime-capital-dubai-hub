@@ -18,7 +18,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { Shell } from "@/components/layout/shell"
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileSidebar } from "@/components/layout/mobile-sidebar"
@@ -26,7 +25,6 @@ import { CollapsibleSidebarNav } from "@/components/layout/collapsible-sidebar-n
 import { Header } from "@/components/layout/header"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle, SurfaceSwitcher, UserMenu, UserNotifications } from "@/components/shared"
-import { Kbd } from "@/components/ui/kbd"
 import { appNavItems } from "@/lib/navigation"
 import { useSidebarState } from "@/components/layout/use-sidebar-state"
 import { AppBreadcrumb } from "./app-breadcrumb"

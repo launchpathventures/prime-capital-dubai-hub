@@ -25,7 +25,6 @@ import {
   getStats,
   type Property,
   type Testimonial,
-  type Stat,
 } from "@/lib/content"
 import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
@@ -88,7 +87,7 @@ export default async function HomePage() {
 function HeroSection() {
   return (
     <ParallaxHero
-      imageUrl="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+      imageUrl="/images/hero/home-hero.jpg"
       overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)"
       intensity={0.15}
       priority
@@ -199,7 +198,7 @@ function PropertiesSection({ properties }: { properties: Property[] }) {
                   {/* Property Image */}
                   <div className="relative h-[280px] overflow-hidden">
                     <Image
-                      src={propertyImages[property.type] || propertyImages.default}
+                      src={property.coverImage || propertyImages[property.type] || propertyImages.default}
                       alt={property.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

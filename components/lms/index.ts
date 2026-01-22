@@ -51,3 +51,14 @@ export { PageSkeleton } from "./skeletons/page-skeleton"
 
 // Empty State
 export { EmptyState } from "./empty-state"
+
+// Market Data Components
+// MarketDataExplorer and ModuleMarketData are server components - import directly, not from barrel
+export {
+  SupplyPipelineChart,
+  AreaRankingChart,
+  StockVsSupplyChart,
+  PriceTable,
+  BudgetExplorer,
+  MarketSnapshotCard,
+} from "./market-data"

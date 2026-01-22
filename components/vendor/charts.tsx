@@ -112,7 +112,7 @@ export function AreaChart({
         <YAxis tickLine={false} axisLine={false} tickMargin={8} />
         {showTooltip && <ChartTooltip content={<ChartTooltipContent />} />}
         {showLegend && <ChartLegend content={<ChartLegendContent />} />}
-        {dataKeys.map((key, index) => (
+        {dataKeys.map((key) => (
           <Area
             key={key}
             dataKey={key}

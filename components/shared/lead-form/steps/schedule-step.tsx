@@ -28,21 +28,21 @@ export function ScheduleStep({
   calendlyUrl,
 }: ScheduleStepProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [calendlyLoaded, setCalendlyLoaded] = useState(false)
+  // Initialize with true if Calendly is already loaded
+  const [calendlyLoaded, setCalendlyLoaded] = useState(() => 
+    typeof window !== "undefined" && !!window.Calendly
+  )
 
-  // Load Calendly widget script
+  // Load Calendly widget script if not already loaded
   useEffect(() => {
-    if (window.Calendly) {
-      setCalendlyLoaded(true)
-      return
-    }
+    if (calendlyLoaded) return
 
     const script = document.createElement("script")
     script.src = "https://assets.calendly.com/assets/external/widget.js"
     script.async = true
     script.onload = () => setCalendlyLoaded(true)
     document.body.appendChild(script)
-  }, [])
+  }, [calendlyLoaded])
 
   // Initialize Calendly inline widget
   useEffect(() => {

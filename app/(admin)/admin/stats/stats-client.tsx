@@ -71,7 +71,7 @@ export function StatsClient({ stats }: StatsClientProps) {
       } else {
         toast.error(result.error)
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete statistic")
     } finally {
       setIsDeleting(false)

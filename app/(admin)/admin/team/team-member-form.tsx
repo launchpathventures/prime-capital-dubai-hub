@@ -85,7 +85,7 @@ export function TeamMemberForm({ member, open, onOpenChange }: TeamMemberFormPro
           toast.error(result.error)
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)

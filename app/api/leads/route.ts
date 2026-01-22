@@ -175,6 +175,11 @@ const leadSchema = z.object({
   calendlyEventId: z.string().optional(),
   calendlyInviteeId: z.string().optional(),
 
+  // Context from referring pages
+  referringProperty: z.string().optional(),
+  referringTeamMember: z.string().optional(),
+  referringTeamMemberEmail: z.string().optional(),
+
   // URL parameters
   source: z.string().optional(),
   utmSource: z.string().optional(),
@@ -257,6 +262,11 @@ export async function POST(request: NextRequest) {
       
       // Calendly booking status
       bookedWithTahir: leadData.scheduledMeeting ? "Yes" : "No",
+      
+      // Context from referring pages (for CRM routing)
+      propertyInterest: leadData.referringProperty || null,
+      assignToTeamMember: leadData.referringTeamMember || null,
+      teamMemberEmail: leadData.referringTeamMemberEmail || null,
       
       // Form identification for CRM routing
       formName: getFormName(leadData.formMode, leadData.pageUrl),

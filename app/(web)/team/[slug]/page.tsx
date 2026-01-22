@@ -60,28 +60,43 @@ export default async function TeamMemberPage({ params }: PageProps) {
   return (
     <div className="web-team-member">
       {/* Hero Section */}
-      <section
-        className="relative min-h-[50vh] flex flex-col justify-center"
-        style={{
-          backgroundImage: `linear-gradient(to right, rgba(63,65,66,0.98) 0%, rgba(63,65,66,0.85) 50%, rgba(63,65,66,0.7) 100%)`,
-          backgroundColor: "var(--web-ash)",
-        }}
-      >
-        {/* Back Button */}
-        <div className="absolute top-24 left-6 z-10">
+      <section className="relative min-h-[55vh] flex flex-col justify-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center 40%",
+          }}
+        />
+        {/* Gradient Overlay */}
+        <div 
+          className="absolute inset-0 z-[1]"
+          style={{
+            background: `linear-gradient(to right, rgba(63,65,66,0.97) 0%, rgba(63,65,66,0.92) 40%, rgba(63,65,66,0.85) 70%, rgba(63,65,66,0.75) 100%)`,
+          }}
+        />
+        {/* Subtle Vignette */}
+        <div 
+          className="absolute inset-0 z-[2] pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at 70% 50%, transparent 0%, rgba(0,0,0,0.15) 100%)`,
+          }}
+        />
+
+        <Container size="xl" className="relative z-10 pt-28 pb-16">
+          {/* Back Link - Inline with content */}
           <Link
             href="/team"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-[2px] text-white text-[13px] hover:bg-white/20 transition-colors"
+            className="group inline-flex items-center gap-2 text-white/60 text-[13px] hover:text-white/90 transition-colors mb-8"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to Team
+            <ArrowLeftIcon className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+            Team
           </Link>
-        </div>
-
-        <Container size="xl" className="py-20">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             {/* Profile Photo */}
-            <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0 rounded-[2px] overflow-hidden bg-[var(--web-spruce)]">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 shrink-0 rounded-[2px] overflow-hidden shadow-2xl ring-1 ring-white/10">
               {member.photo ? (
                 <Image
                   src={member.photo}
@@ -91,7 +106,7 @@ export default async function TeamMemberPage({ params }: PageProps) {
                   priority
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-[var(--web-spruce)]">
                   <UserIcon className="h-24 w-24 text-[var(--web-serenity)]/50" />
                 </div>
               )}
@@ -104,14 +119,20 @@ export default async function TeamMemberPage({ params }: PageProps) {
                   Founder
                 </span>
               )}
-              <h1 className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5vw,48px)] font-normal leading-[1.1]">
+              <h1 
+                className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5vw,48px)] font-normal leading-[1.1]"
+                style={{ textShadow: "0 4px 30px rgba(0,0,0,0.3)" }}
+              >
                 {member.name}
               </h1>
               <div className="text-[var(--web-serenity)] text-[18px] font-light">
                 {member.role}
               </div>
               {member.shortBio && (
-                <Text className="text-white/70 text-[15px] font-light leading-relaxed max-w-xl">
+                <Text 
+                  className="text-white/70 text-[15px] font-light leading-relaxed max-w-xl"
+                  style={{ textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}
+                >
                   {member.shortBio}
                 </Text>
               )}
@@ -234,7 +255,7 @@ export default async function TeamMemberPage({ params }: PageProps) {
                   <div className="pt-4">
                     <Button
                       className="w-full h-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                      render={<Link href="/contact" />}
+                      render={<Link href={`/contact?teamMember=${encodeURIComponent(member.slug)}${member.email ? `&teamMemberEmail=${encodeURIComponent(member.email)}` : ''}`} />}
                     >
                       Schedule Consultation
                     </Button>

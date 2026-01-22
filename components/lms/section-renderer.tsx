@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm"
 import type { Components } from "react-markdown"
 import Image from "next/image"
 import Link from "next/link"
-import { Text, Stack } from "@/components/core"
+import { Text } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { 
@@ -58,6 +58,8 @@ interface SectionRendererProps {
   content: string
   className?: string
   linkedScenarios?: ScenarioLink[]
+  /** Market data component to render after intro section */
+  marketData?: React.ReactNode
 }
 
 // =============================================================================
@@ -113,41 +115,56 @@ function splitIntoSections(markdown: string): Section[] {
 // Main Component
 // =============================================================================
 
-export function SectionRenderer({ content, className, linkedScenarios = [] }: SectionRendererProps) {
+export function SectionRenderer({ content, className, linkedScenarios = [], marketData }: SectionRendererProps) {
   const sections = splitIntoSections(content)
-  
+
   // Count sections with titles (for numbering)
   let sectionNumber = 0
-  
+
   return (
     <div className={cn("lms-sections", className)}>
       {sections.map((section) => {
         const hasTitle = !!section.title
         if (hasTitle) sectionNumber++
-        
+        const isIntro = section.id === "intro"
+
         return (
-          <section
-            key={section.id}
-            id={section.id}
-            className={cn(
-              "lms-section-card",
-              !hasTitle && "lms-section-card--intro"
-            )}
-          >
-            {hasTitle && (
-              <h2 className="lms-section-card__title">
-                <span className="lms-section-card__number">{sectionNumber}</span>
-                {section.title}
-              </h2>
-            )}
-            <div className="lms-section-card__content">
-              <div className="lms-prose">
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                  {section.content}
-                </ReactMarkdown>
+          <div key={section.id}>
+            <section
+              id={section.id}
+              className={cn(
+                "lms-section-card",
+                !hasTitle && "lms-section-card--intro"
+              )}
+            >
+              {hasTitle && (
+                <h2 className="lms-section-card__title">
+                  <span className="lms-section-card__number">{sectionNumber}</span>
+                  {section.title}
+                </h2>
+              )}
+              <div className="lms-section-card__content">
+                <div className="lms-prose">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                    {section.content}
+                  </ReactMarkdown>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            {/* Market data renders after intro section */}
+            {isIntro && marketData && (
+              <section id="market-data" className="lms-section-card">
+                <h2 className="lms-section-card__title">
+                  <span className="lms-section-card__number">{++sectionNumber}</span>
+                  Market Data
+                </h2>
+                <div className="lms-section-card__content">
+                  {marketData}
+                </div>
+              </section>
+            )}
+          </div>
         )
       })}
       

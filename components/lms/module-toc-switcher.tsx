@@ -18,6 +18,8 @@ interface ModuleToCProps {
   deepDiveContent: string | null
   /** Whether a quiz exists */
   hasQuiz: boolean
+  /** Whether this module has market data */
+  hasMarketData?: boolean
   /** Initial mode from server (used before hydration) */
   initialMode?: "essentials" | "deepdive"
 }
@@ -26,22 +28,23 @@ export function ModuleToCSwitcher({
   essentials,
   deepDiveContent,
   hasQuiz,
+  hasMarketData,
   initialMode = "deepdive",
 }: ModuleToCProps) {
   const searchParams = useSearchParams()
-  
+
   // Derive mode from URL, falling back to initial mode
   const urlMode = searchParams.get("mode") as "essentials" | "deepdive" | null
   const mode = urlMode || initialMode
-  
+
   // Show appropriate ToC based on mode
   if (mode === "essentials" && essentials) {
-    return <EssentialsToCRight essentials={essentials} hasQuiz={hasQuiz} />
+    return <EssentialsToCRight essentials={essentials} hasQuiz={hasQuiz} hasMarketData={hasMarketData} />
   }
-  
+
   if (deepDiveContent) {
-    return <ModuleToCRight content={deepDiveContent} hasQuiz={hasQuiz} />
+    return <ModuleToCRight content={deepDiveContent} hasQuiz={hasQuiz} hasMarketData={hasMarketData} />
   }
-  
+
   return null
 }

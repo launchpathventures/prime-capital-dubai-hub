@@ -10,7 +10,6 @@
  * Defaults to essentials if available, otherwise deep dive.
  */
 
-import { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -18,6 +17,7 @@ import { ReadingProgress } from "@/components/lms"
 import { ModuleContentSwitcher } from "@/components/lms/module-content-switcher"
 import { ModuleToCSwitcher } from "@/components/lms/module-toc-switcher"
 import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
+import { ModuleMarketData, hasModuleMarketData } from "@/components/lms/module-market-data"
 import { 
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -221,7 +221,6 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
     : null
   
   // Determine mode: default to deep dive, essentials is opt-in
-  const hasEssentials = currentModule.essentials !== null
   const mode = modeParam === "deepdive" || modeParam === "essentials" 
     ? modeParam 
     : "deepdive"
@@ -277,7 +276,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               {currentModule.title}
             </h1>
           </div>
-          
+
           {/* AI Coach + Mode Toggle + Content - all handled by client component for instant switching */}
           {(currentModule.essentials || currentModule.content) ? (
             <ModuleContentSwitcher
@@ -291,6 +290,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               deepDiveDuration={deepDiveDuration}
               linkedScenarios={linkedScenarios}
               initialMode={mode}
+              marketData={hasModuleMarketData(moduleSlug) ? <ModuleMarketData moduleSlug={moduleSlug} /> : undefined}
             />
           ) : (
             <div className="lms-card" style={{ padding: '1.75rem' }}>
@@ -307,7 +307,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               </div>
             </div>
           )}
-          
+
           {/* Quiz CTA - shown if a related quiz exists */}
           {relatedQuiz && (
             <section id="knowledge-check" className="mt-8">
@@ -348,6 +348,7 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
           essentials={currentModule.essentials}
           deepDiveContent={currentModule.content}
           hasQuiz={!!relatedQuiz}
+          hasMarketData={hasModuleMarketData(moduleSlug)}
           initialMode={mode}
         />
       </div>

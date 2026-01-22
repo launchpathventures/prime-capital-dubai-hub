@@ -65,7 +65,7 @@ function HeroSection() {
       <div 
         className="min-h-[55vh] flex items-center justify-center relative"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2800&auto=format&fit=crop')`,
+          backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/services.jpg')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -377,7 +377,7 @@ function GoldenVisaSection() {
             </Text>
 
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-10">
-              {benefits.map((benefit, index) => (
+              {benefits.map((benefit) => (
                 <div key={benefit.text} className="flex items-center gap-3">
                   {benefit.icon === "globe" ? (
                     <svg className="h-4 w-4 text-[var(--web-spruce)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

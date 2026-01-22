@@ -57,20 +57,27 @@ function extractHeadings(markdown: string): TocItem[] {
 interface ModuleToCRightProps {
   content: string
   hasQuiz?: boolean
+  hasMarketData?: boolean
   className?: string
 }
 
-export function ModuleToCRight({ content, hasQuiz, className }: ModuleToCRightProps) {
+export function ModuleToCRight({ content, hasQuiz, hasMarketData, className }: ModuleToCRightProps) {
   const [activeId, setActiveId] = useState<string>("")
   const [progress, setProgress] = useState(0)
   const headings = useMemo(() => {
     const extracted = extractHeadings(content)
+
+    // Insert market data after intro (at the beginning) if present
+    if (hasMarketData) {
+      extracted.unshift({ id: "market-data", title: "Market Data", level: 2 })
+    }
+
     // Add quiz link if quiz exists
     if (hasQuiz) {
       extracted.push({ id: "knowledge-check", title: "Knowledge Check", level: 2 })
     }
     return extracted
-  }, [content, hasQuiz])
+  }, [content, hasQuiz, hasMarketData])
 
   // Reading progress - listens to the scroll container, not window
   useEffect(() => {

@@ -81,23 +81,28 @@ interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", render, children, ...props }, ref) => {
     const buttonClassName = cn("ui-button", buttonVariants({ variant, size }), className)
-    const buttonProps = {
-      "data-slot": "button" as const,
-      className: buttonClassName,
-      ref,
-      ...props,
-    }
 
     // If render prop provided, clone the element with button props merged
+    // Note: ref is excluded from cloneElement to avoid reading refs during render
     if (render) {
       return React.cloneElement(render, {
-        ...buttonProps,
+        "data-slot": "button" as const,
         className: cn(buttonClassName, render.props.className),
+        ...props,
         children,
       })
     }
 
-    return <button {...buttonProps}>{children}</button>
+    return (
+      <button
+        data-slot="button"
+        className={buttonClassName}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </button>
+    )
   }
 )
 Button.displayName = "Button"

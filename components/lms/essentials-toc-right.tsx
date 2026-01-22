@@ -28,22 +28,28 @@ interface TocItem {
 interface EssentialsToCRightProps {
   essentials: EssentialsContent
   hasQuiz?: boolean
+  hasMarketData?: boolean
   className?: string
 }
 
-export function EssentialsToCRight({ essentials, hasQuiz, className }: EssentialsToCRightProps) {
+export function EssentialsToCRight({ essentials, hasQuiz, hasMarketData, className }: EssentialsToCRightProps) {
   const [activeId, setActiveId] = useState<string>("")
   const [progress, setProgress] = useState(0)
-  
+
   // Build TOC from essentials content
   const headings = useMemo<TocItem[]>(() => {
     const items: TocItem[] = []
-    
+
     // Always show Summary
     if (essentials.tldr) {
       items.push({ id: "summary", title: "Summary", available: true })
     }
-    
+
+    // Market Data (after summary)
+    if (hasMarketData) {
+      items.push({ id: "market-data", title: "Market Data", available: true })
+    }
+
     // Key Facts
     if (essentials.keyFacts?.length > 0) {
       items.push({ id: "key-facts", title: "Key Facts", available: true })
@@ -83,7 +89,7 @@ export function EssentialsToCRight({ essentials, hasQuiz, className }: Essential
     }
     
     return items
-  }, [essentials, hasQuiz])
+  }, [essentials, hasQuiz, hasMarketData])
 
   // Reading progress - listens to the scroll container, not window
   useEffect(() => {

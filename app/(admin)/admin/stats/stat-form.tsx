@@ -71,7 +71,7 @@ export function StatForm({ stat, open, onOpenChange }: StatFormProps) {
           toast.error(result.error)
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)

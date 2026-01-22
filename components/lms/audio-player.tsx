@@ -10,7 +10,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Row, Text } from "@/components/core"
-import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { 
   PlayIcon, 

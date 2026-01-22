@@ -17,7 +17,6 @@ import { Progress } from "@/components/ui/progress"
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
@@ -288,7 +287,6 @@ function QuizQuestionView({
   onContinue,
 }: QuizQuestionViewProps) {
   const questionText = question.question_text || question.question
-  const correctIndex = question.options.findIndex(opt => opt.correct)
   
   return (
     <div className="p-6">

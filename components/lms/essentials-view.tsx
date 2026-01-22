@@ -42,18 +42,17 @@ interface ScenarioLink {
 
 interface EssentialsViewProps {
   essentials: EssentialsContent
-  moduleSlug: string
-  competencySlug: string
   onSwitchMode: () => void
   linkedScenarios?: ScenarioLink[]
+  /** Market data component to render after summary section */
+  marketData?: React.ReactNode
 }
 
-export function EssentialsView({ 
-  essentials, 
-  moduleSlug, 
-  competencySlug,
+export function EssentialsView({
+  essentials,
   onSwitchMode,
   linkedScenarios = [],
+  marketData,
 }: EssentialsViewProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   
@@ -83,7 +82,20 @@ export function EssentialsView({
           </Text>
         </div>
       </section>
-      
+
+      {/* Market Data - shown after summary for relevant modules */}
+      {marketData && (
+        <section id="market-data" className="lms-section-card">
+          <h2 className="lms-section-card__title">
+            <span className="lms-section-card__number">{++sectionNumber}</span>
+            Market Data
+          </h2>
+          <div className="lms-section-card__content">
+            {marketData}
+          </div>
+        </section>
+      )}
+
       {/* Key Facts */}
       {essentials.keyFacts?.length > 0 && (
         <section id="key-facts" className="lms-section-card">

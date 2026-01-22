@@ -12,15 +12,15 @@ import { Row, Text } from "@/components/core"
 import { 
   AwardIcon,
   CheckCircle2Icon,
-  CircleIcon,
   BookOpenIcon,
   ClipboardCheckIcon,
   UsersIcon,
   ClockIcon,
   SparklesIcon,
   MessageSquareIcon,
-  ChevronRightIcon,
   InfoIcon,
+  CircleIcon,
+  ChevronRightIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 
@@ -117,7 +117,8 @@ async function getCompetencies(): Promise<Competency[]> {
   return competenciesWithCounts
 }
 
-async function getUserProgress(userId: string): Promise<UserProgress> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- userId reserved for future per-user filtering
+async function getUserProgress(_userId: string): Promise<UserProgress> {
   const supabase = await createClient()
   
   // Get total counts

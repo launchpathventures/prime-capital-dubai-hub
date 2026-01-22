@@ -131,15 +131,28 @@ export async function submitQuizAttempt(
     // New: lookup by quiz_slug
     quizSlug = quizSlugOrModuleId
     
-    // Get quiz metadata for passing score
+    // Get quiz metadata for passing score and related module
     const { data: quiz } = await supabase
       .from("quizzes")
-      .select("passing_score")
+      .select("passing_score, related_module")
       .eq("slug", quizSlug)
       .single()
     
     if (quiz?.passing_score) {
       passingScore = quiz.passing_score / 100 // Convert percentage to decimal
+    }
+    
+    // Look up the module ID from the related module slug
+    if (quiz?.related_module) {
+      const { data: module } = await supabase
+        .from("learning_modules")
+        .select("id")
+        .eq("slug", quiz.related_module)
+        .single()
+      
+      if (module?.id) {
+        moduleId = module.id
+      }
     }
     
     const { data, error } = await supabase

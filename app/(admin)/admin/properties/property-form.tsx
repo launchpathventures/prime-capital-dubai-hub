@@ -116,7 +116,7 @@ export function PropertyForm({ property, open, onOpenChange }: PropertyFormProps
           toast.error(result.error)
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)

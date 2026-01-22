@@ -85,7 +85,7 @@ export function WebNav({ scrolled = false }: WebNavProps) {
     <>
       {/* Desktop navigation */}
       <Header.Nav aria-label="Main navigation">
-        <NavItems scrolled={scrolled} />
+        <NavItems />
         <ContactButton scrolled={scrolled} />
       </Header.Nav>
 
@@ -168,13 +168,12 @@ export function WebNav({ scrolled = false }: WebNavProps) {
 // -----------------------------------------------------------------------------
 
 interface NavItemsProps {
-  scrolled?: boolean
   /** Whether rendering for mobile (applies explicit mobile styles) */
   mobile?: boolean
 }
 
 /** Renders the main navigation items — used in both desktop and mobile */
-function NavItems({ scrolled, mobile }: NavItemsProps) {
+function NavItems({ mobile }: NavItemsProps) {
   return (
     <>
       {webNavItems.map((item) => (

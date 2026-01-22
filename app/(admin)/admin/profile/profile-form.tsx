@@ -10,6 +10,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getURL } from "@/lib/auth/get-url"
 import { Stack, Row, Text, Title, Grid } from "@/components/core"
@@ -78,7 +79,6 @@ interface ProfileFormProps {
 export function ProfileForm({ mode, user, canDeleteAccount = false }: ProfileFormProps) {
   const router = useRouter()
   const isSupabase = mode === "supabase"
-  const isReadOnly = !isSupabase
 
   // Local state to track pending email (since Supabase's new_email isn't always reliable)
   const [localPendingEmail, setLocalPendingEmail] = React.useState<string | undefined>(user?.pendingEmail)
@@ -113,7 +113,7 @@ export function ProfileForm({ mode, user, canDeleteAccount = false }: ProfileFor
   return (
     <Stack gap="lg" className="profile-form">
       {/* Profile Header with Avatar - Full width hero */}
-      <ProfileHeader user={user} isSupabase={isSupabase} localDisplayName={localDisplayName} />
+      <ProfileHeader user={user} localDisplayName={localDisplayName} />
 
       {/* Personal Info - Full width */}
       <DisplayNameCard 
@@ -180,7 +180,7 @@ function getInitials(name: string): string {
 // Profile Header (Avatar + Name + Email) - Hero Section
 // -----------------------------------------------------------------------------
 
-function ProfileHeader({ user, isSupabase, localDisplayName }: { user: ProfileUser; isSupabase: boolean; localDisplayName?: string }) {
+function ProfileHeader({ user, localDisplayName }: { user: ProfileUser; localDisplayName?: string }) {
   const displayName = localDisplayName || user.displayName || user.email.split("@")[0]
   const initials = getInitials(displayName)
 
@@ -204,9 +204,11 @@ function ProfileHeader({ user, isSupabase, localDisplayName }: { user: ProfileUs
         <div className={cn("absolute top-[60%] -translate-y-1/2 z-10 group", avatarLeft)}>
           <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           {user.avatarUrl ? (
-            <img
+            <Image
               src={user.avatarUrl}
               alt={displayName}
+              width={96}
+              height={96}
               className={cn(avatarSize, "relative rounded-full object-cover ring-4 ring-background shadow-xl")}
             />
           ) : (
@@ -551,7 +553,7 @@ function EmailCard({
       // Request email change
       // Note: Some email domains may trigger a false "invalid email" error due to
       // Supabase's domain validation. See: https://github.com/supabase/auth/issues/2252
-      const { data, error } = await supabase.auth.updateUser(
+      const { error } = await supabase.auth.updateUser(
         { email: newEmail },
         { emailRedirectTo: `${getURL()}api/auth/callback?next=/admin/profile` }
       )

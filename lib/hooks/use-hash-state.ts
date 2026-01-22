@@ -96,7 +96,7 @@ export function useHashState(
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Initializing from URL hash
       setValue(hashValue)
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Initializing from URL hash
+     
     setIsInitialized(true)
   }, [key])
 

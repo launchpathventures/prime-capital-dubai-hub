@@ -11,9 +11,9 @@ export type CrudTableConfig = {
   select?: string
 }
 
-export type CrudListOptions<T> = {
+export type CrudListOptions = {
   select?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
+   
   query?: (query: unknown) => unknown
 }
 
@@ -22,13 +22,13 @@ export type CrudPagination = {
   pageSize: number
 }
 
-export type CrudMutationOptions<T> = {
+export type CrudMutationOptions = {
   select?: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Supabase query builder type
+   
   query?: (query: unknown) => unknown
 }
 
-export type CrudUpsertOptions<T> = CrudMutationOptions<T> & {
+export type CrudUpsertOptions = CrudMutationOptions & {
   onConflict?: string
   ignoreDuplicates?: boolean
 }

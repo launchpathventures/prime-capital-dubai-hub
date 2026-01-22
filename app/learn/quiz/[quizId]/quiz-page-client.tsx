@@ -92,7 +92,6 @@ function generateResultsMarkdown(
   questions.forEach((question, index) => {
     const userAnswerIndex = answers[question.id]
     const userAnswer = question.options[userAnswerIndex]
-    const correctIndex = question.options.findIndex(opt => opt.correct)
     const isCorrect = userAnswer?.correct
     const questionText = question.question_text || question.question
     
@@ -162,7 +161,6 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
   const [score, setScore] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false)
-  const [showReview, setShowReview] = useState(false)
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
   
   const currentQuestion = questions[currentIndex]
@@ -245,7 +243,6 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
     setScore(0)
     setState("in-progress")
     setLastAnswerCorrect(false)
-    setShowReview(false)
     setExpandedQuestions(new Set())
   }
   
@@ -532,7 +529,6 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
   // Question screen
   const questionText = currentQuestion.question_text || currentQuestion.question
   const showingFeedback = state === "showing-feedback"
-  const correctIndex = currentQuestion.options.findIndex(opt => opt.correct)
   
   // For RERA quizzes, link back to RERA index
   const isRERAQuiz = quiz.slug.includes("rera")

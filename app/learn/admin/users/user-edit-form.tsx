@@ -42,7 +42,7 @@ export function UserEditForm({ user }: UserEditFormProps) {
         // Refresh the page to show updated data
         window.location.reload()
       }
-    } catch (err) {
+    } catch {
       setError('Failed to update user')
     } finally {
       setIsLoading(false)

@@ -34,6 +34,7 @@ type Property = {
   description: string
   featured?: boolean
   status?: string
+  coverImage?: string | null
 }
 
 export function PropertiesFilter({ properties }: { properties: Property[] }) {
@@ -107,7 +108,8 @@ export function PropertiesFilter({ properties }: { properties: Property[] }) {
 }
 
 function PropertyCard({ property }: { property: Property }) {
-  const imageUrl = propertyImages[property.type.toLowerCase()] || propertyImages.default
+  // Use cover image if available, otherwise fall back to type-based placeholder
+  const imageUrl = property.coverImage || propertyImages[property.type.toLowerCase()] || propertyImages.default
 
   return (
     <Link

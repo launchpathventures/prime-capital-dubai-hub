@@ -24,7 +24,6 @@ import { useSidebarState } from "@/components/layout/use-sidebar-state"
 import { presentations } from "@/lib/navigation"
 import { Kbd } from "@/components/ui/kbd"
 import {
-  CodeIcon,
   KeyboardIcon,
   LinkIcon,
   SparklesIcon,

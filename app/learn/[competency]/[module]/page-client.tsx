@@ -13,15 +13,11 @@ import type { ScenarioLink } from "./page"
 
 interface ModulePageClientProps {
   essentials: EssentialsContent
-  moduleSlug: string
-  competencySlug: string
   linkedScenarios: ScenarioLink[]
 }
 
 export function ModulePageClient({ 
   essentials, 
-  moduleSlug, 
-  competencySlug,
   linkedScenarios,
 }: ModulePageClientProps) {
   const router = useRouter()
@@ -37,8 +33,6 @@ export function ModulePageClient({
   return (
     <EssentialsView
       essentials={essentials}
-      moduleSlug={moduleSlug}
-      competencySlug={competencySlug}
       onSwitchMode={handleSwitchMode}
       linkedScenarios={linkedScenarios}
     />

@@ -95,6 +95,11 @@ export interface LeadFormData {
   manychat?: string
   submittedAt: string
   pageUrl: string
+
+  // Context from referring pages
+  referringProperty?: string         // Property slug from query param
+  referringTeamMember?: string       // Team member slug from query param
+  referringTeamMemberEmail?: string  // Team member email from query param
 }
 
 // =============================================================================
@@ -119,6 +124,12 @@ export interface LeadFormProps {
 
   /** Optional: Light or dark theme */
   theme?: FormTheme
+
+  /** Optional: URL to redirect to after successful submission (download mode) */
+  redirectUrl?: string
+
+  /** Optional: Delay in ms before redirecting (default: 3000) */
+  redirectDelay?: number
 }
 
 // =============================================================================

@@ -86,6 +86,7 @@ export function CoachProvider({ children, initialContext }: CoachProviderProps) 
       // Clear messages when navigating to different context
       setMessages([])
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only tracking specific properties
   }, [initialContext?.level, initialContext?.competencySlug, initialContext?.moduleSlug])
 
   const openCoach = React.useCallback((newContext?: Partial<CoachContext>) => {

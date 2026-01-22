@@ -11,8 +11,7 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { MenuIcon, XIcon } from "lucide-react"
+import { MenuIcon } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle, SurfaceSwitcher, UserMenu, UserNotifications, HeaderPopoverProvider } from "@/components/shared"
 import { Button } from "@/components/ui/button"

@@ -10,7 +10,7 @@ import { Container, Stack, Row, Text, Title } from "@/components/core"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRightIcon, CheckCircleIcon, CircleIcon, ChevronRightIcon } from "lucide-react"
+import { ArrowRightIcon, CheckCircleIcon, ChevronRightIcon } from "lucide-react"
 import type { CompetencyWithProgress } from "@/lib/learning-types"
 
 interface LearningPathwayProps {
@@ -36,7 +36,7 @@ export function LearningPathway({ competencies }: LearningPathwayProps) {
           
           {/* Competency List */}
           <Stack gap="sm" className="max-w-3xl mx-auto w-full">
-            {competencies.map((competency, index) => {
+            {competencies.map((competency) => {
               const isComplete = competency.completedCount >= competency.totalCount
               const progressPercent = competency.totalCount > 0 
                 ? Math.round((competency.completedCount / competency.totalCount) * 100)

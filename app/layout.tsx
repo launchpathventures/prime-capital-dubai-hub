@@ -61,11 +61,20 @@ export const metadata: Metadata = {
     url: config.app.url,
     siteName: config.app.name,
     type: "website",
+    images: [
+      {
+        url: "/images/hero/home-hero.jpg",
+        width: 1200,
+        height: 630,
+        alt: config.app.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: config.app.name,
     description: config.app.description,
+    images: ["/images/hero/home-hero.jpg"],
   },
 }
 

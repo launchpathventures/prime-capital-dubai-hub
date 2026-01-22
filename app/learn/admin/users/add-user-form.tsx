@@ -42,7 +42,7 @@ export function AddUserForm() {
           window.location.reload()
         }, 1500)
       }
-    } catch (err) {
+    } catch {
       setError('Failed to invite user')
     } finally {
       setIsLoading(false)

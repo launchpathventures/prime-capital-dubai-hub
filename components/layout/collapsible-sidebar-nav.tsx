@@ -133,42 +133,14 @@ function CollapsibleSidebarNav({
   const [searchQuery, setSearchQuery] = React.useState("")
   const searchRef = React.useRef<HTMLInputElement>(null)
 
-  // Alt+S keyboard shortcut to focus search
-  React.useEffect(() => {
-    if (!showSearch) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && e.key.toLowerCase() === "s") {
-        e.preventDefault()
-        searchRef.current?.focus()
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [showSearch])
-
-  // Determine if items are grouped or flat
-  // Handle edge case where items might be empty or undefined
-  const isGrouped = items && items.length > 0 && "items" in items[0]
-
-  // Early return if no items
-  if (!items || items.length === 0) {
-    return (
-      <nav
-        data-slot="sidebar-nav"
-        className={cn("layout-sidebar-nav", "flex min-h-0 flex-1 flex-col", className)}
-        {...props}
-      >
-        <div className="px-3 py-4 text-sm text-muted-foreground">
-          No navigation items
-        </div>
-      </nav>
-    )
-  }
+  // Determine if items are grouped or flat (needed before hooks that depend on it)
+  const hasItems = items && items.length > 0
+  const isGrouped = hasItems && "items" in items[0]
 
   // Filter items based on search query
+  // (Hook must be called before early return)
   const filteredItems = React.useMemo(() => {
+    if (!hasItems) return []
     if (!searchQuery.trim()) return items
 
     const query = searchQuery.toLowerCase()
@@ -189,12 +161,12 @@ function CollapsibleSidebarNav({
         item.label.toLowerCase().includes(query)
       )
     }
-  }, [items, searchQuery, isGrouped])
+  }, [items, searchQuery, isGrouped, hasItems])
 
   // Find the active group index (group containing current page)
   // Uses most specific match (longest href) to avoid /docs matching everything
   const activeGroupIndex = React.useMemo(() => {
-    if (!isGrouped) return 0
+    if (!isGrouped || !hasItems) return 0
     const groups = items as NavGroup[]
     
     let bestMatch = { groupIndex: 0, hrefLength: 0 }
@@ -209,29 +181,15 @@ function CollapsibleSidebarNav({
     })
     
     return bestMatch.groupIndex
-  }, [items, isGrouped, pathname])
+  }, [items, isGrouped, pathname, hasItems])
 
   // Accordion state: initialize to active section
   const [openSections, setOpenSections] = React.useState<number[]>([activeGroupIndex])
-  
-  // Sync open section when navigating to a different group
-  React.useEffect(() => {
-    if (!openSections.includes(activeGroupIndex)) {
-      setOpenSections([activeGroupIndex])
-    }
-  }, [activeGroupIndex]) // eslint-disable-line react-hooks/exhaustive-deps
   
   // Expand mode: manually expanded or auto-expanded during search
   const [isExpanded, setIsExpanded] = React.useState(false)
   const isSearching = searchQuery.trim().length > 0
   const showExpanded = isExpanded || isSearching
-
-  // Clear search and return to showing only the active section
-  const handleClearSearch = () => {
-    setSearchQuery("")
-    setIsExpanded(false)
-    setOpenSections([activeGroupIndex])
-  }
 
   // Callback for accordion to exit expanded mode (collapse button)
   const handleExitExpanded = React.useCallback(() => {
@@ -243,6 +201,50 @@ function CollapsibleSidebarNav({
     setOpenSections([])
     setIsExpanded(false)
   }, [])
+
+  // Alt+S keyboard shortcut to focus search
+  React.useEffect(() => {
+    if (!showSearch) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === "s") {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [showSearch])
+
+  // Sync open section when navigating to a different group
+  React.useEffect(() => {
+    if (!openSections.includes(activeGroupIndex)) {
+      setOpenSections([activeGroupIndex])
+    }
+  }, [activeGroupIndex]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Clear search and return to showing only the active section
+  const handleClearSearch = () => {
+    setSearchQuery("")
+    setIsExpanded(false)
+    setOpenSections([activeGroupIndex])
+  }
+
+  // Early return if no items (after all hooks are called)
+  if (!hasItems) {
+    return (
+      <nav
+        data-slot="sidebar-nav"
+        className={cn("layout-sidebar-nav", "flex min-h-0 flex-1 flex-col", className)}
+        {...props}
+      >
+        <div className="px-3 py-4 text-sm text-muted-foreground">
+          No navigation items
+        </div>
+      </nav>
+    )
+  }
 
   return (
     <nav

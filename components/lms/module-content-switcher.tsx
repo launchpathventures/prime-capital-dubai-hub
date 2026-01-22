@@ -30,10 +30,6 @@ export interface ScenarioLink {
 interface ModuleContentSwitcherProps {
   /** Module title for coach prompt */
   moduleTitle: string
-  /** Module slug */
-  moduleSlug: string
-  /** Competency slug */
-  competencySlug: string
   /** Essentials content (AI-generated summary) */
   essentials: EssentialsContent | null
   /** Deep dive content (full markdown) */
@@ -52,6 +48,8 @@ interface ModuleContentSwitcherProps {
   essentialsToC?: ReactNode
   /** ToC for deep dive mode (rendered by server) */
   deepDiveToC?: ReactNode
+  /** Market data component (rendered by server) */
+  marketData?: ReactNode
 }
 
 // =============================================================================
@@ -60,8 +58,6 @@ interface ModuleContentSwitcherProps {
 
 export function ModuleContentSwitcher({
   moduleTitle,
-  moduleSlug,
-  competencySlug,
   essentials,
   deepDiveContent,
   audioTracks = [],
@@ -69,8 +65,7 @@ export function ModuleContentSwitcher({
   deepDiveDuration = "25 min",
   linkedScenarios = [],
   initialMode,
-  essentialsToC,
-  deepDiveToC,
+  marketData,
 }: ModuleContentSwitcherProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -116,18 +111,17 @@ export function ModuleContentSwitcher({
         currentMode={mode}
         onModeChange={setMode}
       />
-      
+
       {/* Content - instant switch, no skeleton needed */}
       {mode === "essentials" && essentials ? (
         <EssentialsView
           essentials={essentials}
-          moduleSlug={moduleSlug}
-          competencySlug={competencySlug}
           onSwitchMode={handleSwitchToDeepDive}
           linkedScenarios={linkedScenarios}
+          marketData={marketData}
         />
       ) : deepDiveContent ? (
-        <SectionRenderer content={deepDiveContent} linkedScenarios={linkedScenarios} />
+        <SectionRenderer content={deepDiveContent} linkedScenarios={linkedScenarios} marketData={marketData} />
       ) : null}
     </>
   )

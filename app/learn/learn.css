@@ -10344,3 +10344,89 @@
   color: var(--gray-500);
 }
 
+/* =============================================================================
+   Market Data Explorer
+   ============================================================================= */
+
+.market-data-explorer {
+  transition: box-shadow var(--lms-transition);
+}
+
+.market-data-explorer:hover {
+  box-shadow: var(--lms-shadow-md);
+}
+
+/* Chart containers */
+.market-data-chart {
+  width: 100%;
+}
+
+/* Supply pipeline specific styling */
+.supply-pipeline-chart .chart-pie {
+  margin: 0 auto;
+}
+
+/* Area ranking chart */
+.area-ranking-chart .chart-bar {
+  width: 100%;
+}
+
+/* Stock vs supply comparison */
+.stock-vs-supply-chart .chart-bar {
+  width: 100%;
+}
+
+/* Price table enhancements */
+.price-table table {
+  border-collapse: collapse;
+}
+
+.price-table th,
+.price-table td {
+  transition: background var(--lms-transition-fast);
+}
+
+.price-table tbody tr:hover {
+  background: oklch(from var(--color-primary) l c h / 0.05);
+}
+
+/* Budget explorer table */
+.budget-explorer table {
+  border-collapse: collapse;
+}
+
+.budget-explorer tbody tr:hover {
+  background: oklch(from var(--color-primary) l c h / 0.05);
+}
+
+/* Market snapshot card */
+.market-snapshot {
+  transition: transform var(--lms-transition), box-shadow var(--lms-transition);
+}
+
+.market-snapshot:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--lms-shadow-lg);
+}
+
+/* Module market data section */
+.module-market-data {
+  scroll-margin-top: 2rem;
+}
+
+/* Dark mode overrides */
+:root.dark .market-data-explorer {
+  background: var(--gray-900);
+  border-color: var(--gray-800);
+}
+
+:root.dark .market-snapshot {
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.1), oklch(from var(--color-primary) l c h / 0.05));
+  border-color: oklch(from var(--color-primary) l c h / 0.3);
+}
+
+:root.dark .price-table tbody tr:hover,
+:root.dark .budget-explorer tbody tr:hover {
+  background: oklch(from var(--color-primary) l c h / 0.1);
+}
+

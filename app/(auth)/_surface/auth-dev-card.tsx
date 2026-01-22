@@ -19,7 +19,6 @@ import {
   MailIcon,
   ShieldCheckIcon,
   CheckCircleIcon,
-  LogOutIcon,
 } from "lucide-react"
 import { type AuthMode } from "@/lib/auth/config"
 import { authModeConfigs } from "./auth-modes"

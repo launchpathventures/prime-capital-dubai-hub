@@ -11,7 +11,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import * as React from "react"
 
 export interface UTMParams {
   source?: string
@@ -28,14 +28,13 @@ export interface UTMParams {
  * Only runs on client-side.
  */
 export function useUTMParams(): UTMParams {
-  const [params, setParams] = useState<UTMParams>({})
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
+  // Initialize with extracted params directly to avoid setState in effect
+  const [params] = React.useState<UTMParams>(() => {
+    if (typeof window === "undefined") return {}
 
     const searchParams = new URLSearchParams(window.location.search)
 
-    setParams({
+    return {
       source: searchParams.get("source") || undefined,
       utmSource: searchParams.get("utm_source") || undefined,
       utmMedium: searchParams.get("utm_medium") || undefined,
@@ -43,8 +42,8 @@ export function useUTMParams(): UTMParams {
       utmContent: searchParams.get("utm_content") || undefined,
       utmTerm: searchParams.get("utm_term") || undefined,
       manychat: searchParams.get("manychat") || undefined,
-    })
-  }, [])
+    }
+  })
 
   return params
 }

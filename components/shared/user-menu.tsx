@@ -95,6 +95,7 @@ function UserAvatar({
 
   if (user.avatarUrl) {
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- external avatar URL
       <img
         src={user.avatarUrl}
         alt={user.name}

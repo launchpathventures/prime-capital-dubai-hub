@@ -13,14 +13,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { updateSiteSetting, type SiteSettingRow } from "@/lib/actions/cms"
 import {
   SaveIcon,
-  GlobeIcon,
   SettingsIcon,
   MailIcon,
   PhoneIcon,

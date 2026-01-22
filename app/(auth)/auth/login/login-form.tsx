@@ -47,7 +47,6 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
 
   // Determine which fields to show
   const showEmail = mode === "supabase" || mode === "custom" || mode === "demo"
-  const showPassword = true // All modes use password
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

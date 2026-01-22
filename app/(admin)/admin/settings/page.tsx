@@ -5,7 +5,7 @@
  */
 
 import { config } from "@/lib/config"
-import { Container, Stack, Grid, Row, Text, Title } from "@/components/core"
+import { Container, Stack, Row, Text, Title } from "@/components/core"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"

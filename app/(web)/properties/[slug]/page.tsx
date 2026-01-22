@@ -104,19 +104,17 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         </div>
 
-        {/* Back Button */}
-        <div className="absolute top-24 left-6 z-10">
+        {/* Hero Content */}
+        <Container size="xl" className="relative z-10 pt-28 pb-12">
+          {/* Back Link - Inline with content */}
           <Link
             href="/properties"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-[2px] text-white text-[13px] hover:bg-white/20 transition-colors"
+            className="group inline-flex items-center gap-2 text-white/60 text-[13px] hover:text-white/90 transition-colors mb-6"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to Properties
+            <ArrowLeftIcon className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+            Properties
           </Link>
-        </div>
-
-        {/* Hero Content */}
-        <Container size="xl" className="relative z-10 pb-12">
+          
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
             <Stack gap="sm">
               {/* Badges */}
@@ -160,7 +158,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
               <Button
                 className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                render={<Link href="/contact" />}
+                render={<Link href={`/contact?property=${encodeURIComponent(property.slug)}`} />}
               >
                 Enquire Now
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -355,7 +353,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </Text>
                 <Button
                   className="w-full h-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                  render={<Link href="/contact" />}
+                  render={<Link href={`/contact?property=${encodeURIComponent(property.slug)}`} />}
                 >
                   Enquire Now
                   <ArrowRightIcon className="ml-2 h-4 w-4" />

@@ -49,7 +49,7 @@ export default function AboutPage() {
 function HeroSection() {
   return (
     <ParallaxHero
-      imageUrl="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+      imageUrl="/images/hero/about.jpg"
       overlay="linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)"
       intensity={0.12}
       className="about-hero relative min-h-[55vh] flex flex-col justify-center items-center text-center"

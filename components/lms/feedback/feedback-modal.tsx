@@ -19,7 +19,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useFeedback } from "./feedback-provider"
 import { submitFeedback } from "@/lib/lms/feedback"

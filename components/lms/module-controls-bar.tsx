@@ -176,7 +176,8 @@ export function ModuleControlsBar({
     const secs = parseInt(parts[1]) || 0
     return acc + mins + secs / 60
   }, 0)
-  const totalAudioDuration = `${Math.round(totalAudioMinutes)} min`
+  // totalAudioMinutes available for future use (display total duration)
+  void totalAudioMinutes
   
   // Don't render if no essentials and no audio
   if (!hasEssentials && !hasAudio) {

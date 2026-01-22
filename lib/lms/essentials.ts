@@ -5,7 +5,7 @@
  */
 
 import crypto from "crypto"
-import type { EssentialsContent, LearningModule } from "@/lib/learning-types"
+import type { EssentialsContent } from "@/lib/learning-types"
 
 // =============================================================================
 // CONSTANTS

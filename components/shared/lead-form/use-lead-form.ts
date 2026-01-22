@@ -93,10 +93,22 @@ export function useLeadForm({
 }: UseLeadFormOptions): UseLeadFormReturn {
   const utm = useUTMParams()
 
+  // Read context params from URL (property, team member)
+  const contextParams = useMemo(() => {
+    if (typeof window === "undefined") return {}
+    const params = new URLSearchParams(window.location.search)
+    return {
+      referringProperty: params.get("property") || undefined,
+      referringTeamMember: params.get("teamMember") || undefined,
+      referringTeamMemberEmail: params.get("teamMemberEmail") || undefined,
+    }
+  }, [])
+
   // Form data state
   const [data, setData] = useState<Partial<LeadFormData>>({
     formMode: mode,
     goals: [],
+    ...contextParams,
   })
 
   // Current step index (among available steps)
@@ -167,6 +179,10 @@ export function useLeadForm({
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
         ...utm,
+        // Context from referring pages
+        referringProperty: data.referringProperty,
+        referringTeamMember: data.referringTeamMember,
+        referringTeamMemberEmail: data.referringTeamMemberEmail,
       }
 
       const response = await fetch("/api/leads", {

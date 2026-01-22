@@ -10,7 +10,7 @@
 "use client"
 
 import * as React from "react"
-import { SparklesIcon, ArrowRightIcon, ChevronDownIcon } from "lucide-react"
+import { SparklesIcon, ArrowRightIcon } from "lucide-react"
 import { useCoach } from "./coach-provider"
 import { cn } from "@/lib/utils"
 
