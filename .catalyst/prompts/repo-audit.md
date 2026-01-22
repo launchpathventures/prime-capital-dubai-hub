@@ -28,6 +28,7 @@ If not provided, ask for them.
 
 | Audit | Focus |
 |-------|-------|
+| Build Health | TypeScript errors, lint issues, compile failures |
 | Data & Security | Auth, encryption, secrets, input validation |
 | Accessibility | Keyboard nav, screen readers, color contrast |
 | Design & Experience | Consistency, responsive, loading states |
@@ -64,6 +65,24 @@ If not provided, ask for them.
 ---
 
 ## Audit Process
+
+### Step 0: Pre-flight Checks (Always Run First)
+Before starting any audit, run these automated checks:
+
+```bash
+# TypeScript type checking — catches build errors before CI
+pnpm tsc --noEmit
+
+# Linting — catches code style and potential bugs  
+pnpm lint
+```
+
+**If either check fails:**
+1. Report the errors as Critical Issues
+2. These MUST be fixed before continuing the audit
+3. TypeScript errors will cause Vercel/CI builds to fail
+
+This step is mandatory for all audit types and stages.
 
 ### Step 1: Load the Checklist
 Read the relevant audit criteria. Understand what "pass" means at the specified stage level.
