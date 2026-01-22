@@ -54,14 +54,14 @@ export function createCrudClient<T extends Record<string, unknown>>(
   const defaultSelect = config.select || "*"
 
   return {
-    async list(options: CrudListOptions<T> = {}) {
+    async list(options: CrudListOptions = {}) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config).select(select)
       const finalQuery = options.query ? options.query(query) : query
       return await finalQuery
     },
 
-    async getById(id: string | number, options: CrudListOptions<T> = {}) {
+    async getById(id: string | number, options: CrudListOptions = {}) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
         .select(select)
@@ -71,7 +71,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
       return await finalQuery
     },
 
-    async create(payload: Partial<T> | Partial<T>[], options: CrudMutationOptions<T> = {}) {
+    async create(payload: Partial<T> | Partial<T>[], options: CrudMutationOptions = {}) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config).insert(payload).select(select)
       const finalQuery = options.query ? options.query(query) : query
@@ -81,7 +81,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
     async update(
       id: string | number,
       values: Partial<T>,
-      options: CrudMutationOptions<T> = {}
+      options: CrudMutationOptions = {}
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
@@ -93,7 +93,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
       return await finalQuery
     },
 
-    async remove(id: string | number, options: CrudMutationOptions<T> = {}) {
+    async remove(id: string | number, options: CrudMutationOptions = {}) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
         .delete()
@@ -106,7 +106,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
 
     async upsert(
       payload: Partial<T> | Partial<T>[],
-      options: CrudUpsertOptions<T> = {}
+      options: CrudUpsertOptions = {}
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
@@ -121,7 +121,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
 
     async listPage(
       pagination: CrudPagination,
-      options: CrudListOptions<T> = {}
+      options: CrudListOptions = {}
     ) {
       const select = options.select || defaultSelect
       const from = (pagination.page - 1) * pagination.pageSize

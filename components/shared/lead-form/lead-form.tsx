@@ -39,6 +39,7 @@ export function LeadForm({
   theme = "light",
   redirectUrl,
   redirectDelay,
+  downloadAsset,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   
@@ -46,6 +47,7 @@ export function LeadForm({
     currentStep,
     data,
     isSubmitting,
+    error,
     nextStep,
     updateData,
     submit,

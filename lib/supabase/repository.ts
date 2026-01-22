@@ -12,31 +12,31 @@ import type { SupabaseResponse } from "@/lib/supabase/crud"
 import { unwrapSupabaseResponse } from "@/lib/supabase/crud"
 
 export type CrudClient<TModel> = {
-  list: (options?: CrudListOptions<TModel>) => Promise<SupabaseResponse<TModel[]>>
+  list: (options?: CrudListOptions) => Promise<SupabaseResponse<TModel[]>>
   listPage: (
     pagination: CrudPagination,
-    options?: CrudListOptions<TModel>
+    options?: CrudListOptions
   ) => Promise<SupabaseResponse<TModel[]>>
   getById: (
     id: string | number,
-    options?: CrudListOptions<TModel>
+    options?: CrudListOptions
   ) => Promise<SupabaseResponse<TModel>>
   create: (
     payload: Partial<TModel> | Partial<TModel>[],
-    options?: CrudMutationOptions<TModel>
+    options?: CrudMutationOptions
   ) => Promise<SupabaseResponse<TModel[]>>
   update: (
     id: string | number,
     values: Partial<TModel>,
-    options?: CrudMutationOptions<TModel>
+    options?: CrudMutationOptions
   ) => Promise<SupabaseResponse<TModel>>
   remove: (
     id: string | number,
-    options?: CrudMutationOptions<TModel>
+    options?: CrudMutationOptions
   ) => Promise<SupabaseResponse<TModel>>
   upsert: (
     payload: Partial<TModel> | Partial<TModel>[],
-    options?: CrudUpsertOptions<TModel>
+    options?: CrudUpsertOptions
   ) => Promise<SupabaseResponse<TModel[]>>
 }
 
@@ -116,7 +116,7 @@ export function createCrudRepository<TModel, TCreate, TUpdate, TList>(
 
     async upsert(
       payload: Partial<TModel> | Partial<TModel>[],
-      options?: CrudUpsertOptions<TModel>
+      options?: CrudUpsertOptions
     ): Promise<TModel[] | null> {
       const client = getClient()
       const response = await client.upsert(payload, options)

@@ -14,6 +14,7 @@ import { completeScenario } from "@/lib/actions/scenario-actions"
 interface ScenarioReflectionProps {
   category: string
   scenarioId: string
+  scenarioTitle?: string
   isCompleted?: boolean
   existingReflection?: {
     learned: string
@@ -25,6 +26,7 @@ interface ScenarioReflectionProps {
 export function ScenarioReflection({
   category,
   scenarioId,
+  scenarioTitle: _scenarioTitle,
   isCompleted = false,
   existingReflection,
   onComplete,
