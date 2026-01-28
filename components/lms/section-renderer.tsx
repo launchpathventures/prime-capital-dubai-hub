@@ -5,6 +5,7 @@
  * Each H2 heading starts a new section card.
  */
 
+import { Fragment } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { Components } from "react-markdown"
@@ -120,16 +121,23 @@ export function SectionRenderer({ content, className, linkedScenarios = [], mark
 
   // Count sections with titles (for numbering)
   let sectionNumber = 0
+  // Track if we've rendered market data yet
+  let marketDataRendered = false
 
   return (
     <div className={cn("lms-sections", className)}>
-      {sections.map((section) => {
+      {sections.map((section, index) => {
         const hasTitle = !!section.title
         if (hasTitle) sectionNumber++
-        const isIntro = section.id === "intro"
+        
+        // Render market data after the first section (intro or first H2)
+        const shouldRenderMarketData = !marketDataRendered && marketData && index === 0
+        if (shouldRenderMarketData) {
+          marketDataRendered = true
+        }
 
         return (
-          <div key={section.id}>
+          <Fragment key={section.id}>
             <section
               id={section.id}
               className={cn(
@@ -152,8 +160,8 @@ export function SectionRenderer({ content, className, linkedScenarios = [], mark
               </div>
             </section>
 
-            {/* Market data renders after intro section */}
-            {isIntro && marketData && (
+            {/* Market data renders after the first section */}
+            {shouldRenderMarketData && (
               <section id="market-data" className="lms-section-card">
                 <h2 className="lms-section-card__title">
                   <span className="lms-section-card__number">{++sectionNumber}</span>
@@ -164,7 +172,7 @@ export function SectionRenderer({ content, className, linkedScenarios = [], mark
                 </div>
               </section>
             )}
-          </div>
+          </Fragment>
         )
       })}
       

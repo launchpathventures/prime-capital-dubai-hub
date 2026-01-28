@@ -55,7 +55,7 @@ interface Competency {
 interface LearnShellProps {
   children: React.ReactNode
   /** Active section for sidebar highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback" | "admin-prompts"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-progress" | "admin-users" | "admin-feedback" | "admin-prompts"
   /** Current competency slug for course section */
   currentCompetency?: string
   /** Current module slug for course section */

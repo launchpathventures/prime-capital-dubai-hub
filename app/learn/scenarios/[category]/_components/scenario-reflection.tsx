@@ -26,7 +26,8 @@ interface ScenarioReflectionProps {
 export function ScenarioReflection({
   category,
   scenarioId,
-  scenarioTitle: _scenarioTitle,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  scenarioTitle,
   isCompleted = false,
   existingReflection,
   onComplete,

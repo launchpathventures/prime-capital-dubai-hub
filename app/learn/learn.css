@@ -1215,16 +1215,15 @@
    Enhanced Prose Typography
    ============================================================================= */
 
-/* Bold lead-in patterns like "**Total Timeline:**" - make them subheadings */
+/* Bold lead-in patterns like "**2002**: Description" - style but keep inline
+   Note: :only-child doesn't work here because CSS only counts element nodes,
+   not text nodes. So "<p><strong>text</strong>: more</p>" matches :only-child
+   even though there's text after the strong. Keep everything inline. */
 .lms-prose p > strong:first-child {
-  display: block;
   color: var(--gray-900);
   font-size: 0.9375rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
 }
-
-/* Remove the border-left treatment - too cluttered */
 
 /* Definition-style list items: "- **Term:** definition" */
 .lms-prose ul li > strong:first-child,

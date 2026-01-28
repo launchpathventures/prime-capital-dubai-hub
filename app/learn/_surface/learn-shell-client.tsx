@@ -22,6 +22,7 @@ import {
   CoachProvider,
   CoachPanel,
   CoachTrigger,
+  type CoachContext,
 } from "@/components/lms/coach"
 import {
   FeedbackProvider,
@@ -48,7 +49,7 @@ interface Competency {
   modules: Module[]
 }
 
-type ActiveSection = "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback" | "admin-prompts"
+type ActiveSection = "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-progress" | "admin-users" | "admin-feedback" | "admin-prompts"
 
 interface LearnShellClientProps {
   children: React.ReactNode
@@ -75,6 +76,7 @@ function getActiveSection(pathname: string): ActiveSection {
   if (pathname.startsWith("/learn/admin/users")) return "admin-users"
   if (pathname.startsWith("/learn/admin/feedback")) return "admin-feedback"
   if (pathname.startsWith("/learn/admin/prompts")) return "admin-prompts"
+  if (pathname.startsWith("/learn/admin/progress")) return "admin-progress"
   if (pathname.startsWith("/learn/admin")) return "admin"
   return "course"
 }
@@ -110,6 +112,24 @@ export function LearnShellClient({
   // Derive active section and course params from pathname
   const activeSection = getActiveSection(pathname)
   const { competency: currentCompetency, module: currentModule } = extractCourseParams(pathname)
+
+  // Derive coach context from pathname - module > competency > course
+  const coachContext: CoachContext = React.useMemo(() => {
+    if (currentModule && currentCompetency) {
+      return {
+        level: "module",
+        competencySlug: currentCompetency,
+        moduleSlug: currentModule,
+      }
+    }
+    if (currentCompetency) {
+      return {
+        level: "competency",
+        competencySlug: currentCompetency,
+      }
+    }
+    return { level: "course" }
+  }, [currentCompetency, currentModule])
 
   // Track Learn surface navigation for analytics
   React.useEffect(() => {
@@ -185,7 +205,7 @@ export function LearnShellClient({
   }, [pathname])
   
   return (
-    <CoachProvider initialContext={{ level: "course" }}>
+    <CoachProvider initialContext={coachContext}>
       <FeedbackProvider>
         <div className="learn-shell learn-shell--with-sidebar">
           {/* Skip Link */}

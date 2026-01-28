@@ -138,12 +138,27 @@ export async function proxy(request: NextRequest) {
     const { data } = await supabase.auth.getUser()
     const user = data.user
 
+    // Helper to create redirect with session cookies preserved
+    // This is critical - without copying cookies, token refresh during getUser()
+    // would be lost, causing redirect loops when tokens expire
+    const redirectWithCookies = (url: URL | string) => {
+      const redirectResponse = NextResponse.redirect(url)
+      // Copy any cookies that were set during auth (token refresh)
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, {
+          ...cookie,
+          secure: isHttps,
+        })
+      })
+      return redirectResponse
+    }
+
     // Protect /admin/* routes - require authentication AND admin role
     if (pathname.startsWith("/admin")) {
       if (!user) {
         const loginUrl = new URL("/auth/login", request.url)
         loginUrl.searchParams.set("next", pathname)
-        return NextResponse.redirect(loginUrl)
+        return redirectWithCookies(loginUrl)
       }
 
       // Admin routes require admin role
@@ -155,7 +170,7 @@ export async function proxy(request: NextRequest) {
 
       if (adminProfile?.role !== "admin") {
         // Non-admin users redirected to learn home
-        return NextResponse.redirect(new URL("/learn", request.url))
+        return redirectWithCookies(new URL("/learn", request.url))
       }
     }
 
@@ -163,7 +178,7 @@ export async function proxy(request: NextRequest) {
     if (pathname.startsWith("/learn") && !user) {
       const loginUrl = new URL("/auth/login", request.url)
       loginUrl.searchParams.set("next", pathname)
-      return NextResponse.redirect(loginUrl)
+      return redirectWithCookies(loginUrl)
     }
 
     // Admin routes within /learn require admin role
@@ -176,7 +191,7 @@ export async function proxy(request: NextRequest) {
 
       if (profile?.role !== "admin") {
         // Non-admin users redirected to learn home
-        return NextResponse.redirect(new URL("/learn", request.url))
+        return redirectWithCookies(new URL("/learn", request.url))
       }
     }
 
@@ -185,7 +200,7 @@ export async function proxy(request: NextRequest) {
       // Respect ?next parameter if provided, otherwise use default redirect
       const nextParam = request.nextUrl.searchParams.get("next")
       const redirectTarget = nextParam || AUTH_REDIRECT_TO
-      return NextResponse.redirect(new URL(redirectTarget, request.url))
+      return redirectWithCookies(new URL(redirectTarget, request.url))
     }
   }
 

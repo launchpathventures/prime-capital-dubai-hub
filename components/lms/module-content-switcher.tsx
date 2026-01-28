@@ -62,8 +62,10 @@ interface ModuleContentSwitcherProps {
 
 export function ModuleContentSwitcher({
   moduleTitle,
-  moduleSlug: _moduleSlug,
-  competencySlug: _competencySlug,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  moduleSlug,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  competencySlug,
   essentials,
   deepDiveContent,
   audioTracks = [],
