@@ -8,6 +8,43 @@ If you're an AI agent, this file tells you how to work in this codebase.
 
 ---
 
+## Skills — Check Before Building
+
+Before implementing any pattern, check for existing skills:
+
+1. **Read the skill index:** `/Users/thg/code/launchpath-skills/public/SKILL_INDEX.md`
+2. **If a relevant skill exists:** Follow it exactly
+3. **If no skill exists:** Proceed, then consider capturing as a new skill
+
+### Using Skills
+
+Skills are reusable patterns captured from real work. They live in a central repo:
+
+```
+/Users/thg/code/launchpath-skills/
+├── public/           # Shared skills (all projects)
+├── clients/          # Client-specific skills
+└── proposed/         # Skills awaiting review
+```
+
+### Creating Skills
+
+When you spot a repeatable pattern:
+
+- **End of day:** Run `/skills` to scan for patterns
+- **Immediate capture:** Run `/skill [name]` to create a skill
+
+Skills go to `proposed/` for review before being promoted.
+
+### Why This Matters
+
+- Accumulated knowledge becomes reusable
+- New projects inherit proven patterns
+- Less repetition, more consistency
+- Team members share best practices
+
+---
+
 ## Documentation Index
 
 Catalyst separates **method** (how to work) from **project** (what you're building):
