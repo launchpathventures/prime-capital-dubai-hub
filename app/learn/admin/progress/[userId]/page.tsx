@@ -1,17 +1,15 @@
 /**
- * CATALYST - My Progress Page
+ * Learner Detail Page
  *
- * Shows the current user's learning progress with the same layout
- * as the admin learner detail view. Includes:
+ * Shows detailed progress for a single learner including:
  * - Overall progress summary
- * - Learning progress by competency with module details and quiz scores
- * - Scenario completion status with reflections
+ * - Learning progress by competency with module details
+ * - Scenario completion status
  */
 
-import { Metadata } from "next"
 import Link from "next/link"
-import { redirect } from "next/navigation"
-import { Container, Stack, Row, Text, Title } from "@/components/core"
+import { notFound } from "next/navigation"
+import { Container, Stack, Row, Text, Title, Avatar } from "@/components/core"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -22,29 +20,24 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import {
+  ArrowLeftIcon,
   CheckCircleIcon,
   XCircleIcon,
+  AlertTriangleIcon,
   BookOpenIcon,
   MessageSquareIcon,
   ChevronDownIcon,
   MinusIcon,
-  ArrowRightIcon,
-  TrendingUpIcon,
-  AwardIcon,
 } from "lucide-react"
+import { requireAdmin } from "@/lib/auth/require-auth"
 import {
-  getMyProgress,
+  getLearnerDetail,
   formatRelativeTime,
   type CompetencyProgress,
   type ScenarioCategoryProgress,
   type ScenarioCompletion,
   type ModuleProgress,
 } from "@/lib/lms/admin-queries"
-
-export const metadata: Metadata = {
-  title: "My Progress | Learning Portal",
-  description: "Track your learning progress through the Prime Capital training program.",
-}
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic"
@@ -53,75 +46,73 @@ export const dynamic = "force-dynamic"
 // Page Component
 // -----------------------------------------------------------------------------
 
-export default async function MyProgressPage() {
-  const progress = await getMyProgress()
+interface PageProps {
+  params: Promise<{ userId: string }>
+}
 
-  if (!progress) {
-    redirect("/auth/login")
+export default async function LearnerDetailPage({ params }: PageProps) {
+  await requireAdmin()
+
+  const { userId } = await params
+  const learner = await getLearnerDetail(userId)
+
+  if (!learner) {
+    notFound()
   }
 
   const certificationConfig = {
-    in_progress: { label: "In Progress", variant: "secondary" as const, color: "text-muted-foreground" },
-    ready: { label: "Ready for Certification", variant: "outline" as const, color: "text-primary" },
-    certified: { label: "Certified", variant: "default" as const, color: "text-success" },
+    in_progress: { label: "In Progress", variant: "secondary" as const },
+    ready: { label: "Ready", variant: "outline" as const },
+    certified: { label: "Certified", variant: "default" as const },
   }
 
-  const { label: statusLabel, variant: statusVariant, color: statusColor } =
-    certificationConfig[progress.certificationStatus]
+  const { label: statusLabel, variant: statusVariant } =
+    certificationConfig[learner.certificationStatus]
 
   return (
     <Container size="lg" className="py-6">
       <Stack gap="xl">
-        {/* Header */}
-        <header>
-          <Title size="h2" className="mb-2">My Progress</Title>
-          <Text variant="muted">
-            Track your journey through the consultant training program.
-          </Text>
-        </header>
+        {/* Back Button */}
+        <div>
+          <Link href="/learn/admin/progress">
+            <Button variant="ghost" size="sm">
+              <ArrowLeftIcon className="h-4 w-4 mr-2" />
+              Back to Team Progress
+            </Button>
+          </Link>
+        </div>
 
-        {/* Progress Summary Card */}
-        <Card className="bg-gradient-to-br from-primary/5 to-background border-primary/20">
+        {/* Learner Header */}
+        <Card>
           <CardContent className="py-6">
-            <Row gap="lg" align="center" className="flex-wrap">
-              <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-primary/10 text-primary">
-                <TrendingUpIcon className="h-8 w-8" />
-              </div>
-              <Stack gap="xs" className="flex-1 min-w-48">
+            <Row gap="lg" align="center">
+              <Avatar name={learner.fullName} size="lg" />
+              <Stack gap="xs" className="flex-1">
+                <Row gap="sm" align="center">
+                  <Title size="h3">{learner.fullName}</Title>
+                  <Badge variant={statusVariant}>{statusLabel}</Badge>
+                  {learner.isAtRisk && (
+                    <Badge variant="outline" className="border-warning text-warning">
+                      <AlertTriangleIcon className="h-3 w-3 mr-1" />
+                      At Risk
+                    </Badge>
+                  )}
+                </Row>
+                <Text variant="muted">{learner.email}</Text>
+              </Stack>
+              <Stack gap="xs" align="end">
                 <Row gap="sm" align="baseline">
-                  <Title size="h1">{progress.overallProgress}%</Title>
+                  <Title size="h2">{learner.overallProgress}%</Title>
                   <Text variant="muted">complete</Text>
                 </Row>
                 <Text size="sm" variant="muted">
-                  {progress.completedModules} of {progress.totalModules} modules completed
+                  {learner.completedModules} of {learner.totalModules} modules
                 </Text>
-                <div className="w-full max-w-xs mt-1">
-                  <Progress value={progress.overallProgress} className="h-2" />
-                </div>
-              </Stack>
-              <Stack gap="sm" align="end" className="flex-shrink-0">
-                <Badge variant={statusVariant} className={statusColor}>
-                  <AwardIcon className="h-3 w-3 mr-1" />
-                  {statusLabel}
-                </Badge>
-                {progress.lastActivity && (
-                  <Text size="xs" variant="muted">
-                    Last active: {formatRelativeTime(progress.lastActivity)}
-                  </Text>
-                )}
+                <Text size="xs" variant="muted">
+                  Last active: {formatRelativeTime(learner.lastActivity)}
+                </Text>
               </Stack>
             </Row>
-            
-            {progress.overallProgress < 100 && (
-              <div className="mt-4 pt-4 border-t border-primary/10">
-                <Link href="/learn">
-                  <Button variant="default" size="sm">
-                    Continue Learning
-                    <ArrowRightIcon className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -136,7 +127,7 @@ export default async function MyProgressPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {progress.competencyProgress.length === 0 ? (
+            {learner.competencyProgress.length === 0 ? (
               <div className="p-6">
                 <EmptyState
                   icon={<BookOpenIcon className="h-8 w-8" />}
@@ -145,7 +136,7 @@ export default async function MyProgressPage() {
               </div>
             ) : (
               <div className="divide-y">
-                {progress.competencyProgress.map((comp) => (
+                {learner.competencyProgress.map((comp) => (
                   <CompetencySection key={comp.slug} competency={comp} />
                 ))}
               </div>
@@ -156,29 +147,21 @@ export default async function MyProgressPage() {
         {/* Scenario Progress */}
         <Card>
           <CardHeader>
-            <Row gap="sm" align="center" className="justify-between">
-              <CardTitle>
-                <Row gap="sm" align="center">
-                  <MessageSquareIcon className="h-5 w-5" />
-                  Scenario Practice
-                </Row>
-              </CardTitle>
-              <Link href="/learn/scenarios">
-                <Button variant="ghost" size="sm">
-                  Practice Scenarios
-                  <ArrowRightIcon className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-            </Row>
+            <CardTitle>
+              <Row gap="sm" align="center">
+                <MessageSquareIcon className="h-5 w-5" />
+                Scenario Progress
+              </Row>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {progress.scenarioProgress.length === 0 ? (
+            {learner.scenarioProgress.length === 0 ? (
               <EmptyState
                 icon={<MessageSquareIcon className="h-8 w-8" />}
                 message="No scenarios available"
               />
             ) : (
-              <ScenarioTable scenarios={progress.scenarioProgress} />
+              <ScenarioTable scenarios={learner.scenarioProgress} />
             )}
           </CardContent>
         </Card>
@@ -242,7 +225,7 @@ function CompetencySection({ competency }: { competency: CompetencyProgress }) {
               </thead>
               <tbody className="divide-y divide-border/50">
                 {competency.modules.map((mod) => (
-                  <ModuleRow key={mod.id} module={mod} competencySlug={competency.slug} />
+                  <ModuleRow key={mod.id} module={mod} />
                 ))}
               </tbody>
             </table>
@@ -257,27 +240,22 @@ function CompetencySection({ competency }: { competency: CompetencyProgress }) {
 // Module Row Component
 // -----------------------------------------------------------------------------
 
-function ModuleRow({ module, competencySlug }: { module: ModuleProgress; competencySlug: string }) {
+function ModuleRow({ module }: { module: ModuleProgress }) {
   return (
     <tr className="hover:bg-muted/20 transition-colors">
       <td className="px-3 py-2">
-        <Link href={`/learn/${competencySlug}/${module.slug}`}>
-          <Row gap="sm" align="center" className="group">
-            {module.status === "completed" ? (
-              <CheckCircleIcon className="h-4 w-4 text-success flex-shrink-0" />
-            ) : module.status === "in_progress" ? (
-              <div className="h-4 w-4 rounded-full border-2 border-primary flex-shrink-0" />
-            ) : (
-              <MinusIcon className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
-            )}
-            <Text 
-              size="sm" 
-              className={`group-hover:text-primary transition-colors ${module.status === "not_started" ? "text-muted-foreground" : ""}`}
-            >
-              {module.title}
-            </Text>
-          </Row>
-        </Link>
+        <Row gap="sm" align="center">
+          {module.status === "completed" ? (
+            <CheckCircleIcon className="h-4 w-4 text-success flex-shrink-0" />
+          ) : module.status === "in_progress" ? (
+            <div className="h-4 w-4 rounded-full border-2 border-primary flex-shrink-0" />
+          ) : (
+            <MinusIcon className="h-4 w-4 text-muted-foreground/50 flex-shrink-0" />
+          )}
+          <Text size="sm" className={module.status === "not_started" ? "text-muted-foreground" : ""}>
+            {module.title}
+          </Text>
+        </Row>
       </td>
       <td className="px-3 py-2">
         {module.status === "completed" ? (
@@ -309,13 +287,15 @@ function ModuleRow({ module, competencySlug }: { module: ModuleProgress; compete
 }
 
 // -----------------------------------------------------------------------------
-// Scenario Progress Component
+// Scenario Progress Component - Collapsible with individual completions
 // -----------------------------------------------------------------------------
 
 function ScenarioTable({ scenarios }: { scenarios: ScenarioCategoryProgress[] }) {
+  // Separate categories with activity from those without
   const withActivity = scenarios.filter((s) => s.completedScenarios > 0)
   const withoutActivity = scenarios.filter((s) => s.completedScenarios === 0)
   
+  // Calculate totals
   const totalCompleted = scenarios.reduce((sum, s) => sum + s.completedScenarios, 0)
   const totalAvailable = scenarios.reduce((sum, s) => sum + s.totalScenarios, 0)
   const totalReflections = scenarios.reduce((sum, s) => sum + s.reflectionsSubmitted, 0)
@@ -329,7 +309,7 @@ function ScenarioTable({ scenarios }: { scenarios: ScenarioCategoryProgress[] })
     )
   }
   
-  // If nothing practiced yet
+  // If nothing practiced yet - show a clear "not started" state
   if (withActivity.length === 0) {
     return (
       <Stack gap="md" className="py-2">
@@ -339,18 +319,11 @@ function ScenarioTable({ scenarios }: { scenarios: ScenarioCategoryProgress[] })
               <MessageSquareIcon className="h-6 w-6 text-muted-foreground" />
             </div>
             <Stack gap="xs" align="center">
-              <Text weight="medium">Ready to Practice?</Text>
+              <Text weight="medium">No Scenario Practice Yet</Text>
               <Text size="sm" variant="muted" className="max-w-md">
-                Scenarios help you develop real-world skills through simulated client interactions. 
-                Practice handling objections, discovery calls, and difficult situations.
+                This learner hasn&apos;t practiced any roleplay scenarios. Scenarios help develop real-world skills through simulated client interactions.
               </Text>
             </Stack>
-            <Link href="/learn/scenarios" className="mt-2">
-              <Button variant="default" size="sm">
-                Start Practicing
-                <ArrowRightIcon className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
           </Stack>
         </div>
         
@@ -360,14 +333,13 @@ function ScenarioTable({ scenarios }: { scenarios: ScenarioCategoryProgress[] })
           </Text>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {scenarios.map((category) => (
-              <Link 
+              <div 
                 key={category.categorySlug}
-                href={`/learn/scenarios/${category.categorySlug}`}
-                className="flex items-center justify-between px-3 py-2 bg-muted/20 rounded-md hover:bg-muted/40 transition-colors"
+                className="flex items-center justify-between px-3 py-2 bg-muted/20 rounded-md"
               >
                 <Text size="sm">{category.categoryTitle}</Text>
                 <Text size="xs" variant="muted">{category.totalScenarios} scenarios</Text>
-              </Link>
+              </div>
             ))}
           </div>
         </Stack>
@@ -408,14 +380,13 @@ function ScenarioTable({ scenarios }: { scenarios: ScenarioCategoryProgress[] })
           </Text>
           <div className="flex flex-wrap gap-2">
             {withoutActivity.map((category) => (
-              <Link 
+              <div 
                 key={category.categorySlug}
-                href={`/learn/scenarios/${category.categorySlug}`}
-                className="flex items-center gap-2 px-2 py-1 bg-muted/30 rounded text-sm hover:bg-muted/50 transition-colors"
+                className="flex items-center gap-2 px-2 py-1 bg-muted/30 rounded text-sm"
               >
                 <span className="text-muted-foreground">{category.categoryTitle}</span>
                 <span className="text-xs text-muted-foreground/60">{category.totalScenarios}</span>
-              </Link>
+              </div>
             ))}
           </div>
         </Stack>

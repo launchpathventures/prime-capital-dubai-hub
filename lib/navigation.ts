@@ -89,9 +89,9 @@ export const appNavItems: NavGroup[] = [
     label: "Learning",
     icon: GraduationCapIcon,
     items: [
-      { label: "Modules", href: "/admin/learning/modules" },
-      { label: "Users", href: "/admin/learning/users" },
-      { label: "Progress", href: "/admin/learning/progress" },
+      { label: "Modules", href: "/admin/learning" },
+      { label: "Users", href: "/learn/admin/users" },
+      { label: "Progress", href: "/admin/progress" },
     ],
   },
   {

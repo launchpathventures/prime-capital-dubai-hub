@@ -48,7 +48,7 @@ interface Competency {
 
 interface LearnSidebarProps {
   /** Active section for highlighting */
-  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-users" | "admin-feedback" | "admin-prompts"
+  activeSection?: "overview" | "progress" | "course" | "scenarios" | "prompts" | "rera" | "certification" | "admin" | "admin-progress" | "admin-users" | "admin-feedback" | "admin-prompts"
   /** Competency data for course section */
   competencies?: Competency[]
   /** Current competency slug */
@@ -310,6 +310,15 @@ export function LearnSidebar({
             >
               <UsersIcon className="learn-sidebar__nav-icon" />
               <span>User Management</span>
+            </Link>
+            <Link 
+              href="/learn/admin/progress"
+              className="learn-sidebar__nav-item"
+              data-active={activeSection === "admin-progress"}
+              onClick={onNavigate}
+            >
+              <BarChart3Icon className="learn-sidebar__nav-icon" />
+              <span>Team Progress</span>
             </Link>
             <Link 
               href="/learn/admin/feedback"

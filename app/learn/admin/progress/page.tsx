@@ -230,7 +230,7 @@ function LearnerRow({ learner }: LearnerRowProps) {
       {/* Learner Info */}
       <td className="px-4 py-3">
         <Link
-          href={`/admin/progress/${learner.id}`}
+          href={`/learn/admin/progress/${learner.id}`}
           className="block hover:opacity-80 transition-opacity"
         >
           <Row gap="sm" align="center">
@@ -276,7 +276,7 @@ function LearnerRow({ learner }: LearnerRowProps) {
       {/* View Details */}
       <td className="px-4 py-3">
         <Link
-          href={`/admin/progress/${learner.id}`}
+          href={`/learn/admin/progress/${learner.id}`}
           className="text-sm text-primary hover:underline"
         >
           View

@@ -67,9 +67,9 @@ export function ModuleToCRight({ content, hasQuiz, hasMarketData, className }: M
   const headings = useMemo(() => {
     const extracted = extractHeadings(content)
 
-    // Insert market data after intro (at the beginning) if present
+    // Insert market data after the first heading (Introduction)
     if (hasMarketData) {
-      extracted.unshift({ id: "market-data", title: "Market Data", level: 2 })
+      extracted.splice(1, 0, { id: "market-data", title: "Market Data", level: 2 })
     }
 
     // Add quiz link if quiz exists
