@@ -32,8 +32,14 @@ export function GoalsStep({ data, onUpdate, onNext }: GoalsStepProps) {
   }, [])
 
   // Keyboard navigation: 1-6 to toggle options
+  // Don't intercept keystrokes when user is typing in an input/textarea
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return
+      }
+
       const num = parseInt(e.key)
       if (num >= 1 && num <= GOAL_OPTIONS.length) {
         const option = GOAL_OPTIONS[num - 1]
@@ -70,24 +76,26 @@ export function GoalsStep({ data, onUpdate, onNext }: GoalsStepProps) {
         </p>
       </div>
 
-      <div className="lead-form__options">
+      <div role="group" aria-label="Select your goals" className="lead-form__options">
         {GOAL_OPTIONS.map((option, idx) => {
           const isSelected = selectedGoals.includes(option.value)
           return (
             <button
               key={option.value}
               type="button"
+              role="checkbox"
+              aria-checked={isSelected}
               onClick={() => toggleGoal(option.value)}
               className={cn(
                 "lead-form__option",
                 isSelected && "lead-form__option--selected"
               )}
             >
-              <span className="lead-form__option-key">{idx + 1}</span>
+              <span className="lead-form__option-key" aria-hidden="true">{idx + 1}</span>
               <span className="lead-form__option-content">
                 <span className="lead-form__option-label">{option.label}</span>
               </span>
-              <span className="lead-form__option-check">
+              <span className="lead-form__option-check" aria-hidden="true">
                 {isSelected && <CheckIcon size={14} />}
               </span>
             </button>
@@ -99,7 +107,7 @@ export function GoalsStep({ data, onUpdate, onNext }: GoalsStepProps) {
         Press 1-{GOAL_OPTIONS.length} to select
       </p>
 
-      {error && <p className="lead-form__error">{error}</p>}
+      {error && <p role="alert" className="lead-form__error">{error}</p>}
 
       <div className="lead-form__actions">
         <button type="submit" className="lead-form__submit">

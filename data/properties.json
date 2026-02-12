@@ -24,9 +24,10 @@
       "Sea views",
       "Private garden"
     ],
+    "coverImage": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop",
     "images": [
-      "/images/properties/palm-villa-1.jpg",
-      "/images/properties/palm-villa-2.jpg"
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop"
     ],
     "published": true,
     "displayOrder": 1
@@ -56,9 +57,10 @@
       "Wine cellar",
       "Concierge service"
     ],
+    "coverImage": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
     "images": [
-      "/images/properties/downtown-penthouse-1.jpg",
-      "/images/properties/downtown-penthouse-2.jpg"
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop"
     ],
     "published": true,
     "displayOrder": 2
@@ -88,9 +90,10 @@
       "Temperature-controlled garage",
       "Landscaped gardens"
     ],
+    "coverImage": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
     "images": [
-      "/images/properties/hills-mansion-1.jpg",
-      "/images/properties/hills-mansion-2.jpg"
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop"
     ],
     "published": true,
     "displayOrder": 3

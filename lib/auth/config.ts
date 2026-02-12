@@ -48,11 +48,11 @@ export type AuthConfig = {
  */
 const AUTH_MODE = process.env.AUTH_MODE as AuthMode | undefined
 
-/** Password for "password" mode */
-const AUTH_PASSWORD = process.env.AUTH_PASSWORD || process.env.NEXT_PUBLIC_AUTH_PASSWORD
+/** Password for "password" mode (server-only, no public fallback) */
+const AUTH_PASSWORD = process.env.AUTH_PASSWORD
 
-/** API endpoint for "custom" mode */
-const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT || process.env.NEXT_PUBLIC_AUTH_CUSTOM_ENDPOINT
+/** API endpoint for "custom" mode (server-only, no public fallback) */
+const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT
 
 /** Where to redirect after successful sign in */
 const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/learn"

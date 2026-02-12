@@ -10,14 +10,19 @@
 
 import "./web.css"
 import { WebShell } from "./_surface/web-shell"
+import { Analytics } from "@vercel/analytics/next"
 
-// Force dynamic rendering to avoid SSG issues with base-ui components
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 export default function WebGroupLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <WebShell>{children}</WebShell>
+  return (
+    <>
+      <WebShell>{children}</WebShell>
+      <Analytics debug={process.env.NODE_ENV === "development"} />
+    </>
+  )
 }

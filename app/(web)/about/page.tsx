@@ -15,6 +15,9 @@ import { ParallaxHero } from "../_surface/parallax-hero"
 export const metadata = {
   title: "About Us | Prime Capital Dubai",
   description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
+  alternates: {
+    canonical: "/about",
+  },
 }
 
 export default function AboutPage() {
@@ -288,14 +291,22 @@ function DubaiOpportunitySection() {
   ]
 
   return (
-    <section
-      className="py-[var(--web-section-gap)] relative"
-      style={{
-        backgroundImage: `linear-gradient(to right, rgba(63,65,66,0.95) 0%, rgba(63,65,66,0.85) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <section className="py-[var(--web-section-gap)] relative">
+      {/* Background Image */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to right, rgba(63,65,66,0.95) 0%, rgba(63,65,66,0.85) 100%)" }}
+        />
+      </div>
       <Container size="xl">
         <div className="max-w-[600px] mb-12">
           <span className="block text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.2em] mb-4">
@@ -438,14 +449,15 @@ function CTASection() {
       }}
     >
       {/* Subtle cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-[center_bottom]"
+          sizes="100vw"
+        />
+      </div>
       
       <Container size="md" className="relative z-10">
         <Stack gap="lg" align="center" className="text-center">

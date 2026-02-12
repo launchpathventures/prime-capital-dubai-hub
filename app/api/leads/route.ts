@@ -10,6 +10,59 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
 // =============================================================================
+// RATE LIMITING
+// =============================================================================
+
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000 // 15 minutes
+const RATE_LIMIT_MAX_REQUESTS = 5
+
+// In-memory rate limit store: IP -> { count, windowStart }
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>()
+let requestCount = 0
+
+/**
+ * Clean up expired rate limit entries every 100 requests.
+ */
+function cleanupRateLimitStore() {
+  requestCount++
+  if (requestCount % 100 === 0) {
+    const now = Date.now()
+    for (const [ip, data] of rateLimitStore.entries()) {
+      if (now - data.windowStart > RATE_LIMIT_WINDOW_MS) {
+        rateLimitStore.delete(ip)
+      }
+    }
+  }
+}
+
+/**
+ * Check if the IP is rate limited.
+ * Returns { limited: false } if allowed, or { limited: true, retryAfter } if blocked.
+ */
+function checkRateLimit(ip: string): { limited: boolean; retryAfter?: number } {
+  cleanupRateLimitStore()
+
+  const now = Date.now()
+  const entry = rateLimitStore.get(ip)
+
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    // New window
+    rateLimitStore.set(ip, { count: 1, windowStart: now })
+    return { limited: false }
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    // Rate limited
+    const retryAfter = Math.ceil((entry.windowStart + RATE_LIMIT_WINDOW_MS - now) / 1000)
+    return { limited: true, retryAfter }
+  }
+
+  // Increment count
+  entry.count++
+  return { limited: false }
+}
+
+// =============================================================================
 // BITRIX24 CODE MAPPINGS
 // =============================================================================
 
@@ -92,6 +145,26 @@ const BITRIX_TARGET_PRICE_CODES: Record<string, number> = {
   "50m-plus": 49748,
 }
 
+// Private mode labels (for CRM readability)
+const PRIVATE_ROLE_LABELS: Record<string, string> = {
+  "investor": "Direct Investor",
+  "advisor": "Advisor / Intermediary",
+  "family-office": "Family Office",
+}
+
+const DEPLOYMENT_RANGE_LABELS: Record<string, string> = {
+  "5m-10m": "AED 5–10 million",
+  "10m-20m": "AED 10–20 million",
+  "20m-50m": "AED 20–50 million",
+  "50m-plus": "AED 50+ million",
+}
+
+const PREFERRED_CONTACT_LABELS: Record<string, string> = {
+  "phone": "Phone Call",
+  "email": "Email",
+  "whatsapp": "WhatsApp",
+}
+
 // =============================================================================
 // FORM NAME HELPER
 // =============================================================================
@@ -117,6 +190,8 @@ function getFormName(formMode: string, pageUrl: string): string {
       pageName = "Services Page"
     } else if (path === "strategy-kit") {
       pageName = "Strategy Kit"
+    } else if (path === "private") {
+      pageName = "Private Channel"
     } else if (path === "about") {
       pageName = "About Page"
     } else {
@@ -132,6 +207,7 @@ function getFormName(formMode: string, pageUrl: string): string {
     "contact": "Contact Form",
     "landing": "Quick Enquiry",
     "download": "Download Request",
+    "private": "Private Enquiry",
   }
 
   const modeName = modeNames[formMode] || formMode
@@ -144,50 +220,54 @@ function getFormName(formMode: string, pageUrl: string): string {
 // =============================================================================
 
 const leadSchema = z.object({
-  // Required fields
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  email: z.string().email(),
-  whatsapp: z.string().min(1),
-  formMode: z.enum(["contact", "landing", "download"]),
+  // Required fields with length limits
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  email: z.string().email().max(100),
+  whatsapp: z.string().min(1).max(20),
+  formMode: z.enum(["contact", "landing", "download", "private"]),
   submittedAt: z.string(),
-  pageUrl: z.string(),
+  pageUrl: z.string().max(500),
 
   // Optional fields - goals
-  goals: z.array(z.string()).optional(),
+  goals: z.array(z.string().max(100)).optional(),
 
   // Optional fields - buyer qualification
-  investTimeline: z.string().optional(),
-  budget: z.string().optional(),
+  investTimeline: z.string().max(100).optional(),
+  budget: z.string().max(100).optional(),
 
   // Optional fields - seller qualification
-  propertyLocation: z.string().optional(),
-  propertyType: z.string().optional(),
-  saleTimeline: z.string().optional(),
-  targetPrice: z.string().optional(),
+  propertyLocation: z.string().max(500).optional(),
+  propertyType: z.string().max(100).optional(),
+  saleTimeline: z.string().max(100).optional(),
+  targetPrice: z.string().max(100).optional(),
 
   // Optional fields - questions
   hasQuestions: z.boolean().optional(),
-  questionsText: z.string().optional(),
+  questionsText: z.string().max(500).optional(),
 
-  // Optional fields - scheduling (Calendly)
-  scheduledMeeting: z.boolean().optional(),
-  calendlyEventId: z.string().optional(),
-  calendlyInviteeId: z.string().optional(),
+  // Optional fields - private mode
+  privateRole: z.string().max(100).optional(),
+  deploymentRange: z.string().max(100).optional(),
+  preferredContact: z.string().max(100).optional(),
+  privateContext: z.string().max(500).optional(),
 
   // Context from referring pages
-  referringProperty: z.string().optional(),
-  referringTeamMember: z.string().optional(),
-  referringTeamMemberEmail: z.string().optional(),
+  referringProperty: z.string().max(500).optional(),
+  referringTeamMember: z.string().max(100).optional(),
+  referringTeamMemberEmail: z.string().max(100).optional(),
 
   // URL parameters
-  source: z.string().optional(),
-  utmSource: z.string().optional(),
-  utmMedium: z.string().optional(),
-  utmCampaign: z.string().optional(),
-  utmContent: z.string().optional(),
-  utmTerm: z.string().optional(),
-  manychat: z.string().optional(),
+  source: z.string().max(100).optional(),
+  utmSource: z.string().max(100).optional(),
+  utmMedium: z.string().max(100).optional(),
+  utmCampaign: z.string().max(100).optional(),
+  utmContent: z.string().max(100).optional(),
+  utmTerm: z.string().max(100).optional(),
+  manychat: z.string().max(100).optional(),
+
+  // Honeypot field for bot protection
+  website: z.string().max(500).optional(),
 })
 
 type LeadData = z.infer<typeof leadSchema>
@@ -198,39 +278,57 @@ type LeadData = z.infer<typeof leadSchema>
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting - get IP from headers or fallback
+    const forwardedFor = request.headers.get("x-forwarded-for")
+    const ip = forwardedFor?.split(",")[0]?.trim() || "unknown"
+
+    const rateLimitResult = checkRateLimit(ip)
+    if (rateLimitResult.limited) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimitResult.retryAfter),
+          },
+        }
+      )
+    }
+
     // Parse request body
     const body = await request.json()
+
+    // Honeypot check - bots will fill in this hidden field
+    if (body.website) {
+      // Bot detected - silently accept to avoid revealing the trap
+      return NextResponse.json({ success: true })
+    }
 
     // Validate with Zod
     const result = leadSchema.safeParse(body)
     if (!result.success) {
+      // Log detailed error server-side only
       console.error("[Leads API] Validation error:", result.error.errors)
+      // Return generic message to client
       return NextResponse.json(
-        { error: "Invalid form data", details: result.error.errors },
+        { error: "Please check your form and try again." },
         { status: 400 }
       )
     }
 
     const leadData: LeadData = result.data
+    const referenceId = Date.now()
 
     // Get Zapier webhook URL from environment
     const zapierWebhookUrl = process.env.ZAPIER_LEAD_WEBHOOK_URL
 
     if (!zapierWebhookUrl) {
       console.warn("[Leads API] ZAPIER_LEAD_WEBHOOK_URL not configured")
-      // In development, just log and return success
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Leads API] Lead data (dev mode):", JSON.stringify(leadData, null, 2))
-        return NextResponse.json({ 
-          success: true, 
-          message: "Lead captured (dev mode - no webhook configured)" 
-        })
-      }
-      // In production without webhook, still accept but log warning
-      console.log("[Leads API] Lead data:", JSON.stringify(leadData, null, 2))
-      return NextResponse.json({ 
-        success: true, 
-        message: "Lead captured" 
+      // Log reference ID and mode only, not PII
+      console.log(`[Leads API] Lead received (no webhook): mode=${leadData.formMode}, ref=${referenceId}`)
+      return NextResponse.json({
+        success: true,
+        message: "Lead captured"
       })
     }
 
@@ -260,13 +358,19 @@ export async function POST(request: NextRequest) {
       targetPriceLabel: leadData.targetPrice ? BITRIX_BUDGET_LABELS[leadData.targetPrice] : null,
       targetPriceCode: leadData.targetPrice ? BITRIX_TARGET_PRICE_CODES[leadData.targetPrice] : null,
       
-      // Calendly booking status
-      bookedWithTahir: leadData.scheduledMeeting ? "Yes" : "No",
-      
       // Context from referring pages (for CRM routing)
       propertyInterest: leadData.referringProperty || null,
       assignToTeamMember: leadData.referringTeamMember || null,
       teamMemberEmail: leadData.referringTeamMemberEmail || null,
+      
+      // Private mode fields
+      privateRole: leadData.privateRole || null,
+      privateRoleLabel: PRIVATE_ROLE_LABELS[leadData.privateRole || ""] || null,
+      deploymentRange: leadData.deploymentRange || null,
+      deploymentRangeLabel: DEPLOYMENT_RANGE_LABELS[leadData.deploymentRange || ""] || null,
+      preferredContact: leadData.preferredContact || null,
+      preferredContactLabel: PREFERRED_CONTACT_LABELS[leadData.preferredContact || ""] || null,
+      privateContext: leadData.privateContext || null,
       
       // Form identification for CRM routing
       formName: getFormName(leadData.formMode, leadData.pageUrl),
@@ -291,8 +395,8 @@ export async function POST(request: NextRequest) {
         await zapierResponse.text()
       )
       // Still return success to user - we don't want form failures due to webhook issues
-      // The lead data is logged, so it can be recovered if needed
-      console.log("[Leads API] Lead data (webhook failed):", JSON.stringify(leadData, null, 2))
+      // Log reference ID and mode only, not PII
+      console.log(`[Leads API] Lead received (webhook failed): mode=${leadData.formMode}, ref=${referenceId}`)
     }
 
     return NextResponse.json({

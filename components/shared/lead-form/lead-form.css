@@ -681,3 +681,69 @@
     display: block;
   }
 }
+
+/* =============================================================================
+   SELECT GROUP (Private Mode)
+   Compact radio-button-style selectors for role, range, contact method.
+   ============================================================================= */
+
+.lead-form__select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.lead-form__select-group--row {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.lead-form__select-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: var(--lf-font-body);
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--lf-text-muted);
+  background: transparent;
+  border: 1px solid var(--lf-border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color var(--lf-transition-fast),
+              color var(--lf-transition-fast),
+              background var(--lf-transition-fast);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lead-form__select-group--row .lead-form__select-option {
+  flex: 1;
+  min-width: 0;
+}
+
+.lead-form__select-option:hover {
+  border-color: var(--lf-border-hover);
+  color: var(--lf-text);
+  background: var(--lf-option-bg-hover);
+}
+
+.lead-form__select-option--selected {
+  border-color: var(--lf-border-active);
+  color: var(--lf-text);
+  background: var(--lf-option-bg-active);
+}
+
+.lead-form__label-optional {
+  font-weight: 300;
+  color: var(--lf-text-subtle);
+  font-size: var(--lf-font-small);
+}
+
+@media (max-width: 479px) {
+  .lead-form__select-group--row {
+    flex-direction: column;
+  }
+}

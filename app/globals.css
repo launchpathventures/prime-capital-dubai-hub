@@ -297,7 +297,7 @@
   --font-sans: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   --font-headline: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-  --font-mono: var(--font-geist-mono);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* --- Responsive text sizes (clamp: min, fluid, max) ---
      Smaller sizes (xs-2xl) stay fixed — they're already appropriate.
@@ -465,7 +465,7 @@
 
   /* --- Typography --- */
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   /* --- Border radius scale --- */
   --radius-sm: calc(var(--radius) - 4px);

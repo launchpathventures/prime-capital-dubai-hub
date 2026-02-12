@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
   const { redirectTo } = getAuthConfig()
 
   const code = searchParams.get("code")
-  const next = searchParams.get("next") ?? redirectTo
+  // Validate redirect is a relative path to prevent open redirect attacks
+  const nextParam = searchParams.get("next")
+  const next = nextParam?.startsWith("/") ? nextParam : redirectTo
   const type = searchParams.get("type")
   const tokenHash = searchParams.get("token_hash")
   const errorParam = searchParams.get("error")

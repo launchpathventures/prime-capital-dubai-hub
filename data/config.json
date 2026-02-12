@@ -9,16 +9,17 @@
     "name": "Prime Capital Dubai",
     "tagline": "We move complexity out of sight",
     "description": "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
-    "email": "hello@primecapitaldubai.com",
-    "phone": "+971 4 XXX XXXX",
-    "address": "Office XXX, DIFC, Dubai, UAE"
+    "email": "admin@primecapitaldubai.com",
+    "phone": "+971 58 5414720",
+    "address": "API Business Suites, Office 101, Sheikh Zayed Rd, Al Barsha, Dubai"
   },
   "social": {
     "linkedin": "https://linkedin.com/company/prime-capital-dubai",
     "instagram": "https://instagram.com/primecapitaldubai"
   },
   "forms": {
-    "contact": "contactFormId",
-    "strategyKit": "strategyKitFormId"
+    "_comment": "DEPRECATED: Forms are now handled by LeadForm component. These IDs are kept for reference only.",
+    "contact": "",
+    "strategyKit": ""
   }
 }

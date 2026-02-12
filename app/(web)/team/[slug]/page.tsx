@@ -7,10 +7,12 @@
 
 import Link from "next/link"
 import Image from "next/image"
+
+export const revalidate = 86400 // 24 hours ISR
 import { notFound } from "next/navigation"
-import { getTeamMemberBySlug, getTeamMemberSlugs } from "@/lib/content"
+import { getWebTeamMemberBySlug, getTeamMemberSlugs } from "@/lib/content"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
-import { Button } from "@/components/ui/button"
+import { JsonLd, personJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -32,8 +34,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
-  const member = await getTeamMemberBySlug(slug)
-  
+  const member = await getWebTeamMemberBySlug(slug)
+
   if (!member) {
     return { title: "Team Member Not Found" }
   }
@@ -41,12 +43,20 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title: `${member.name} | Prime Capital Dubai`,
     description: member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`,
+    alternates: {
+      canonical: `/team/${member.slug}`,
+    },
+    openGraph: {
+      title: `${member.name} - ${member.role}`,
+      description: member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`,
+      images: member.photo ? [{ url: member.photo, width: 1200, height: 630 }] : undefined,
+    },
   }
 }
 
 export default async function TeamMemberPage({ params }: PageProps) {
   const { slug } = await params
-  const member = await getTeamMemberBySlug(slug)
+  const member = await getWebTeamMemberBySlug(slug)
 
   if (!member) {
     notFound()
@@ -59,17 +69,34 @@ export default async function TeamMemberPage({ params }: PageProps) {
 
   return (
     <div className="web-team-member">
+      {/* JSON-LD Structured Data */}
+      <JsonLd data={personJsonLd({
+        name: member.name,
+        role: member.role,
+        bio: member.shortBio || member.bio,
+        slug: member.slug,
+        photo: member.photo,
+        email: member.email,
+        linkedin: member.linkedin,
+      })} />
+      <JsonLd data={breadcrumbJsonLd([
+        { name: "Home", url: "https://primecapitaldubai.com" },
+        { name: "Team", url: "https://primecapitaldubai.com/team" },
+        { name: member.name }
+      ])} />
+
       {/* Hero Section */}
       <section className="relative min-h-[55vh] flex flex-col justify-center overflow-hidden">
         {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center 40%",
-          }}
-        />
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+            alt=""
+            fill
+            className="object-cover object-[center_40%]"
+            sizes="100vw"
+          />
+        </div>
         {/* Gradient Overlay */}
         <div 
           className="absolute inset-0 z-[1]"
@@ -137,16 +164,40 @@ export default async function TeamMemberPage({ params }: PageProps) {
                 </Text>
               )}
               
-              {/* Contact Button */}
-              {member.email && (
-                <div className="pt-2">
-                  <a
-                    href={`mailto:${member.email}`}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-[var(--web-off-white)] border border-[var(--web-off-white)]/50 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] transition-colors"
-                  >
-                    <MailIcon className="h-4 w-4" />
-                    Email
-                  </a>
+              {/* Contact Buttons */}
+              {(member.email || member.phone) && (
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {member.phone && (
+                    <a
+                      href={`tel:${member.phone.replace(/\s/g, "")}`}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-[var(--web-off-white)] border border-[var(--web-off-white)]/50 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <PhoneIcon className="h-4 w-4" />
+                      Call
+                    </a>
+                  )}
+                  {member.phone && (
+                    <a
+                      href={`https://wa.me/${member.phone.replace(/[\s+\-()]/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-[var(--web-off-white)] border border-[var(--web-off-white)]/50 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      WhatsApp
+                    </a>
+                  )}
+                  {member.email && (
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-[var(--web-off-white)] border border-[var(--web-off-white)]/50 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <MailIcon className="h-4 w-4" />
+                      Email
+                    </a>
+                  )}
                 </div>
               )}
             </Stack>
@@ -239,7 +290,21 @@ export default async function TeamMemberPage({ params }: PageProps) {
                       <span>{member.phone}</span>
                     </a>
                   )}
-                  
+
+                  {member.phone && (
+                    <a
+                      href={`https://wa.me/${member.phone.replace(/[\s+\-()]/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 text-[var(--web-spruce)] text-[14px] hover:text-[var(--web-ash)] transition-colors"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                      </svg>
+                      <span>WhatsApp</span>
+                    </a>
+                  )}
+
                   {member.linkedin && (
                     <a
                       href={member.linkedin}
@@ -253,12 +318,12 @@ export default async function TeamMemberPage({ params }: PageProps) {
                   )}
 
                   <div className="pt-4">
-                    <Button
-                      className="w-full h-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                      render={<Link href={`/contact?teamMember=${encodeURIComponent(member.slug)}${member.email ? `&teamMemberEmail=${encodeURIComponent(member.email)}` : ''}`} />}
+                    <Link
+                      href={`/contact?teamMember=${encodeURIComponent(member.slug)}${member.email ? `&teamMemberEmail=${encodeURIComponent(member.email)}` : ''}`}
+                      className="flex items-center justify-center w-full h-12 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors"
                     >
                       Schedule Consultation
-                    </Button>
+                    </Link>
                   </div>
                 </Stack>
               </div>
@@ -268,14 +333,22 @@ export default async function TeamMemberPage({ params }: PageProps) {
       </section>
 
       {/* CTA Section */}
-      <section
-        className="py-[var(--web-section-gap)]"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.97) 0%, rgba(63,65,66,0.98) 100%), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <section className="py-[var(--web-section-gap)] relative">
+        {/* Background Image */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+            alt=""
+            fill
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          {/* Gradient Overlay */}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.97) 0%, rgba(63,65,66,0.98) 100%)" }}
+          />
+        </div>
         <Container size="md">
           <Stack gap="lg" align="center" className="text-center">
             <Title
@@ -291,21 +364,19 @@ export default async function TeamMemberPage({ params }: PageProps) {
             </Text>
 
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
-              <Button
-                size="lg"
-                className="h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                render={<Link href="/contact" />}
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors"
               >
                 Get In Touch
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                size="lg"
-                className="h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-white/10 border border-white/30 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                render={<Link href="/team" />}
+              </Link>
+              <Link
+                href="/team"
+                className="inline-flex items-center justify-center h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-white/10 border border-white/30 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors"
               >
                 Meet the Team
-              </Button>
+              </Link>
             </div>
           </Stack>
         </Container>

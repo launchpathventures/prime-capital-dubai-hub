@@ -11,7 +11,16 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { config } from "@/lib/config"
+import { trackActionError } from "@/lib/error-tracking"
 import type { ProgressStats } from "@/lib/learning-types"
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { success: false; error: string }
 
 // =============================================================================
 // PROGRESS ACTIONS
@@ -20,62 +29,76 @@ import type { ProgressStats } from "@/lib/learning-types"
 /**
  * Mark a module as started.
  */
-export async function markModuleStarted(moduleId: string) {
-  const supabase = await createClient()
+export async function markModuleStarted(moduleId: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
-
-  // Upsert progress record
-  const { error } = await supabase.from("learning_progress").upsert(
-    {
-      user_id: user.id,
-      module_id: moduleId,
-      status: "in_progress",
-      started_at: new Date().toISOString(),
-    },
-    {
-      onConflict: "user_id,module_id",
-      ignoreDuplicates: false,
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: "Not authenticated" }
     }
-  )
 
-  if (error) throw error
+    // Upsert progress record
+    const { error } = await supabase.from("learning_progress").upsert(
+      {
+        user_id: user.id,
+        module_id: moduleId,
+        status: "in_progress",
+        started_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "user_id,module_id",
+        ignoreDuplicates: false,
+      }
+    )
 
-  revalidatePath("/learn")
-  return { success: true }
+    if (error) throw error
+
+    revalidatePath("/learn")
+    return { success: true, data: undefined }
+  } catch (error) {
+    trackActionError(error, "markModuleStarted", { moduleId })
+    return { success: false, error: "Failed to mark module as started" }
+  }
 }
 
 /**
  * Mark a module as completed.
  */
-export async function markModuleComplete(moduleId: string) {
-  const supabase = await createClient()
+export async function markModuleComplete(moduleId: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Not authenticated")
-
-  const { error } = await supabase.from("learning_progress").upsert(
-    {
-      user_id: user.id,
-      module_id: moduleId,
-      status: "completed",
-      completed_at: new Date().toISOString(),
-    },
-    {
-      onConflict: "user_id,module_id",
-      ignoreDuplicates: false,
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return { success: false, error: "Not authenticated" }
     }
-  )
 
-  if (error) throw error
+    const { error } = await supabase.from("learning_progress").upsert(
+      {
+        user_id: user.id,
+        module_id: moduleId,
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "user_id,module_id",
+        ignoreDuplicates: false,
+      }
+    )
 
-  revalidatePath("/learn")
-  return { success: true }
+    if (error) throw error
+
+    revalidatePath("/learn")
+    return { success: true, data: undefined }
+  } catch (error) {
+    trackActionError(error, "markModuleComplete", { moduleId })
+    return { success: false, error: "Failed to mark module as completed" }
+  }
 }
 
 // =============================================================================

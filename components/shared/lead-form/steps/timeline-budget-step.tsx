@@ -59,8 +59,8 @@ export function TimelineBudgetStep({
       </div>
 
       {/* Timeline Section */}
-      <div className="lead-form__section">
-        <p className="lead-form__section-label">When are you looking to invest?</p>
+      <div className="lead-form__section" role="radiogroup" aria-label="When are you looking to invest?" aria-required="true">
+        <p className="lead-form__section-label" id="invest-timeline-label">When are you looking to invest?</p>
 
         <div className="lead-form__options">
           {TIMELINE_OPTIONS.map((option, idx) => {
@@ -69,6 +69,8 @@ export function TimelineBudgetStep({
               <button
                 key={option.value}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => {
                   setTimeline(option.value)
                   setErrors((e) => ({ ...e, timeline: "" }))
@@ -78,7 +80,7 @@ export function TimelineBudgetStep({
                   isSelected && "lead-form__option--selected"
                 )}
               >
-                <span className="lead-form__option-key">{idx + 1}</span>
+                <span className="lead-form__option-key" aria-hidden="true">{idx + 1}</span>
                 <span className="lead-form__option-content">
                   <span className="lead-form__option-label">{option.label}</span>
                 </span>
@@ -86,12 +88,12 @@ export function TimelineBudgetStep({
             )
           })}
         </div>
-        {errors.timeline && <p className="lead-form__error">{errors.timeline}</p>}
+        {errors.timeline && <p id="invest-timeline-error" role="alert" className="lead-form__error">{errors.timeline}</p>}
       </div>
 
       {/* Budget Section */}
-      <div className="lead-form__section">
-        <p className="lead-form__section-label">What's your investment budget?</p>
+      <div className="lead-form__section" role="radiogroup" aria-label="What's your investment budget?" aria-required="true">
+        <p className="lead-form__section-label" id="budget-label">What's your investment budget?</p>
 
         <div className="lead-form__options lead-form__options--grid">
           {BUDGET_OPTIONS.map((option) => {
@@ -100,6 +102,8 @@ export function TimelineBudgetStep({
               <button
                 key={option.value}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => {
                   setBudget(option.value)
                   setErrors((e) => ({ ...e, budget: "" }))
@@ -116,7 +120,7 @@ export function TimelineBudgetStep({
             )
           })}
         </div>
-        {errors.budget && <p className="lead-form__error">{errors.budget}</p>}
+        {errors.budget && <p id="budget-error" role="alert" className="lead-form__error">{errors.budget}</p>}
       </div>
 
       <div className="lead-form__actions">

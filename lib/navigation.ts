@@ -58,6 +58,7 @@ export const webNavItems: NavItem[] = [
   { label: "About", href: "/about" },
   { label: "Properties", href: "/properties" },
   { label: "Team", href: "/team" },
+  { label: "Private", href: "/private" },
 ]
 
 /** "More" dropdown items for web navigation */

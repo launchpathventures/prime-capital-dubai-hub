@@ -36,6 +36,7 @@ interface WebNavProps {
 export function WebNav({ scrolled = false }: WebNavProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const pathname = usePathname()
+  const menuRef = React.useRef<HTMLDivElement>(null)
 
   // Close mobile menu on route change
   React.useEffect(() => {
@@ -79,6 +80,35 @@ export function WebNav({ scrolled = false }: WebNavProps) {
     }
   }, [mobileOpen])
 
+  // Focus trap for mobile menu accessibility
+  React.useEffect(() => {
+    if (!mobileOpen) return
+    const menuEl = menuRef.current
+    if (!menuEl) return
+
+    const focusableEls = menuEl.querySelectorAll<HTMLElement>(
+      'a, button, input, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstEl = focusableEls[0]
+    const lastEl = focusableEls[focusableEls.length - 1]
+
+    const trapFocus = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl?.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl?.focus()
+      }
+    }
+
+    // Focus the first focusable element when menu opens
+    firstEl?.focus()
+    menuEl.addEventListener("keydown", trapFocus)
+    return () => menuEl.removeEventListener("keydown", trapFocus)
+  }, [mobileOpen])
+
   const closeMenu = () => setMobileOpen(false)
 
   return (
@@ -117,7 +147,7 @@ export function WebNav({ scrolled = false }: WebNavProps) {
           />
 
           {/* Menu panel */}
-          <div className="absolute top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-xl">
+          <div ref={menuRef} className="absolute top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between h-14 px-4 border-b">
               <Logo />
@@ -142,15 +172,17 @@ export function WebNav({ scrolled = false }: WebNavProps) {
                   key={item.href}
                   href={item.href}
                   onClick={closeMenu}
+                  aria-current={pathname === item.href ? "page" : undefined}
                   className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   {item.label}
                 </Link>
               ))}
 
-              <Link 
-                href="/contact" 
+              <Link
+                href="/contact"
                 onClick={closeMenu}
+                aria-current={pathname === "/contact" ? "page" : undefined}
                 className="flex items-center justify-center mt-2 px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
               >
                 Get In Touch
@@ -174,12 +206,14 @@ interface NavItemsProps {
 
 /** Renders the main navigation items — used in both desktop and mobile */
 function NavItems({ mobile }: NavItemsProps) {
+  const pathname = usePathname()
   return (
     <>
       {webNavItems.map((item) => (
-        <Link 
-          key={item.href} 
+        <Link
+          key={item.href}
           href={item.href}
+          aria-current={pathname === item.href ? "page" : undefined}
           className={mobile ? "web-mobile-nav-link" : undefined}
         >
           {item.label}

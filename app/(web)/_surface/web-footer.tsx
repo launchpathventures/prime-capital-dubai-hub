@@ -5,10 +5,7 @@
  * Full contact details signal permanence and accessibility.
  */
 
-"use client"
-
 import Link from "next/link"
-import Image from "next/image"
 import { config } from "@/lib/config"
 import { Container, Stack, Grid, Text } from "@/components/core"
 
@@ -28,6 +25,7 @@ const navColumns = [
     links: [
       { href: "/about", label: "About" },
       ...(config.features.team ? [{ href: "/team", label: "Team" }] : []),
+      { href: "/private", label: "Private" },
       { href: "/contact", label: "Contact" },
       { href: "/strategy-kit", label: "Strategy Kit" },
     ],
@@ -57,12 +55,11 @@ export function WebFooter() {
           {/* Brand Column */}
           <Stack gap="md">
             <Link href="/" className="inline-block">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/logo-light.svg"
                 alt="Prime Capital"
-                width={144}
-                height={72}
-                className="h-[72px] w-auto"
+                style={{ height: "72px", width: "auto" }}
               />
             </Link>
 
@@ -73,6 +70,9 @@ export function WebFooter() {
 
             {/* Contact Details */}
             <Stack gap="xs" className="mt-4">
+              <Text className="text-[var(--web-off-white)] text-sm font-light">
+                RERA ORN: {config.contact.reraOrn}
+              </Text>
               <Text className="text-[var(--web-off-white)] text-sm font-light">
                 {config.contact.address}
               </Text>
@@ -116,11 +116,33 @@ export function WebFooter() {
             <Text className="text-[var(--web-serenity)] text-xs font-normal tracking-[0.15em] uppercase">
               Hours
             </Text>
-            <Text className="text-[var(--web-off-white)] text-sm font-light leading-relaxed">
-              Sunday – Thursday 9:00
-              <br />
-              AM – 6:00 PM
+            <Stack gap="xs">
+              <Text className="text-[var(--web-off-white)] text-sm font-light">
+                Monday – Friday
+              </Text>
+              <Text className="text-[var(--web-off-white)] text-sm font-light">
+                9:00 AM – 6:00 PM
+              </Text>
+            </Stack>
+
+            {/* Staff Links */}
+            <Text className="text-[var(--web-serenity)] text-xs font-normal tracking-[0.15em] uppercase mt-4">
+              Staff
             </Text>
+            <Stack gap="sm">
+              <Link
+                href="/auth/login"
+                className="text-[var(--web-off-white)] text-sm font-light hover:text-white transition-colors"
+              >
+                Admin Login
+              </Link>
+              <Link
+                href="/learn"
+                className="text-[var(--web-off-white)] text-sm font-light hover:text-white transition-colors"
+              >
+                Training Portal
+              </Link>
+            </Stack>
           </Stack>
         </Grid>
 

@@ -13,6 +13,7 @@
 import "./admin.css"
 import { AdminShell } from "./_surface/admin-shell"
 import { createClient } from "@/lib/supabase/server"
+import { AppClientProviders } from "@/components/shared/app-client-providers"
 
 // Force dynamic rendering - admin routes use auth and dynamic data
 export const dynamic = "force-dynamic"
@@ -85,8 +86,10 @@ export default async function AdminGroupLayout({
   const user = await getUser()
   
   return (
-    <AdminShell user={user}>
-      {children}
-    </AdminShell>
+    <AppClientProviders>
+      <AdminShell user={user}>
+        {children}
+      </AdminShell>
+    </AppClientProviders>
   )
 }

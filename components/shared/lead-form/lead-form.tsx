@@ -13,7 +13,7 @@
 "use client"
 
 import "./lead-form.css"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { useLeadForm } from "./use-lead-form"
 import {
@@ -23,13 +23,10 @@ import {
   TimelineBudgetStep,
   PropertyStep,
   QuestionsStep,
-  ScheduleStep,
+  PrivateContextStep,
   SuccessStep,
 } from "./steps"
 import type { LeadFormProps } from "./types"
-
-// Default Calendly URL
-const DEFAULT_CALENDLY_URL = "https://calendly.com/tahirmajithia/30min"
 
 export function LeadForm({
   mode,
@@ -42,7 +39,8 @@ export function LeadForm({
   downloadAsset,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
-  
+  const [honeypot, setHoneypot] = useState("")
+
   const {
     currentStep,
     data,
@@ -51,7 +49,7 @@ export function LeadForm({
     nextStep,
     updateData,
     submit,
-  } = useLeadForm({ mode, onSuccess })
+  } = useLeadForm({ mode, onSuccess, honeypot })
 
   // Scroll to top of form when step changes
   useEffect(() => {
@@ -65,9 +63,6 @@ export function LeadForm({
       }
     }
   }, [currentStep])
-
-  const calendlyUrl =
-    process.env.NEXT_PUBLIC_CALENDLY_URL || DEFAULT_CALENDLY_URL
 
   // Determine if contact step is the last step (for landing/download modes)
   const isContactLastStep = mode === "landing" || mode === "download"
@@ -133,21 +128,20 @@ export function LeadForm({
           <QuestionsStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onSubmit={submit}
+            isSubmitting={isSubmitting}
             theme={theme}
           />
         )
 
-      case "schedule":
+      case "private-context":
         return (
-          <ScheduleStep
+          <PrivateContextStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
             onSubmit={submit}
             isSubmitting={isSubmitting}
             theme={theme}
-            calendlyUrl={calendlyUrl}
           />
         )
 
@@ -183,17 +177,33 @@ export function LeadForm({
       data-step={currentStep}
     >
       <div className="lead-form__container">
+        {/* Honeypot field for bot protection - hidden from users */}
+        <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }}>
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
+
         {/* Form content */}
         <div className="lead-form__content" key={currentStep}>
           {renderStep()}
         </div>
 
-        {/* Error display */}
-        {error && (
-          <div className="lead-form__error" style={{ marginTop: "1rem" }}>
-            {error}
-          </div>
-        )}
+        {/* Error display - aria-live region for screen reader announcements */}
+        <div aria-live="polite" aria-atomic="true">
+          {error && (
+            <div role="alert" className="lead-form__error" style={{ marginTop: "1rem" }}>
+              {error}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

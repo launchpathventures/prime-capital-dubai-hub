@@ -18,6 +18,12 @@ import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { createClient } from "@/lib/supabase/server"
 import { getPrompts } from "@/lib/lms/ai-prompts"
+import {
+  checkRateLimit as checkIPRateLimit,
+  getClientIP,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -201,6 +207,14 @@ EVALUATION CRITERIA:
 
 export async function POST(request: NextRequest) {
   try {
+    // IP-based rate limiting (defense against abuse)
+    const ip = getClientIP(request)
+    const ipRateLimit = checkIPRateLimit(ip, "coach-roleplay", RATE_LIMITS.AI)
+
+    if (ipRateLimit.limited) {
+      return createRateLimitResponse(ipRateLimit.retryAfter!)
+    }
+
     // Check API key first
     if (!process.env.ANTHROPIC_API_KEY) {
       console.error("ANTHROPIC_API_KEY is not configured")
@@ -319,14 +333,16 @@ export async function POST(request: NextRequest) {
         messages.map((m) => ({ role: m.role, content: m.content }))
       )
 
-      // Debug logging
-      console.log("Roleplay request:", {
-        scenario: scenario.title,
-        inputMessageCount: messages.length,
-        apiMessageCount: apiMessages.length,
-        firstRole: apiMessages[0]?.role,
-        lastRole: apiMessages[apiMessages.length - 1]?.role,
-      })
+      // Debug logging (development only)
+      if (process.env.NODE_ENV === "development") {
+        console.log("Roleplay request:", {
+          scenario: scenario.title,
+          inputMessageCount: messages.length,
+          apiMessageCount: apiMessages.length,
+          firstRole: apiMessages[0]?.role,
+          lastRole: apiMessages[apiMessages.length - 1]?.role,
+        })
+      }
 
       // Validate alternation
       if (!validateMessageAlternation(apiMessages)) {
@@ -363,12 +379,17 @@ export async function POST(request: NextRequest) {
                 controller.enqueue(encoder.encode(text))
               }
             }
-            // Log the complete response from Claude
-            console.log("[Roleplay API] Complete AI response:", fullResponse)
+            // Log the complete response from Claude (development only)
+            if (process.env.NODE_ENV === "development") {
+              console.log("[Roleplay API] Complete AI response:", fullResponse)
+            }
             controller.close()
           } catch (streamError) {
             console.error("Stream error:", streamError)
-            console.log("[Roleplay API] Partial response before error:", fullResponse)
+            // Log partial response only in development (contains user content)
+            if (process.env.NODE_ENV === "development") {
+              console.log("[Roleplay API] Partial response before error:", fullResponse)
+            }
             controller.error(streamError)
           }
         },

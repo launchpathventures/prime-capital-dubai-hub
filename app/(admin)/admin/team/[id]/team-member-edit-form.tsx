@@ -72,6 +72,7 @@ export function TeamMemberEditForm({ member }: TeamMemberEditFormProps) {
       photo: photo,
       linkedin: formData.get("linkedin") as string || null,
       is_founder: formData.get("is_founder") === "on",
+      published: formData.get("published") === "on",
       display_order: formData.get("display_order") ? Number(formData.get("display_order")) : 0,
     }
 
@@ -394,6 +395,19 @@ export function TeamMemberEditForm({ member }: TeamMemberEditFormProps) {
               </CardHeader>
               <CardContent>
                 <Stack gap="md">
+                  <Row align="center" justify="between" className="py-2 px-3 rounded-lg border">
+                    <Stack gap="xs">
+                      <Label htmlFor="published" className="cursor-pointer">Published</Label>
+                      <Text size="xs" variant="muted">
+                        When off, this member is hidden from the website
+                      </Text>
+                    </Stack>
+                    <Switch
+                      id="published"
+                      name="published"
+                      defaultChecked={member?.published ?? true}
+                    />
+                  </Row>
                   <div>
                     <Label htmlFor="display_order">Display Order</Label>
                     <Input

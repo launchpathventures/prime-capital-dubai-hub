@@ -11,6 +11,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { MenuIcon } from "lucide-react"
 import { Logo } from "@/components/layout/logo"
 import { ThemeToggle, SurfaceSwitcher, UserMenu, UserNotifications, HeaderPopoverProvider } from "@/components/shared"
@@ -37,6 +38,15 @@ interface AdminShellProps {
 
 export function AdminShell({ children, user }: AdminShellProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
+  const pathname = usePathname()
+  const contentRef = React.useRef<HTMLElement>(null)
+
+  // Scroll to top on route change
+  React.useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "instant" })
+    }
+  }, [pathname])
 
   return (
     <div className="admin-shell">
@@ -90,7 +100,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
         </header>
 
         {/* Content */}
-        <main className="admin-shell__content">
+        <main ref={contentRef} className="admin-shell__content">
           {children}
         </main>
       </div>

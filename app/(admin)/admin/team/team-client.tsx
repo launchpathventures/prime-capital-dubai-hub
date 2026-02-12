@@ -179,11 +179,16 @@ export function TeamClient({ members }: TeamClientProps) {
                         </Row>
                       </TableCell>
                       <TableCell>
-                        {member.is_founder ? (
-                          <Badge>Founder</Badge>
-                        ) : (
-                          <Badge variant="secondary">Team</Badge>
-                        )}
+                        <Row gap="xs">
+                          {member.published ? (
+                            <Badge variant="secondary">Published</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">Draft</Badge>
+                          )}
+                          {member.is_founder && (
+                            <Badge>Founder</Badge>
+                          )}
+                        </Row>
                       </TableCell>
                       <TableCell className="text-right">
                         <Row gap="xs" justify="end">

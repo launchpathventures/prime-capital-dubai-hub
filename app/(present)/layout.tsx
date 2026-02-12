@@ -6,11 +6,16 @@
  */
 
 import "./present.css"
+import { AppClientProviders } from "@/components/shared/app-client-providers"
 
 export default function PresentGroupLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <AppClientProviders showUrlToast={false}>
+      {children}
+    </AppClientProviders>
+  )
 }

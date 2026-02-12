@@ -79,6 +79,7 @@ export interface TeamMember {
   /** @deprecated Use linkedin - kept for backward compatibility */
   linkedinUrl: string | null
   isFounder: boolean
+  published: boolean
   displayOrder: number
 }
 

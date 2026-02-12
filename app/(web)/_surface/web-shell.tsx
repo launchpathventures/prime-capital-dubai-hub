@@ -11,6 +11,7 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import { Shell } from "@/components/layout/shell"
 import { Header } from "@/components/layout/header"
 import { Logo } from "@/components/layout/logo"
@@ -27,6 +28,18 @@ interface WebShellProps {
 
 export function WebShell({ children }: WebShellProps) {
   const [scrolled, setScrolled] = React.useState(false)
+  const pathname = usePathname()
+
+  // Scroll to top on route change
+  React.useEffect(() => {
+    // Scroll the content container (Shell.Content) to top
+    const contentEl = document.querySelector('[data-slot="shell-content"]')
+    if (contentEl) {
+      contentEl.scrollTo({ top: 0, behavior: "instant" })
+    }
+    // Also scroll window as fallback
+    window.scrollTo({ top: 0, behavior: "instant" })
+  }, [pathname])
 
   // Track scroll position for header background transition
   React.useEffect(() => {
@@ -37,7 +50,7 @@ export function WebShell({ children }: WebShellProps) {
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll() // Check initial position
-    
+
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 

@@ -85,9 +85,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // If render prop provided, clone the element with button props merged
     // Note: ref is excluded from cloneElement to avoid reading refs during render
     if (render) {
+      const existingClassName = render.props?.className || ""
       return React.cloneElement(render, {
         ...props,
-        className: cn(buttonClassName, render.props.className),
+        className: cn(buttonClassName, existingClassName),
         children,
       } as React.HTMLAttributes<HTMLElement>)
     }

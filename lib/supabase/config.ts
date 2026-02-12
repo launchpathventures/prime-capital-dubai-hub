@@ -29,9 +29,14 @@ export function getSupabasePublicConfig(): SupabasePublicConfig {
   }
 }
 
+/**
+ * Get server-only Supabase config.
+ * This reads directly from env to avoid importing server-only config here.
+ * The actual usage of this key should be in server-only contexts.
+ */
 export function getSupabaseServerConfig(): SupabaseServerConfig {
   return {
-    serviceRoleKey: config.supabase.serviceRoleKey,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   }
 }
 

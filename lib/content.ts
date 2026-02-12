@@ -13,6 +13,8 @@
 
 import "server-only"
 import { createClient, createStaticClient } from "@/lib/supabase/server"
+import { unstable_cache } from "next/cache"
+import { trackSupabaseError } from "@/lib/error-tracking"
 
 // Re-export types and helpers from content-types for convenience
 export type {
@@ -39,6 +41,21 @@ import type {
   Service,
   SiteConfig,
 } from "@/lib/content-types"
+
+/**
+ * Shared cache tags for public web data.
+ * CMS server actions can revalidate these tags after content updates.
+ */
+export const WEB_CONTENT_TAGS = {
+  siteConfig: "web:site-config",
+  properties: "web:properties",
+  team: "web:team",
+  testimonials: "web:testimonials",
+  stats: "web:stats",
+  services: "web:services",
+} as const
+
+const WEB_CONTENT_REVALIDATE_SECONDS = 60 * 5
 
 // =============================================================================
 // SUPABASE ROW TYPES (snake_case from database)
@@ -97,6 +114,7 @@ interface TeamMemberRow {
   photo: string | null
   linkedin: string | null
   is_founder: boolean | null
+  published: boolean
   display_order: number | null
 }
 
@@ -221,6 +239,7 @@ function mapTeamMember(row: TeamMemberRow): TeamMember {
     linkedin: row.linkedin,
     linkedinUrl: row.linkedin, // backward compat
     isFounder: row.is_founder ?? false,
+    published: row.published ?? true,
     displayOrder: row.display_order ?? 0,
   }
 }
@@ -263,21 +282,18 @@ function mapService(row: ServiceRow): Service {
 }
 
 // =============================================================================
-// DATA GETTERS (Supabase)
+// PUBLIC WEB DATA (cache-friendly, no request cookies)
 // =============================================================================
 
-/**
- * Get site configuration from Supabase site_settings table.
- */
-export async function getSiteConfig(): Promise<SiteConfig> {
+async function fetchPublicSiteConfig(): Promise<SiteConfig> {
   try {
-    const supabase = await createClient()
+    const supabase = createStaticClient()
     const { data, error } = await supabase
       .from("site_settings")
       .select("key, value")
 
     if (error) {
-      console.error("Error fetching site config:", error)
+      trackSupabaseError(error, "site_settings", "select", { function: "fetchPublicSiteConfig" })
       return getDefaultSiteConfig()
     }
 
@@ -320,7 +336,324 @@ export async function getSiteConfig(): Promise<SiteConfig> {
       },
     }
   } catch (err) {
-    console.error("Error fetching site config:", err)
+    trackSupabaseError(err, "site_settings", "select", { function: "fetchPublicSiteConfig" })
+    return getDefaultSiteConfig()
+  }
+}
+
+async function fetchPublicProperties(): Promise<Property[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "properties", "select", { function: "fetchPublicProperties" })
+      return []
+    }
+
+    return (data as PropertyRow[]).map(mapProperty)
+  } catch (err) {
+    trackSupabaseError(err, "properties", "select", { function: "fetchPublicProperties" })
+    return []
+  }
+}
+
+async function fetchPublicPropertyBySlug(slug: string): Promise<Property | null> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("slug", slug)
+      .single()
+
+    if (error) {
+      trackSupabaseError(error, "properties", "select", { function: "fetchPublicPropertyBySlug", slug })
+      return null
+    }
+
+    return mapProperty(data as PropertyRow)
+  } catch (err) {
+    trackSupabaseError(err, "properties", "select", { function: "fetchPublicPropertyBySlug", slug })
+    return null
+  }
+}
+
+async function fetchPublicTeamMembers(): Promise<TeamMember[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("published", true)
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "team_members", "select", { function: "fetchPublicTeamMembers" })
+      return []
+    }
+
+    return (data as TeamMemberRow[]).map(mapTeamMember)
+  } catch (err) {
+    trackSupabaseError(err, "team_members", "select", { function: "fetchPublicTeamMembers" })
+    return []
+  }
+}
+
+async function fetchPublicTeamMemberBySlug(slug: string): Promise<TeamMember | null> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("slug", slug)
+      .eq("published", true)
+      .single()
+
+    if (error) {
+      trackSupabaseError(error, "team_members", "select", { function: "fetchPublicTeamMemberBySlug", slug })
+      return null
+    }
+
+    return mapTeamMember(data as TeamMemberRow)
+  } catch (err) {
+    trackSupabaseError(err, "team_members", "select", { function: "fetchPublicTeamMemberBySlug", slug })
+    return null
+  }
+}
+
+async function fetchPublicTestimonials(): Promise<Testimonial[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "testimonials", "select", { function: "fetchPublicTestimonials" })
+      return []
+    }
+
+    return (data as TestimonialRow[]).map(mapTestimonial)
+  } catch (err) {
+    trackSupabaseError(err, "testimonials", "select", { function: "fetchPublicTestimonials" })
+    return []
+  }
+}
+
+async function fetchPublicStats(): Promise<Stat[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("stats")
+      .select("*")
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "stats", "select", { function: "fetchPublicStats" })
+      return []
+    }
+
+    return (data as StatRow[]).map(mapStat)
+  } catch (err) {
+    trackSupabaseError(err, "stats", "select", { function: "fetchPublicStats" })
+    return []
+  }
+}
+
+async function fetchPublicServices(): Promise<Service[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("services")
+      .select("*")
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "services", "select", { function: "fetchPublicServices" })
+      return []
+    }
+
+    return (data as ServiceRow[]).map(mapService)
+  } catch (err) {
+    trackSupabaseError(err, "services", "select", { function: "fetchPublicServices" })
+    return []
+  }
+}
+
+const getCachedWebSiteConfig = unstable_cache(
+  fetchPublicSiteConfig,
+  ["web-site-config"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.siteConfig],
+  }
+)
+
+const getCachedWebProperties = unstable_cache(
+  fetchPublicProperties,
+  ["web-properties"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.properties],
+  }
+)
+
+const getCachedWebPropertyBySlug = unstable_cache(
+  fetchPublicPropertyBySlug,
+  ["web-property-by-slug"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.properties],
+  }
+)
+
+const getCachedWebTeamMembers = unstable_cache(
+  fetchPublicTeamMembers,
+  ["web-team-members"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.team],
+  }
+)
+
+const getCachedWebTeamMemberBySlug = unstable_cache(
+  fetchPublicTeamMemberBySlug,
+  ["web-team-member-by-slug"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.team],
+  }
+)
+
+const getCachedWebTestimonials = unstable_cache(
+  fetchPublicTestimonials,
+  ["web-testimonials"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.testimonials],
+  }
+)
+
+const getCachedWebStats = unstable_cache(
+  fetchPublicStats,
+  ["web-stats"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.stats],
+  }
+)
+
+const getCachedWebServices = unstable_cache(
+  fetchPublicServices,
+  ["web-services"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.services],
+  }
+)
+
+/**
+ * Public web data getters.
+ *
+ * These functions are cache-first and use the static Supabase client so pages
+ * can be generated and served quickly without request cookie coupling.
+ */
+export async function getWebSiteConfig(): Promise<SiteConfig> {
+  return getCachedWebSiteConfig()
+}
+
+export async function getWebProperties(): Promise<Property[]> {
+  return getCachedWebProperties()
+}
+
+export async function getWebPropertyBySlug(slug: string): Promise<Property | null> {
+  return getCachedWebPropertyBySlug(slug)
+}
+
+export async function getWebTeamMembers(): Promise<TeamMember[]> {
+  return getCachedWebTeamMembers()
+}
+
+export async function getWebTeamMemberBySlug(slug: string): Promise<TeamMember | null> {
+  return getCachedWebTeamMemberBySlug(slug)
+}
+
+export async function getWebTestimonials(): Promise<Testimonial[]> {
+  return getCachedWebTestimonials()
+}
+
+export async function getWebStats(): Promise<Stat[]> {
+  return getCachedWebStats()
+}
+
+export async function getWebServices(): Promise<Service[]> {
+  return getCachedWebServices()
+}
+
+// =============================================================================
+// DATA GETTERS (Supabase)
+// =============================================================================
+
+/**
+ * Get site configuration from Supabase site_settings table.
+ */
+export async function getSiteConfig(): Promise<SiteConfig> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("key, value")
+
+    if (error) {
+      trackSupabaseError(error, "site_settings", "select", { function: "getSiteConfig" })
+      return getDefaultSiteConfig()
+    }
+
+    const settings = (data as SiteSettingRow[]).reduce(
+      (acc, row) => ({ ...acc, [row.key]: row.value }),
+      {} as Record<string, Record<string, unknown>>
+    )
+
+    return {
+      features: {
+        properties: (settings.feature_flags?.properties as boolean) ?? true,
+        team: (settings.feature_flags?.team as boolean) ?? true,
+        testimonials: (settings.feature_flags?.testimonials as boolean) ?? true,
+        blog: (settings.feature_flags?.blog as boolean) ?? false,
+      },
+      company: {
+        name: (settings.company?.name as string) ?? "Prime Capital Dubai",
+        tagline: (settings.company?.tagline as string) ?? "",
+        description: (settings.company?.description as string) ?? "",
+        legalName: (settings.company?.legalName as string) ?? "",
+        founded: (settings.company?.founded as string) ?? "",
+      },
+      contact: {
+        email: (settings.contact?.email as string) ?? "",
+        phone: (settings.contact?.phone as string) ?? "",
+        hours: (settings.contact?.hours as string) ?? "",
+        address: {
+          line1: ((settings.contact?.address as Record<string, string>)?.line1) ?? "",
+          line2: ((settings.contact?.address as Record<string, string>)?.line2) ?? "",
+          city: ((settings.contact?.address as Record<string, string>)?.city) ?? "",
+          country: ((settings.contact?.address as Record<string, string>)?.country) ?? "",
+        },
+      },
+      strategyKit: {
+        title: (settings.strategy_kit?.title as string) ?? "",
+        subtitle: (settings.strategy_kit?.subtitle as string) ?? "",
+        description: (settings.strategy_kit?.description as string) ?? "",
+        benefits: (settings.strategy_kit?.benefits as string[]) ?? [],
+        formUrl: (settings.strategy_kit?.formUrl as string | null) ?? null,
+      },
+    }
+  } catch (err) {
+    trackSupabaseError(err, "site_settings", "select", { function: "getSiteConfig" })
     return getDefaultSiteConfig()
   }
 }
@@ -346,13 +679,13 @@ export async function getProperties(): Promise<Property[]> {
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching properties:", error)
+      trackSupabaseError(error, "properties", "select", { function: "getProperties" })
       return []
     }
 
     return (data as PropertyRow[]).map(mapProperty)
   } catch (err) {
-    console.error("Error fetching properties:", err)
+    trackSupabaseError(err, "properties", "select", { function: "getProperties" })
     return []
   }
 }
@@ -370,13 +703,13 @@ export async function getFeaturedProperties(): Promise<Property[]> {
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching featured properties:", error)
+      trackSupabaseError(error, "properties", "select", { function: "getFeaturedProperties" })
       return []
     }
 
     return (data as PropertyRow[]).map(mapProperty)
   } catch (err) {
-    console.error("Error fetching featured properties:", err)
+    trackSupabaseError(err, "properties", "select", { function: "getFeaturedProperties" })
     return []
   }
 }
@@ -394,13 +727,13 @@ export async function getPropertyBySlug(slug: string): Promise<Property | null> 
       .single()
 
     if (error) {
-      console.error("Error fetching property by slug:", error)
+      trackSupabaseError(error, "properties", "select", { function: "getPropertyBySlug", slug })
       return null
     }
 
     return mapProperty(data as PropertyRow)
   } catch (err) {
-    console.error("Error fetching property by slug:", err)
+    trackSupabaseError(err, "properties", "select", { function: "getPropertyBySlug", slug })
     return null
   }
 }
@@ -414,16 +747,17 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
     const { data, error } = await supabase
       .from("team_members")
       .select("*")
+      .eq("published", true)
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching team members:", error)
+      trackSupabaseError(error, "team_members", "select", { function: "getTeamMembers" })
       return []
     }
 
     return (data as TeamMemberRow[]).map(mapTeamMember)
   } catch (err) {
-    console.error("Error fetching team members:", err)
+    trackSupabaseError(err, "team_members", "select", { function: "getTeamMembers" })
     return []
   }
 }
@@ -438,16 +772,17 @@ export async function getFounders(): Promise<TeamMember[]> {
       .from("team_members")
       .select("*")
       .eq("is_founder", true)
+      .eq("published", true)
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching founders:", error)
+      trackSupabaseError(error, "team_members", "select", { function: "getFounders" })
       return []
     }
 
     return (data as TeamMemberRow[]).map(mapTeamMember)
   } catch (err) {
-    console.error("Error fetching founders:", err)
+    trackSupabaseError(err, "team_members", "select", { function: "getFounders" })
     return []
   }
 }
@@ -462,16 +797,17 @@ export async function getTeamMemberBySlug(slug: string): Promise<TeamMember | nu
       .from("team_members")
       .select("*")
       .eq("slug", slug)
+      .eq("published", true)
       .single()
 
     if (error) {
-      console.error("Error fetching team member by slug:", error)
+      trackSupabaseError(error, "team_members", "select", { function: "getTeamMemberBySlug", slug })
       return null
     }
 
     return mapTeamMember(data as TeamMemberRow)
   } catch (err) {
-    console.error("Error fetching team member by slug:", err)
+    trackSupabaseError(err, "team_members", "select", { function: "getTeamMemberBySlug", slug })
     return null
   }
 }
@@ -488,13 +824,13 @@ export async function getTestimonials(): Promise<Testimonial[]> {
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching testimonials:", error)
+      trackSupabaseError(error, "testimonials", "select", { function: "getTestimonials" })
       return []
     }
 
     return (data as TestimonialRow[]).map(mapTestimonial)
   } catch (err) {
-    console.error("Error fetching testimonials:", err)
+    trackSupabaseError(err, "testimonials", "select", { function: "getTestimonials" })
     return []
   }
 }
@@ -511,13 +847,13 @@ export async function getStats(): Promise<Stat[]> {
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching stats:", error)
+      trackSupabaseError(error, "stats", "select", { function: "getStats" })
       return []
     }
 
     return (data as StatRow[]).map(mapStat)
   } catch (err) {
-    console.error("Error fetching stats:", err)
+    trackSupabaseError(err, "stats", "select", { function: "getStats" })
     return []
   }
 }
@@ -534,13 +870,13 @@ export async function getServices(): Promise<Service[]> {
       .order("display_order")
 
     if (error) {
-      console.error("Error fetching services:", error)
+      trackSupabaseError(error, "services", "select", { function: "getServices" })
       return []
     }
 
     return (data as ServiceRow[]).map(mapService)
   } catch (err) {
-    console.error("Error fetching services:", err)
+    trackSupabaseError(err, "services", "select", { function: "getServices" })
     return []
   }
 }
@@ -558,13 +894,13 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
       .single()
 
     if (error) {
-      console.error("Error fetching service by slug:", error)
+      trackSupabaseError(error, "services", "select", { function: "getServiceBySlug", slug })
       return null
     }
 
     return mapService(data as ServiceRow)
   } catch (err) {
-    console.error("Error fetching service by slug:", err)
+    trackSupabaseError(err, "services", "select", { function: "getServiceBySlug", slug })
     return null
   }
 }
@@ -585,13 +921,13 @@ export async function getPropertySlugs(): Promise<string[]> {
       .select("slug")
 
     if (error) {
-      console.error("Error fetching property slugs:", error)
+      trackSupabaseError(error, "properties", "select", { function: "getPropertySlugs" })
       return []
     }
 
     return (data as { slug: string }[]).map((row) => row.slug)
   } catch (err) {
-    console.error("Error fetching property slugs:", err)
+    trackSupabaseError(err, "properties", "select", { function: "getPropertySlugs" })
     return []
   }
 }
@@ -606,15 +942,16 @@ export async function getTeamMemberSlugs(): Promise<string[]> {
     const { data, error } = await supabase
       .from("team_members")
       .select("slug")
+      .eq("published", true)
 
     if (error) {
-      console.error("Error fetching team member slugs:", error)
+      trackSupabaseError(error, "team_members", "select", { function: "getTeamMemberSlugs" })
       return []
     }
 
     return (data as { slug: string }[]).map((row) => row.slug)
   } catch (err) {
-    console.error("Error fetching team member slugs:", err)
+    trackSupabaseError(err, "team_members", "select", { function: "getTeamMemberSlugs" })
     return []
   }
 }
@@ -631,13 +968,13 @@ export async function getServiceSlugs(): Promise<string[]> {
       .select("slug")
 
     if (error) {
-      console.error("Error fetching service slugs:", error)
+      trackSupabaseError(error, "services", "select", { function: "getServiceSlugs" })
       return []
     }
 
     return (data as { slug: string }[]).map((row) => row.slug)
   } catch (err) {
-    console.error("Error fetching service slugs:", err)
+    trackSupabaseError(err, "services", "select", { function: "getServiceSlugs" })
     return []
   }
 }

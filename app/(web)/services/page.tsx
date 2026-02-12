@@ -9,6 +9,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
+import { config } from "@/lib/config"
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -21,6 +22,9 @@ import {
 export const metadata = {
   title: "Services | Prime Capital Dubai",
   description: "Investment advisory, acquisition support, Golden Visa guidance, and asset management.",
+  alternates: {
+    canonical: "/services",
+  },
 }
 
 export default function ServicesPage() {
@@ -62,14 +66,23 @@ function HeroSection() {
       className="relative flex flex-col"
     >
       {/* Hero Image Area */}
-      <div 
-        className="min-h-[55vh] flex items-center justify-center relative"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/services.jpg')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <div className="min-h-[55vh] flex items-center justify-center relative">
+        {/* Background Image */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/images/hero/services.jpg"
+            alt=""
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          {/* Gradient Overlay */}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
+          />
+        </div>
         <Container size="lg" className="relative z-10 px-4">
           <Stack gap="md" align="center" className="text-center max-w-[800px] mx-auto">
             <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
@@ -287,14 +300,15 @@ function ProcessSection() {
       }}
     >
       {/* Background cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+      </div>
       
       <Container size="lg" className="relative z-10">
         <Stack gap="sm" align="center" className="text-center mb-16">
@@ -451,14 +465,15 @@ function CTASection() {
       }}
     >
       {/* Subtle cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-[center_bottom]"
+          sizes="100vw"
+        />
+      </div>
       
       <Container size="md" className="relative z-10">
         <Stack gap="lg" align="center" className="text-center">
@@ -484,8 +499,8 @@ function CTASection() {
 
           <Text className="text-white/50 text-[13px] font-light mt-2">
             Or email us directly at{" "}
-            <a href="mailto:contact@primecapital.ae" className="text-white/60 hover:text-white underline">
-              contact@primecapital.ae
+            <a href={`mailto:${config.contact.email}`} className="text-white/60 hover:text-white underline">
+              {config.contact.email}
             </a>
           </Text>
         </Stack>

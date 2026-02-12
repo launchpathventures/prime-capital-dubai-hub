@@ -53,8 +53,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // TODO: Add admin role check when roles are implemented
-    // For now, any authenticated user can generate essentials
+    // Admin role check
+    const { data: isAdmin } = await supabase.rpc('is_admin')
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Access denied: Admin only" }, { status: 403 })
+    }
 
     // 3. Fetch module with competency context
     const { data: module, error: moduleError } = await supabase

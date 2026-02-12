@@ -6,6 +6,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
+import { trackActionError } from "@/lib/error-tracking"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -67,7 +68,7 @@ export async function completeScenario(
     })
   
   if (error) {
-    console.error("Failed to save scenario progress:", error)
+    trackActionError(error, "completeScenario", { category, scenarioId })
     return { success: false, error: "Failed to save reflection" }
   }
   
@@ -105,7 +106,7 @@ export async function getScenarioProgress(
   const { data, error } = await query
   
   if (error) {
-    console.error("Failed to fetch scenario progress:", error)
+    trackActionError(error, "getScenarioProgress", { category })
     return []
   }
   
@@ -138,7 +139,7 @@ export async function getScenarioCompletionStats(): Promise<{
     .eq("user_id", user.id)
   
   if (error) {
-    console.error("Failed to fetch scenario stats:", error)
+    trackActionError(error, "getScenarioCompletionStats")
     return { completedScenarios: 0, byCategory: [] }
   }
   

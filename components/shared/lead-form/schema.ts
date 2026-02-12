@@ -48,7 +48,7 @@ export const propertyTypeSchema = z.enum([
   "commercial",
 ])
 
-export const formModeSchema = z.enum(["contact", "landing", "download"])
+export const formModeSchema = z.enum(["contact", "landing", "download", "private"])
 
 // =============================================================================
 // STEP SCHEMAS
@@ -105,6 +105,18 @@ export const questionsStepSchema = z.object({
   }
 )
 
+// Private mode enums
+export const privateRoleSchema = z.enum(["investor", "advisor", "family-office"])
+export const deploymentRangeSchema = z.enum(["5m-10m", "10m-20m", "20m-50m", "50m-plus"])
+export const preferredContactSchema = z.enum(["phone", "email", "whatsapp"])
+
+export const privateContextStepSchema = z.object({
+  privateRole: privateRoleSchema.refine((val) => !!val, { message: "Please select your role" }),
+  deploymentRange: deploymentRangeSchema.refine((val) => !!val, { message: "Please select a range" }),
+  preferredContact: preferredContactSchema.refine((val) => !!val, { message: "Please select a method" }),
+  privateContext: z.string().max(500).optional(),
+})
+
 // =============================================================================
 // FULL FORM SCHEMAS (per mode)
 // =============================================================================
@@ -149,16 +161,21 @@ export const contactFormSchema = baseSchema.extend({
   // Questions
   hasQuestions: z.boolean().optional(),
   questionsText: z.string().optional(),
-  
-  // Schedule
-  scheduledMeeting: z.boolean().optional(),
+})
+
+// Private mode: Discreet UHNW capture
+export const privateFormSchema = baseSchema.extend({
+  privateRole: privateRoleSchema.optional(),
+  deploymentRange: deploymentRangeSchema.optional(),
+  preferredContact: preferredContactSchema.optional(),
+  privateContext: z.string().max(500).optional(),
 })
 
 // =============================================================================
 // DYNAMIC SCHEMA SELECTOR
 // =============================================================================
 
-export function getFormSchema(mode: "contact" | "landing" | "download") {
+export function getFormSchema(mode: "contact" | "landing" | "download" | "private") {
   switch (mode) {
     case "contact":
       return contactFormSchema
@@ -166,6 +183,8 @@ export function getFormSchema(mode: "contact" | "landing" | "download") {
       return landingFormSchema
     case "download":
       return downloadFormSchema
+    case "private":
+      return privateFormSchema
     default:
       return baseSchema
   }
@@ -184,3 +203,4 @@ export type QuestionsStepData = z.infer<typeof questionsStepSchema>
 export type ContactFormData = z.infer<typeof contactFormSchema>
 export type DownloadFormData = z.infer<typeof downloadFormSchema>
 export type LandingFormData = z.infer<typeof landingFormSchema>
+export type PrivateFormData = z.infer<typeof privateFormSchema>

@@ -12,37 +12,14 @@
  */
 
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import "@/design/animate.css"
 import "@/design/helpers.css"
 import "@/design/print.css"
 import "@/design/shared.css"
 import { config } from "@/lib/config"
-import { ToastProvider } from "@/components/ui/toast"
-import { UrlToast } from "@/components/shared/url-toast"
-import { ThemeProvider } from "@/components/shared/theme-provider"
-import { Analytics } from "@vercel/analytics/next"
-import { Suspense } from "react"
-
-// -----------------------------------------------------------------------------
-// Fonts
-// -----------------------------------------------------------------------------
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-})
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/json-ld"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // -----------------------------------------------------------------------------
 // Metadata
@@ -55,6 +32,10 @@ export const metadata: Metadata = {
   },
   description: config.app.description,
   metadataBase: new URL(config.app.url),
+  icons: {
+    icon: "/icon.svg",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     title: config.app.name,
     description: config.app.description,
@@ -88,20 +69,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
-      >
-        <ThemeProvider>
-          <ToastProvider>
-            {children}
-            <Suspense fallback={null}>
-              <UrlToast />
-            </Suspense>
-          </ToastProvider>
-          <Analytics debug={process.env.NODE_ENV === "development"} />
-        </ThemeProvider>
+    <html lang="en">
+      <body className="antialiased">
+        {children}
+        <SpeedInsights />
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
       </body>
     </html>
   )

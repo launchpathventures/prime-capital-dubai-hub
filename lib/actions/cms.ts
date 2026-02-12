@@ -7,8 +7,10 @@
 
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
+import { WEB_CONTENT_TAGS } from "@/lib/content"
+import { trackActionError } from "@/lib/error-tracking"
 
 // =============================================================================
 // TYPES
@@ -69,6 +71,7 @@ export type TeamMemberRow = {
   photo: string | null
   linkedin: string | null
   is_founder: boolean | null
+  published: boolean
   display_order: number | null
   created_at: string | null
   updated_at: string | null
@@ -112,6 +115,10 @@ export type SiteSettingRow = {
   updated_at: string | null
 }
 
+function revalidateWebContent(tags: string[]) {
+  tags.forEach((tag) => revalidateTag(tag, "max"))
+}
+
 // =============================================================================
 // PROPERTIES
 // =============================================================================
@@ -127,7 +134,7 @@ export async function getPropertiesFromDb(): Promise<ActionResult<PropertyRow[]>
     if (error) throw error
     return { success: true, data: data ?? [] }
   } catch (error) {
-    console.error("Error fetching properties:", error)
+    trackActionError(error, "getPropertiesFromDb")
     return { success: false, error: "Failed to fetch properties" }
   }
 }
@@ -144,7 +151,7 @@ export async function getPropertyById(id: string): Promise<ActionResult<Property
     if (error && error.code !== "PGRST116") throw error
     return { success: true, data }
   } catch (error) {
-    console.error("Error fetching property:", error)
+    trackActionError(error, "getPropertyById", { id })
     return { success: false, error: "Failed to fetch property" }
   }
 }
@@ -161,9 +168,10 @@ export async function createProperty(input: PropertyInput): Promise<ActionResult
     if (error) throw error
     revalidatePath("/admin/properties")
     revalidatePath("/properties")
+    revalidateWebContent([WEB_CONTENT_TAGS.properties])
     return { success: true, data }
   } catch (error) {
-    console.error("Error creating property:", error)
+    trackActionError(error, "createProperty")
     return { success: false, error: "Failed to create property" }
   }
 }
@@ -182,9 +190,10 @@ export async function updateProperty(id: string, input: Partial<PropertyInput>):
     revalidatePath("/admin/properties")
     revalidatePath("/properties")
     revalidatePath(`/properties/${data.slug}`)
+    revalidateWebContent([WEB_CONTENT_TAGS.properties])
     return { success: true, data }
   } catch (error) {
-    console.error("Error updating property:", error)
+    trackActionError(error, "updateProperty", { id })
     return { success: false, error: "Failed to update property" }
   }
 }
@@ -200,9 +209,10 @@ export async function deleteProperty(id: string): Promise<ActionResult> {
     if (error) throw error
     revalidatePath("/admin/properties")
     revalidatePath("/properties")
+    revalidateWebContent([WEB_CONTENT_TAGS.properties])
     return { success: true, data: undefined }
   } catch (error) {
-    console.error("Error deleting property:", error)
+    trackActionError(error, "deleteProperty", { id })
     return { success: false, error: "Failed to delete property" }
   }
 }
@@ -222,7 +232,7 @@ export async function getTeamMembersFromDb(): Promise<ActionResult<TeamMemberRow
     if (error) throw error
     return { success: true, data: data ?? [] }
   } catch (error) {
-    console.error("Error fetching team members:", error)
+    trackActionError(error, "getTeamMembersFromDb")
     return { success: false, error: "Failed to fetch team members" }
   }
 }
@@ -239,7 +249,7 @@ export async function getTeamMemberById(id: string): Promise<ActionResult<TeamMe
     if (error && error.code !== "PGRST116") throw error
     return { success: true, data }
   } catch (error) {
-    console.error("Error fetching team member:", error)
+    trackActionError(error, "getTeamMemberById", { id })
     return { success: false, error: "Failed to fetch team member" }
   }
 }
@@ -256,9 +266,10 @@ export async function createTeamMember(input: TeamMemberInput): Promise<ActionRe
     if (error) throw error
     revalidatePath("/admin/team")
     revalidatePath("/team")
+    revalidateWebContent([WEB_CONTENT_TAGS.team])
     return { success: true, data }
   } catch (error) {
-    console.error("Error creating team member:", error)
+    trackActionError(error, "createTeamMember")
     return { success: false, error: "Failed to create team member" }
   }
 }
@@ -277,9 +288,10 @@ export async function updateTeamMember(id: string, input: Partial<TeamMemberInpu
     revalidatePath("/admin/team")
     revalidatePath("/team")
     revalidatePath(`/team/${data.slug}`)
+    revalidateWebContent([WEB_CONTENT_TAGS.team])
     return { success: true, data }
   } catch (error) {
-    console.error("Error updating team member:", error)
+    trackActionError(error, "updateTeamMember", { id })
     return { success: false, error: "Failed to update team member" }
   }
 }
@@ -295,9 +307,10 @@ export async function deleteTeamMember(id: string): Promise<ActionResult> {
     if (error) throw error
     revalidatePath("/admin/team")
     revalidatePath("/team")
+    revalidateWebContent([WEB_CONTENT_TAGS.team])
     return { success: true, data: undefined }
   } catch (error) {
-    console.error("Error deleting team member:", error)
+    trackActionError(error, "deleteTeamMember", { id })
     return { success: false, error: "Failed to delete team member" }
   }
 }
@@ -317,7 +330,7 @@ export async function getTestimonialsFromDb(): Promise<ActionResult<TestimonialR
     if (error) throw error
     return { success: true, data: data ?? [] }
   } catch (error) {
-    console.error("Error fetching testimonials:", error)
+    trackActionError(error, "getTestimonialsFromDb")
     return { success: false, error: "Failed to fetch testimonials" }
   }
 }
@@ -334,7 +347,7 @@ export async function getTestimonialById(id: string): Promise<ActionResult<Testi
     if (error && error.code !== "PGRST116") throw error
     return { success: true, data }
   } catch (error) {
-    console.error("Error fetching testimonial:", error)
+    trackActionError(error, "getTestimonialById", { id })
     return { success: false, error: "Failed to fetch testimonial" }
   }
 }
@@ -351,9 +364,10 @@ export async function createTestimonial(input: TestimonialInput): Promise<Action
     if (error) throw error
     revalidatePath("/admin/testimonials")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.testimonials])
     return { success: true, data }
   } catch (error) {
-    console.error("Error creating testimonial:", error)
+    trackActionError(error, "createTestimonial")
     return { success: false, error: "Failed to create testimonial" }
   }
 }
@@ -371,9 +385,10 @@ export async function updateTestimonial(id: string, input: Partial<TestimonialIn
     if (error) throw error
     revalidatePath("/admin/testimonials")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.testimonials])
     return { success: true, data }
   } catch (error) {
-    console.error("Error updating testimonial:", error)
+    trackActionError(error, "updateTestimonial", { id })
     return { success: false, error: "Failed to update testimonial" }
   }
 }
@@ -389,9 +404,10 @@ export async function deleteTestimonial(id: string): Promise<ActionResult> {
     if (error) throw error
     revalidatePath("/admin/testimonials")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.testimonials])
     return { success: true, data: undefined }
   } catch (error) {
-    console.error("Error deleting testimonial:", error)
+    trackActionError(error, "deleteTestimonial", { id })
     return { success: false, error: "Failed to delete testimonial" }
   }
 }
@@ -411,7 +427,7 @@ export async function getStatsFromDb(): Promise<ActionResult<StatRow[]>> {
     if (error) throw error
     return { success: true, data: data ?? [] }
   } catch (error) {
-    console.error("Error fetching stats:", error)
+    trackActionError(error, "getStatsFromDb")
     return { success: false, error: "Failed to fetch stats" }
   }
 }
@@ -428,7 +444,7 @@ export async function getStatById(id: string): Promise<ActionResult<StatRow | nu
     if (error && error.code !== "PGRST116") throw error
     return { success: true, data }
   } catch (error) {
-    console.error("Error fetching stat:", error)
+    trackActionError(error, "getStatById", { id })
     return { success: false, error: "Failed to fetch stat" }
   }
 }
@@ -445,9 +461,10 @@ export async function createStat(input: StatInput): Promise<ActionResult<StatRow
     if (error) throw error
     revalidatePath("/admin/stats")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.stats])
     return { success: true, data }
   } catch (error) {
-    console.error("Error creating stat:", error)
+    trackActionError(error, "createStat")
     return { success: false, error: "Failed to create stat" }
   }
 }
@@ -465,9 +482,10 @@ export async function updateStat(id: string, input: Partial<StatInput>): Promise
     if (error) throw error
     revalidatePath("/admin/stats")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.stats])
     return { success: true, data }
   } catch (error) {
-    console.error("Error updating stat:", error)
+    trackActionError(error, "updateStat", { id })
     return { success: false, error: "Failed to update stat" }
   }
 }
@@ -483,9 +501,10 @@ export async function deleteStat(id: string): Promise<ActionResult> {
     if (error) throw error
     revalidatePath("/admin/stats")
     revalidatePath("/")
+    revalidateWebContent([WEB_CONTENT_TAGS.stats])
     return { success: true, data: undefined }
   } catch (error) {
-    console.error("Error deleting stat:", error)
+    trackActionError(error, "deleteStat", { id })
     return { success: false, error: "Failed to delete stat" }
   }
 }
@@ -504,7 +523,7 @@ export async function getSiteSettingsFromDb(): Promise<ActionResult<SiteSettingR
     if (error) throw error
     return { success: true, data: data ?? [] }
   } catch (error) {
-    console.error("Error fetching site settings:", error)
+    trackActionError(error, "getSiteSettingsFromDb")
     return { success: false, error: "Failed to fetch site settings" }
   }
 }
@@ -527,9 +546,17 @@ export async function updateSiteSetting(key: string, value: Record<string, unkno
     if (error) throw error
     revalidatePath("/admin/site-settings")
     revalidatePath("/")
+    revalidateWebContent([
+      WEB_CONTENT_TAGS.siteConfig,
+      WEB_CONTENT_TAGS.properties,
+      WEB_CONTENT_TAGS.team,
+      WEB_CONTENT_TAGS.testimonials,
+      WEB_CONTENT_TAGS.stats,
+      WEB_CONTENT_TAGS.services,
+    ])
     return { success: true, data }
   } catch (error) {
-    console.error("Error updating site setting:", error)
+    trackActionError(error, "updateSiteSetting", { key })
     return { success: false, error: "Failed to update site setting" }
   }
 }
@@ -591,7 +618,7 @@ export async function uploadCmsImage(
 
     return { success: true, data: urlData.publicUrl }
   } catch (error) {
-    console.error("Error uploading image:", error)
+    trackActionError(error, "uploadCmsImage", { folder })
     return { success: false, error: "Failed to upload image" }
   }
 }
@@ -623,7 +650,7 @@ export async function deleteCmsImage(imageUrl: string): Promise<ActionResult> {
 
     return { success: true, data: undefined }
   } catch (error) {
-    console.error("Error deleting image:", error)
+    trackActionError(error, "deleteCmsImage")
     return { success: false, error: "Failed to delete image" }
   }
 }

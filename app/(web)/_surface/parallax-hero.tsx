@@ -8,6 +8,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 
 interface ParallaxHeroProps {
   /** Background image URL */
@@ -32,85 +33,90 @@ export function ParallaxHero({
   children,
   priority = false,
 }: ParallaxHeroProps) {
-  const [offset, setOffset] = React.useState(0)
-  const [isMobile, setIsMobile] = React.useState(true) // Default to mobile (no parallax SSR)
+  const [isDesktop, setIsDesktop] = React.useState(false)
   const heroRef = React.useRef<HTMLElement>(null)
+  const backgroundRef = React.useRef<HTMLDivElement>(null)
+  const frameRef = React.useRef<number | null>(null)
 
-  // Check if mobile on mount
+  // Track breakpoint without rerendering on scroll.
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
+    const mediaQuery = window.matchMedia("(min-width: 1024px)")
+    const update = () => setIsDesktop(mediaQuery.matches)
+    update()
+
+    mediaQuery.addEventListener("change", update)
+    return () => mediaQuery.removeEventListener("change", update)
   }, [])
 
-  // Handle parallax scroll effect
+  // Apply parallax transform directly to DOM with requestAnimationFrame.
   React.useEffect(() => {
-    if (isMobile) return
+    if (!isDesktop) {
+      if (backgroundRef.current) {
+        backgroundRef.current.style.transform = "translate3d(0, 0, 0)"
+      }
+      return
+    }
 
-    const handleScroll = () => {
-      if (!heroRef.current) return
+    const applyParallax = () => {
+      frameRef.current = null
 
-      const rect = heroRef.current.getBoundingClientRect()
+      const hero = heroRef.current
+      const background = backgroundRef.current
+      if (!hero || !background) return
+
+      const rect = hero.getBoundingClientRect()
       const scrollPosition = window.scrollY
       const elementTop = rect.top + scrollPosition
       const elementHeight = rect.height
 
-      // Only apply parallax when hero is in view
-      if (scrollPosition < elementTop + elementHeight) {
-        // Calculate offset based on scroll position
-        const parallaxOffset = scrollPosition * intensity
-        setOffset(parallaxOffset)
+      // Skip work when the section is fully outside viewport.
+      const isOutOfView =
+        scrollPosition > elementTop + elementHeight ||
+        scrollPosition + window.innerHeight < elementTop
+
+      if (!isOutOfView) {
+        background.style.transform = `translate3d(0, ${scrollPosition * intensity}px, 0)`
       }
     }
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Initial calculation
+    const onScroll = () => {
+      if (frameRef.current !== null) return
+      frameRef.current = window.requestAnimationFrame(applyParallax)
+    }
 
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [isMobile, intensity])
+    window.addEventListener("scroll", onScroll, { passive: true })
+    onScroll()
+
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current)
+      }
+    }
+  }, [isDesktop, intensity])
 
   return (
-    <>
-      {/* Preload hero image for LCP optimization */}
-      {priority && (
-        <link
-          rel="preload"
-          as="image"
-          href={imageUrl}
-          fetchPriority="high"
-        />
-      )}
-      <section
-        ref={heroRef}
-        className={`relative overflow-hidden ${className}`}
-        style={{
-          // Static background for mobile, parallax for desktop
-          backgroundImage: isMobile ? `${overlay}, url('${imageUrl}')` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center 30%",
-        }}
-      >
-      {/* Parallax background layer - only rendered on desktop */}
-      {!isMobile && (
+    <section ref={heroRef} className={`relative ${className}`}>
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <div
-          className="absolute inset-0 -top-[15%] -bottom-[15%]"
-          style={{
-            backgroundImage: `${overlay}, url('${imageUrl}')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center 30%",
-            transform: `translateY(${offset}px)`,
-            willChange: "transform",
-          }}
-          aria-hidden="true"
-        />
-      )}
+          ref={backgroundRef}
+          className={`absolute inset-0 ${isDesktop ? "-top-[15%] -bottom-[15%] will-change-transform" : ""}`}
+        >
+          <Image
+            src={imageUrl}
+            alt=""
+            fill
+            priority={priority}
+            fetchPriority={priority ? "high" : "auto"}
+            className="object-cover object-[center_30%]"
+            sizes="100vw"
+          />
+        </div>
+        <div className="absolute inset-0" style={{ background: overlay }} />
+      </div>
 
-        {/* Content layer - children rendered directly for proper absolute positioning */}
-        {children}
-      </section>
-    </>
+      {/* Content layer - children rendered directly for proper absolute positioning */}
+      {children}
+    </section>
   )
 }

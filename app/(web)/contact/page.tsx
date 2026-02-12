@@ -5,6 +5,7 @@
  * Clean, focused layout: hero with quick contact options, centered form, consultation process.
  */
 
+import Image from "next/image"
 import { config } from "@/lib/config"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
@@ -13,6 +14,9 @@ import { PhoneIcon, MailIcon, MessageCircleIcon } from "lucide-react"
 export const metadata = {
   title: "Contact Us | Prime Capital Dubai",
   description: "Get in touch with Prime Capital Dubai for investment advisory.",
+  alternates: {
+    canonical: "/contact",
+  },
 }
 
 export default function ContactPage() {
@@ -37,14 +41,23 @@ export default function ContactPage() {
 
 function HeroSection() {
   return (
-    <section
-      className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/contact.jpg')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center 30%",
-      }}
-    >
+    <section className="relative min-h-[55vh] flex flex-col justify-center items-center text-center">
+      {/* Background Image */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/images/hero/contact.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-[center_30%]"
+          sizes="100vw"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
+        />
+      </div>
       <Container size="lg" className="relative z-10 px-4">
         <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
           <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
@@ -147,14 +160,15 @@ function ConsultationProcessSection() {
       }}
     >
       {/* Subtle cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-[center_bottom]"
+          sizes="100vw"
+        />
+      </div>
       <Container size="xl" className="relative z-10">
         <Stack gap="xl" align="center" className="text-center mb-16">
           <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.2em]">

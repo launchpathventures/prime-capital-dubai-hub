@@ -71,8 +71,9 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
       {/* Property Location & Type */}
       <div className="lead-form__section">
         <div className="lead-form__field">
-          <label className="lead-form__label">Property Location</label>
+          <label htmlFor="propertyLocation" className="lead-form__label">Property Location</label>
           <input
+            id="propertyLocation"
             type="text"
             value={location}
             onChange={(e) => {
@@ -80,45 +81,57 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
               setErrors((prev) => ({ ...prev, location: "" }))
             }}
             placeholder="e.g., Palm Jumeirah, Downtown Dubai"
+            aria-required="true"
+            aria-invalid={!!errors.location}
+            aria-describedby={errors.location ? "propertyLocation-error" : undefined}
             className={cn("lead-form__input", errors.location && "lead-form__input--error")}
           />
-          {errors.location && <p className="lead-form__error">{errors.location}</p>}
+          {errors.location && <p id="propertyLocation-error" role="alert" className="lead-form__error">{errors.location}</p>}
         </div>
 
-        <p className="lead-form__section-label" style={{ marginTop: "1.5rem" }}>
-          Property Type
-        </p>
-        <div className="lead-form__options lead-form__options--grid">
-          {PROPERTY_TYPE_OPTIONS.map((option) => {
-            const isSelected = propertyType === option.value
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => {
-                  setPropertyType(option.value)
-                  setErrors((prev) => ({ ...prev, propertyType: "" }))
-                }}
-                className={cn(
-                  "lead-form__option",
-                  isSelected && "lead-form__option--selected"
-                )}
-              >
-                <span className="lead-form__option-content">
-                  <span className="lead-form__option-label">{option.label}</span>
-                </span>
-              </button>
-            )
-          })}
+        <div
+          role="radiogroup"
+          aria-label="Property Type"
+          aria-required="true"
+          style={{ marginTop: "1.5rem" }}
+        >
+          <p className="lead-form__section-label" id="propertyType-label">
+            Property Type
+          </p>
+          <div className="lead-form__options lead-form__options--grid">
+            {PROPERTY_TYPE_OPTIONS.map((option) => {
+              const isSelected = propertyType === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => {
+                    setPropertyType(option.value)
+                    setErrors((prev) => ({ ...prev, propertyType: "" }))
+                  }}
+                  className={cn(
+                    "lead-form__option",
+                    isSelected && "lead-form__option--selected"
+                  )}
+                >
+                  <span className="lead-form__option-content">
+                    <span className="lead-form__option-label">{option.label}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
         {errors.propertyType && (
-          <p className="lead-form__error">{errors.propertyType}</p>
+          <p id="propertyType-error" role="alert" className="lead-form__error">{errors.propertyType}</p>
         )}
       </div>
 
       {/* Sale Timeline */}
-      <div className="lead-form__section">
-        <p className="lead-form__section-label">When do you want to sell?</p>
+      <div className="lead-form__section" role="radiogroup" aria-label="When do you want to sell?" aria-required="true">
+        <p className="lead-form__section-label" id="timeline-label">When do you want to sell?</p>
         <div className="lead-form__options">
           {TIMELINE_OPTIONS.map((option, idx) => {
             const isSelected = timeline === option.value
@@ -126,6 +139,8 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
               <button
                 key={option.value}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => {
                   setTimeline(option.value)
                   setErrors((prev) => ({ ...prev, timeline: "" }))
@@ -135,7 +150,7 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
                   isSelected && "lead-form__option--selected"
                 )}
               >
-                <span className="lead-form__option-key">{idx + 1}</span>
+                <span className="lead-form__option-key" aria-hidden="true">{idx + 1}</span>
                 <span className="lead-form__option-content">
                   <span className="lead-form__option-label">{option.label}</span>
                 </span>
@@ -143,12 +158,12 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
             )
           })}
         </div>
-        {errors.timeline && <p className="lead-form__error">{errors.timeline}</p>}
+        {errors.timeline && <p id="timeline-error" role="alert" className="lead-form__error">{errors.timeline}</p>}
       </div>
 
       {/* Target Price */}
-      <div className="lead-form__section">
-        <p className="lead-form__section-label">Estimated property value</p>
+      <div className="lead-form__section" role="radiogroup" aria-label="Estimated property value" aria-required="true">
+        <p className="lead-form__section-label" id="price-label">Estimated property value</p>
         <div className="lead-form__options lead-form__options--grid">
           {BUDGET_OPTIONS.map((option) => {
             const isSelected = price === option.value
@@ -156,6 +171,8 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
               <button
                 key={option.value}
                 type="button"
+                role="radio"
+                aria-checked={isSelected}
                 onClick={() => {
                   setPrice(option.value)
                   setErrors((prev) => ({ ...prev, price: "" }))
@@ -172,7 +189,7 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
             )
           })}
         </div>
-        {errors.price && <p className="lead-form__error">{errors.price}</p>}
+        {errors.price && <p id="price-error" role="alert" className="lead-form__error">{errors.price}</p>}
       </div>
 
       <div className="lead-form__actions">

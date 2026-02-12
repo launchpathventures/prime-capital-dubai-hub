@@ -1,12 +1,14 @@
 /**
  * CATALYST - Certification Document Download API
- * 
+ *
  * Serves certification markdown files for download.
+ * Requires admin role to access.
  */
 
 import { NextRequest, NextResponse } from "next/server"
 import { promises as fs } from "fs"
 import path from "path"
+import { createClient } from "@/lib/supabase/server"
 
 const ALLOWED_FILES = [
   "evaluator-guide.md",
@@ -17,6 +19,21 @@ const ALLOWED_FILES = [
 ]
 
 export async function GET(request: NextRequest) {
+  // Auth check
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  // Admin role check
+  const { data: isAdmin } = await supabase.rpc('is_admin')
+
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Access denied: Admin only" }, { status: 403 })
+  }
+
   const searchParams = request.nextUrl.searchParams
   const filename = searchParams.get("file")
   

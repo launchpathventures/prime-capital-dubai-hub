@@ -21,8 +21,8 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { id: "name", modes: ["contact", "landing", "download"] },
-  { id: "contact", modes: ["contact", "landing", "download"] },
+  { id: "name", modes: ["contact", "landing", "download", "private"] },
+  { id: "contact", modes: ["contact", "landing", "download", "private"] },
   { id: "goals", modes: ["contact"] },
   {
     id: "timeline-budget",
@@ -38,18 +38,8 @@ const STEPS: StepDef[] = [
     condition: (data) => data.goals?.includes("sell") ?? false,
   },
   { id: "questions", modes: ["contact"] },
-  {
-    id: "schedule",
-    modes: ["contact"],
-    condition: (data) => {
-      // Skip schedule for advice-only if that's the only goal
-      if (data.goals?.length === 1 && data.goals[0] === "advice-only") {
-        return false
-      }
-      return true
-    },
-  },
-  { id: "success", modes: ["contact", "landing", "download"] },
+  { id: "private-context", modes: ["private"] },
+  { id: "success", modes: ["contact", "landing", "download", "private"] },
 ]
 
 // =============================================================================
@@ -59,6 +49,7 @@ const STEPS: StepDef[] = [
 interface UseLeadFormOptions {
   mode: FormMode
   onSuccess?: (data: LeadFormData) => void
+  honeypot?: string
 }
 
 interface UseLeadFormReturn {
@@ -90,6 +81,7 @@ interface UseLeadFormReturn {
 export function useLeadForm({
   mode,
   onSuccess,
+  honeypot,
 }: UseLeadFormOptions): UseLeadFormReturn {
   const utm = useUTMParams()
 
@@ -172,9 +164,11 @@ export function useLeadForm({
         targetPrice: data.targetPrice,
         hasQuestions: data.hasQuestions,
         questionsText: data.questionsText,
-        scheduledMeeting: data.scheduledMeeting,
-        calendlyEventId: data.calendlyEventId,
-        calendlyInviteeId: data.calendlyInviteeId,
+        // Private mode fields
+        privateRole: data.privateRole,
+        deploymentRange: data.deploymentRange,
+        preferredContact: data.preferredContact,
+        privateContext: data.privateContext,
         formMode: mode,
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
@@ -183,6 +177,8 @@ export function useLeadForm({
         referringProperty: data.referringProperty,
         referringTeamMember: data.referringTeamMember,
         referringTeamMemberEmail: data.referringTeamMemberEmail,
+        // Honeypot for bot protection
+        website: honeypot,
       }
 
       const response = await fetch("/api/leads", {
@@ -204,7 +200,7 @@ export function useLeadForm({
     } finally {
       setIsSubmitting(false)
     }
-  }, [data, mode, utm, nextStep, onSuccess])
+  }, [data, mode, utm, honeypot, nextStep, onSuccess])
 
   return {
     currentStep,

@@ -74,10 +74,9 @@ export function SuccessStep({
         return "Your download is ready. Check your email for the link."
       case "landing":
         return "We've received your details and will be in touch shortly."
+      case "private":
+        return "A senior member of our team will be in touch to arrange a call at your convenience."
       case "contact":
-        if (data.scheduledMeeting) {
-          return "Your consultation is confirmed. We look forward to speaking with you."
-        }
         return "We've received your enquiry. A member of our team will reach out within one business day."
     }
   }

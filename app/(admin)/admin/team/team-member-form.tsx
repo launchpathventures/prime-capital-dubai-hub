@@ -62,6 +62,7 @@ export function TeamMemberForm({ member, open, onOpenChange }: TeamMemberFormPro
       photo: formData.get("photo") as string || null,
       linkedin: formData.get("linkedin") as string || null,
       is_founder: formData.get("is_founder") === "on",
+      published: formData.get("published") === "on",
       display_order: formData.get("display_order") ? Number(formData.get("display_order")) : 0,
     }
 
@@ -264,6 +265,15 @@ export function TeamMemberForm({ member, open, onOpenChange }: TeamMemberFormPro
             <Stack gap="md">
               <Text weight="medium" size="sm">Settings</Text>
               
+              <Row align="center" gap="sm">
+                <Switch 
+                  id="published" 
+                  name="published" 
+                  defaultChecked={member?.published ?? true}
+                />
+                <Label htmlFor="published">Published (visible on website)</Label>
+              </Row>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="display_order">Display Order</Label>

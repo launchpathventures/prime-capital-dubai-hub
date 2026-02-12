@@ -1,56 +1,261 @@
 [
   {
     "id": "1",
-    "slug": "faisal-almahmoud",
-    "name": "Faisal Al Mahmoud",
+    "slug": "tahir-majithia",
+    "name": "Tahir Majithia",
     "role": "Founding Partner",
-    "bio": "With over 15 years of experience in Dubai real estate, Faisal has advised HNW clients from Europe, Asia, and the Middle East on strategic property investments. His approach combines deep market knowledge with a commitment to client success.",
+    "bio": "[CLIENT REVIEW] Add bio for Tahir Majithia",
     "expertise": [
-      "Off-plan investments",
-      "Portfolio strategy",
-      "Golden Visa advisory"
+      "Investment Strategy",
+      "Portfolio Advisory",
+      "Golden Visa"
     ],
-    "imageUrl": "/images/team/faisal.jpg",
-    "email": "faisal@primecapitaldubai.com",
-    "phone": "+971 50 XXX XXXX",
-    "linkedinUrl": "https://linkedin.com/in/faisalalmahmoud",
+    "imageUrl": "/images/team/tahir-majithia.png",
+    "email": "tahir@primecapitaldubai.com",
+    "phone": "+971 58 5414720",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
     "published": true,
     "displayOrder": 1
   },
   {
     "id": "2",
-    "slug": "sarah-chen",
-    "name": "Sarah Chen",
-    "role": "Senior Investment Advisor",
-    "bio": "Sarah brings a decade of experience from Singapore's family office sector, specializing in cross-border real estate transactions. She leads our relationships with Asian investors seeking Dubai diversification.",
+    "slug": "rohit-saluja",
+    "name": "Rohit Saluja",
+    "role": "Senior Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Rohit Saluja",
     "expertise": [
-      "Family office advisory",
-      "Cross-border transactions",
-      "Market analysis"
+      "Real Estate Advisory",
+      "Client Relations"
     ],
-    "imageUrl": "/images/team/sarah.jpg",
-    "email": "sarah@primecapitaldubai.com",
-    "phone": "+971 50 XXX XXXX",
-    "linkedinUrl": "https://linkedin.com/in/sarahchen",
+    "imageUrl": "/images/team/Rohit-Saluja.jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
     "published": true,
     "displayOrder": 2
   },
   {
     "id": "3",
-    "slug": "james-morrison",
-    "name": "James Morrison",
-    "role": "Director of Operations",
-    "bio": "James oversees client experience and ensures seamless transaction management. His background in luxury hospitality brings a service-first approach to every client interaction.",
+    "slug": "shaad-haji",
+    "name": "Shaad Haji",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Shaad Haji",
     "expertise": [
-      "Transaction management",
-      "Client experience",
-      "Due diligence coordination"
+      "Real Estate Advisory"
     ],
-    "imageUrl": "/images/team/james.jpg",
-    "email": "james@primecapitaldubai.com",
-    "phone": "+971 50 XXX XXXX",
-    "linkedinUrl": "https://linkedin.com/in/jamesmorrison",
+    "imageUrl": "/images/team/Shaad-Haji.png",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
     "published": true,
     "displayOrder": 3
+  },
+  {
+    "id": "4",
+    "slug": "subha-arora",
+    "name": "Subha Arora",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Subha Arora",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Subha Arora.png",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 4
+  },
+  {
+    "id": "5",
+    "slug": "ahmed-ashfaq",
+    "name": "Ahmed Ashfaq",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Ahmed Ashfaq",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Ahmed Ashfaq .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 5
+  },
+  {
+    "id": "6",
+    "slug": "anisha-mehrotra",
+    "name": "Anisha Mehrotra",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Anisha Mehrotra",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Anisha Mehrotra .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 6
+  },
+  {
+    "id": "7",
+    "slug": "harshini-shetty",
+    "name": "Harshini Shetty",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Harshini Shetty",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Harshini Shetty .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 7
+  },
+  {
+    "id": "8",
+    "slug": "kyle-lopez",
+    "name": "Kyle Lopez",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Kyle Lopez",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Kyle Lopez.jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 8
+  },
+  {
+    "id": "9",
+    "slug": "manu-agarwal",
+    "name": "Manu Agarwal",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Manu Agarwal",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Manu Agarwal .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 9
+  },
+  {
+    "id": "10",
+    "slug": "mohib-malgi",
+    "name": "Mohib Malgi",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Mohib Malgi",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Mohib Malgi .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 10
+  },
+  {
+    "id": "11",
+    "slug": "rakshhima-mehra",
+    "name": "Rakshhima Mehra",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Rakshhima Mehra",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Rakshhima Mehra .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 11
+  },
+  {
+    "id": "12",
+    "slug": "rishabh-arora",
+    "name": "Rishabh Arora",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Rishabh Arora",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Rishabh Arora .jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 12
+  },
+  {
+    "id": "13",
+    "slug": "riyam-almayyahi",
+    "name": "Riyam Almayyahi",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Riyam Almayyahi",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Riyam Almayyahi.jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 13
+  },
+  {
+    "id": "14",
+    "slug": "ruhaan-chawla",
+    "name": "Ruhaan Chawla",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Ruhaan Chawla",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Ruhaan Chawla .JPG",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 14
+  },
+  {
+    "id": "15",
+    "slug": "silvia-fernandez",
+    "name": "Silvia Fernandez",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Silvia Fernandez",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Silvia Fernandez.jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 15
+  },
+  {
+    "id": "16",
+    "slug": "sourav-lakhyani",
+    "name": "Sourav Lakhyani",
+    "role": "Advisor",
+    "bio": "[CLIENT REVIEW] Add bio for Sourav Lakhyani",
+    "expertise": [
+      "Real Estate Advisory"
+    ],
+    "imageUrl": "/images/team/Sourav Lakhyani.jpg",
+    "email": "[CLIENT REVIEW]@primecapitaldubai.com",
+    "phone": "[CLIENT REVIEW]",
+    "linkedinUrl": "[CLIENT REVIEW] Add LinkedIn URL",
+    "published": true,
+    "displayOrder": 16
   }
 ]

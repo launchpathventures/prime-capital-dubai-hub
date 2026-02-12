@@ -3,9 +3,16 @@
  *
  * Proxies authentication to a custom endpoint.
  * Sets a session cookie on success (same as password mode).
+ * Rate limited: 5 attempts per 15 minutes per IP.
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import {
+  checkRateLimit,
+  getClientIP,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit"
 
 // Get custom endpoint from environment
 const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT
@@ -16,7 +23,15 @@ const SESSION_DURATION = 60 * 60 * 24 * 7 // 7 days in seconds
 
 export async function POST(request: NextRequest) {
   const isProduction = process.env.NODE_ENV === "production"
-  
+
+  // Rate limiting
+  const ip = getClientIP(request)
+  const rateLimitResult = checkRateLimit(ip, "auth-custom", RATE_LIMITS.AUTH)
+
+  if (rateLimitResult.limited) {
+    return createRateLimitResponse(rateLimitResult.retryAfter!)
+  }
+
   try {
     const body = await request.json()
     const { email, password, action = "login" } = body

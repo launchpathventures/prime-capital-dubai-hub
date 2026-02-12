@@ -6,8 +6,11 @@
  */
 
 import Link from "next/link"
+import Image from "next/image"
 import { config } from "@/lib/config"
-import { getProperties } from "@/lib/content"
+
+export const revalidate = 1800 // 30 minutes ISR
+import { getWebProperties } from "@/lib/content"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
@@ -16,11 +19,25 @@ import { PropertiesFilter } from "./_components/properties-filter"
 export const metadata = {
   title: "Properties | Prime Capital Dubai",
   description: "Curated selection of premium Dubai real estate opportunities.",
+  alternates: {
+    canonical: "/properties",
+  },
 }
 
-export default async function PropertiesPage() {
-  const properties = await getProperties()
+interface PropertiesPageProps {
+  searchParams: Promise<{
+    type?: string | string[]
+    area?: string | string[]
+  }>
+}
 
+export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
+  const properties = await getWebProperties()
+  const params = await searchParams
+  const activeType = typeof params.type === "string" ? params.type : "all"
+  const areaFilter = typeof params.area === "string" ? params.area : ""
+
+  // Feature disabled state
   if (!config.features.properties) {
     return (
       <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
@@ -30,7 +47,7 @@ export default async function PropertiesPage() {
               Properties Coming Soon
             </Title>
             <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-md">
-              Our curated portfolio is being prepared. Contact us directly to discuss 
+              Our curated portfolio is being prepared. Contact us directly to discuss
               available opportunities.
             </Text>
             <Button
@@ -46,13 +63,67 @@ export default async function PropertiesPage() {
     )
   }
 
+  // Empty properties state
+  if (properties.length === 0) {
+    return (
+      <div className="web-properties">
+        <section className="relative min-h-[55vh] flex flex-col justify-center items-center text-center">
+          {/* Background Image */}
+          <div className="absolute inset-0 -z-10">
+            <Image
+              src="/images/hero/properties.jpg"
+              alt=""
+              fill
+              priority
+              className="object-cover object-center"
+              sizes="100vw"
+            />
+            {/* Gradient Overlay */}
+            <div
+              className="absolute inset-0"
+              style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
+            />
+          </div>
+          <Container size="lg" className="relative z-10 px-4">
+            <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
+              <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
+                Portfolio
+              </span>
+              <h1
+                className="font-headline text-[var(--web-off-white)] text-[clamp(36px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
+                style={{ textShadow: "0 4px 30px rgba(0,0,0,0.3)" }}
+              >
+                Properties Coming Soon
+              </h1>
+              <Text
+                className="text-white/80 text-[clamp(15px,1.8vw,18px)] font-light leading-relaxed max-w-[520px] mt-2"
+                style={{ textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}
+              >
+                We are currently curating our portfolio. Contact us directly to discuss available
+                investment opportunities tailored to your requirements.
+              </Text>
+              <Button
+                className="mt-6 h-12 px-8 bg-[var(--web-off-white)] text-[var(--web-ash)] hover:bg-white rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+                render={<Link href="/contact" />}
+              >
+                Contact Us
+                <ArrowRightIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </Stack>
+          </Container>
+        </section>
+        <CTASection />
+      </div>
+    )
+  }
+
   // Calculate stats
   const propertyCount = properties.length
   const categoryCount = new Set(properties.map(p => p.type)).size
   const areaCount = new Set(properties.map(p => p.location)).size
 
-  // Prepare properties for client component
-  const clientProperties = properties.map(p => ({
+  // Prepare properties for filter/grid rendering
+  const filterableProperties = properties.map(p => ({
     slug: p.slug,
     title: p.title,
     type: p.type,
@@ -80,8 +151,12 @@ export default async function PropertiesPage() {
         areaCount={areaCount} 
       />
       
-      {/* Filter + Grid (Client Component) */}
-      <PropertiesFilter properties={clientProperties} />
+      {/* Filter + Grid */}
+      <PropertiesFilter
+        properties={filterableProperties}
+        activeType={activeType}
+        areaFilter={areaFilter}
+      />
       
       {/* CTA Section */}
       <CTASection />
@@ -94,24 +169,33 @@ export default async function PropertiesPage() {
 // Full-width image with stats
 // =============================================================================
 
-function HeroSection({ 
-  propertyCount, 
-  categoryCount, 
-  areaCount 
-}: { 
+function HeroSection({
+  propertyCount,
+  categoryCount,
+  areaCount
+}: {
   propertyCount: number
   categoryCount: number
-  areaCount: number 
+  areaCount: number
 }) {
   return (
-    <section
-      className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/properties.jpg')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <section className="relative min-h-[55vh] flex flex-col justify-center items-center text-center">
+      {/* Background Image */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/images/hero/properties.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
+        />
+      </div>
       <Container size="lg" className="relative z-10 px-4">
         <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
           <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
@@ -180,14 +264,15 @@ function CTASection() {
       }}
     >
       {/* Subtle cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-[center_bottom]"
+          sizes="100vw"
+        />
+      </div>
       
       <Container size="xl" className="relative z-10">
         <Grid cols={1} className="lg:grid-cols-2 gap-12 items-center">

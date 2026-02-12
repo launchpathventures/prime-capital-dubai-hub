@@ -8,18 +8,20 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { ArrowRightIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme } from "../types"
 
 interface QuestionsStepProps {
   data: Partial<LeadFormData>
   onUpdate: (data: Partial<LeadFormData>) => void
-  onNext: () => void
+  onSubmit: () => void
+  isSubmitting: boolean
   theme: FormTheme
 }
 
-export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function QuestionsStep({ data, onUpdate, onSubmit, isSubmitting, theme }: QuestionsStepProps) {
   const [hasQuestions, setHasQuestions] = useState<boolean | undefined>(
     data.hasQuestions
   )
@@ -32,8 +34,14 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
   }, [])
 
   // Keyboard navigation: Y/N or 1/2
+  // Don't intercept keystrokes when user is typing in an input/textarea
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return
+      }
+
       if (e.key === "y" || e.key === "Y" || e.key === "1") {
         selectOption(true)
       } else if (e.key === "n" || e.key === "N" || e.key === "2") {
@@ -59,7 +67,7 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
     }
 
     onUpdate({ hasQuestions, questionsText: hasQuestions ? questionsText : undefined })
-    onNext()
+    onSubmit()
   }
 
   return (
@@ -73,9 +81,17 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
         </p>
       </div>
 
-      <div className="lead-form__options" style={{ flexDirection: "row", gap: "1rem" }}>
+      <div
+        role="radiogroup"
+        aria-label="Do you have questions before we meet?"
+        aria-required="true"
+        className="lead-form__options"
+        style={{ flexDirection: "row", gap: "1rem" }}
+      >
         <button
           type="button"
+          role="radio"
+          aria-checked={hasQuestions === true}
           onClick={() => selectOption(true)}
           className={cn(
             "lead-form__option",
@@ -83,7 +99,7 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
           )}
           style={{ flex: 1 }}
         >
-          <span className="lead-form__option-key">Y</span>
+          <span className="lead-form__option-key" aria-hidden="true">Y</span>
           <span className="lead-form__option-content">
             <span className="lead-form__option-label">Yes</span>
           </span>
@@ -91,6 +107,8 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
 
         <button
           type="button"
+          role="radio"
+          aria-checked={hasQuestions === false}
           onClick={() => selectOption(false)}
           className={cn(
             "lead-form__option",
@@ -98,7 +116,7 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
           )}
           style={{ flex: 1 }}
         >
-          <span className="lead-form__option-key">N</span>
+          <span className="lead-form__option-key" aria-hidden="true">N</span>
           <span className="lead-form__option-content">
             <span className="lead-form__option-label">No</span>
           </span>
@@ -107,8 +125,9 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
 
       {hasQuestions && (
         <div className="lead-form__field" style={{ animationName: "lf-enter" }}>
-          <label className="lead-form__label">Your questions</label>
+          <label htmlFor="questionsText" className="lead-form__label">Your questions</label>
           <textarea
+            id="questionsText"
             value={questionsText}
             onChange={(e) => {
               setQuestionsText(e.target.value)
@@ -116,18 +135,30 @@ export function QuestionsStep({ data, onUpdate, onNext }: QuestionsStepProps) {
             }}
             placeholder="Share any questions or topics you'd like to discuss..."
             rows={4}
+            aria-required="true"
+            aria-invalid={!!(error && !questionsText.trim())}
+            aria-describedby={error && !questionsText.trim() ? "questionsText-error" : undefined}
             className="lead-form__textarea"
             autoFocus
           />
         </div>
       )}
 
-      {error && <p className="lead-form__error">{error}</p>}
+      {error && <p id="questionsText-error" role="alert" className="lead-form__error">{error}</p>}
 
       <div className="lead-form__actions">
-        <button type="submit" className="lead-form__submit">
-          Continue
-          <ArrowRightIcon className="lead-form__submit-icon" />
+        <button type="submit" className="lead-form__submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <span className="lead-form__loading">
+              <span className="lead-form__spinner" />
+              Sending...
+            </span>
+          ) : (
+            <>
+              Submit
+              <CheckIcon className="lead-form__submit-icon" style={{ marginRight: 4 }} />
+            </>
+          )}
         </button>
       </div>
     </form>

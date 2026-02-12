@@ -7,11 +7,15 @@
 
 import Link from "next/link"
 import Image from "next/image"
+
+export const revalidate = 3600 // 1 hour ISR
 import { notFound } from "next/navigation"
-import { getPropertyBySlug, getPropertySlugs, formatPriceRange, formatBedroomRange, formatSizeRange } from "@/lib/content"
+import { getWebPropertyBySlug, getPropertySlugs, formatPriceRange, formatBedroomRange, formatSizeRange } from "@/lib/content"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PropertyMap } from "@/components/shared/property-map"
+import { JsonLd, propertyJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -51,6 +55,22 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
+// Format completion dates like "2029-Q4", "2029-04", or "2025-06-01"
+function formatCompletionDate(dateStr: string): string {
+  // Quarter format: "2029-Q4" → "Q4 2029"
+  const quarterMatch = dateStr.match(/^(\d{4})-Q(\d)$/i)
+  if (quarterMatch) return `Q${quarterMatch[2]} ${quarterMatch[1]}`
+
+  // Try standard date parse (ISO dates like "2025-06-01")
+  const d = new Date(dateStr)
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleDateString("en-GB", { month: "short", year: "numeric" })
+  }
+
+  // Fallback: return as-is
+  return dateStr
+}
+
 export async function generateStaticParams() {
   const slugs = await getPropertySlugs()
   return slugs.map((slug) => ({ slug }))
@@ -58,8 +78,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params
-  const property = await getPropertyBySlug(slug)
-  
+  const property = await getWebPropertyBySlug(slug)
+
   if (!property) {
     return { title: "Property Not Found" }
   }
@@ -67,12 +87,20 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title: `${property.title} | Prime Capital Dubai`,
     description: property.description?.slice(0, 160) ?? "",
+    alternates: {
+      canonical: `/properties/${property.slug}`,
+    },
+    openGraph: {
+      title: property.title,
+      description: property.description?.slice(0, 160) ?? "",
+      images: property.coverImage ? [{ url: property.coverImage, width: 1200, height: 630 }] : undefined,
+    },
   }
 }
 
 export default async function PropertyDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const property = await getPropertyBySlug(slug)
+  const property = await getWebPropertyBySlug(slug)
 
   if (!property) {
     notFound()
@@ -83,6 +111,23 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
   return (
     <div className="web-property-detail">
+      {/* JSON-LD Structured Data */}
+      <JsonLd data={propertyJsonLd({
+        title: property.title,
+        description: property.description,
+        slug: property.slug,
+        cover_image: property.coverImage,
+        price: property.priceFrom,
+        area: property.location,
+        bedrooms: property.bedroomsFrom,
+        size_sqft: property.sizeFrom,
+      })} />
+      <JsonLd data={breadcrumbJsonLd([
+        { name: "Home", url: "https://primecapitaldubai.com" },
+        { name: "Properties", url: "https://primecapitaldubai.com/properties" },
+        { name: property.title }
+      ])} />
+
       {/* Hero Section */}
       <section className="relative min-h-[60vh] flex flex-col justify-end">
         {/* Background Image */}
@@ -100,8 +145,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <BuildingIcon className="h-24 w-24 text-[var(--web-spruce)]/30" />
             </div>
           )}
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          {/* Gradient overlay — bottom for content, top for nav readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/40" />
         </div>
 
         {/* Hero Content */}
@@ -200,10 +245,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               <div className="text-center">
                 <CalendarIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
                 <div className="font-headline text-[var(--web-off-white)] text-xl">
-                  {new Date(property.completionDate).toLocaleDateString("en-GB", {
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  {formatCompletionDate(property.completionDate)}
                 </div>
                 <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">Completion</div>
               </div>
@@ -321,12 +363,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {/* Location placeholder */}
-                  <div className="mt-4 aspect-video bg-[var(--web-serenity)]/20 rounded-[2px] flex items-center justify-center">
-                    <Stack gap="xs" align="center">
-                      <MapPinIcon className="h-8 w-8 text-[var(--web-spruce)]/30" />
-                      <Text className="text-[var(--web-spruce)] text-[12px]">{property.location}</Text>
-                    </Stack>
+                  {/* Location Map */}
+                  <div className="mt-4 rounded-[2px] overflow-hidden">
+                    <PropertyMap
+                      location={property.location}
+                    />
                   </div>
                 </Stack>
               </div>

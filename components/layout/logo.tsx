@@ -14,7 +14,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 // -----------------------------------------------------------------------------
@@ -61,18 +60,18 @@ function Logo({
       )}
       {...props}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={logoSrc}
         alt="Prime Capital"
-        width={heights[size] * 2} // Approximate aspect ratio
-        height={heights[size]}
-        className="h-auto w-auto"
+        loading="eager"
+        // eslint-disable-next-line @next/next/no-img-element
+        fetchPriority="high"
         style={{ 
-          height: heights[size],
+          height: `${heights[size]}px`,
           width: "auto",
           transition: "all 0.3s cubic-bezier(0, 0, 0.2, 1)",
         }}
-        priority
       />
     </Link>
   )

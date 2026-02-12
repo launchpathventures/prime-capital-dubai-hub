@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { useHeaderPopover } from "./header-popover-context"
 import {
-  GlobeIcon,
   LayoutDashboardIcon,
   BookOpenIcon,
   PresentationIcon,
@@ -39,7 +38,6 @@ export type Surface = {
 
 export const surfaces: Surface[] = [
   { id: "home", label: "Home", href: "/", icon: HomeIcon },
-  { id: "web", label: "Web", href: "/web", icon: GlobeIcon },
   { id: "admin", label: "Admin", href: "/admin", icon: LayoutDashboardIcon },
   { id: "learn", label: "Learn", href: "/learn", icon: GraduationCapIcon },
   { id: "auth", label: "Auth", href: "/auth", icon: LockIcon },

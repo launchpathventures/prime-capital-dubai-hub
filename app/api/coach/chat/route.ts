@@ -16,6 +16,12 @@ import { createClient } from "@/lib/supabase/server"
 import { getCompetencyWithModules, getModule } from "@/lib/learning"
 import { getCurriculumIndex, findRelevantModules } from "@/lib/lms/curriculum-index"
 import { getPrompts } from "@/lib/lms/ai-prompts"
+import {
+  checkRateLimit as checkIPRateLimit,
+  getClientIP,
+  createRateLimitResponse,
+  RATE_LIMITS,
+} from "@/lib/rate-limit"
 
 // -----------------------------------------------------------------------------
 // Types
@@ -232,6 +238,14 @@ function formatEssentialsForPrompt(essentials: Record<string, unknown>): string 
 
 export async function POST(request: NextRequest) {
   try {
+    // IP-based rate limiting (defense against abuse)
+    const ip = getClientIP(request)
+    const ipRateLimit = checkIPRateLimit(ip, "coach-chat", RATE_LIMITS.AI)
+
+    if (ipRateLimit.limited) {
+      return createRateLimitResponse(ipRateLimit.retryAfter!)
+    }
+
     // Auth check
     const supabase = await createClient()
     const {
@@ -243,7 +257,7 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Rate limit check
+    // User-based rate limit check (per-user quota)
     const withinLimit = await checkRateLimit(user.id)
     if (!withinLimit) {
       return Response.json(
@@ -338,7 +352,10 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(text))
           }
         }
-        console.log("[Coach Chat API] Complete AI response:", fullResponse)
+        // Only log full response in development (contains user-generated content)
+        if (process.env.NODE_ENV === "development") {
+          console.log("[Coach Chat API] Complete AI response:", fullResponse)
+        }
         controller.close()
       },
     })

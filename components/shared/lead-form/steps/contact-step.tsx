@@ -75,31 +75,39 @@ export function ContactStep({
 
       <div className="lead-form__fields">
         <div className="lead-form__field">
-          <label className="lead-form__label">Email</label>
+          <label htmlFor="email" className="lead-form__label">Email</label>
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
+            aria-required="true"
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
             className={cn("lead-form__input", errors.email && "lead-form__input--error")}
             autoFocus
           />
           {errors.email && (
-            <span className="lead-form__error">{errors.email}</span>
+            <span id="email-error" role="alert" className="lead-form__error">{errors.email}</span>
           )}
         </div>
 
         <div className="lead-form__field">
-          <label className="lead-form__label">WhatsApp / Mobile</label>
+          <label htmlFor="whatsapp" className="lead-form__label">WhatsApp / Mobile</label>
           <input
+            id="whatsapp"
             type="tel"
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             placeholder="+971 50 123 4567"
+            aria-required="true"
+            aria-invalid={!!errors.whatsapp}
+            aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
             className={cn("lead-form__input", errors.whatsapp && "lead-form__input--error")}
           />
           {errors.whatsapp && (
-            <span className="lead-form__error">{errors.whatsapp}</span>
+            <span id="whatsapp-error" role="alert" className="lead-form__error">{errors.whatsapp}</span>
           )}
         </div>
       </div>

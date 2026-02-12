@@ -9,8 +9,13 @@ import { createClient } from "@supabase/supabase-js"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
-// Default password for new users created through admin panel
-const DEFAULT_PASSWORD = "Prime$1234!"
+// Default password from environment (server-only, never expose to client)
+const DEFAULT_PASSWORD = process.env.AUTH_DEFAULT_PASSWORD
+
+// Validate that default password is configured
+if (!DEFAULT_PASSWORD) {
+  console.warn("⚠️ AUTH_DEFAULT_PASSWORD is not configured - user creation will fail")
+}
 
 export async function POST(request: Request) {
   // First check if current user is admin
@@ -35,6 +40,12 @@ export async function POST(request: Request) {
   
   if (!email) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 })
+  }
+
+  // Ensure default password is configured
+  if (!DEFAULT_PASSWORD) {
+    console.error("AUTH_DEFAULT_PASSWORD environment variable is not set")
+    return NextResponse.json({ error: "Server configuration error: default password not configured" }, { status: 500 })
   }
   
   // Create admin client with service role

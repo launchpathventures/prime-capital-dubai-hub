@@ -46,7 +46,17 @@ export type PropertyType =
   | "land"
   | "commercial"
 
-export type FormMode = "contact" | "landing" | "download"
+export type PrivateRole = "investor" | "advisor" | "family-office"
+
+export type DeploymentRange =
+  | "5m-10m"
+  | "10m-20m"
+  | "20m-50m"
+  | "50m-plus"
+
+export type PreferredContact = "phone" | "email" | "whatsapp"
+
+export type FormMode = "contact" | "landing" | "download" | "private"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================
@@ -79,10 +89,11 @@ export interface LeadFormData {
   hasQuestions?: boolean
   questionsText?: string
 
-  // Step 6: Schedule (Calendly)
-  scheduledMeeting?: boolean
-  calendlyEventId?: string    // e.g., "ABC123"
-  calendlyInviteeId?: string  // e.g., "XYZ789"
+  // Step: Private Context (private mode only)
+  privateRole?: PrivateRole
+  deploymentRange?: DeploymentRange
+  preferredContact?: PreferredContact
+  privateContext?: string
 
   // Meta (auto-captured)
   formMode: FormMode
@@ -100,6 +111,9 @@ export interface LeadFormData {
   referringProperty?: string         // Property slug from query param
   referringTeamMember?: string       // Team member slug from query param
   referringTeamMemberEmail?: string  // Team member email from query param
+
+  // Honeypot for bot protection (hidden field)
+  website?: string
 }
 
 // =============================================================================
@@ -143,7 +157,7 @@ export type StepId =
   | "timeline-budget"
   | "property"
   | "questions"
-  | "schedule"
+  | "private-context"
   | "success"
 
 export interface StepConfig {
@@ -199,4 +213,23 @@ export const PROPERTY_TYPE_OPTIONS: SelectOption<PropertyType>[] = [
   { value: "penthouse", label: "Penthouse" },
   { value: "land", label: "Land" },
   { value: "commercial", label: "Commercial" },
+]
+
+export const PRIVATE_ROLE_OPTIONS: SelectOption<PrivateRole>[] = [
+  { value: "investor", label: "I am an investor" },
+  { value: "advisor", label: "I represent an investor" },
+  { value: "family-office", label: "Family office" },
+]
+
+export const DEPLOYMENT_RANGE_OPTIONS: SelectOption<DeploymentRange>[] = [
+  { value: "5m-10m", label: "AED 5–10 million" },
+  { value: "10m-20m", label: "AED 10–20 million" },
+  { value: "20m-50m", label: "AED 20–50 million" },
+  { value: "50m-plus", label: "AED 50 million +" },
+]
+
+export const PREFERRED_CONTACT_OPTIONS: SelectOption<PreferredContact>[] = [
+  { value: "phone", label: "Phone call" },
+  { value: "email", label: "Email" },
+  { value: "whatsapp", label: "WhatsApp" },
 ]

@@ -6,8 +6,11 @@
  */
 
 import Link from "next/link"
+import Image from "next/image"
 import { config } from "@/lib/config"
-import { getTeamMembers } from "@/lib/content"
+
+export const revalidate = 86400 // 24 hours ISR
+import { getWebTeamMembers } from "@/lib/content"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
@@ -16,10 +19,13 @@ import { TeamCard } from "./_components/team-card"
 export const metadata = {
   title: "Our Team | Prime Capital Dubai",
   description: "Meet the experienced advisors at Prime Capital Dubai.",
+  alternates: {
+    canonical: "/team",
+  },
 }
 
 export default async function TeamPage() {
-  const team = await getTeamMembers()
+  const team = await getWebTeamMembers()
 
   if (!config.features.team) {
     return (
@@ -65,14 +71,23 @@ export default async function TeamPage() {
 
 function HeroSection() {
   return (
-    <section
-      className="relative min-h-[55vh] flex flex-col justify-center items-center text-center"
-      style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%), url('/images/hero/team.jpg')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
+    <section className="relative min-h-[55vh] flex flex-col justify-center items-center text-center">
+      {/* Background Image */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/images/hero/team.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
+        />
+      </div>
       <Container size="lg" className="relative z-10 px-4">
         <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
           <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
@@ -105,7 +120,7 @@ function HeroSection() {
 // TEAM GRID SECTION
 // =============================================================================
 
-function TeamGridSection({ team }: { team: Awaited<ReturnType<typeof getTeamMembers>> }) {
+function TeamGridSection({ team }: { team: Awaited<ReturnType<typeof getWebTeamMembers>> }) {
   if (team.length === 0) {
     return (
       <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
@@ -153,14 +168,15 @@ function CTASection() {
       }}
     >
       {/* Subtle cityscape silhouette */}
-      <div 
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.08]">
+        <Image
+          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-[center_bottom]"
+          sizes="100vw"
+        />
+      </div>
       
       <Container size="md" className="relative z-10">
         <Stack gap="lg" align="center" className="text-center">

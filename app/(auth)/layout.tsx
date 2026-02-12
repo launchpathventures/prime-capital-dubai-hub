@@ -10,6 +10,7 @@
 
 import "./auth.css"
 import { AuthShell } from "./_surface/auth-shell"
+import { AppClientProviders } from "@/components/shared/app-client-providers"
 
 // -----------------------------------------------------------------------------
 // TEMPORARILY DISABLED: Auth redirect logic
@@ -42,8 +43,10 @@ export default async function AuthGroupLayout({
 }) {
   // Auth redirect is handled in proxy.ts - no checks needed here
   return (
-    <AuthShell>
-      {children}
-    </AuthShell>
+    <AppClientProviders>
+      <AuthShell>
+        {children}
+      </AuthShell>
+    </AppClientProviders>
   )
 }

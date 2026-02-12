@@ -60,27 +60,37 @@ export function NameStep({ data, onUpdate, onNext }: NameStepProps) {
         <div className="lead-form__field-row">
           <div className="lead-form__field">
             <input
+              id="firstName"
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First name"
+              aria-label="First name"
+              aria-required="true"
+              aria-invalid={!!errors.firstName}
+              aria-describedby={errors.firstName ? "firstName-error" : undefined}
               className={cn("lead-form__input", errors.firstName && "lead-form__input--error")}
               autoFocus
             />
             {errors.firstName && (
-              <span className="lead-form__error">{errors.firstName}</span>
+              <span id="firstName-error" role="alert" className="lead-form__error">{errors.firstName}</span>
             )}
           </div>
           <div className="lead-form__field">
             <input
+              id="lastName"
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Last name"
+              aria-label="Last name"
+              aria-required="true"
+              aria-invalid={!!errors.lastName}
+              aria-describedby={errors.lastName ? "lastName-error" : undefined}
               className={cn("lead-form__input", errors.lastName && "lead-form__input--error")}
             />
             {errors.lastName && (
-              <span className="lead-form__error">{errors.lastName}</span>
+              <span id="lastName-error" role="alert" className="lead-form__error">{errors.lastName}</span>
             )}
           </div>
         </div>

@@ -4,20 +4,8 @@
  * Signs out the user and redirects to sign in with a toast.
  * Handles all auth modes: demo, password, custom, supabase.
  *
- * ⚠️ PREFETCH WARNING
- * -------------------
- * This route has both GET and POST handlers. The GET handler exists to support
- * <Link> navigation, but this creates a dangerous prefetch scenario:
- *
- * Next.js <Link> components prefetch linked routes by default when they enter
- * the viewport. If a Link to this route is visible, Next.js will prefetch it,
- * triggering the GET handler and signing the user out unexpectedly!
- *
- * SOLUTION: Always use prefetch={false} when linking to this route:
- *   ✅ <Link href="/api/auth/signout" prefetch={false}>Sign out</Link>
- *   ❌ <Link href="/api/auth/signout">Sign out</Link>  ← WILL CAUSE LOGOUT!
- *
- * @see https://nextjs.org/docs/app/api-reference/components/link#prefetch
+ * Security: POST-only to prevent prefetch-triggered signouts.
+ * Use form submission or fetch() to sign out, not <Link>.
  */
 
 import { NextRequest, NextResponse } from "next/server"
@@ -59,18 +47,4 @@ export async function POST(request: NextRequest) {
 
   // Redirect to sign in with toast
   return NextResponse.redirect(`${origin}/auth/login?toast=signed-out`, { status: 303 })
-}
-
-// -----------------------------------------------------------------------------
-// GET Handler - For <Link> navigation
-// -----------------------------------------------------------------------------
-// ⚠️ IMPORTANT: Any <Link> pointing here MUST have prefetch={false}
-// Otherwise Next.js will prefetch this route and sign the user out!
-//
-// Safe usage:   <Link href="/api/auth/signout" prefetch={false}>
-// UNSAFE usage: <Link href="/api/auth/signout">  ← Will prefetch and logout!
-// -----------------------------------------------------------------------------
-
-export async function GET(request: NextRequest) {
-  return POST(request)
 }

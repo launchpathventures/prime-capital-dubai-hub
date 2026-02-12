@@ -12,6 +12,7 @@
 
 import "./learn.css"
 import { LearnLayoutShell } from "./_surface/learn-layout-shell"
+import { AppClientProviders } from "@/components/shared/app-client-providers"
 
 // Force dynamic rendering - these routes use cookies for auth
 export const dynamic = "force-dynamic"
@@ -35,8 +36,10 @@ export default async function LearnLayout({
   children: React.ReactNode
 }) {
   return (
-    <LearnLayoutShell>
-      {children}
-    </LearnLayoutShell>
+    <AppClientProviders>
+      <LearnLayoutShell>
+        {children}
+      </LearnLayoutShell>
+    </AppClientProviders>
   )
 }

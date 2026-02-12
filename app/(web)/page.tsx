@@ -15,22 +15,33 @@
  * 8. Contact CTA
  */
 
+import { Metadata } from "next"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+
+export const revalidate = 3600 // 1 hour ISR
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+}
 import Image from "next/image"
 import { config } from "@/lib/config"
 import {
-  getProperties,
-  getTestimonials,
-  getStats,
+  getWebProperties,
+  getWebTestimonials,
+  getWebStats,
   type Property,
   type Testimonial,
 } from "@/lib/content"
 import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRightIcon, ChevronDownIcon } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 import { AnimatedStatsSection } from "./_surface/animated-stats"
 import { ParallaxHero } from "./_surface/parallax-hero"
+import { PropertySearch } from "./_surface/property-search"
+import { propertyTypeImages } from "./_surface/property-images"
 
 // Curated imagery for areas
 const areaImages: Record<string, string> = {
@@ -42,13 +53,6 @@ const areaImages: Record<string, string> = {
   "Business Bay": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop",
 }
 
-// Property images for types
-const propertyImages: Record<string, string> = {
-  villa: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop",
-  penthouse: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
-  apartment: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
-  default: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200&auto=format&fit=crop",
-}
 
 export default async function HomePage() {
   // Handle root redirect if configured (e.g., redirect "/" to "/learn" during dev)
@@ -57,16 +61,32 @@ export default async function HomePage() {
   }
 
   const [properties, testimonials, stats] = await Promise.all([
-    getProperties(),
-    getTestimonials(),
-    getStats(),
+    getWebProperties(),
+    getWebTestimonials(),
+    getWebStats(),
   ])
   const featuredProperties = properties.slice(0, 3)
 
+  // Extract unique values from actual property data for search bar
+  const propertyTypes = [...new Set(properties.map((p) => p.type))].sort()
+  const propertyLocations = [...new Set(properties.map((p) => p.location))].sort()
+
+  // Fallback stats when database is empty (must match data/stats.json)
+  const fallbackStats = [
+    { id: "1", value: "AED 6.5B+", label: "Transaction Volume" },
+    { id: "2", value: "750+", label: "Properties Transacted" },
+    { id: "3", value: "94%", label: "Client Retention" },
+    { id: "4", value: "15+", label: "Years Experience" },
+  ]
+  const displayStats = stats.length > 0 ? stats : fallbackStats
+
   return (
     <div className="web-homepage">
-      <HeroSection />
-      <AnimatedStatsSection stats={stats} />
+      {/* Above-the-fold: hero fills available space, stats anchored at bottom */}
+      <div className="web-fold">
+        <HeroSection types={propertyTypes} locations={propertyLocations} />
+        <AnimatedStatsSection stats={displayStats} />
+      </div>
       <PositioningSection />
       {config.features.properties && featuredProperties.length > 0 && (
         <PropertiesSection properties={featuredProperties} />
@@ -84,47 +104,48 @@ export default async function HomePage() {
 // Full viewport, dark, deliberately minimal
 // =============================================================================
 
-function HeroSection() {
+function HeroSection({ types, locations }: { types: string[]; locations: string[] }) {
   return (
     <ParallaxHero
       imageUrl="/images/hero/home-hero.jpg"
-      overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)"
+      overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.65) 100%)"
       intensity={0.15}
       priority
-      className="web-hero min-h-dvh flex flex-col justify-center items-center text-center"
+      className="web-hero flex-1 flex flex-col items-center text-center relative"
     >
-      <Container size="lg" className="relative z-10 px-4">
-        <Stack gap="lg" align="center" className="max-w-[720px] mx-auto">
-          <h1
-            className="font-headline text-[var(--web-off-white)] text-[clamp(38px,7vw,76px)] font-normal leading-[1.05] tracking-tight text-center"
-            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}
-          >
-            We move complexity out of sight.
-          </h1>
+      {/* Hero content — centred in available space, pt accounts for navbar, pb for search bar */}
+      <div className="flex-1 flex items-center pt-[var(--web-header-height)] pb-16 max-md:pb-10">
+        <Container size="lg" className="relative z-10 px-4">
+          <Stack gap="lg" align="center" className="max-w-[720px] mx-auto max-md:max-w-full">
+            <h1
+              className="font-headline text-[var(--web-off-white)] text-[clamp(38px,7vw,76px)] font-normal leading-[1.15] tracking-tight text-center"
+              style={{ textShadow: "0 2px 40px rgba(0,0,0,0.3)" }}
+            >
+              We move complexity out of sight.
+            </h1>
 
-          <p
-            className="text-white/90 text-[clamp(17px,2.2vw,22px)] font-light leading-relaxed max-w-[520px] mt-4"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
-          >
-            Boutique real estate advisory for discerning investors.
-          </p>
+            <p
+              className="text-white/80 text-[clamp(16px,2vw,21px)] font-light leading-relaxed max-w-[480px] mt-2"
+              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.2)" }}
+            >
+              Boutique real estate advisory for discerning investors.
+            </p>
 
-          {/* DEBUG: Using plain link instead of Button to test */}
-          <Link 
-            href="/contact"
-            className="mt-8 h-14 px-12 bg-white/95 text-[var(--web-ash)] hover:bg-white border-none rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] shadow-lg inline-flex items-center justify-center"
-          >
-            Begin Your Journey
-          </Link>
-        </Stack>
-      </Container>
+            <Link 
+              href="/contact"
+              className="web-hero-cta"
+            >
+              Begin Your Journey
+            </Link>
+          </Stack>
+        </Container>
+      </div>
 
-      {/* Scroll Indicator - anchored to bottom of hero */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce z-10">
-        <span className="text-[var(--web-off-white)] text-[11px] font-normal uppercase tracking-[0.15em] opacity-70">
-          Discover
-        </span>
-        <ChevronDownIcon className="h-4 w-4 text-[var(--web-off-white)] opacity-70" />
+      {/* Search bar — straddles the hero bottom edge */}
+      <div className="web-hero-search">
+        <Container size="lg" className="px-4">
+          <PropertySearch types={types} locations={locations} />
+        </Container>
       </div>
     </ParallaxHero>
   )
@@ -198,7 +219,7 @@ function PropertiesSection({ properties }: { properties: Property[] }) {
                   {/* Property Image */}
                   <div className="relative h-[280px] overflow-hidden">
                     <Image
-                      src={property.coverImage || propertyImages[property.type] || propertyImages.default}
+                      src={property.coverImage || propertyTypeImages[property.type] || propertyTypeImages.default}
                       alt={property.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -376,7 +397,8 @@ function AreasSection() {
               >
                 <Image
                   src={areaImages[area.name] || areaImages["Dubai Marina"]}
-                  alt={area.name}
+                  alt=""
+                  aria-hidden="true"
                   fill
                   className="img-zoom object-cover"
                   sizes="(max-width: 768px) 50vw, 16vw"
@@ -411,14 +433,24 @@ function AreasSection() {
 function StrategyKitSection() {
   return (
     <section
-      className="py-[var(--web-section-gap)]"
-      style={{
-        backgroundColor: "var(--web-spruce)",
-        backgroundImage: `linear-gradient(135deg, rgba(63,65,66,0.95) 0%, rgba(87,108,117,0.9) 100%), url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2500&auto=format&fit=crop')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="py-[var(--web-section-gap)] relative"
+      style={{ backgroundColor: "var(--web-spruce)" }}
     >
+      {/* Background Image */}
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2500&auto=format&fit=crop"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        {/* Gradient Overlay */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(135deg, rgba(63,65,66,0.95) 0%, rgba(87,108,117,0.9) 100%)" }}
+        />
+      </div>
       <Container size="xl">
         <Grid cols={1} className="md:grid-cols-[1.4fr_1fr] gap-16 items-center">
           {/* Left: Content */}
@@ -433,17 +465,17 @@ function StrategyKitSection() {
               Dubai 2026 Investment Strategy Kit
             </Title>
             <Text className="text-white/80 text-[17px] font-light leading-relaxed">
-              A comprehensive 48-page analysis of Dubai's residential market, including area-by-area
-              breakdowns, price trend analysis, and our proprietary investment framework.
+              A complete investment framework for Dubai real estate — three proven strategies,
+              area-by-area market zones, full cost transparency, and a step-by-step buying process.
             </Text>
 
             {/* Benefits grid */}
             <Grid cols={2} className="gap-x-6 gap-y-4 mt-4">
               {[
-                "Current market analysis with 5-year projections",
-                "Area-by-area breakdown & pricing",
-                "ROI data and historical performance",
-                "Golden Visa & Pro Strategies",
+                "Three strategies: income, growth & legacy",
+                "Four market zones mapped & rated",
+                "Off-plan leverage & branded premiums",
+                "Golden Visa & full cost transparency",
               ].map((benefit, index) => (
                 <div
                   key={index}
@@ -484,7 +516,7 @@ function StrategyKitSection() {
               Get Your Free Copy
             </div>
             <Text className="text-[var(--web-spruce)] text-sm mb-6">
-              48 pages of institutional-grade research
+              Your complete Dubai investment framework
             </Text>
 
             <Link

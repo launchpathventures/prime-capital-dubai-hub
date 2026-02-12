@@ -1,13 +1,14 @@
 /**
  * CATALYST - Upload team photos to Supabase storage
  * 
+ * Uploads all team photos from public/images/team/ to the Supabase "cms" bucket,
+ * then updates the corresponding team_members row with the public URL.
+ * 
  * Usage: npx tsx scripts/upload-team-photos.ts
  * 
- * Prerequisites:
- * 1. Save team photos to public/images/team/:
- *    - tahir-majitia.jpg
- *    - shaad-haji.jpg
- *    - rohit-saluja.jpg
+ * Modes:
+ *   --dry-run    Show what would happen without uploading or updating
+ *   --audit      Show current DB photo values vs local files
  */
 
 import { createClient } from "@supabase/supabase-js"
@@ -26,33 +27,136 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-// Team members with their photo files
-const teamPhotos = [
-  { slug: "tahir-majitia", file: "tahir-majithia.png" },
-  { slug: "shaad-haji", file: "Shaad-Haji.png" },
-  { slug: "rohit-saluja", file: "Rohit-Saluja.jpg" },
+// ============================================================================
+// TEAM PHOTO MAPPING
+// Maps each local filename to the team_members.slug in Supabase.
+// Keep this list in sync when adding/removing team members.
+// ============================================================================
+const teamPhotos: { slug: string; file: string }[] = [
+  { slug: "ahmed-ashfaq",              file: "Ahmed Ashfaq .jpg" },
+  { slug: "anisha-mehrotra",           file: "Anisha Mehrotra .jpg" },
+  { slug: "harshini-shetty",           file: "Harshini Shetty .jpg" },
+  { slug: "kyle-lopez",               file: "Kyle Lopez.jpg" },
+  { slug: "manu-agarwal",             file: "Manu Agarwal .jpg" },
+  { slug: "mohib-malgi",              file: "Mohib Malgi .jpg" },
+  { slug: "rakshima-mehra",            file: "Rakshhima Mehra .jpg" },   // DB slug: rakshima (single h)
+  { slug: "rishabh-arora",             file: "Rishabh Arora .jpg" },
+  { slug: "riyam-al-mayyahi",          file: "Riyam Almayyahi.jpg" },    // DB slug has hyphen: al-mayyahi
+  { slug: "rohit-saluja",              file: "Rohit-Saluja.jpg" },
+  { slug: "ruhaan-chawla",            file: "Ruhaan Chawla .JPG" },
+  { slug: "shaad-haji",                file: "Shaad-Haji.png" },
+  { slug: "silvia-fernandes",          file: "Silvia Fernandez.jpg" },   // DB slug: fernandes (s not z)
+  { slug: "sourav-umesh-lakhiyani",    file: "Sourav Lakhyani.jpg" },    // DB slug: sourav-umesh-lakhiyani
+  { slug: "subha-arora",               file: "Subha Arora.png" },
+  { slug: "tahir-majitia",             file: "tahir-majithia.png" },     // DB slug: majitia (no h)
 ]
 
-async function uploadTeamPhotos() {
+// ============================================================================
+// AUDIT MODE — show current state of DB vs local files
+// ============================================================================
+async function auditTeamPhotos() {
+  const teamDir = path.join(process.cwd(), "public/images/team")
+
+  console.log("🔍 Auditing team photos...\n")
+
+  // Fetch all team members from DB
+  const { data: dbMembers, error } = await supabase
+    .from("team_members")
+    .select("slug, name, photo")
+    .order("display_order", { ascending: true })
+
+  if (error) {
+    console.error("❌ Failed to fetch team members:", error.message)
+    return
+  }
+
+  // List local files
+  const localFiles = fs.existsSync(teamDir) ? fs.readdirSync(teamDir) : []
+
+  console.log(`📁 Local files in public/images/team/: ${localFiles.length}`)
+  console.log(`👥 Team members in DB: ${dbMembers?.length ?? 0}\n`)
+
+  // Check each mapping
+  console.log("── Mapping Status ──────────────────────────────────────────")
+  for (const mapping of teamPhotos) {
+    const localExists = localFiles.some(f => f === mapping.file)
+    const dbMember = dbMembers?.find(m => m.slug === mapping.slug)
+    const hasPhoto = dbMember?.photo && dbMember.photo.length > 0
+
+    const localIcon = localExists ? "✅" : "❌"
+    const dbIcon = dbMember ? "✅" : "❌"
+    const photoIcon = hasPhoto ? "✅" : "⬜"
+
+    console.log(`${localIcon} Local  ${dbIcon} DB  ${photoIcon} Photo  │ ${mapping.slug}`)
+    if (!dbMember) console.log(`   ⚠️  No DB row with slug "${mapping.slug}"`)
+    if (dbMember && hasPhoto) console.log(`   🔗 ${dbMember.photo}`)
+  }
+
+  // Check for DB members without a mapping
+  const mappedSlugs = new Set(teamPhotos.map(m => m.slug))
+  const unmapped = dbMembers?.filter(m => !mappedSlugs.has(m.slug)) ?? []
+  if (unmapped.length > 0) {
+    console.log("\n── DB members without a local photo mapping ──")
+    for (const m of unmapped) {
+      console.log(`   ⚠️  ${m.slug} (${m.name}) — photo: ${m.photo || "(none)"}`)
+    }
+  }
+
+  // Check for local files without a mapping
+  const mappedFiles = new Set(teamPhotos.map(m => m.file))
+  const unmappedFiles = localFiles.filter(f => !mappedFiles.has(f))
+  if (unmappedFiles.length > 0) {
+    console.log("\n── Local files without a slug mapping ──")
+    for (const f of unmappedFiles) {
+      console.log(`   ⚠️  ${f}`)
+    }
+  }
+
+  console.log("\nDone!")
+}
+
+// ============================================================================
+// UPLOAD MODE — upload photos and update DB
+// ============================================================================
+async function uploadTeamPhotos(dryRun: boolean) {
   const teamDir = path.join(process.cwd(), "public/images/team")
   
-  console.log("📸 Uploading team photos to Supabase storage...\n")
+  console.log(dryRun
+    ? "📸 DRY RUN — showing what would happen...\n"
+    : "📸 Uploading team photos to Supabase storage...\n"
+  )
   
+  let uploaded = 0
+  let skipped = 0
+  let failed = 0
+
   for (const member of teamPhotos) {
     const filePath = path.join(teamDir, member.file)
     
-    // Check if file exists
+    // Check if file exists locally
     if (!fs.existsSync(filePath)) {
       console.log(`⚠️  Skipping ${member.slug}: ${member.file} not found`)
+      skipped++
       continue
     }
-    
+
+    // Normalise the storage filename (remove spaces, lowercase)
+    const ext = path.extname(member.file).toLowerCase()
+    const storageFilename = `${member.slug}${ext}`
+    const storagePath = `team/${storageFilename}`
+    const contentType = ext === ".png" ? "image/png" : "image/jpeg"
+
+    if (dryRun) {
+      console.log(`🔄 Would upload: ${member.file} → cms/${storagePath}`)
+      console.log(`   Would update: team_members.photo WHERE slug = "${member.slug}"\n`)
+      uploaded++
+      continue
+    }
+
     const fileBuffer = fs.readFileSync(filePath)
-    const storagePath = `team/${member.file}`
-    
+
     // Upload to storage
-    const contentType = member.file.endsWith('.png') ? 'image/png' : 'image/jpeg'
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("cms")
       .upload(storagePath, fileBuffer, {
         contentType,
@@ -61,6 +165,7 @@ async function uploadTeamPhotos() {
     
     if (uploadError) {
       console.error(`❌ Failed to upload ${member.file}:`, uploadError.message)
+      failed++
       continue
     }
     
@@ -72,22 +177,44 @@ async function uploadTeamPhotos() {
     const publicUrl = urlData.publicUrl
     
     // Update team_members table
-    const { error: updateError } = await supabase
+    const { data: updateData, error: updateError } = await supabase
       .from("team_members")
       .update({ photo: publicUrl })
       .eq("slug", member.slug)
+      .select("slug")
     
     if (updateError) {
-      console.error(`❌ Failed to update ${member.slug}:`, updateError.message)
+      console.error(`❌ Failed to update DB for ${member.slug}:`, updateError.message)
+      failed++
+      continue
+    }
+
+    if (!updateData || updateData.length === 0) {
+      console.warn(`⚠️  Photo uploaded but no DB row matched slug "${member.slug}" — photo is orphaned`)
+      console.log(`   🔗 URL: ${publicUrl}\n`)
+      skipped++
       continue
     }
     
     console.log(`✅ ${member.slug}`)
-    console.log(`   📤 Uploaded: ${storagePath}`)
+    console.log(`   📤 Uploaded: cms/${storagePath}`)
     console.log(`   🔗 URL: ${publicUrl}\n`)
+    uploaded++
   }
   
+  console.log("────────────────────────")
+  console.log(`✅ Uploaded: ${uploaded}  ⚠️ Skipped: ${skipped}  ❌ Failed: ${failed}`)
   console.log("Done!")
 }
 
-uploadTeamPhotos().catch(console.error)
+// ============================================================================
+// CLI
+// ============================================================================
+const args = process.argv.slice(2)
+
+if (args.includes("--audit")) {
+  auditTeamPhotos().catch(console.error)
+} else {
+  const dryRun = args.includes("--dry-run")
+  uploadTeamPhotos(dryRun).catch(console.error)
+}

@@ -86,6 +86,7 @@ export const config = {
    * Contact Information
    */
   contact: {
+    reraOrn: "28153",
     email: "admin@primecapitaldubai.com",
     phone: "+971 58 5414720",
     address: "API Business Suites, Office 101, Sheikh Zayed Rd, Al Barsha, Dubai",
@@ -111,7 +112,7 @@ export const config = {
     /** Support or contact link */
     support: null as string | null,
     /** Strategy Kit PDF download */
-    strategyKit: "/downloads/strategy-kit.pdf",
+    strategyKit: "https://gamma.app/docs/The-Prime-Capital-2026-Investor-Strategy-Kit-nra1olekeesasny",
     /** Calendly scheduling link */
     calendly: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/tahirmajithia/30min",
   },
@@ -127,12 +128,12 @@ export const config = {
   /**
    * Supabase Configuration
    * Public values are safe for client use.
+   * NOTE: Service role key is in lib/config.server.ts (server-only)
    */
   supabase: {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "",
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   },
 
   /**

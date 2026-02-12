@@ -85,11 +85,11 @@ export function AnimatedStatsSection({ stats }: AnimatedStatsSectionProps) {
   const { ref, isInView } = useInView<HTMLDivElement>({ threshold: 0.2 })
 
   return (
-    <section id="stats-section" className="bg-[var(--web-ash)]">
+    <section id="stats-section" className="web-stats-bar shrink-0">
       <Container size="xl">
         <div
           ref={ref}
-          className="stats-grid grid grid-cols-2 md:grid-cols-4 py-12 md:py-14 text-center"
+          className="stats-grid grid grid-cols-2 md:grid-cols-4 py-6 md:py-8 text-center"
         >
           {stats.map((stat, index) => (
             <div

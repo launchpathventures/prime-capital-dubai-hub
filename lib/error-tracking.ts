@@ -2,13 +2,15 @@
  * CATALYST - Error Tracking Utility
  *
  * Centralized error tracking for the application.
- * Currently logs to console with structured format.
- * Ready for Sentry/external service integration.
+ * Integrates with Sentry when DSN is configured.
+ * Falls back to structured console logging.
  *
  * Usage:
  * - trackError(error, { context: 'quiz', userId: '123' })
  * - trackError(error, { context: 'api', route: '/api/coach/chat' })
  */
+
+import * as Sentry from "@sentry/nextjs"
 
 type ErrorContext = {
   context: string
@@ -31,8 +33,35 @@ interface TrackedError {
 }
 
 /**
+ * Check if Sentry is configured and enabled.
+ */
+function isSentryEnabled(): boolean {
+  // Check for DSN in client or server environment
+  const dsn =
+    process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN
+  return Boolean(dsn) && process.env.NODE_ENV === "production"
+}
+
+/**
+ * Map our severity levels to Sentry severity levels.
+ */
+function mapSeverityToSentry(
+  severity: ErrorSeverity
+): Sentry.SeverityLevel {
+  switch (severity) {
+    case "warning":
+      return "warning"
+    case "info":
+      return "info"
+    case "error":
+    default:
+      return "error"
+  }
+}
+
+/**
  * Track an error with context.
- * Logs structured error data and can be extended to send to external services.
+ * Sends to Sentry when configured, otherwise logs structured error data.
  */
 export function trackError(
   error: Error | unknown,
@@ -60,15 +89,27 @@ export function trackError(
   // Production logging - structured for log aggregation
   console.error(JSON.stringify(tracked))
 
-  // TODO: Integrate with Sentry or other error tracking service
-  // Example Sentry integration:
-  // if (typeof Sentry !== 'undefined') {
-  //   Sentry.withScope((scope) => {
-  //     scope.setLevel(severity)
-  //     scope.setContext('custom', context)
-  //     Sentry.captureException(errorObj)
-  //   })
-  // }
+  // Send to Sentry if configured
+  if (isSentryEnabled()) {
+    Sentry.withScope((scope) => {
+      scope.setLevel(mapSeverityToSentry(severity))
+      scope.setContext("custom", context)
+
+      // Add tags for easier filtering in Sentry
+      scope.setTag("error_context", context.context)
+      if (context.component) scope.setTag("component", context.component)
+      if (context.route) scope.setTag("route", context.route)
+      if (context.action) scope.setTag("action", context.action)
+      if (digestMatch) scope.setTag("digest", digestMatch)
+
+      // Add user context if available
+      if (context.userId) {
+        scope.setUser({ id: context.userId })
+      }
+
+      Sentry.captureException(errorObj)
+    })
+  }
 }
 
 /**
@@ -112,6 +153,23 @@ export function trackActionError(
   trackError(error, {
     context: "action",
     action,
+    ...additionalContext,
+  })
+}
+
+/**
+ * Track a Supabase query error with table context.
+ */
+export function trackSupabaseError(
+  error: Error | unknown,
+  table: string,
+  operation: "select" | "insert" | "update" | "delete" | "rpc",
+  additionalContext: Record<string, unknown> = {}
+): void {
+  trackError(error, {
+    context: "supabase",
+    table,
+    operation,
     ...additionalContext,
   })
 }

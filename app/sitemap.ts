@@ -8,52 +8,59 @@
 import type { MetadataRoute } from "next"
 
 import { config } from "@/lib/config"
-import { getProperties, getTeamMembers } from "@/lib/content"
+import { getWebProperties, getWebTeamMembers } from "@/lib/content"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = config.app.url
 
-  // Static pages
+  // Static pages with fixed lastModified dates
+  // These should be updated when the page content changes significantly
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "weekly",
       priority: 1,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${baseUrl}/properties`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/team`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/strategy-kit`,
+      lastModified: new Date("2026-02-11"),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/terms`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-02-11"),
       changeFrequency: "yearly",
       priority: 0.3,
     },
@@ -63,7 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const propertyPages: MetadataRoute.Sitemap = []
   if (config.features.properties) {
     try {
-      const properties = await getProperties()
+      const properties = await getWebProperties()
       properties.forEach((property) => {
         propertyPages.push({
           url: `${baseUrl}/properties/${property.slug}`,
@@ -81,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const teamPages: MetadataRoute.Sitemap = []
   if (config.features.team) {
     try {
-      const team = await getTeamMembers()
+      const team = await getWebTeamMembers()
       team.forEach((member) => {
         teamPages.push({
           url: `${baseUrl}/team/${member.slug}`,
