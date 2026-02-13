@@ -29,12 +29,28 @@ import {
   LandmarkIcon,
 } from "lucide-react"
 
+const STRATEGY_KIT_HERO_IMAGE = "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2500&auto=format&fit=crop"
+
 export const metadata = {
   title: "Dubai Investment Strategy Kit",
   description:
     "Download our comprehensive guide to Dubai real estate investment. Three proven strategies, area-by-area analysis, rental yields, Golden Visa guide, and full cost transparency.",
   alternates: {
     canonical: "/strategy-kit",
+  },
+  openGraph: {
+    title: "Dubai Investment Strategy Kit",
+    description:
+      "Download our comprehensive guide to Dubai real estate investment. Three proven strategies, area-by-area analysis, rental yields, Golden Visa guide, and full cost transparency.",
+    url: "/strategy-kit",
+    images: [{ url: STRATEGY_KIT_HERO_IMAGE, width: 1200, height: 630, alt: "Dubai Investment Strategy Kit" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dubai Investment Strategy Kit",
+    description:
+      "Download our comprehensive guide to Dubai real estate investment. Three proven strategies, area-by-area analysis, rental yields, Golden Visa guide, and full cost transparency.",
+    images: [STRATEGY_KIT_HERO_IMAGE],
   },
 }
 
@@ -61,7 +77,7 @@ function HeroSection() {
     <section className="sk-hero relative overflow-hidden min-h-[90vh] flex items-center">
       {/* Background image */}
       <Image
-        src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2500&auto=format&fit=crop"
+        src={STRATEGY_KIT_HERO_IMAGE}
         alt=""
         fill
         priority

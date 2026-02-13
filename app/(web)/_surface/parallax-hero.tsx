@@ -8,11 +8,11 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
+import Image, { type StaticImageData } from "next/image"
 
 interface ParallaxHeroProps {
-  /** Background image URL */
-  imageUrl: string
+  /** Background image — static import (preferred) or URL string */
+  imageUrl: StaticImageData | string
   /** Gradient overlay (optional) */
   overlay?: string
   /** Parallax intensity (0.1 = subtle, 0.5 = strong) */
@@ -111,6 +111,7 @@ export function ParallaxHero({
             fill
             priority={priority}
             fetchPriority={priority ? "high" : "auto"}
+            placeholder={typeof imageUrl !== "string" ? "blur" : undefined}
             className="object-cover"
             style={{ objectPosition }}
             sizes="100vw"

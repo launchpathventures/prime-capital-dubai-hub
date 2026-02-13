@@ -25,7 +25,7 @@ const navColumns = [
     links: [
       { href: "/about", label: "About" },
       ...(config.features.team ? [{ href: "/team", label: "Team" }] : []),
-      { href: "/private", label: "Private" },
+      { href: "/private", label: "Private Advisory" },
       { href: "/contact", label: "Contact" },
       { href: "/strategy-kit", label: "Strategy Kit" },
     ],

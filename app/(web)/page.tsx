@@ -22,8 +22,32 @@ import Link from "next/link"
 export const revalidate = 3600 // 1 hour ISR
 
 export const metadata: Metadata = {
+  title: "Dubai Real Estate Advisory",
+  description:
+    "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
   alternates: {
     canonical: "/",
+  },
+  openGraph: {
+    title: "Dubai Real Estate Advisory",
+    description:
+      "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
+    url: "/",
+    images: [
+      {
+        url: "/images/hero/prime-capital-hero.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Prime Capital Dubai",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dubai Real Estate Advisory",
+    description:
+      "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
+    images: ["/images/hero/prime-capital-hero.jpg"],
   },
 }
 import Image from "next/image"
@@ -42,6 +66,7 @@ import { AnimatedStatsSection } from "./_surface/animated-stats"
 import { ParallaxHero } from "./_surface/parallax-hero"
 import { PropertySearch } from "./_surface/property-search"
 import { propertyTypeImages } from "./_surface/property-images"
+import heroImage from "@/public/images/hero/prime-capital-hero.jpg"
 
 // Curated imagery for areas
 const areaImages: Record<string, string> = {
@@ -107,7 +132,7 @@ export default async function HomePage() {
 function HeroSection({ types, locations }: { types: string[]; locations: string[] }) {
   return (
     <ParallaxHero
-      imageUrl="/images/hero/prime-capital-hero.jpg"
+      imageUrl={heroImage}
       overlay="linear-gradient(to bottom, rgba(20,22,26,0.45) 0%, rgba(20,22,26,0.25) 35%, rgba(20,22,26,0.4) 65%, rgba(16,18,22,0.75) 100%)"
       objectPosition="center 65%"
       intensity={0.12}

@@ -15,12 +15,25 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
 import { PropertiesFilter } from "./_components/properties-filter"
+import propertiesImage from "@/public/images/hero/properties.jpg"
 
 export const metadata = {
   title: "Properties",
   description: "Curated selection of premium Dubai real estate opportunities.",
   alternates: {
     canonical: "/properties",
+  },
+  openGraph: {
+    title: "Properties",
+    description: "Curated selection of premium Dubai real estate opportunities.",
+    url: "/properties",
+    images: [{ url: "/images/hero/properties.jpg", width: 1200, height: 630, alt: "Prime Capital Dubai Properties" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Properties",
+    description: "Curated selection of premium Dubai real estate opportunities.",
+    images: ["/images/hero/properties.jpg"],
   },
 }
 
@@ -71,10 +84,11 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           {/* Background Image */}
           <div className="absolute inset-0 -z-10">
             <Image
-              src="/images/hero/properties.jpg"
+              src={propertiesImage}
               alt=""
               fill
               priority
+              placeholder="blur"
               className="object-cover object-center"
               sizes="100vw"
             />
@@ -183,10 +197,11 @@ function HeroSection({
       {/* Background Image */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero/properties.jpg"
+          src={propertiesImage}
           alt=""
           fill
           priority
+          placeholder="blur"
           className="object-cover object-center"
           sizes="100vw"
         />

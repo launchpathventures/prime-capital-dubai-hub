@@ -84,6 +84,8 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: "Property Not Found" }
   }
 
+  const heroImage = property.images[0] || property.coverImage
+
   return {
     title: property.title,
     description: property.description?.slice(0, 160) ?? "",
@@ -93,7 +95,13 @@ export async function generateMetadata({ params }: PageProps) {
     openGraph: {
       title: property.title,
       description: property.description?.slice(0, 160) ?? "",
-      images: property.coverImage ? [{ url: property.coverImage, width: 1200, height: 630 }] : undefined,
+      images: heroImage ? [{ url: heroImage, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: property.title,
+      description: property.description?.slice(0, 160) ?? "",
+      images: heroImage ? [heroImage] : undefined,
     },
   }
 }

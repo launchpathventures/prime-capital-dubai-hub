@@ -17,6 +17,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Container, Stack, Grid, Text } from "@/components/core"
 import { config } from "@/lib/config"
+import aboutImage from "@/public/images/hero/about.jpg"
 import {
   BuildingIcon,
   BriefcaseIcon,
@@ -38,6 +39,20 @@ export const metadata = {
     "Terms and conditions for Prime Capital Real Estate Brokers LLC services.",
   alternates: {
     canonical: "/terms",
+  },
+  openGraph: {
+    title: "Terms & Conditions",
+    description:
+      "Terms and conditions for Prime Capital Real Estate Brokers LLC services.",
+    url: "/terms",
+    images: [{ url: "/images/hero/about.jpg", width: 1200, height: 630, alt: "Prime Capital Dubai Terms & Conditions" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms & Conditions",
+    description:
+      "Terms and conditions for Prime Capital Real Estate Brokers LLC services.",
+    images: ["/images/hero/about.jpg"],
   },
 }
 
@@ -62,10 +77,11 @@ function HeroSection() {
       {/* Background Image */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero/about.jpg"
+          src={aboutImage}
           alt=""
           fill
           priority
+          placeholder="blur"
           className="object-cover object-[center_30%]"
           sizes="100vw"
         />
@@ -421,9 +437,10 @@ function ContactSection() {
       {/* Subtle background texture */}
       <div className="absolute inset-0 opacity-[0.06]">
         <Image
-          src="/images/hero/about.jpg"
+          src={aboutImage}
           alt=""
           fill
+          placeholder="blur"
           className="object-cover object-center"
           sizes="100vw"
         />

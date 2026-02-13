@@ -15,12 +15,25 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
 import { TeamCard } from "./_components/team-card"
+import teamImage from "@/public/images/hero/team.jpg"
 
 export const metadata = {
   title: "Our Team",
   description: "Meet the experienced advisors at Prime Capital Dubai.",
   alternates: {
     canonical: "/team",
+  },
+  openGraph: {
+    title: "Our Team",
+    description: "Meet the experienced advisors at Prime Capital Dubai.",
+    url: "/team",
+    images: [{ url: "/images/hero/team.jpg", width: 1200, height: 630, alt: "Prime Capital Dubai Team" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Our Team",
+    description: "Meet the experienced advisors at Prime Capital Dubai.",
+    images: ["/images/hero/team.jpg"],
   },
 }
 
@@ -75,10 +88,11 @@ function HeroSection() {
       {/* Background Image */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero/team.jpg"
+          src={teamImage}
           alt=""
           fill
           priority
+          placeholder="blur"
           className="object-cover object-center"
           sizes="100vw"
         />

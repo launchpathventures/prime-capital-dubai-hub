@@ -31,6 +31,7 @@ import {
   HandshakeIcon,
   ChevronDownIcon,
 } from "lucide-react"
+import privateImage from "@/public/images/hero/private.jpg"
 
 export const metadata = {
   title: "Private",
@@ -38,6 +39,20 @@ export const metadata = {
     "Private real estate advisory for investors and their advisors deploying significant capital into Dubai.",
   alternates: {
     canonical: "/private",
+  },
+  openGraph: {
+    title: "Private",
+    description:
+      "Private real estate advisory for investors and their advisors deploying significant capital into Dubai.",
+    url: "/private",
+    images: [{ url: "/images/hero/private.jpg", width: 1200, height: 630, alt: "Prime Capital Private Advisory" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Private",
+    description:
+      "Private real estate advisory for investors and their advisors deploying significant capital into Dubai.",
+    images: ["/images/hero/private.jpg"],
   },
 }
 
@@ -61,7 +76,7 @@ export default function PrivatePage() {
 function HeroSection() {
   return (
     <ParallaxHero
-      imageUrl="https://images.unsplash.com/photo-1751473058035-3b7ef98d0367?q=80&w=2400&auto=format&fit=crop"
+      imageUrl={privateImage}
       overlay="linear-gradient(to bottom, rgba(26,26,31,0.45) 0%, rgba(26,26,31,0.65) 50%, rgba(26,26,31,0.92) 100%)"
       intensity={0.08}
       className="pcp-hero"

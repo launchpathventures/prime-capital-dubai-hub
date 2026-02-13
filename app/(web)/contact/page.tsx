@@ -10,12 +10,25 @@ import { config } from "@/lib/config"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
 import { PhoneIcon, MailIcon, MessageCircleIcon } from "lucide-react"
+import contactImage from "@/public/images/hero/contact.jpg"
 
 export const metadata = {
   title: "Contact Us",
   description: "Get in touch with Prime Capital Dubai for investment advisory.",
   alternates: {
     canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact Us",
+    description: "Get in touch with Prime Capital Dubai for investment advisory.",
+    url: "/contact",
+    images: [{ url: "/images/hero/contact.jpg", width: 1200, height: 630, alt: "Contact Prime Capital Dubai" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Us",
+    description: "Get in touch with Prime Capital Dubai for investment advisory.",
+    images: ["/images/hero/contact.jpg"],
   },
 }
 
@@ -45,10 +58,11 @@ function HeroSection() {
       {/* Background Image */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero/contact.jpg"
+          src={contactImage}
           alt=""
           fill
           priority
+          placeholder="blur"
           className="object-cover object-[center_30%]"
           sizes="100vw"
         />

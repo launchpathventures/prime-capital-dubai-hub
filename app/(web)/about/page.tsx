@@ -11,12 +11,25 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon, CheckIcon, ShieldCheckIcon, EyeIcon, TrendingUpIcon, SearchIcon } from "lucide-react"
 import { ParallaxHero } from "../_surface/parallax-hero"
+import aboutImage from "@/public/images/hero/about.jpg"
 
 export const metadata = {
   title: "About Us",
   description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
   alternates: {
     canonical: "/about",
+  },
+  openGraph: {
+    title: "About Us",
+    description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
+    url: "/about",
+    images: [{ url: "/images/hero/about.jpg", width: 1200, height: 630, alt: "About Prime Capital Dubai" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Us",
+    description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
+    images: ["/images/hero/about.jpg"],
   },
 }
 
@@ -52,7 +65,7 @@ export default function AboutPage() {
 function HeroSection() {
   return (
     <ParallaxHero
-      imageUrl="/images/hero/about.jpg"
+      imageUrl={aboutImage}
       overlay="linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)"
       intensity={0.12}
       className="about-hero relative min-h-[55vh] flex flex-col justify-center items-center text-center"

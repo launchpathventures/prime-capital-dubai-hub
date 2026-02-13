@@ -40,16 +40,25 @@ export async function generateMetadata({ params }: PageProps) {
     return { title: "Team Member Not Found" }
   }
 
+  const shareImage = member.photo
+  const description = member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`
+
   return {
     title: member.name,
-    description: member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`,
+    description,
     alternates: {
       canonical: `/team/${member.slug}`,
     },
     openGraph: {
       title: `${member.name} - ${member.role}`,
-      description: member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`,
-      images: member.photo ? [{ url: member.photo, width: 1200, height: 630 }] : undefined,
+      description,
+      images: shareImage ? [{ url: shareImage, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${member.name} - ${member.role}`,
+      description,
+      images: shareImage ? [shareImage] : undefined,
     },
   }
 }

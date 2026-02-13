@@ -18,12 +18,25 @@ import {
   HomeIcon,
   TrendingUpIcon,
 } from "lucide-react"
+import servicesImage from "@/public/images/hero/services.jpg"
 
 export const metadata = {
   title: "Services",
   description: "Investment advisory, acquisition support, Golden Visa guidance, and asset management.",
   alternates: {
     canonical: "/services",
+  },
+  openGraph: {
+    title: "Services",
+    description: "Investment advisory, acquisition support, Golden Visa guidance, and asset management.",
+    url: "/services",
+    images: [{ url: "/images/hero/services.jpg", width: 1200, height: 630, alt: "Prime Capital Dubai Services" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Services",
+    description: "Investment advisory, acquisition support, Golden Visa guidance, and asset management.",
+    images: ["/images/hero/services.jpg"],
   },
 }
 
@@ -70,10 +83,11 @@ function HeroSection() {
         {/* Background Image */}
         <div className="absolute inset-0 -z-10">
           <Image
-            src="/images/hero/services.jpg"
+            src={servicesImage}
             alt=""
             fill
             priority
+            placeholder="blur"
             className="object-cover object-center"
             sizes="100vw"
           />
