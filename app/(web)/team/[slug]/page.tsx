@@ -377,7 +377,7 @@ export default async function TeamMemberPage({ params }: PageProps) {
                 href="/contact"
                 className="inline-flex items-center justify-center h-12 px-8 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors"
               >
-                Get In Touch
+                Start a Conversation
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
               <Link
