@@ -95,8 +95,8 @@ function HeroSection() {
         </Stack>
       </Container>
 
-      {/* Contact Quick Links */}
-      <div className="absolute bottom-0 left-0 right-0 bg-[var(--web-off-white)]">
+      {/* Contact Quick Links — absolute on md+, flows naturally on mobile */}
+      <div className="md:absolute md:bottom-0 md:left-0 md:right-0 bg-[var(--web-off-white)]">
         <Container size="xl">
           <div className="flex flex-wrap justify-center gap-4 py-6">
             <a
@@ -134,7 +134,7 @@ function HeroSection() {
 
 function ContactFormSection() {
   return (
-    <section className="bg-[var(--web-off-white)] pt-12 pb-[var(--web-section-gap)]">
+    <section className="bg-[var(--web-off-white)] pt-8 md:pt-12 pb-[var(--web-section-gap)]">
       <Container size="sm">
         <LeadForm mode="contact" theme="light" />
       </Container>

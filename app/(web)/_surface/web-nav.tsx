@@ -199,7 +199,7 @@ export function WebNav({ scrolled = false }: WebNavProps) {
                 aria-current={pathname === "/contact" ? "page" : undefined}
                 className="flex items-center justify-center mt-2 px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
               >
-                Get In Touch
+                Invest With Prime
               </Link>
             </nav>
           </div>

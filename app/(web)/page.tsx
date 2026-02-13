@@ -107,7 +107,7 @@ export default async function HomePage() {
 
   return (
     <div className="web-homepage">
-      {/* Above-the-fold: hero fills available space, stats anchored at bottom */}
+      {/* Above-the-fold: hero fills first viewport on mobile; stats follow below */}
       <div className="web-fold">
         <HeroSection types={propertyTypes} locations={propertyLocations} />
         <AnimatedStatsSection stats={displayStats} />
@@ -137,10 +137,10 @@ function HeroSection({ types, locations }: { types: string[]; locations: string[
       objectPosition="center 65%"
       intensity={0.12}
       priority
-      className="web-hero flex-1 flex flex-col items-center text-center relative"
+      className="web-hero flex-none min-h-[100dvh] md:flex-1 md:min-h-0 flex flex-col items-center text-center relative"
     >
-      {/* Hero content — centred in available space, pt accounts for navbar, pb for search bar */}
-      <div className="flex-1 flex items-center pt-[var(--web-header-height)] pb-16 max-md:pb-10">
+      {/* Hero content — centred in available space, pt accounts for navbar */}
+      <div className="flex-1 flex items-center pt-[var(--web-header-height)] pb-16 max-md:pb-4">
         <Container size="lg" className="relative z-10 px-4">
           <Stack gap="lg" align="center" className="max-w-[720px] mx-auto max-md:max-w-full">
             <h1

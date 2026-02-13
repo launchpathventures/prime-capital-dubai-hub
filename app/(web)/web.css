@@ -466,7 +466,13 @@
 /* Stats bar — compact proof strip */
 .web-stats-bar {
   background: var(--web-ash);
-  padding-top: 2.5rem; /* Space for overlapping search bar */
+  padding-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .web-stats-bar {
+    padding-top: 2.5rem;
+  }
 }
 
 /* Search bar container — pinned to the bottom of the hero */
@@ -477,6 +483,15 @@
   right: 0;
   z-index: 20;
   transform: translateY(50%);
+}
+
+/* Mobile: keep search bar fully inside the hero instead of straddling the fold */
+@media (max-width: 767px) {
+  .web-hero-search {
+    position: relative;
+    transform: none;
+    padding-bottom: 1rem;
+  }
 }
 
 /* The bar itself — off-white to reduce contrast jump at fold */
