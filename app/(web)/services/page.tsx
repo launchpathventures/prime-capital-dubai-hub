@@ -70,8 +70,8 @@ function HeroSection() {
   const stats = [
     { value: "4", label: "Core Services" },
     { value: "100+", label: "Golden Visas Facilitated" },
-    { value: "AED 800M+", label: "Transaction Value" },
-    { value: "98%", label: "Client Satisfaction" },
+    { value: "AED 6.5B+", label: "Transaction Value" },
+    { value: "94%", label: "Client Retention" },
   ]
 
   return (
