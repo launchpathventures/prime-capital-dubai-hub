@@ -10,7 +10,7 @@
 import { useState } from "react"
 import { ArrowRightIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LeadFormData, FormTheme } from "../types"
+import type { LeadFormData, FormTheme, FormMode } from "../types"
 import { nameStepSchema } from "../schema"
 
 interface NameStepProps {
@@ -18,9 +18,10 @@ interface NameStepProps {
   onUpdate: (data: Partial<LeadFormData>) => void
   onNext: () => void
   theme: FormTheme
+  mode?: FormMode
 }
 
-export function NameStep({ data, onUpdate, onNext }: NameStepProps) {
+export function NameStep({ data, onUpdate, onNext, mode }: NameStepProps) {
   const [firstName, setFirstName] = useState(data.firstName || "")
   const [lastName, setLastName] = useState(data.lastName || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -49,11 +50,13 @@ export function NameStep({ data, onUpdate, onNext }: NameStepProps) {
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
         <h2 className="lead-form__question">
-          Let's start with your name
+          {mode === "private" ? "Your name" : "Hello. Who am I speaking with today?"}
         </h2>
-        <p className="lead-form__subtext">
-          So we know who we're speaking with
-        </p>
+        {mode !== "private" && (
+          <p className="lead-form__subtext">
+            So we know who we&#39;re speaking with
+          </p>
+        )}
       </div>
 
       <div className="lead-form__fields">
@@ -70,7 +73,8 @@ export function NameStep({ data, onUpdate, onNext }: NameStepProps) {
               aria-invalid={!!errors.firstName}
               aria-describedby={errors.firstName ? "firstName-error" : undefined}
               className={cn("lead-form__input", errors.firstName && "lead-form__input--error")}
-              autoFocus
+              autoFocus={mode !== "private"}
+              autoComplete="given-name"
             />
             {errors.firstName && (
               <span id="firstName-error" role="alert" className="lead-form__error">{errors.firstName}</span>
@@ -88,6 +92,7 @@ export function NameStep({ data, onUpdate, onNext }: NameStepProps) {
               aria-invalid={!!errors.lastName}
               aria-describedby={errors.lastName ? "lastName-error" : undefined}
               className={cn("lead-form__input", errors.lastName && "lead-form__input--error")}
+              autoComplete="family-name"
             />
             {errors.lastName && (
               <span id="lastName-error" role="alert" className="lead-form__error">{errors.lastName}</span>

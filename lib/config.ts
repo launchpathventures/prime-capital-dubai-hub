@@ -87,7 +87,7 @@ export const config = {
    */
   contact: {
     reraOrn: "28153",
-    email: "admin@primecapitaldubai.com",
+    email: "tahir@primecapitaldubai.com",
     phone: "+971 58 5414720",
     address: "API Business Suites, Office 101, Sheikh Zayed Rd, Al Barsha, Dubai",
   },

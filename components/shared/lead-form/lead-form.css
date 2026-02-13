@@ -435,7 +435,7 @@
   padding: 0.875rem 1.5rem;
   font-size: var(--lf-font-small);
   font-weight: 400;
-  color: var(--web-off-white, #F2EFEA);
+  color: var(--lf-submit-text, var(--web-off-white, #F2EFEA));
   background: var(--lf-accent);
   border: none;
   border-radius: 2px;

@@ -28,17 +28,16 @@ import { privateContextStepSchema } from "../schema"
 
 interface PrivateContextStepProps {
   data: Partial<LeadFormData>
-  onUpdate: (data: Partial<LeadFormData>) => void
-  onSubmit: () => void
+  onSubmit: (data: Partial<LeadFormData>) => void
   isSubmitting: boolean
   theme: FormTheme
 }
 
 export function PrivateContextStep({
   data,
-  onUpdate,
   onSubmit,
   isSubmitting,
+  theme: _theme, // Received for interface consistency; styling via CSS parent classes
 }: PrivateContextStepProps) {
   const [privateRole, setPrivateRole] = useState<PrivateRole | undefined>(data.privateRole)
   const [deploymentRange, setDeploymentRange] = useState<DeploymentRange | undefined>(data.deploymentRange)
@@ -68,21 +67,17 @@ export function PrivateContextStep({
     }
 
     setErrors({})
-    onUpdate({ privateRole, deploymentRange, preferredContact, privateContext: privateContext || undefined })
-    onSubmit()
+    onSubmit({ privateRole, deploymentRange, preferredContact, privateContext: privateContext || undefined })
   }
-
-  const firstName = data.firstName || ""
 
   return (
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
-        <p className="lead-form__greeting">Thank you, {firstName}.</p>
         <h2 className="lead-form__question">
-          A few details so we can prepare
+          A few details to prepare
         </h2>
         <p className="lead-form__subtext">
-          All information is held in strict confidence.
+          Held in strict confidence.
         </p>
       </div>
 
@@ -165,14 +160,14 @@ export function PrivateContextStep({
         {/* Optional context */}
         <div className="lead-form__field">
           <label htmlFor="privateContext" className="lead-form__label">
-            Anything we should know ahead of the call?
+            Anything else?
             <span className="lead-form__label-optional"> (optional)</span>
           </label>
           <textarea
             id="privateContext"
             value={privateContext}
             onChange={(e) => setPrivateContext(e.target.value)}
-            placeholder="E.g. specific areas of interest, timeline, advisory relationships"
+            placeholder="Areas of interest, timeline, advisory relationships..."
             className="lead-form__input lead-form__textarea"
             rows={3}
             maxLength={500}

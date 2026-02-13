@@ -30,7 +30,7 @@ import {
 } from "lucide-react"
 
 export const metadata = {
-  title: "Dubai Investment Strategy Kit | Prime Capital Dubai",
+  title: "Dubai Investment Strategy Kit",
   description:
     "Download our comprehensive guide to Dubai real estate investment. Three proven strategies, area-by-area analysis, rental yields, Golden Visa guide, and full cost transparency.",
   alternates: {

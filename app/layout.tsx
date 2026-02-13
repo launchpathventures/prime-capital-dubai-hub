@@ -12,6 +12,7 @@
  */
 
 import type { Metadata } from "next"
+import { Playfair_Display } from "next/font/google"
 import "./globals.css"
 import "@/design/animate.css"
 import "@/design/helpers.css"
@@ -20,6 +21,17 @@ import "@/design/shared.css"
 import { config } from "@/lib/config"
 import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/json-ld"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+
+// -----------------------------------------------------------------------------
+// Fonts — loaded via next/font for consistent cross-platform rendering
+// -----------------------------------------------------------------------------
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-headline",
+})
 
 // -----------------------------------------------------------------------------
 // Metadata
@@ -33,8 +45,8 @@ export const metadata: Metadata = {
   description: config.app.description,
   metadataBase: new URL(config.app.url),
   icons: {
-    icon: "/icon.svg",
-    apple: "/apple-touch-icon.png",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
   },
   openGraph: {
     title: config.app.name,
@@ -69,7 +81,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={playfair.variable}>
       <body className="antialiased">
         {children}
         <SpeedInsights />

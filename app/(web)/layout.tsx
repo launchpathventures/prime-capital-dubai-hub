@@ -9,10 +9,18 @@
  */
 
 import "./web.css"
+import type { Metadata } from "next"
 import { WebShell } from "./_surface/web-shell"
 import { Analytics } from "@vercel/analytics/next"
 
 export const revalidate = 300
+
+export const metadata: Metadata = {
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
+}
 
 export default function WebGroupLayout({
   children,

@@ -107,9 +107,10 @@ export default async function HomePage() {
 function HeroSection({ types, locations }: { types: string[]; locations: string[] }) {
   return (
     <ParallaxHero
-      imageUrl="/images/hero/home-hero.jpg"
-      overlay="linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.35) 70%, rgba(0,0,0,0.65) 100%)"
-      intensity={0.15}
+      imageUrl="/images/hero/prime-capital-hero.jpg"
+      overlay="linear-gradient(to bottom, rgba(20,22,26,0.45) 0%, rgba(20,22,26,0.25) 35%, rgba(20,22,26,0.4) 65%, rgba(16,18,22,0.75) 100%)"
+      objectPosition="center 65%"
+      intensity={0.12}
       priority
       className="web-hero flex-1 flex flex-col items-center text-center relative"
     >
@@ -118,24 +119,24 @@ function HeroSection({ types, locations }: { types: string[]; locations: string[
         <Container size="lg" className="relative z-10 px-4">
           <Stack gap="lg" align="center" className="max-w-[720px] mx-auto max-md:max-w-full">
             <h1
-              className="font-headline text-[var(--web-off-white)] text-[clamp(38px,7vw,76px)] font-normal leading-[1.15] tracking-tight text-center"
-              style={{ textShadow: "0 2px 40px rgba(0,0,0,0.3)" }}
+              className="font-headline text-[var(--web-off-white)] text-[clamp(36px,6vw,64px)] font-normal leading-[1.1] tracking-tight text-center"
+              style={{ textShadow: "0 2px 40px rgba(0,0,0,0.4)" }}
             >
               We move complexity out of sight.
             </h1>
 
             <p
-              className="text-white/80 text-[clamp(16px,2vw,21px)] font-light leading-relaxed max-w-[480px] mt-2"
-              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.2)" }}
+              className="text-white/85 text-[clamp(16px,1.8vw,20px)] font-light leading-relaxed max-w-[480px] mt-2"
+              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.25)" }}
             >
               Boutique real estate advisory for discerning investors.
             </p>
 
-            <Link 
+            <Link
               href="/contact"
               className="web-hero-cta"
             >
-              Begin Your Journey
+              Invest With Prime
             </Link>
           </Stack>
         </Container>

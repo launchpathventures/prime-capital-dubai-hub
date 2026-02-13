@@ -5,21 +5,25 @@
  * investors who arrive via intermediaries, not marketing. The design is
  * intentionally distinct from the main brand: darker, quieter, more spacious.
  *
+ * Design philosophy: The luxury is in the restraint. No image galleries,
+ * no stock photography. One cinematic hero, then typography, space, and
+ * muted gold accents do the work. Every section earns its place.
+ *
  * Structure:
- * 1. Full-viewport hero — dark, minimal, serif headline
- * 2. Positioning — who this is for, what it solves
- * 3. Pillars — the 4 concerns UHNW investors have
- * 4. How we work — 3-step engagement
- * 5. Credentials — quiet proof
- * 6. CTA — private consultation
+ * 1. Full-viewport parallax hero — cinematic, very dark
+ * 2. Positioning — centred text, generous space, validating
+ * 3. Pillars — refined card grid, icon-led, no images
+ * 4. How we work — numbered steps on warm ivory
+ * 5. Credentials — quiet stats, dark background
+ * 6. CTA — two-column with embedded lead form
  */
 
 import Link from "next/link"
-import Image from "next/image"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { LeadForm } from "@/components/shared/lead-form"
 import { config } from "@/lib/config"
+import { ParallaxHero } from "../_surface/parallax-hero"
 import {
   ShieldCheckIcon,
   LockKeyholeIcon,
@@ -29,7 +33,7 @@ import {
 } from "lucide-react"
 
 export const metadata = {
-  title: "Private | Prime Capital Dubai",
+  title: "Private",
   description:
     "Private real estate advisory for investors and their advisors deploying significant capital into Dubai.",
   alternates: {
@@ -51,25 +55,18 @@ export default function PrivatePage() {
 }
 
 // =============================================================================
-// HERO
+// HERO — Cinematic parallax. One image for the entire page. Very dark.
 // =============================================================================
 
 function HeroSection() {
   return (
-    <section className="pcp-hero">
-      {/* Background — Emirates Hills villa, quiet luxury */}
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2400&auto=format&fit=crop"
-          alt=""
-          fill
-          priority
-          className="object-cover object-[center_40%]"
-          sizes="100vw"
-        />
-        <div className="pcp-hero-overlay" />
-      </div>
-
+    <ParallaxHero
+      imageUrl="https://images.unsplash.com/photo-1751473058035-3b7ef98d0367?q=80&w=2400&auto=format&fit=crop"
+      overlay="linear-gradient(to bottom, rgba(26,26,31,0.45) 0%, rgba(26,26,31,0.65) 50%, rgba(26,26,31,0.92) 100%)"
+      intensity={0.08}
+      className="pcp-hero"
+      priority
+    >
       <Container size="md" className="relative z-10 px-6">
         <Stack gap="lg" align="center" className="text-center pcp-hero-content">
           {/* Wordmark */}
@@ -108,12 +105,12 @@ function HeroSection() {
       <div className="pcp-scroll-hint">
         <ChevronDownIcon className="h-5 w-5" />
       </div>
-    </section>
+    </ParallaxHero>
   )
 }
 
 // =============================================================================
-// POSITIONING
+// POSITIONING — Centred. Generous space. No image — the words do the work.
 // =============================================================================
 
 function PositioningSection() {
@@ -121,25 +118,30 @@ function PositioningSection() {
     <section className="pcp-section pcp-positioning">
       <Container size="sm" className="px-6">
         <Stack gap="lg" align="center" className="text-center">
-          <Title
-            as="h2"
-            className="pcp-section-headline"
-          >
+          <span className="pcp-eyebrow">Who This Is For</span>
+
+          <Title as="h2" className="pcp-section-headline">
             A different kind of engagement
           </Title>
 
           <div className="pcp-divider" />
 
-          <Text className="pcp-body max-w-[520px]">
+          <Text className="pcp-body max-w-[540px]">
             Deploying significant capital into a new market brings real
             questions — about how funds move, how privacy is maintained,
-            how residency works, and who you're actually dealing with.
+            how residency works, and who you&#39;re actually dealing with.
           </Text>
 
-          <Text className="pcp-body max-w-[520px]">
+          <Text className="pcp-body max-w-[540px]">
             Prime Capital Private is for investors and their professional
             advisors who need these questions answered properly before
             anything else happens.
+          </Text>
+
+          <Text className="pcp-body-emphasis max-w-[480px]">
+            No sales pressure. No marketing noise.
+            <br />
+            Just substance, clarity, and discretion.
           </Text>
         </Stack>
       </Container>
@@ -148,7 +150,7 @@ function PositioningSection() {
 }
 
 // =============================================================================
-// PILLARS
+// PILLARS — Refined card grid. Icon-led. No images. Let the detail breathe.
 // =============================================================================
 
 function PillarsSection() {
@@ -190,7 +192,7 @@ function PillarsSection() {
       icon: HandshakeIcon,
       title: "Portfolio Strategy",
       description:
-        "Multi-asset deployment across Dubai's prime corridors. Strategy, not just transactions.",
+        "Multi-asset deployment across Dubai&#39;s prime corridors. Strategy, not just transactions.",
       points: [
         "Diversified across areas and asset types",
         "Off-market and pre-launch access",
@@ -209,7 +211,7 @@ function PillarsSection() {
           </Title>
         </Stack>
 
-        <Grid cols={1} className="md:grid-cols-2 gap-6 pcp-pillars-grid">
+        <Grid cols={1} className="md:grid-cols-2 gap-px pcp-pillars-grid">
           {pillars.map((pillar) => {
             const Icon = pillar.icon
             return (
@@ -244,7 +246,7 @@ function PillarsSection() {
 }
 
 // =============================================================================
-// ENGAGEMENT — How it works
+// ENGAGEMENT — Numbered steps on warm ivory. No image — focus on the process.
 // =============================================================================
 
 function EngagementSection() {
@@ -277,6 +279,10 @@ function EngagementSection() {
           <Title as="h2" className="pcp-section-headline-dark">
             A simple, structured process
           </Title>
+          <Text className="pcp-body-dark max-w-[460px]">
+            Every engagement follows a clear path — designed for
+            confidence, not complexity.
+          </Text>
         </Stack>
 
         <div className="pcp-steps">
@@ -301,7 +307,7 @@ function EngagementSection() {
 }
 
 // =============================================================================
-// CREDENTIALS
+// CREDENTIALS — Quiet stats. Dark. No background image — just numbers.
 // =============================================================================
 
 function CredentialsSection() {
@@ -313,18 +319,7 @@ function CredentialsSection() {
 
   return (
     <section className="pcp-section pcp-credentials">
-      {/* Subtle background image — Dubai skyline, very faint */}
-      <div className="absolute inset-0 -z-10 opacity-[0.04]">
-        <Image
-          src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2800&auto=format&fit=crop"
-          alt=""
-          fill
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-      </div>
-
-      <Container size="md" className="relative z-10 px-6">
+      <Container size="md" className="px-6">
         <Stack gap="lg" align="center" className="text-center mb-12">
           <span className="pcp-eyebrow">Track Record</span>
           <Title as="h2" className="pcp-section-headline">
@@ -350,44 +345,54 @@ function CredentialsSection() {
 }
 
 // =============================================================================
-// CTA
+// CTA — Two-column with embedded lead form
 // =============================================================================
 
 function CTASection() {
   return (
     <section id="enquire" className="pcp-section pcp-cta">
-      <Container size="sm" className="px-6">
-        <Stack gap="lg" align="center" className="text-center">
-          <div className="pcp-cta-rule" />
+      <Container size="xl" className="px-6">
+        <div className="pcp-cta-layout">
+          {/* Left: copy */}
+          <Stack gap="md" className="pcp-cta-copy">
+            <div className="pcp-cta-rule" />
 
-          <Title as="h2" className="pcp-section-headline">
-            Start a conversation
-          </Title>
+            <Title as="h2" className="pcp-section-headline">
+              Start a conversation
+            </Title>
 
-          <Text className="pcp-body max-w-[400px]">
-            Whether you're an investor or an advisor representing one,
-            we're happy to talk.
-          </Text>
-        </Stack>
+            <Text className="pcp-body max-w-[440px]">
+              Whether you&#39;re an investor or an advisor representing one,
+              we&#39;re happy to talk. Share a few details and a senior member of
+              our team will be in touch within one business day.
+            </Text>
 
-        {/* Private lead form — dark theme to match page */}
-        <div className="mt-12 max-w-[480px] mx-auto">
-          <LeadForm mode="private" theme="dark" />
+            <Stack gap="xs" className="mt-4">
+              <Text className="pcp-body-muted text-[13px]">
+                Or contact us directly
+              </Text>
+              <a
+                href={`mailto:${config.contact.email}?subject=Private Enquiry`}
+                className="pcp-inline-link text-[15px]"
+              >
+                {config.contact.email}
+              </a>
+              <a
+                href={`tel:${config.contact.phone}`}
+                className="pcp-inline-link text-[15px]"
+              >
+                {config.contact.phone}
+              </a>
+            </Stack>
+
+            <div className="pcp-cta-rule mt-6" />
+          </Stack>
+
+          {/* Right: lead form */}
+          <div className="pcp-cta-form-wrapper">
+            <LeadForm mode="private" theme="dark" />
+          </div>
         </div>
-
-        <Stack gap="sm" align="center" className="mt-10 text-center">
-          <Text className="pcp-body-muted text-[13px]">
-            Or email{" "}
-            <a
-              href={`mailto:${config.contact.email}?subject=Private Enquiry`}
-              className="pcp-inline-link"
-            >
-              {config.contact.email}
-            </a>
-          </Text>
-
-          <div className="pcp-cta-rule" />
-        </Stack>
       </Container>
     </section>
   )

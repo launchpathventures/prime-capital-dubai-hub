@@ -38,6 +38,14 @@ export function WebNav({ scrolled = false }: WebNavProps) {
   const pathname = usePathname()
   const menuRef = React.useRef<HTMLDivElement>(null)
 
+  const handlePrivateNavClick = React.useCallback(() => {
+    const contentEl = document.querySelector('[data-slot="shell-content"]')
+    if (contentEl) {
+      contentEl.scrollTo({ top: 0, behavior: "instant" })
+    }
+    window.scrollTo({ top: 0, behavior: "instant" })
+  }, [])
+
   // Close mobile menu on route change
   React.useEffect(() => {
     setMobileOpen(false)
@@ -115,7 +123,7 @@ export function WebNav({ scrolled = false }: WebNavProps) {
     <>
       {/* Desktop navigation */}
       <Header.Nav aria-label="Main navigation">
-        <NavItems />
+        <NavItems onPrivateNavClick={handlePrivateNavClick} />
         <ContactButton scrolled={scrolled} />
       </Header.Nav>
 
@@ -171,7 +179,13 @@ export function WebNav({ scrolled = false }: WebNavProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={closeMenu}
+                  onClick={() => {
+                    if (item.href === "/private") {
+                      handlePrivateNavClick()
+                    }
+                    closeMenu()
+                  }}
+                  scroll={item.href === "/private"}
                   aria-current={pathname === item.href ? "page" : undefined}
                   className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
@@ -202,10 +216,12 @@ export function WebNav({ scrolled = false }: WebNavProps) {
 interface NavItemsProps {
   /** Whether rendering for mobile (applies explicit mobile styles) */
   mobile?: boolean
+  /** Optional handler for Private Advisory nav clicks */
+  onPrivateNavClick?: () => void
 }
 
 /** Renders the main navigation items — used in both desktop and mobile */
-function NavItems({ mobile }: NavItemsProps) {
+function NavItems({ mobile, onPrivateNavClick }: NavItemsProps) {
   const pathname = usePathname()
   return (
     <>
@@ -213,6 +229,8 @@ function NavItems({ mobile }: NavItemsProps) {
         <Link
           key={item.href}
           href={item.href}
+          onClick={item.href === "/private" ? onPrivateNavClick : undefined}
+          scroll={item.href === "/private"}
           aria-current={pathname === item.href ? "page" : undefined}
           className={mobile ? "web-mobile-nav-link" : undefined}
         >

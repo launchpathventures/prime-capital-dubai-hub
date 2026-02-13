@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${property.title} | Prime Capital Dubai`,
+    title: property.title,
     description: property.description?.slice(0, 160) ?? "",
     alternates: {
       canonical: `/properties/${property.slug}`,

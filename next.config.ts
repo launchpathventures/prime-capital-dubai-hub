@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+      {
+        protocol: "https",
         hostname: "ebirxyrjwaulyqizcbcs.supabase.co",
       },
       {
@@ -59,7 +63,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://api.mapbox.com; font-src 'self'; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://api.mapbox.com; font-src 'self'; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src 'none';",
           },
         ],
       },

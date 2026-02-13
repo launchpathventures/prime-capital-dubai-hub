@@ -23,6 +23,8 @@ interface ParallaxHeroProps {
   children: React.ReactNode
   /** Priority loading for LCP optimization */
   priority?: boolean
+  /** Image focal point (CSS object-position) */
+  objectPosition?: string
 }
 
 export function ParallaxHero({
@@ -32,6 +34,7 @@ export function ParallaxHero({
   className = "",
   children,
   priority = false,
+  objectPosition = "center center",
 }: ParallaxHeroProps) {
   const [isDesktop, setIsDesktop] = React.useState(false)
   const heroRef = React.useRef<HTMLElement>(null)
@@ -108,7 +111,8 @@ export function ParallaxHero({
             fill
             priority={priority}
             fetchPriority={priority ? "high" : "auto"}
-            className="object-cover object-[center_30%]"
+            className="object-cover"
+            style={{ objectPosition }}
             sizes="100vw"
           />
         </div>

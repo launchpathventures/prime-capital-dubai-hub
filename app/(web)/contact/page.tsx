@@ -12,7 +12,7 @@ import { LeadForm } from "@/components/shared/lead-form"
 import { PhoneIcon, MailIcon, MessageCircleIcon } from "lucide-react"
 
 export const metadata = {
-  title: "Contact Us | Prime Capital Dubai",
+  title: "Contact Us",
   description: "Get in touch with Prime Capital Dubai for investment advisory.",
   alternates: {
     canonical: "/contact",

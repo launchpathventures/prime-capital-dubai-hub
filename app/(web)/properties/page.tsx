@@ -17,7 +17,7 @@ import { ArrowRightIcon } from "lucide-react"
 import { PropertiesFilter } from "./_components/properties-filter"
 
 export const metadata = {
-  title: "Properties | Prime Capital Dubai",
+  title: "Properties",
   description: "Curated selection of premium Dubai real estate opportunities.",
   alternates: {
     canonical: "/properties",

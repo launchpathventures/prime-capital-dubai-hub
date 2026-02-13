@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 
 export const metadata = {
-  title: "Terms & Conditions | Prime Capital Dubai",
+  title: "Terms & Conditions",
   description:
     "Terms and conditions for Prime Capital Real Estate Brokers LLC services.",
   alternates: {

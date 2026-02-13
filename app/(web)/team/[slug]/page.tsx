@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: `${member.name} | Prime Capital Dubai`,
+    title: member.name,
     description: member.shortBio || member.bio?.slice(0, 160) || `Meet ${member.name}, ${member.role} at Prime Capital Dubai.`,
     alternates: {
       canonical: `/team/${member.slug}`,

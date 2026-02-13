@@ -59,6 +59,107 @@
 }
 
 /* =============================================================================
+   PRIVATE ADVISORY BANNER
+   Subtle announcement bar for UHNW investors.
+   Uses main brand colors (ash/spruce) to stay on-brand with the main site.
+   ============================================================================= */
+
+.private-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001; /* Above header */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  height: 2.25rem;
+  padding-inline: 1rem;
+  background: var(--web-ash);
+  border-bottom: 1px solid rgba(87, 108, 117, 0.2); /* Spruce tint */
+}
+
+.private-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+}
+
+.private-banner__text {
+  color: rgba(242, 239, 234, 0.7); /* Muted off-white */
+}
+
+.private-banner__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--web-serenity);
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.private-banner__link:hover {
+  color: var(--web-off-white);
+}
+
+.private-banner__arrow {
+  width: 0.875rem;
+  height: 0.875rem;
+  transition: transform 0.15s;
+}
+
+.private-banner__link:hover .private-banner__arrow {
+  transform: translateX(2px);
+}
+
+.private-banner__dismiss {
+  position: absolute;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  color: rgba(242, 239, 234, 0.4);
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.private-banner__dismiss:hover {
+  color: rgba(242, 239, 234, 0.8);
+}
+
+/* When banner is visible, push header down */
+.web-shell:has(.private-banner) .web-header-wrapper {
+  top: 2.25rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 639px) {
+  .private-banner {
+    height: 2.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .private-banner__content {
+    font-size: 0.75rem;
+  }
+
+  .private-banner__dismiss {
+    right: 0.5rem;
+  }
+
+  .web-shell:has(.private-banner) .web-header-wrapper {
+    top: 2.5rem;
+  }
+}
+
+/* =============================================================================
    WEB SHELL & HEADER
    Fixed transparent header that becomes solid on scroll.
    ============================================================================= */
@@ -336,30 +437,30 @@
   min-height: 100dvh;
 }
 
-/* Hero CTA — solid, prominent, unmissable */
+/* Hero CTA — ghost outline for a more refined, premium feel */
 .web-hero-cta {
   margin-top: 2rem;
-  height: 52px;
+  height: 54px;
   padding: 0 3rem;
-  background: var(--web-off-white);
-  color: var(--web-ash);
-  border: none;
+  background: transparent;
+  color: var(--web-off-white);
+  border: 1px solid rgba(242, 239, 234, 0.45);
   border-radius: 2px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  transition: background 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  transition: background 300ms ease, color 300ms ease, border-color 300ms ease, transform 200ms ease;
 }
 
 .web-hero-cta:hover {
-  background: white;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  background: var(--web-off-white);
+  color: var(--web-ash);
+  border-color: var(--web-off-white);
+  transform: translateY(-1px);
 }
 
 /* Stats bar — compact proof strip */
@@ -378,15 +479,15 @@
   transform: translateY(50%);
 }
 
-/* The bar itself */
+/* The bar itself — off-white to reduce contrast jump at fold */
 .property-search {
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--web-off-white);
   border-radius: 3px;
   box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.08);
+    0 8px 40px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   height: 62px;
 }
 
@@ -497,8 +598,9 @@
   .web-hero-cta {
     width: 100%;
     margin-top: 1.5rem;
-    height: 46px;
+    height: 48px;
     padding: 0 2rem;
+    font-size: 11px;
   }
 
   /* Tighter hero content spacing on mobile */
@@ -552,11 +654,11 @@
   }
 }
 
-/* Entrance animation */
+/* Entrance animation — appears with the hero content cascade, not after */
 .property-search {
   opacity: 0;
   transform: translateY(12px);
-  animation: fadeSlideUp 500ms cubic-bezier(0, 0, 0.2, 1) 700ms forwards;
+  animation: fadeSlideUp 500ms cubic-bezier(0, 0, 0.2, 1) 500ms forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -852,9 +954,9 @@
    Enhanced text styling for brand alignment.
    ============================================================================= */
 
-/* Headline font with negative tracking */
+/* Headline font — Playfair Display loaded via next/font, Palatino as fallback */
 .font-headline {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   letter-spacing: -0.02em;
 }
 
@@ -1013,7 +1115,7 @@
 }
 
 .terms-block-title {
-  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-family: var(--font-headline), "Palatino Linotype", "Book Antiqua", Palatino, serif;
   font-size: clamp(20px, 2.5vw, 26px);
   font-weight: 400;
   color: var(--web-ash);
@@ -1337,7 +1439,7 @@
 }
 
 .svc-block-number {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(48px, 5vw, 64px);
   font-weight: 300;
   color: rgba(87, 108, 117, 0.12);
@@ -1347,7 +1449,7 @@
 }
 
 .svc-block-title {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(24px, 3vw, 32px);
   font-weight: 400;
   color: var(--web-ash);
@@ -1473,7 +1575,7 @@
 }
 
 .svc-step-number {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 22px;
   font-weight: 400;
   color: var(--web-off-white);
@@ -1481,7 +1583,7 @@
 }
 
 .svc-step-title {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 20px;
   font-weight: 400;
   color: var(--web-off-white);
@@ -1670,16 +1772,7 @@
   overflow: hidden;
 }
 
-.pcp-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(26, 26, 31, 0.82) 0%,
-    rgba(26, 26, 31, 0.88) 50%,
-    rgba(26, 26, 31, 0.94) 100%
-  );
-}
+/* ParallaxHero handles the overlay internally via its `overlay` prop */
 
 /* Wordmark — "Prime Capital | Private" */
 .pcp-wordmark {
@@ -1690,7 +1783,7 @@
 }
 
 .pcp-wordmark-prime {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.25em;
@@ -1705,7 +1798,7 @@
 }
 
 .pcp-wordmark-private {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.25em;
@@ -1715,7 +1808,7 @@
 
 /* Headline */
 .pcp-headline {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(30px, 5vw, 52px);
   font-weight: 400;
   line-height: 1.15;
@@ -1809,7 +1902,7 @@
 }
 
 .pcp-section-headline {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(26px, 3.5vw, 40px);
   font-weight: 400;
   line-height: 1.2;
@@ -1819,7 +1912,7 @@
 
 /* For light backgrounds */
 .pcp-section-headline-dark {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: clamp(26px, 3.5vw, 40px);
   font-weight: 400;
   line-height: 1.2;
@@ -1842,7 +1935,7 @@
 }
 
 .pcp-body-emphasis {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 18px;
   font-weight: 400;
   font-style: italic;
@@ -1876,68 +1969,78 @@
 }
 
 /* =============================================================================
-   PCP POSITIONING SECTION
+   PCP POSITIONING
+   Dark section — typography-focused, generous space.
    ============================================================================= */
 
 .pcp-positioning {
-  background: var(--pcp-charcoal);
-  border-top: 1px solid rgba(184, 168, 138, 0.08);
+  /* Inherits dark bg from .pcp */
 }
 
 /* =============================================================================
    PCP PILLARS
-   Four concerns — dark card grid with gold accents.
+   Four refined cards in a 2x2 grid. Icon-led, no images.
    ============================================================================= */
 
 .pcp-pillars {
   background: var(--pcp-deep);
 }
 
-.pcp-pillar-card {
-  padding: 2.5rem;
-  background: var(--pcp-charcoal);
+.pcp-pillars-grid {
+  background: rgba(184, 168, 138, 0.08);
   border: 1px solid rgba(184, 168, 138, 0.08);
-  border-radius: 2px;
-  transition: border-color 400ms ease, transform 400ms ease;
+}
+
+.pcp-pillar-card {
+  background: var(--pcp-charcoal);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: background 300ms ease;
+}
+
+@media (min-width: 768px) {
+  .pcp-pillar-card {
+    padding: 3rem;
+  }
 }
 
 .pcp-pillar-card:hover {
-  border-color: rgba(184, 168, 138, 0.2);
-  transform: translateY(-3px);
+  background: var(--pcp-deep);
 }
 
 .pcp-pillar-icon {
-  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
   border: 1px solid var(--pcp-gold-dim);
   border-radius: 50%;
   color: var(--pcp-gold);
-  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .pcp-pillar-title {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 20px;
   font-weight: 400;
   color: var(--pcp-soft-white);
-  margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .pcp-pillar-description {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 300;
-  line-height: 1.75;
+  line-height: 1.7;
   color: rgba(232, 228, 220, 0.6);
-  margin-bottom: 1.25rem;
 }
 
 .pcp-pillar-points {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0.5rem 0 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1945,19 +2048,21 @@
 
 .pcp-pillar-points li {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: 0.625rem;
   font-size: 13px;
   font-weight: 300;
-  color: rgba(232, 228, 220, 0.55);
+  color: rgba(232, 228, 220, 0.5);
+  line-height: 1.5;
 }
 
 .pcp-pillar-bullet {
   width: 4px;
   height: 4px;
-  border-radius: 50%;
   background: var(--pcp-gold-dim);
+  border-radius: 50%;
   flex-shrink: 0;
+  margin-top: 0.45em;
 }
 
 /* =============================================================================
@@ -1972,7 +2077,6 @@
 
 .pcp-engagement .pcp-eyebrow {
   color: var(--pcp-gold);
-  /* Gold reads well on ivory */
 }
 
 .pcp-steps {
@@ -2005,7 +2109,7 @@
   justify-content: center;
   border: 1px solid var(--pcp-gold-dim);
   border-radius: 50%;
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 18px;
   color: var(--pcp-gold);
 }
@@ -2016,7 +2120,7 @@
 }
 
 .pcp-step-title {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   font-size: 22px;
   font-weight: 400;
   color: var(--pcp-ash);
@@ -2059,7 +2163,7 @@
 
 /* =============================================================================
    PCP CREDENTIALS
-   Dark section with quiet stats grid.
+   Dark section with quiet stats grid. No background image — just numbers.
    ============================================================================= */
 
 .pcp-credentials {
@@ -2090,12 +2194,13 @@
 }
 
 .pcp-credential-value {
-  font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-  font-size: clamp(28px, 4vw, 40px);
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  font-size: clamp(26px, 3.5vw, 40px);
   font-weight: 400;
   color: var(--pcp-soft-white);
   line-height: 1;
   margin-bottom: 0.75rem;
+  white-space: nowrap;
 }
 
 .pcp-credential-label {
@@ -2107,17 +2212,27 @@
   opacity: 0.7;
 }
 
-.pcp-credential-note {
-  text-align: center;
-}
-
 /* =============================================================================
    PCP CTA
-   Dark section, centered, restrained.
+   Two-column: copy on left, embedded lead form on right.
    ============================================================================= */
 
 .pcp-cta {
   background: var(--pcp-deep);
+}
+
+.pcp-cta-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .pcp-cta-layout {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 5rem;
+    align-items: start;
+  }
 }
 
 .pcp-cta-rule {
@@ -2126,23 +2241,27 @@
   background: var(--pcp-gold-dim);
 }
 
-.pcp-primary-btn {
-  height: 52px;
-  padding: 0 2.5rem;
-  background: var(--pcp-gold);
-  color: var(--pcp-charcoal);
-  border: none;
-  border-radius: 1px;
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  transition: background 300ms ease, transform 200ms ease;
+.pcp-cta-copy {
+  padding-top: 1rem;
 }
 
-.pcp-primary-btn:hover {
-  background: var(--pcp-soft-white);
-  transform: translateY(-2px);
+@media (min-width: 1024px) {
+  .pcp-cta-copy {
+    position: sticky;
+    top: 8rem;
+  }
+}
+
+.pcp-cta-form-wrapper {
+  padding: 2.5rem;
+  background: var(--pcp-charcoal);
+  border: 1px solid rgba(184, 168, 138, 0.08);
+}
+
+@media (min-width: 768px) {
+  .pcp-cta-form-wrapper {
+    padding: 3rem;
+  }
 }
 
 /* =============================================================================
@@ -2157,9 +2276,8 @@
     animation: none;
   }
 
-  .pcp-pillar-card:hover,
-  .pcp-primary-btn:hover {
-    transform: none;
+  .pcp-pillar-card:hover {
+    background: var(--pcp-charcoal);
   }
 }
 
@@ -2168,14 +2286,6 @@
    ============================================================================= */
 
 @media (max-width: 767px) {
-  .pcp-pillar-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .pcp-pillar-card:hover {
-    transform: none;
-  }
-
   .pcp-headline {
     font-size: clamp(26px, 7vw, 36px);
   }
@@ -2195,8 +2305,71 @@
     justify-content: center;
   }
 
-  .pcp-primary-btn {
-    width: 100%;
-    justify-content: center;
+  .pcp-pillar-card {
+    padding: 2rem 1.5rem;
   }
+
+  .pcp-cta-form-wrapper {
+    padding: 1.5rem;
+  }
+}
+
+/* =============================================================================
+   PCP — LEAD FORM OVERRIDES
+   Gold palette, refined sizing for private mode elegance.
+   ============================================================================= */
+
+.pcp .lead-form--dark {
+  --lf-text: var(--pcp-soft-white);
+  --lf-text-muted: rgba(232, 228, 220, 0.6);
+  --lf-text-subtle: rgba(232, 228, 220, 0.4);
+  --lf-accent: var(--pcp-gold);
+  --lf-accent-hover: #c9bb9d;
+  --lf-submit-text: var(--pcp-charcoal);
+  --lf-border: rgba(184, 168, 138, 0.2);
+  --lf-border-hover: rgba(184, 168, 138, 0.4);
+  --lf-border-active: var(--pcp-gold);
+  --lf-option-bg-hover: rgba(184, 168, 138, 0.06);
+  --lf-option-bg-active: rgba(184, 168, 138, 0.12);
+  --lf-input-bg: rgba(184, 168, 138, 0.05);
+  --lf-dot: rgba(184, 168, 138, 0.3);
+  --lf-dot-active: var(--pcp-gold);
+
+  /* Tighter typography for private elegance */
+  --lf-font-question: clamp(20px, 2.5vw, 26px);
+  --lf-font-greeting: clamp(13px, 1.5vw, 14px);
+  --lf-gap: 1.25rem;
+}
+
+.pcp .lead-form__question {
+  font-family: var(--font-headline), 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.pcp .lead-form__greeting {
+  color: var(--pcp-gold);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+.pcp .lead-form__subtext {
+  font-size: 12px;
+}
+
+.pcp .lead-form__label {
+  color: var(--pcp-gold);
+  opacity: 0.7;
+}
+
+.pcp .lead-form__actions {
+  margin-top: 1rem;
+}
+
+.pcp .lead-form__submit {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1px;
 }

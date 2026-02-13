@@ -14,14 +14,13 @@ import type { LeadFormData, FormTheme } from "../types"
 
 interface QuestionsStepProps {
   data: Partial<LeadFormData>
-  onUpdate: (data: Partial<LeadFormData>) => void
-  onSubmit: () => void
+  onSubmit: (data: Partial<LeadFormData>) => void
   isSubmitting: boolean
   theme: FormTheme
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function QuestionsStep({ data, onUpdate, onSubmit, isSubmitting, theme }: QuestionsStepProps) {
+export function QuestionsStep({ data, onSubmit, isSubmitting, theme }: QuestionsStepProps) {
   const [hasQuestions, setHasQuestions] = useState<boolean | undefined>(
     data.hasQuestions
   )
@@ -66,8 +65,7 @@ export function QuestionsStep({ data, onUpdate, onSubmit, isSubmitting, theme }:
       return
     }
 
-    onUpdate({ hasQuestions, questionsText: hasQuestions ? questionsText : undefined })
-    onSubmit()
+    onSubmit({ hasQuestions, questionsText: hasQuestions ? questionsText : undefined })
   }
 
   return (

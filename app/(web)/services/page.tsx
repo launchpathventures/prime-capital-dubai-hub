@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 
 export const metadata = {
-  title: "Services | Prime Capital Dubai",
+  title: "Services",
   description: "Investment advisory, acquisition support, Golden Visa guidance, and asset management.",
   alternates: {
     canonical: "/services",

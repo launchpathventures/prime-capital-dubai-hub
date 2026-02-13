@@ -13,7 +13,7 @@ import { ArrowRightIcon, CheckIcon, ShieldCheckIcon, EyeIcon, TrendingUpIcon, Se
 import { ParallaxHero } from "../_surface/parallax-hero"
 
 export const metadata = {
-  title: "About Us | Prime Capital Dubai",
+  title: "About Us",
   description: "Learn about Prime Capital Dubai's boutique approach to real estate advisory.",
   alternates: {
     canonical: "/about",

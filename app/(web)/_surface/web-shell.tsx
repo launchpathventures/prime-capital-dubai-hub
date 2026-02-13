@@ -17,6 +17,7 @@ import { Header } from "@/components/layout/header"
 import { Logo } from "@/components/layout/logo"
 import { WebNav } from "./web-nav"
 import { WebFooter } from "./web-footer"
+import { PrivateBanner } from "./private-banner"
 
 // -----------------------------------------------------------------------------
 // WebShell Component
@@ -63,6 +64,9 @@ export function WebShell({ children }: WebShellProps) {
       >
         Skip to main content
       </a>
+
+      {/* Private Advisory banner - only shows on homepage */}
+      <PrivateBanner />
 
       {/* Fixed header wrapper - full width background, constrained content */}
       <div className="web-header-wrapper" data-scrolled={scrolled}>

@@ -39,6 +39,7 @@ export function LeadForm({
   downloadAsset,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
+  const previousStepRef = useRef<string | null>(null)
   const [honeypot, setHoneypot] = useState("")
 
   const {
@@ -53,6 +54,19 @@ export function LeadForm({
 
   // Scroll to top of form when step changes
   useEffect(() => {
+    // Skip initial render and Strict Mode effect replays on mount.
+    // Only scroll after an actual step transition.
+    if (previousStepRef.current === null) {
+      previousStepRef.current = currentStep
+      return
+    }
+
+    if (previousStepRef.current === currentStep) {
+      return
+    }
+
+    previousStepRef.current = currentStep
+
     if (formRef.current) {
       const rect = formRef.current.getBoundingClientRect()
       const headerOffset = 112 // 5rem header + 2rem breathing room
@@ -77,6 +91,7 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={nextStep}
             theme={theme}
+            mode={mode}
           />
         )
 
@@ -87,6 +102,7 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={nextStep}
             theme={theme}
+            mode={mode}
             isLastStep={isContactLastStep}
             isSubmitting={isSubmitting}
             onSubmit={submit}
@@ -127,7 +143,6 @@ export function LeadForm({
         return (
           <QuestionsStep
             data={data}
-            onUpdate={updateData}
             onSubmit={submit}
             isSubmitting={isSubmitting}
             theme={theme}
@@ -138,7 +153,6 @@ export function LeadForm({
         return (
           <PrivateContextStep
             data={data}
-            onUpdate={updateData}
             onSubmit={submit}
             isSubmitting={isSubmitting}
             theme={theme}

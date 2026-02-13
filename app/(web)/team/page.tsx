@@ -17,7 +17,7 @@ import { ArrowRightIcon } from "lucide-react"
 import { TeamCard } from "./_components/team-card"
 
 export const metadata = {
-  title: "Our Team | Prime Capital Dubai",
+  title: "Our Team",
   description: "Meet the experienced advisors at Prime Capital Dubai.",
   alternates: {
     canonical: "/team",

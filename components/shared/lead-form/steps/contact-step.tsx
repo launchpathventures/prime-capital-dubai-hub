@@ -9,7 +9,7 @@
 import { useState } from "react"
 import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LeadFormData, FormTheme } from "../types"
+import type { LeadFormData, FormTheme, FormMode } from "../types"
 import { contactStepSchema } from "../schema"
 
 interface ContactStepProps {
@@ -17,15 +17,17 @@ interface ContactStepProps {
   onUpdate: (data: Partial<LeadFormData>) => void
   onNext: () => void
   theme: FormTheme
+  mode?: FormMode
   isLastStep?: boolean
   isSubmitting?: boolean
-  onSubmit?: () => void
+  onSubmit?: (data: Partial<LeadFormData>) => void
 }
 
 export function ContactStep({
   data,
   onUpdate,
   onNext,
+  mode,
   isLastStep = false,
   isSubmitting = false,
   onSubmit,
@@ -50,11 +52,10 @@ export function ContactStep({
     }
 
     setErrors({})
-    onUpdate({ email, whatsapp })
-
     if (isLastStep && onSubmit) {
-      onSubmit()
+      onSubmit({ email, whatsapp })
     } else {
+      onUpdate({ email, whatsapp })
       onNext()
     }
   }
@@ -64,13 +65,26 @@ export function ContactStep({
   return (
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
-        <p className="lead-form__greeting">Nice to meet you, {firstName}.</p>
-        <h2 className="lead-form__question">
-          How can we reach you?
-        </h2>
-        <p className="lead-form__subtext">
-          We respect your privacy and never share your details.
-        </p>
+        {mode === "private" ? (
+          <>
+            <h2 className="lead-form__question">
+              How should we reach you?
+            </h2>
+            <p className="lead-form__subtext">
+              Your details remain strictly confidential.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="lead-form__greeting">Nice to meet you, {firstName}.</p>
+            <h2 className="lead-form__question">
+              Thanks {firstName}. Can you share your contact details so we can contact you about your enquiry.
+            </h2>
+            <p className="lead-form__subtext">
+              We cherish our clients&#39; privacy and never share your details with 3rd parties.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="lead-form__fields">
@@ -86,7 +100,8 @@ export function ContactStep({
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? "email-error" : undefined}
             className={cn("lead-form__input", errors.email && "lead-form__input--error")}
-            autoFocus
+            autoFocus={mode !== "private"}
+            autoComplete="email"
           />
           {errors.email && (
             <span id="email-error" role="alert" className="lead-form__error">{errors.email}</span>
@@ -105,6 +120,8 @@ export function ContactStep({
             aria-invalid={!!errors.whatsapp}
             aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
             className={cn("lead-form__input", errors.whatsapp && "lead-form__input--error")}
+            autoComplete="tel"
+            inputMode="tel"
           />
           {errors.whatsapp && (
             <span id="whatsapp-error" role="alert" className="lead-form__error">{errors.whatsapp}</span>

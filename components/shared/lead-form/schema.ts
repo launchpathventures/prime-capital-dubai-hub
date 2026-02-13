@@ -111,9 +111,18 @@ export const deploymentRangeSchema = z.enum(["5m-10m", "10m-20m", "20m-50m", "50
 export const preferredContactSchema = z.enum(["phone", "email", "whatsapp"])
 
 export const privateContextStepSchema = z.object({
-  privateRole: privateRoleSchema.refine((val) => !!val, { message: "Please select your role" }),
-  deploymentRange: deploymentRangeSchema.refine((val) => !!val, { message: "Please select a range" }),
-  preferredContact: preferredContactSchema.refine((val) => !!val, { message: "Please select a method" }),
+  privateRole: privateRoleSchema.optional().refine(
+    (val) => val !== undefined,
+    { message: "Please select your role" }
+  ),
+  deploymentRange: deploymentRangeSchema.optional().refine(
+    (val) => val !== undefined,
+    { message: "Please select a range" }
+  ),
+  preferredContact: preferredContactSchema.optional().refine(
+    (val) => val !== undefined,
+    { message: "Please select a method" }
+  ),
   privateContext: z.string().max(500).optional(),
 })
 

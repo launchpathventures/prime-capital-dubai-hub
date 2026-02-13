@@ -71,7 +71,7 @@ interface UseLeadFormReturn {
   updateData: (updates: Partial<LeadFormData>) => void
 
   // Submission
-  submit: () => Promise<void>
+  submit: (finalUpdates?: Partial<LeadFormData>) => Promise<void>
 
   // Computed
   availableSteps: StepId[]
@@ -145,38 +145,47 @@ export function useLeadForm({
   }, [])
 
   // Submission
-  const submit = useCallback(async () => {
+  const submit = useCallback(async (finalUpdates?: Partial<LeadFormData>) => {
     setIsSubmitting(true)
     setError(null)
 
     try {
+      const mergedData: Partial<LeadFormData> = finalUpdates
+        ? { ...data, ...finalUpdates }
+        : data
+
+      // Keep in-memory state aligned so success step/callback always has latest values.
+      if (finalUpdates) {
+        setData((prev) => ({ ...prev, ...finalUpdates }))
+      }
+
       const finalData: LeadFormData = {
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        email: data.email || "",
-        whatsapp: data.whatsapp || "",
-        goals: data.goals || [],
-        investTimeline: data.investTimeline,
-        budget: data.budget,
-        propertyLocation: data.propertyLocation,
-        propertyType: data.propertyType,
-        saleTimeline: data.saleTimeline,
-        targetPrice: data.targetPrice,
-        hasQuestions: data.hasQuestions,
-        questionsText: data.questionsText,
+        firstName: mergedData.firstName || "",
+        lastName: mergedData.lastName || "",
+        email: mergedData.email || "",
+        whatsapp: mergedData.whatsapp || "",
+        goals: mergedData.goals || [],
+        investTimeline: mergedData.investTimeline,
+        budget: mergedData.budget,
+        propertyLocation: mergedData.propertyLocation,
+        propertyType: mergedData.propertyType,
+        saleTimeline: mergedData.saleTimeline,
+        targetPrice: mergedData.targetPrice,
+        hasQuestions: mergedData.hasQuestions,
+        questionsText: mergedData.questionsText,
         // Private mode fields
-        privateRole: data.privateRole,
-        deploymentRange: data.deploymentRange,
-        preferredContact: data.preferredContact,
-        privateContext: data.privateContext,
+        privateRole: mergedData.privateRole,
+        deploymentRange: mergedData.deploymentRange,
+        preferredContact: mergedData.preferredContact,
+        privateContext: mergedData.privateContext,
         formMode: mode,
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
         ...utm,
         // Context from referring pages
-        referringProperty: data.referringProperty,
-        referringTeamMember: data.referringTeamMember,
-        referringTeamMemberEmail: data.referringTeamMemberEmail,
+        referringProperty: mergedData.referringProperty,
+        referringTeamMember: mergedData.referringTeamMember,
+        referringTeamMemberEmail: mergedData.referringTeamMemberEmail,
         // Honeypot for bot protection
         website: honeypot,
       }

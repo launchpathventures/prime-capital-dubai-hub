@@ -11,6 +11,7 @@
  */
 
 import "./learn.css"
+import type { Metadata } from "next"
 import { LearnLayoutShell } from "./_surface/learn-layout-shell"
 import { AppClientProviders } from "@/components/shared/app-client-providers"
 
@@ -21,9 +22,13 @@ export const dynamic = "force-dynamic"
 // Metadata
 // -----------------------------------------------------------------------------
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Learning Portal | Prime Capital Dubai",
   description: "Prime Capital Dubai agent training and certification platform",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 }
 
 // -----------------------------------------------------------------------------

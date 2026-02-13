@@ -8,6 +8,7 @@
  */
 
 import Link from "next/link"
+import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { 
   BookOpenIcon, 
@@ -19,6 +20,11 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { AcademyTour } from "./_surface/academy-tour"
+
+export const metadata: Metadata = {
+  title: "Dashboard | Learning Portal",
+  description: "Track competencies, modules, and certification progress in the Prime Capital Dubai learning portal.",
+}
 
 // =============================================================================
 // Types
