@@ -144,6 +144,9 @@ export interface LeadFormProps {
 
   /** Optional: Delay in ms before redirecting (default: 3000) */
   redirectDelay?: number
+
+  /** Optional: Auto-focus the first input on mount (default: true) */
+  autoFocus?: boolean
 }
 
 // =============================================================================

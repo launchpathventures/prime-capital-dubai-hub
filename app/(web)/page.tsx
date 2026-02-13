@@ -137,10 +137,10 @@ function HeroSection({ types, locations }: { types: string[]; locations: string[
       objectPosition="center 65%"
       intensity={0.12}
       priority
-      className="web-hero flex-none min-h-[100dvh] md:flex-1 md:min-h-0 flex flex-col items-center text-center relative"
+      className="web-hero flex-none min-h-[100dvh] md:flex-1 md:min-h-0 flex flex-col items-center max-md:justify-center text-center relative"
     >
       {/* Hero content — centred in available space, pt accounts for navbar */}
-      <div className="flex-1 flex items-center pt-[var(--web-header-height)] pb-16 max-md:pb-4">
+      <div className="max-md:pt-[var(--web-header-height)] flex-1 flex items-center pb-16 max-md:flex-none max-md:pb-0">
         <Container size="lg" className="relative z-10 px-4">
           <Stack gap="lg" align="center" className="max-w-[720px] mx-auto max-md:max-w-full">
             <h1
@@ -161,7 +161,7 @@ function HeroSection({ types, locations }: { types: string[]; locations: string[
               href="/contact"
               className="web-hero-cta"
             >
-              Invest With Prime
+              Start A Conversation
             </Link>
           </Stack>
         </Container>

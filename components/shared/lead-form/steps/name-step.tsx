@@ -19,9 +19,10 @@ interface NameStepProps {
   onNext: () => void
   theme: FormTheme
   mode?: FormMode
+  autoFocus?: boolean
 }
 
-export function NameStep({ data, onUpdate, onNext, mode }: NameStepProps) {
+export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: NameStepProps) {
   const [firstName, setFirstName] = useState(data.firstName || "")
   const [lastName, setLastName] = useState(data.lastName || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -73,7 +74,7 @@ export function NameStep({ data, onUpdate, onNext, mode }: NameStepProps) {
               aria-invalid={!!errors.firstName}
               aria-describedby={errors.firstName ? "firstName-error" : undefined}
               className={cn("lead-form__input", errors.firstName && "lead-form__input--error")}
-              autoFocus={mode !== "private"}
+              autoFocus={autoFocus && mode !== "private"}
               autoComplete="given-name"
             />
             {errors.firstName && (

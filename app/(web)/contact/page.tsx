@@ -9,7 +9,8 @@ import Image from "next/image"
 import { config } from "@/lib/config"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
-import { PhoneIcon, MailIcon, MessageCircleIcon } from "lucide-react"
+import { ParallaxHero } from "../_surface/parallax-hero"
+import { ContactBar } from "./contact-bar"
 import contactImage from "@/public/images/hero/contact.jpg"
 
 export const metadata = {
@@ -54,76 +55,48 @@ export default function ContactPage() {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[55vh] flex flex-col justify-center items-center text-center">
-      {/* Background Image */}
-      <div className="absolute inset-0 -z-10">
-        <Image
-          src={contactImage}
-          alt=""
-          fill
-          priority
-          placeholder="blur"
-          className="object-cover object-[center_30%]"
-          sizes="100vw"
-        />
-        {/* Gradient Overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(to bottom, rgba(63,65,66,0.55) 0%, rgba(63,65,66,0.65) 100%)" }}
-        />
-      </div>
-      <Container size="lg" className="relative z-10 px-4">
+    <ParallaxHero
+      imageUrl={contactImage}
+      overlay="linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)"
+      intensity={0.12}
+      objectPosition="center 30%"
+      priority
+      className="contact-hero relative min-h-[40vh] md:min-h-[55vh] flex flex-col items-center text-center"
+    >
+      {/* Push content below the transparent fixed header */}
+      <div className="pt-[var(--web-header-height)]" />
+
+      {/* Hero copy — vertically centered in remaining space */}
+      <div className="relative z-10 flex-1 flex items-center px-4 py-8 md:py-16">
         <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
-          <span className="text-[var(--web-serenity)] text-[11px] font-normal uppercase tracking-[0.25em]">
+          <span className="text-[var(--web-off-white)]/70 text-[11px] font-normal uppercase tracking-[0.25em]">
             Contact
           </span>
           
           <h1
-            className="font-headline text-[var(--web-off-white)] text-[clamp(36px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
-            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.3)" }}
+            className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
+            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}
           >
-            Let's start a conversation
+            Let&apos;s start a conversation
           </h1>
 
           <Text
-            className="text-white/80 text-[clamp(15px,1.8vw,18px)] font-light leading-relaxed max-w-[540px] mt-2"
-            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.2)" }}
+            className="text-[var(--web-off-white)]/80 text-[clamp(14px,1.8vw,18px)] font-light leading-relaxed max-w-[540px]"
+            style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
           >
             Whether you have a specific property in mind or are exploring your options,
-            we're here to help.
+            we&apos;re here to help.
           </Text>
         </Stack>
-      </Container>
+      </div>
 
-      {/* Contact Quick Links — absolute on md+, flows naturally on mobile */}
-      <div className="md:absolute md:bottom-0 md:left-0 md:right-0 bg-[var(--web-off-white)]">
-        <Container size="xl">
-          <div className="flex flex-wrap justify-center gap-4 py-6">
-            <a
-              href={`tel:${config.contact.phone.replace(/\s/g, "")}`}
-              className="flex items-center gap-3 px-6 py-3 border border-[var(--web-spruce)]/30 rounded-[2px] text-[var(--web-spruce)] text-[13px] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)] transition-colors"
-            >
-              <PhoneIcon className="h-4 w-4" />
-              {config.contact.phone}
-            </a>
-            <a
-              href={`mailto:${config.contact.email}`}
-              className="flex items-center gap-3 px-6 py-3 border border-[var(--web-spruce)]/30 rounded-[2px] text-[var(--web-spruce)] text-[13px] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)] transition-colors"
-            >
-              <MailIcon className="h-4 w-4" />
-              {config.contact.email}
-            </a>
-            <a
-              href={`https://wa.me/${config.contact.phone.replace(/\s/g, "").replace("+", "")}`}
-              className="flex items-center gap-3 px-6 py-3 border border-[var(--web-spruce)]/30 rounded-[2px] text-[var(--web-spruce)] text-[13px] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)] transition-colors"
-            >
-              <MessageCircleIcon className="h-4 w-4" />
-              WhatsApp
-            </a>
-          </div>
+      {/* Contact bar — pinned to hero bottom, edge-to-edge, brand spruce */}
+      <div className="relative z-10 w-full bg-[var(--web-spruce)]">
+        <Container size="lg" className="px-4">
+          <ContactBar />
         </Container>
       </div>
-    </section>
+    </ParallaxHero>
   )
 }
 
@@ -134,9 +107,9 @@ function HeroSection() {
 
 function ContactFormSection() {
   return (
-    <section className="bg-[var(--web-off-white)] pt-8 md:pt-12 pb-[var(--web-section-gap)]">
+    <section className="bg-[var(--web-off-white)] pt-8 md:pt-[var(--web-section-gap)] pb-[var(--web-section-gap)]">
       <Container size="sm">
-        <LeadForm mode="contact" theme="light" />
+        <LeadForm mode="contact" theme="light" autoFocus={false} />
       </Container>
     </section>
   )

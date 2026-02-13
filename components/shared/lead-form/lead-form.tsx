@@ -37,6 +37,7 @@ export function LeadForm({
   redirectUrl,
   redirectDelay,
   downloadAsset,
+  autoFocus = true,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   const previousStepRef = useRef<string | null>(null)
@@ -92,6 +93,7 @@ export function LeadForm({
             onNext={nextStep}
             theme={theme}
             mode={mode}
+            autoFocus={autoFocus}
           />
         )
 

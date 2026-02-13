@@ -35,6 +35,21 @@
 }
 
 /* =============================================================================
+   iOS FORM INPUT ZOOM PREVENTION
+   iOS Safari auto-zooms when a focused input has font-size < 16px.
+   This ensures all form elements are at least 16px on small screens,
+   regardless of Tailwind classes or density scaling.
+   ============================================================================= */
+
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* =============================================================================
    OVERFLOW & TEXT TRUNCATION
    Robust patterns for text overflow that work in complex layouts.
    ============================================================================= */
