@@ -34,7 +34,7 @@ const AUTH_MODE = process.env.AUTH_MODE as
   | undefined
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD
 const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT
-const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/learn"
+const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/auth/redirect"
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
@@ -105,7 +105,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Redirect authenticated users away from auth pages (except signout)
-    if (pathname.startsWith("/auth") && !isSignoutPath(pathname) && isAuthenticated) {
+    if (pathname.startsWith("/auth") && !isAuthExceptionPath(pathname) && isAuthenticated) {
       // Respect ?next parameter if provided, otherwise use default redirect
       const nextParam = request.nextUrl.searchParams.get("next")
       const redirectTarget = nextParam || AUTH_REDIRECT_TO
@@ -196,7 +196,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Redirect authenticated users away from auth pages (except signout)
-    if (pathname.startsWith("/auth") && !isSignoutPath(pathname) && user) {
+    if (pathname.startsWith("/auth") && !isAuthExceptionPath(pathname) && user) {
       // Respect ?next parameter if provided, otherwise use default redirect
       const nextParam = request.nextUrl.searchParams.get("next")
       const redirectTarget = nextParam || AUTH_REDIRECT_TO
@@ -279,9 +279,13 @@ export async function proxy(request: NextRequest) {
 // Helpers
 // -----------------------------------------------------------------------------
 
-/** Check if path is a signout route (don't redirect away from these) */
-function isSignoutPath(pathname: string): boolean {
-  return pathname === "/auth/signout" || pathname === "/api/auth/signout"
+/** Check if path is an auth exception (don't redirect authenticated users away from these) */
+function isAuthExceptionPath(pathname: string): boolean {
+  return (
+    pathname === "/auth/signout" ||
+    pathname === "/api/auth/signout" ||
+    pathname === "/auth/redirect"
+  )
 }
 
 // -----------------------------------------------------------------------------

@@ -25,6 +25,7 @@ import {
   SparklesIcon,
   GraduationCapIcon,
   MessageSquarePlusIcon,
+  ShieldIcon,
 } from "lucide-react"
 import { TourSidebarLink } from "./academy-tour"
 
@@ -302,6 +303,14 @@ export function LearnSidebar({
         <div className="learn-sidebar__section learn-sidebar__section--admin">
           <div className="learn-sidebar__heading">Admin</div>
           <nav className="learn-sidebar__nav-list">
+            <Link 
+              href="/admin/dashboard"
+              className="learn-sidebar__nav-item"
+              onClick={onNavigate}
+            >
+              <ShieldIcon className="learn-sidebar__nav-icon" />
+              <span>Admin Dashboard</span>
+            </Link>
             <Link 
               href="/learn/admin/users"
               className="learn-sidebar__nav-item"

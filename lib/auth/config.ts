@@ -55,7 +55,7 @@ const AUTH_PASSWORD = process.env.AUTH_PASSWORD
 const AUTH_CUSTOM_ENDPOINT = process.env.AUTH_CUSTOM_ENDPOINT
 
 /** Where to redirect after successful sign in */
-const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/learn"
+const AUTH_REDIRECT_TO = process.env.NEXT_PUBLIC_AUTH_REDIRECT_TO || "/auth/redirect"
 
 // -----------------------------------------------------------------------------
 // Auth Mode Detection

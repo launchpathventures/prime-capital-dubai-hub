@@ -272,3 +272,133 @@
   }
 }
 
+/* -----------------------------------------------------------------------------
+ * Destination Chooser (post-login surface picker)
+ * -------------------------------------------------------------------------- */
+
+/* Page wrapper — standalone layout, no AuthCard */
+.auth-redirect-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 640px;
+  animation: auth-fade-in 0.5s ease-out;
+}
+
+.auth-redirect-logo {
+  opacity: 0;
+  animation: auth-fade-in 0.4s ease-out 0.1s forwards;
+}
+
+/* Grid */
+.auth-destination-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Individual card */
+.auth-destination-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  text-decoration: none;
+  color: inherit;
+  box-shadow:
+    0 1px 3px oklch(from var(--color-foreground) l c h / 0.03),
+    0 4px 12px oklch(from var(--color-foreground) l c h / 0.03);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  opacity: 0;
+  animation: auth-destination-enter 0.4s ease-out forwards;
+}
+
+.auth-destination-card:nth-child(1) {
+  animation-delay: 0.15s;
+}
+
+.auth-destination-card:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.auth-destination-card:hover {
+  border-color: var(--color-primary);
+  box-shadow:
+    0 0 0 1px var(--color-primary),
+    0 4px 16px oklch(from var(--color-primary) l c h / 0.1);
+  transform: translateY(-1px);
+}
+
+.auth-destination-card:active {
+  transform: translateY(0);
+}
+
+.auth-destination-card:hover .auth-destination-arrow {
+  color: var(--color-primary);
+  transform: translateX(3px);
+}
+
+.auth-destination-card:hover .auth-destination-icon {
+  background: oklch(from var(--color-primary) l c h / 0.15);
+}
+
+/* Icon container */
+.auth-destination-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  background: oklch(from var(--color-primary) l c h / 0.08);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+/* Optional: secondary color for learn icon */
+.auth-destination-icon--learn {
+  background: oklch(from var(--color-secondary) l c h / 0.15);
+  color: var(--color-secondary-foreground);
+}
+
+.auth-destination-card:hover .auth-destination-icon--learn {
+  background: oklch(from var(--color-secondary) l c h / 0.25);
+}
+
+/* Arrow */
+.auth-destination-arrow {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Mobile: full-width */
+@media (max-width: 560px) {
+  .auth-redirect-page {
+    max-width: 100%;
+  }
+
+  .auth-destination-card {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+@keyframes auth-destination-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

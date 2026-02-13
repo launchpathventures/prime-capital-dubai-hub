@@ -25,8 +25,8 @@ interface TeamMember {
 
 export function TeamCard({ member }: { member: TeamMember }) {
   return (
-    <article className="group block">
-      <div className="card-lift relative bg-white rounded-[2px] overflow-hidden shadow-sm">
+    <article className="group block h-full">
+      <div className="card-lift relative bg-white rounded-[2px] overflow-hidden shadow-sm h-full flex flex-col">
         <Link
           href={`/team/${member.slug}`}
           className="absolute inset-0 z-[1]"
@@ -58,7 +58,7 @@ export function TeamCard({ member }: { member: TeamMember }) {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 flex-1 flex flex-col">
           <h3 className="font-headline text-[var(--web-ash)] text-xl font-normal mb-1 group-hover:text-[var(--web-spruce)] transition-colors">
             {member.name}
           </h3>
@@ -73,7 +73,7 @@ export function TeamCard({ member }: { member: TeamMember }) {
           )}
 
           {/* Social Links */}
-          <div className="relative z-[2] flex items-center gap-2 pt-4 border-t border-[var(--web-serenity)]/20">
+          <div className="relative z-[2] flex items-center gap-2 pt-4 border-t border-[var(--web-serenity)]/20 mt-auto">
             {member.phone && (
               <a
                 href={`tel:${member.phone.replace(/\s/g, "")}`}

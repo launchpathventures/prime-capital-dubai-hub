@@ -10,7 +10,7 @@
 "use client"
 
 import * as React from "react"
-import { UserIcon, LogOutIcon } from "lucide-react"
+import { UserIcon, LogOutIcon, UserCogIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SignoutMenuItem } from "@/components/shared/signout"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 // -----------------------------------------------------------------------------
@@ -167,6 +168,15 @@ export function UserMenu({ user: userProp, className }: UserMenuProps) {
               )}
             </div>
           </DropdownMenuLabel>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href="/admin/profile" prefetch={false} />}>
+            <UserCogIcon className="mr-2 h-4 w-4" />
+            Profile
+          </DropdownMenuItem>
         </DropdownMenuGroup>
 
         <DropdownMenuSeparator />

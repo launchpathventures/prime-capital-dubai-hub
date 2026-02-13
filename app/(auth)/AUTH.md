@@ -21,7 +21,7 @@ Authentication pages for sign in, registration, and password recovery.
 AUTH_MODE=supabase              # demo | password | supabase | custom
 AUTH_PASSWORD=secret            # For password mode
 AUTH_CUSTOM_ENDPOINT=https://   # For custom mode
-NEXT_PUBLIC_AUTH_REDIRECT_TO=/learn
+NEXT_PUBLIC_AUTH_REDIRECT_TO=/auth/redirect
 SUPABASE_SERVICE_ROLE_KEY=...   # Required for account deletion
 ```
 
@@ -79,7 +79,7 @@ AUTH_PASSWORD=your-secret-password
 # Custom mode  
 AUTH_CUSTOM_ENDPOINT=https://api.example.com/auth
 
-# Redirect after login (default: /learn)
+# Redirect after login (default: /auth/redirect — shows surface chooser for admins)
 NEXT_PUBLIC_AUTH_REDIRECT_TO=/dashboard
 ```
 
@@ -94,6 +94,7 @@ NEXT_PUBLIC_AUTH_REDIRECT_TO=/dashboard
 | `/auth/forgot-password` | Request password reset | demo, supabase, custom |
 | `/auth/reset-password` | Set new password (from email link) | demo, supabase, custom |
 | `/auth/verify-email` | Email verification status | Supabase only |
+| `/auth/redirect` | Post-login surface chooser (admin) / redirect (non-admin) | Supabase only |
 | `/auth/success` | Generic success page | All modes |
 
 ### Form Behavior by Mode
@@ -258,6 +259,8 @@ app/(auth)/
     │   └── reset-password-form.tsx
     ├── verify-email/
     │   └── page.tsx
+    ├── redirect/
+    │   └── page.tsx                # Post-login surface chooser
     └── success/
         └── page.tsx
 

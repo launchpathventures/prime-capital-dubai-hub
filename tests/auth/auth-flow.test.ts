@@ -97,7 +97,7 @@ describe("Auth Configuration", () => {
       const { getAuthConfig } = await import("@/lib/auth/config")
       const config = getAuthConfig()
 
-      expect(config.redirectTo).toBe("/learn")
+      expect(config.redirectTo).toBe("/auth/redirect")
     })
   })
 
