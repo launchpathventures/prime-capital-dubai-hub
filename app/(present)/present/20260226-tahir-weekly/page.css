@@ -1,0 +1,205 @@
+/**
+ * CATALYST - Tahir Weekly Meeting Presentation Styles
+ */
+
+/* Badge pill */
+.present-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in oklch, var(--color-primary), transparent 80%);
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  backdrop-filter: blur(8px);
+}
+
+:is(.dark, [data-theme="dark"]) .present-badge {
+  border-color: color-mix(in oklch, white, transparent 80%);
+  background: color-mix(in oklch, white, transparent 90%);
+  color: white;
+}
+
+/* Glass card */
+.present-card-glass {
+  background: color-mix(in oklch, var(--color-background), transparent 50%);
+  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklch, var(--color-primary), transparent 90%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease-out;
+}
+
+.present-card-glass:hover {
+  background: color-mix(in oklch, var(--color-background), transparent 20%);
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px -10px color-mix(in oklch, var(--color-primary), transparent 90%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glass {
+  background: color-mix(in oklch, white, transparent 95%);
+  border-color: color-mix(in oklch, white, transparent 90%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glass:hover {
+  background: color-mix(in oklch, white, transparent 90%);
+}
+
+/* Glow card */
+.present-card-glow {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 0 30px -10px color-mix(in oklch, var(--color-primary), transparent 90%);
+  transition: all 0.3s ease-out;
+}
+
+.present-card-glow:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  box-shadow: 0 0 40px -10px color-mix(in oklch, var(--color-primary), transparent 70%);
+  transform: translateY(-4px);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glow {
+  background: #111;
+  border-color: color-mix(in oklch, white, transparent 90%);
+  box-shadow: 0 0 40px -10px color-mix(in oklch, var(--color-primary), transparent 50%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-card-glow:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+}
+
+/* Icon wrapper */
+.present-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  color: var(--color-primary);
+  transition: transform 0.2s ease-out;
+}
+
+.present-icon.sm { width: 2.5rem; height: 2.5rem; }
+.present-icon.md { width: 3rem; height: 3rem; }
+.present-icon.lg { width: 3.5rem; height: 3.5rem; }
+
+:is(.dark, [data-theme="dark"]) .present-icon {
+  background: color-mix(in oklch, white, transparent 90%);
+  color: white;
+}
+
+.group:hover .present-icon {
+  transform: scale(1.1);
+}
+
+/* Tinted slide background */
+.present-slide--tinted {
+  background: color-mix(in oklch, var(--color-primary), transparent 95%);
+}
+
+:is(.dark, [data-theme="dark"]) .present-slide--tinted {
+  background: #0f0f12;
+}
+
+/* Decorative blob */
+.present-blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--color-primary), transparent 90%);
+  filter: blur(64px);
+}
+
+:is(.dark, [data-theme="dark"]) .present-blob {
+  background: color-mix(in oklch, var(--color-primary), transparent 80%);
+}
+
+/* Agenda item */
+.agenda-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  transition: all 0.2s ease-out;
+}
+
+.agenda-item:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  transform: translateX(4px);
+}
+
+/* Stat highlight */
+.stat-highlight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--color-primary), transparent 95%);
+  border: 1px solid color-mix(in oklch, var(--color-primary), transparent 85%);
+}
+
+:is(.dark, [data-theme="dark"]) .stat-highlight {
+  background: color-mix(in oklch, white, transparent 95%);
+  border-color: color-mix(in oklch, white, transparent 90%);
+}
+
+/* Template category card */
+.template-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  transition: all 0.2s ease-out;
+}
+
+.template-card:hover {
+  border-color: color-mix(in oklch, var(--color-primary), transparent 50%);
+  box-shadow: 0 4px 20px -4px color-mix(in oklch, var(--color-primary), transparent 85%);
+  transform: translateY(-2px);
+}
+
+/* Timeline step */
+.timeline-step {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline-step::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 1.75rem;
+  bottom: -0.5rem;
+  width: 2px;
+  background: color-mix(in oklch, var(--color-primary), transparent 80%);
+}
+
+.timeline-step:last-child::before {
+  display: none;
+}
+
+.timeline-step .step-dot {
+  position: absolute;
+  left: 0;
+  top: 0.375rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  border: 3px solid var(--color-background);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}

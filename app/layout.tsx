@@ -85,7 +85,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={playfair.variable}>
+    <html lang="en" className={playfair.variable} suppressHydrationWarning>
       <body className="antialiased">
         {children}
         <SpeedInsights />

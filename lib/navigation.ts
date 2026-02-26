@@ -117,17 +117,23 @@ export const appNavItems: NavGroup[] = [
 
 export const presentations: Presentation[] = [
   {
+    title: "Weekly Meeting — Tahir",
+    addendum: "Progress Update • 26 February 2026",
+    href: "/present/20260226-tahir-weekly",
+    date: "2026-02-26",
+  },
+  {
     title: "Placeholder Presentation",
     addendum: "Template Slides • January 2026",
     href: "/present/20260101-placeholder",
     date: "2026-01-01",
   },
-  {
-    title: "Presentations with Catalyst",
-    addendum: "Example Slides • December 2025",
-    href: "/present/20251231-catalyst-example",
-    date: "2025-12-31",
-  },
+  // {
+  //   title: "Presentations with Catalyst",
+  //   addendum: "Example Slides • December 2025",
+  //   href: "/present/20251231-catalyst-example",
+  //   date: "2025-12-31",
+  // },
 ]
 
 // -----------------------------------------------------------------------------
