@@ -122,12 +122,12 @@ export const presentations: Presentation[] = [
     href: "/present/20260226-tahir-weekly",
     date: "2026-02-26",
   },
-  {
-    title: "Placeholder Presentation",
-    addendum: "Template Slides • January 2026",
-    href: "/present/20260101-placeholder",
-    date: "2026-01-01",
-  },
+  // {
+  //   title: "Placeholder Presentation",
+  //   addendum: "Template Slides • January 2026",
+  //   href: "/present/20260101-placeholder",
+  //   date: "2026-01-01",
+  // },
   // {
   //   title: "Presentations with Catalyst",
   //   addendum: "Example Slides • December 2025",

@@ -45,12 +45,9 @@ export const metadata: Metadata = {
   description: config.app.description,
   metadataBase: new URL(config.app.url),
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
-    ],
-    shortcut: ["/favicon.svg", "/icon.svg"],
-    apple: "/favicon.svg",
+    icon: [{ url: "/icon.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
   openGraph: {
     title: config.app.name,
