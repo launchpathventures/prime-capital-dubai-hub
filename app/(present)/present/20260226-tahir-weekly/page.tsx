@@ -203,6 +203,10 @@ export default function TahirWeeklyMeeting() {
                     <ArrowRightIcon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span>First project: <strong>House of Tenet</strong></span>
                   </li>
+                  <li className="flex items-start gap-2">
+                    <ArrowRightIcon className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span><strong>VidIQ</strong> — try for ideas, titles & thumbnails on our 4 videos</span>
+                  </li>
                 </ul>
               </div>
 
