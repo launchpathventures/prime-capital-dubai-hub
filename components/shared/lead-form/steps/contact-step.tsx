@@ -78,7 +78,7 @@ export function ContactStep({
           <>
             <p className="lead-form__greeting">Nice to meet you, {firstName}.</p>
             <h2 className="lead-form__question">
-              Thanks {firstName}. Can you share your contact details so we can contact you about your enquiry.
+              How can we best reach you?
             </h2>
             <p className="lead-form__subtext">
               We cherish our clients&#39; privacy and never share your details with 3rd parties.

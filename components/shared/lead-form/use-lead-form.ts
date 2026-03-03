@@ -50,6 +50,7 @@ interface UseLeadFormOptions {
   mode: FormMode
   onSuccess?: (data: LeadFormData) => void
   honeypot?: string
+  tag?: string
 }
 
 interface UseLeadFormReturn {
@@ -82,6 +83,7 @@ export function useLeadForm({
   mode,
   onSuccess,
   honeypot,
+  tag,
 }: UseLeadFormOptions): UseLeadFormReturn {
   const utm = useUTMParams()
 
@@ -186,6 +188,8 @@ export function useLeadForm({
         referringProperty: mergedData.referringProperty,
         referringTeamMember: mergedData.referringTeamMember,
         referringTeamMemberEmail: mergedData.referringTeamMemberEmail,
+        // Lead tagging for CRM categorisation
+        leadTag: tag,
         // Honeypot for bot protection
         website: honeypot,
       }

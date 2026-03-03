@@ -38,6 +38,7 @@ export function LeadForm({
   redirectDelay,
   downloadAsset,
   autoFocus = true,
+  tag,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   const previousStepRef = useRef<string | null>(null)
@@ -51,7 +52,7 @@ export function LeadForm({
     nextStep,
     updateData,
     submit,
-  } = useLeadForm({ mode, onSuccess, honeypot })
+  } = useLeadForm({ mode, onSuccess, honeypot, tag })
 
   // Scroll to top of form when step changes
   useEffect(() => {

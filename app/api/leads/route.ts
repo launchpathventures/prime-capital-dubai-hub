@@ -252,6 +252,9 @@ const leadSchema = z.object({
   preferredContact: z.string().max(100).optional(),
   privateContext: z.string().max(500).optional(),
 
+  // Lead tagging for CRM categorisation
+  leadTag: z.string().max(100).optional(),
+
   // Context from referring pages
   referringProperty: z.string().max(500).optional(),
   referringTeamMember: z.string().max(100).optional(),
@@ -372,6 +375,12 @@ export async function POST(request: NextRequest) {
       preferredContactLabel: PREFERRED_CONTACT_LABELS[leadData.preferredContact || ""] || null,
       privateContext: leadData.privateContext || null,
       
+      // Lead tagging for CRM categorisation
+      leadTag: leadData.leadTag || null,
+      leadTagLabel: leadData.leadTag
+        ? leadData.leadTag.charAt(0).toUpperCase() + leadData.leadTag.slice(1).replace(/-/g, " ")
+        : null,
+
       // Form identification for CRM routing
       formName: getFormName(leadData.formMode, leadData.pageUrl),
       

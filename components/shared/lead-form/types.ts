@@ -95,6 +95,9 @@ export interface LeadFormData {
   preferredContact?: PreferredContact
   privateContext?: string
 
+  // Tagging (set by parent component)
+  leadTag?: string
+
   // Meta (auto-captured)
   formMode: FormMode
   source?: string
@@ -147,6 +150,9 @@ export interface LeadFormProps {
 
   /** Optional: Auto-focus the first input on mount (default: true) */
   autoFocus?: boolean
+
+  /** Optional: Tag for CRM categorisation (e.g. "distressed") */
+  tag?: string
 }
 
 // =============================================================================
