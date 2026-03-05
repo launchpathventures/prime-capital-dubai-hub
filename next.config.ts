@@ -25,6 +25,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "vhgtbeimnkitqgekvtrz.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "pplx-res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "static.propsearch.ae",
+      },
+      {
+        protocol: "https",
+        hostname: "skyviewdubai.com",
+      },
     ],
   },
   async redirects() {
@@ -63,7 +75,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com; font-src 'self'; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://pplx-res.cloudinary.com https://static.propsearch.ae https://skyviewdubai.com; font-src 'self'; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src 'none';",
           },
         ],
       },

@@ -21,12 +21,14 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { id: "name", modes: ["contact", "landing", "download", "private"] },
-  { id: "contact", modes: ["contact", "landing", "download", "private"] },
-  { id: "goals", modes: ["contact"] },
+  { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
+  { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
+  // Property interest comes before goals in property-enquiry mode
+  { id: "property-interest", modes: ["property-enquiry"] },
+  { id: "goals", modes: ["contact", "property-enquiry"] },
   {
     id: "timeline-budget",
-    modes: ["contact"],
+    modes: ["contact", "property-enquiry"],
     condition: (data) => {
       const buyerGoals: LeadGoal[] = ["invest-offplan", "buy-ready", "build", "build-wealth"]
       return data.goals?.some((g) => buyerGoals.includes(g)) ?? false
@@ -34,12 +36,12 @@ const STEPS: StepDef[] = [
   },
   {
     id: "property",
-    modes: ["contact"],
+    modes: ["contact", "property-enquiry"],
     condition: (data) => data.goals?.includes("sell") ?? false,
   },
-  { id: "questions", modes: ["contact"] },
+  { id: "questions", modes: ["contact", "property-enquiry"] },
   { id: "private-context", modes: ["private"] },
-  { id: "success", modes: ["contact", "landing", "download", "private"] },
+  { id: "success", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
 ]
 
 // =============================================================================
@@ -51,6 +53,7 @@ interface UseLeadFormOptions {
   onSuccess?: (data: LeadFormData) => void
   honeypot?: string
   tag?: string
+  bitrixLeadId?: string
 }
 
 interface UseLeadFormReturn {
@@ -84,7 +87,10 @@ export function useLeadForm({
   onSuccess,
   honeypot,
   tag,
+  bitrixLeadId,
 }: UseLeadFormOptions): UseLeadFormReturn {
+  // Returning lead: has Bitrix Lead ID, skips name/contact/goals/budget
+  const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
   const utm = useUTMParams()
 
   // Read context params from URL (property, team member)
@@ -103,6 +109,7 @@ export function useLeadForm({
     formMode: mode,
     goals: [],
     ...contextParams,
+    ...(bitrixLeadId ? { bitrixLeadId } : {}),
   })
 
   // Current step index (among available steps)
@@ -110,16 +117,22 @@ export function useLeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Steps to skip for returning leads (they only see property-interest → success)
+  const returningLeadSkipSteps: StepId[] = ["name", "contact", "goals", "timeline-budget", "property", "questions"]
+
   // Calculate available steps based on mode and conditions
   const availableSteps = useMemo(() => {
     return STEPS.filter((step) => {
       // Must be available for this mode
       if (!step.modes.includes(mode)) return false
+      // Returning leads skip most steps
+      if (isReturningLead && returningLeadSkipSteps.includes(step.id)) return false
       // Must pass condition if present
       if (step.condition && !step.condition(data)) return false
       return true
     }).map((s) => s.id)
-  }, [mode, data])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, data, isReturningLead])
 
   const currentStep = availableSteps[stepIndex] ?? "name"
   const totalSteps = availableSteps.length - 1 // Exclude success step from count
@@ -180,6 +193,11 @@ export function useLeadForm({
         deploymentRange: mergedData.deploymentRange,
         preferredContact: mergedData.preferredContact,
         privateContext: mergedData.privateContext,
+        // Property enquiry fields
+        bitrixLeadId: mergedData.bitrixLeadId,
+        enquiryIntent: mergedData.enquiryIntent,
+        propertyAppeals: mergedData.propertyAppeals,
+        enquiryNotes: mergedData.enquiryNotes,
         formMode: mode,
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",

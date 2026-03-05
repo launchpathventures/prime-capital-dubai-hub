@@ -54,6 +54,8 @@ export interface Property {
   featured: boolean
   isPartnerProject: boolean
   displayOrder: number
+  /** Tags for categorization (e.g., ["distressed"]) */
+  tags: string[]
   /** Computed: "ready" or "off-plan" based on status */
   completionStatus: "ready" | "off-plan"
 }

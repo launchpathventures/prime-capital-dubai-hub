@@ -41,6 +41,7 @@ interface PropertiesPageProps {
   searchParams: Promise<{
     type?: string | string[]
     area?: string | string[]
+    tag?: string | string[]
   }>
 }
 
@@ -49,6 +50,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const params = await searchParams
   const activeType = typeof params.type === "string" ? params.type : "all"
   const areaFilter = typeof params.area === "string" ? params.area : ""
+  const tagFilter = typeof params.tag === "string" ? params.tag : ""
 
   // Feature disabled state
   if (!config.features.properties) {
@@ -154,22 +156,24 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     featured: p.featured,
     status: p.completionStatus,
     coverImage: p.coverImage,
+    tags: p.tags,
   }))
 
   return (
     <div className="web-properties">
       {/* Hero Section */}
-      <HeroSection 
-        propertyCount={propertyCount} 
-        categoryCount={categoryCount} 
-        areaCount={areaCount} 
+      <HeroSection
+        propertyCount={propertyCount}
+        categoryCount={categoryCount}
+        areaCount={areaCount}
       />
-      
+
       {/* Filter + Grid */}
       <PropertiesFilter
         properties={filterableProperties}
         activeType={activeType}
         areaFilter={areaFilter}
+        tagFilter={tagFilter}
       />
       
       {/* CTA Section */}

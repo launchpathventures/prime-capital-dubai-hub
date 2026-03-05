@@ -24,6 +24,7 @@ import {
   PropertyStep,
   QuestionsStep,
   PrivateContextStep,
+  PropertyInterestStep,
   SuccessStep,
 } from "./steps"
 import type { LeadFormProps } from "./types"
@@ -39,6 +40,8 @@ export function LeadForm({
   downloadAsset,
   autoFocus = true,
   tag,
+  propertyContext,
+  bitrixLeadId,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   const previousStepRef = useRef<string | null>(null)
@@ -52,7 +55,7 @@ export function LeadForm({
     nextStep,
     updateData,
     submit,
-  } = useLeadForm({ mode, onSuccess, honeypot, tag })
+  } = useLeadForm({ mode, onSuccess, honeypot, tag, bitrixLeadId })
 
   // Scroll to top of form when step changes
   useEffect(() => {
@@ -82,6 +85,8 @@ export function LeadForm({
 
   // Determine if contact step is the last step (for landing/download modes)
   const isContactLastStep = mode === "landing" || mode === "download"
+  // For returning leads, property-interest is the last step before success
+  const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
 
   // Render current step
   const renderStep = () => {
@@ -161,6 +166,20 @@ export function LeadForm({
             theme={theme}
           />
         )
+
+      case "property-interest":
+        return propertyContext ? (
+          <PropertyInterestStep
+            data={data}
+            onUpdate={updateData}
+            onNext={nextStep}
+            onSubmit={submit}
+            isSubmitting={isSubmitting}
+            isLastStep={isReturningLead}
+            theme={theme}
+            propertyContext={propertyContext}
+          />
+        ) : null
 
       case "success":
         return (

@@ -48,7 +48,7 @@ export const propertyTypeSchema = z.enum([
   "commercial",
 ])
 
-export const formModeSchema = z.enum(["contact", "landing", "download", "private"])
+export const formModeSchema = z.enum(["contact", "landing", "download", "private", "property-enquiry"])
 
 // =============================================================================
 // STEP SCHEMAS
@@ -126,6 +126,12 @@ export const privateContextStepSchema = z.object({
   privateContext: z.string().max(500).optional(),
 })
 
+export const propertyInterestStepSchema = z.object({
+  enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
+  propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
+  enquiryNotes: z.string().max(1000).optional(),
+})
+
 // =============================================================================
 // FULL FORM SCHEMAS (per mode)
 // =============================================================================
@@ -180,11 +186,53 @@ export const privateFormSchema = baseSchema.extend({
   privateContext: z.string().max(500).optional(),
 })
 
+// Property enquiry mode: new leads get full flow, returning leads skip name/contact
+export const propertyEnquiryFormSchema = baseSchema.extend({
+  goals: z.array(leadGoalSchema).min(1).optional(),
+
+  // Buyer fields (optional - conditional)
+  investTimeline: investTimelineSchema.optional(),
+  budget: budgetRangeSchema.optional(),
+
+  // Seller fields (optional - conditional)
+  propertyLocation: z.string().optional(),
+  propertyType: propertyTypeSchema.optional(),
+  saleTimeline: investTimelineSchema.optional(),
+  targetPrice: budgetRangeSchema.optional(),
+
+  // Questions
+  hasQuestions: z.boolean().optional(),
+  questionsText: z.string().optional(),
+
+  // Property interest fields
+  bitrixLeadId: z.string().max(50).optional(),
+  enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
+  propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
+  enquiryNotes: z.string().max(1000).optional(),
+})
+
+// Returning lead: minimal schema (no name/contact required)
+export const returningLeadFormSchema = z.object({
+  formMode: formModeSchema,
+  submittedAt: z.string(),
+  pageUrl: z.string(),
+  bitrixLeadId: z.string().max(50),
+  enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
+  propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
+  enquiryNotes: z.string().max(1000).optional(),
+  referringProperty: z.string().max(500).optional(),
+  utmSource: z.string().optional(),
+  utmMedium: z.string().optional(),
+  utmCampaign: z.string().optional(),
+  utmContent: z.string().optional(),
+  utmTerm: z.string().optional(),
+})
+
 // =============================================================================
 // DYNAMIC SCHEMA SELECTOR
 // =============================================================================
 
-export function getFormSchema(mode: "contact" | "landing" | "download" | "private") {
+export function getFormSchema(mode: "contact" | "landing" | "download" | "private" | "property-enquiry") {
   switch (mode) {
     case "contact":
       return contactFormSchema
@@ -194,6 +242,8 @@ export function getFormSchema(mode: "contact" | "landing" | "download" | "privat
       return downloadFormSchema
     case "private":
       return privateFormSchema
+    case "property-enquiry":
+      return propertyEnquiryFormSchema
     default:
       return baseSchema
   }
@@ -213,3 +263,5 @@ export type ContactFormData = z.infer<typeof contactFormSchema>
 export type DownloadFormData = z.infer<typeof downloadFormSchema>
 export type LandingFormData = z.infer<typeof landingFormSchema>
 export type PrivateFormData = z.infer<typeof privateFormSchema>
+export type PropertyInterestStepData = z.infer<typeof propertyInterestStepSchema>
+export type PropertyEnquiryFormData = z.infer<typeof propertyEnquiryFormSchema>

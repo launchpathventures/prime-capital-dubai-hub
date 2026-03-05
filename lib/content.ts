@@ -98,6 +98,7 @@ interface PropertyRow {
   featured: boolean | null
   is_partner_project: boolean | null
   display_order: number | null
+  tags: string[] | null
 }
 
 interface TeamMemberRow {
@@ -217,6 +218,7 @@ function mapProperty(row: PropertyRow): Property {
     featured: row.featured ?? false,
     isPartnerProject: row.is_partner_project ?? false,
     displayOrder: row.display_order ?? 0,
+    tags: row.tags || [],
     completionStatus,
   }
 }
@@ -503,6 +505,36 @@ const getCachedWebProperties = unstable_cache(
   }
 )
 
+async function fetchPublicDistressedProperties(): Promise<Property[]> {
+  try {
+    const supabase = createStaticClient()
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .contains("tags", ["distressed"])
+      .order("display_order")
+
+    if (error) {
+      trackSupabaseError(error, "properties", "select", { function: "fetchPublicDistressedProperties" })
+      return []
+    }
+
+    return (data as PropertyRow[]).map(mapProperty)
+  } catch (err) {
+    trackSupabaseError(err, "properties", "select", { function: "fetchPublicDistressedProperties" })
+    return []
+  }
+}
+
+const getCachedWebDistressedProperties = unstable_cache(
+  fetchPublicDistressedProperties,
+  ["web-distressed-properties"],
+  {
+    revalidate: WEB_CONTENT_REVALIDATE_SECONDS,
+    tags: [WEB_CONTENT_TAGS.properties],
+  }
+)
+
 const getCachedWebPropertyBySlug = unstable_cache(
   fetchPublicPropertyBySlug,
   ["web-property-by-slug"],
@@ -569,6 +601,10 @@ export async function getWebSiteConfig(): Promise<SiteConfig> {
 
 export async function getWebProperties(): Promise<Property[]> {
   return getCachedWebProperties()
+}
+
+export async function getWebDistressedProperties(): Promise<Property[]> {
+  return getCachedWebDistressedProperties()
 }
 
 export async function getWebPropertyBySlug(slug: string): Promise<Property | null> {

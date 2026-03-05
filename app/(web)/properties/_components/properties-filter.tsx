@@ -2,14 +2,14 @@
  * CATALYST - Properties Filter Component
  *
  * Server-rendered filter UI driven by URL query params.
- * Keeps the properties grid interactive without client hydration overhead.
+ * Supports type, area, and tag filters (e.g., ?tag=distressed).
  */
 
 import Link from "next/link"
 import Image from "next/image"
 import { Container, Stack, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRightIcon, MapPinIcon } from "lucide-react"
+import { ArrowRightIcon, MapPinIcon, TagIcon } from "lucide-react"
 import { propertyTypeImages } from "../../_surface/property-images"
 
 type Property = {
@@ -25,21 +25,25 @@ type Property = {
   featured?: boolean
   status?: string
   coverImage?: string | null
+  tags?: string[]
 }
 
 interface PropertiesFilterProps {
   properties: Property[]
   activeType?: string
   areaFilter?: string
+  tagFilter?: string
 }
 
 export function PropertiesFilter({
   properties,
   activeType = "all",
   areaFilter = "",
+  tagFilter = "",
 }: PropertiesFilterProps) {
   const normalisedType = activeType || "all"
   const normalisedAreaFilter = areaFilter.trim().toLowerCase()
+  const normalisedTagFilter = tagFilter.trim().toLowerCase()
 
   // Get unique types
   const types = Array.from(new Set(properties.map((p) => p.type)))
@@ -48,7 +52,10 @@ export function PropertiesFilter({
     return acc
   }, {} as Record<string, number>)
 
-  // Filter properties by type and area
+  // Count distressed properties
+  const distressedCount = properties.filter((p) => p.tags?.includes("distressed")).length
+
+  // Filter properties by type, area, and tag
   let filteredProperties = normalisedType === "all"
     ? properties
     : properties.filter((p) => p.type === normalisedType)
@@ -59,13 +66,23 @@ export function PropertiesFilter({
     )
   }
 
-  const getFilterHref = (type: string) => {
+  if (normalisedTagFilter) {
+    filteredProperties = filteredProperties.filter((p) =>
+      p.tags?.includes(normalisedTagFilter)
+    )
+  }
+
+  const getFilterHref = (type: string, tag?: string) => {
     const params = new URLSearchParams()
     if (type !== "all") params.set("type", type)
-    if (areaFilter) params.set("area", areaFilter)
+    if (areaFilter && !tag) params.set("area", areaFilter)
+    if (tag) params.set("tag", tag)
+    else if (tagFilter && type !== "all") params.set("tag", tagFilter)
     const query = params.toString()
     return `/properties${query ? `?${query}` : ""}`
   }
+
+  const isDistressedActive = normalisedTagFilter === "distressed" && normalisedType === "all"
 
   return (
     <>
@@ -76,7 +93,7 @@ export function PropertiesFilter({
             <Link
               href={getFilterHref("all")}
               className={`px-5 py-2 rounded-[2px] text-[13px] uppercase tracking-wider transition-colors ${
-                normalisedType === "all"
+                normalisedType === "all" && !normalisedTagFilter
                   ? "bg-[var(--web-ash)] text-[var(--web-off-white)]"
                   : "bg-transparent text-[var(--web-spruce)] border border-[var(--web-spruce)]/30 hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
               }`}
@@ -89,7 +106,7 @@ export function PropertiesFilter({
                 key={type}
                 href={getFilterHref(type)}
                 className={`px-5 py-2 rounded-[2px] text-[13px] uppercase tracking-wider transition-colors capitalize ${
-                  normalisedType === type
+                  normalisedType === type && !normalisedTagFilter
                     ? "bg-[var(--web-ash)] text-[var(--web-off-white)]"
                     : "bg-transparent text-[var(--web-spruce)] border border-[var(--web-spruce)]/30 hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
                 }`}
@@ -98,6 +115,21 @@ export function PropertiesFilter({
                 {type} ({typeCounts[type]})
               </Link>
             ))}
+            {/* Distressed Sale filter */}
+            {distressedCount > 0 && (
+              <Link
+                href={isDistressedActive ? getFilterHref("all") : "/properties?tag=distressed"}
+                className={`px-5 py-2 rounded-[2px] text-[13px] uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
+                  isDistressedActive
+                    ? "bg-[var(--web-ash)] text-[var(--web-serenity)]"
+                    : "bg-transparent text-[var(--web-ash)] border border-[var(--web-ash)]/40 hover:bg-[var(--web-ash)] hover:text-[var(--web-serenity)]"
+                }`}
+                scroll={false}
+              >
+                <TagIcon className="h-3.5 w-3.5" />
+                Distressed Sale ({distressedCount})
+              </Link>
+            )}
           </div>
         </Container>
       </section>
@@ -125,8 +157,8 @@ export function PropertiesFilter({
 }
 
 function PropertyCard({ property }: { property: Property }) {
-  // Use cover image if available, otherwise fall back to type-based placeholder
   const imageUrl = property.coverImage || propertyTypeImages[property.type.toLowerCase()] || propertyTypeImages.default
+  const isDistressed = property.tags?.includes("distressed")
 
   return (
     <Link
@@ -147,15 +179,23 @@ function PropertyCard({ property }: { property: Property }) {
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-          {/* Featured badge */}
-          {property.featured && (
-            <Badge
-              variant="secondary"
-              className="absolute top-4 right-4 bg-[var(--web-spruce)] text-[var(--web-off-white)] text-[10px] uppercase tracking-wider"
-            >
-              Featured
-            </Badge>
-          )}
+          {/* Badges — top right */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            {isDistressed && (
+              <Badge className="bg-[var(--web-ash)] text-[var(--web-serenity)] border-0 text-[10px] uppercase tracking-wider">
+                <TagIcon className="h-3 w-3 mr-1" />
+                Distressed Sale
+              </Badge>
+            )}
+            {property.featured && (
+              <Badge
+                variant="secondary"
+                className="bg-[var(--web-spruce)] text-[var(--web-off-white)] text-[10px] uppercase tracking-wider"
+              >
+                Featured
+              </Badge>
+            )}
+          </div>
 
           {/* Location */}
           <div className="absolute bottom-4 left-4 flex items-center gap-1 text-white text-[13px]">
@@ -191,4 +231,3 @@ function PropertyCard({ property }: { property: Property }) {
     </Link>
   )
 }
-

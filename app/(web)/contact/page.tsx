@@ -6,11 +6,12 @@
  */
 
 import Image from "next/image"
-import { config } from "@/lib/config"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
-import { LeadForm } from "@/components/shared/lead-form"
 import { ParallaxHero } from "../_surface/parallax-hero"
 import { ContactBar } from "./contact-bar"
+import { ContactFormSection } from "./contact-form-section"
+import { getWebPropertyBySlug } from "@/lib/content"
+import type { PropertyContext } from "@/components/shared/lead-form/types"
 import contactImage from "@/public/images/hero/contact.jpg"
 
 export const metadata = {
@@ -33,15 +34,39 @@ export const metadata = {
   },
 }
 
-export default function ContactPage() {
+interface PageProps {
+  searchParams: Promise<{ property?: string; bid?: string }>
+}
+
+export default async function ContactPage({ searchParams }: PageProps) {
+  const { property: propertySlug, bid } = await searchParams
+
+  // If arriving from a property page, fetch property data for context
+  let propertyContext: PropertyContext | undefined
+  if (propertySlug) {
+    const property = await getWebPropertyBySlug(propertySlug)
+    if (property) {
+      propertyContext = {
+        slug: property.slug,
+        title: property.title,
+        isOffPlan: property.completionStatus === "off-plan",
+        isDistressed: property.tags?.includes("distressed") ?? false,
+        hasDeveloper: !!property.developer,
+        hasRentalYield: !!(property.investment as Record<string, unknown> | null)?.rentalYield,
+        developerName: property.developer ?? undefined,
+        coverImage: property.coverImage ?? undefined,
+      }
+    }
+  }
+
   return (
     <div className="web-contact">
       {/* Hero Section */}
-      <HeroSection />
-      
+      <HeroSection propertyTitle={propertyContext?.title} propertyImage={propertyContext?.coverImage} />
+
       {/* Contact Form + Details */}
-      <ContactFormSection />
-      
+      <ContactFormSection propertyContext={propertyContext} bidFromUrl={bid} />
+
       {/* Consultation Process */}
       <ConsultationProcessSection />
     </div>
@@ -53,11 +78,13 @@ export default function ContactPage() {
 // Full-width hero with contact quick links
 // =============================================================================
 
-function HeroSection() {
+function HeroSection({ propertyTitle, propertyImage }: { propertyTitle?: string; propertyImage?: string }) {
   return (
     <ParallaxHero
-      imageUrl={contactImage}
-      overlay="linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)"
+      imageUrl={propertyImage || contactImage}
+      overlay={propertyImage
+        ? "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%)"
+        : "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%)"}
       intensity={0.12}
       objectPosition="center 30%"
       priority
@@ -70,22 +97,25 @@ function HeroSection() {
       <div className="relative z-10 flex-1 flex items-center px-4 py-8 md:py-16">
         <Stack gap="md" align="center" className="max-w-[800px] mx-auto">
           <span className="text-[var(--web-off-white)]/70 text-[11px] font-normal uppercase tracking-[0.25em]">
-            Contact
+            {propertyTitle ? "Property Enquiry" : "Contact"}
           </span>
-          
+
           <h1
             className="font-headline text-[var(--web-off-white)] text-[clamp(32px,5.5vw,56px)] font-normal leading-[1.1] tracking-tight"
             style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}
           >
-            Let&apos;s start a conversation
+            {propertyTitle
+              ? <>Enquire about {propertyTitle}</>
+              : <>Let&apos;s start a conversation</>}
           </h1>
 
           <Text
             className="text-[var(--web-off-white)]/80 text-[clamp(14px,1.8vw,18px)] font-light leading-relaxed max-w-[540px]"
             style={{ textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
           >
-            Whether you have a specific property in mind or are exploring your options,
-            we&apos;re here to help.
+            {propertyTitle
+              ? "Tell us what you'd like to know and we'll get back to you promptly."
+              : "Whether you have a specific property in mind or are exploring your options, we're here to help."}
           </Text>
         </Stack>
       </div>
@@ -97,21 +127,6 @@ function HeroSection() {
         </Container>
       </div>
     </ParallaxHero>
-  )
-}
-
-// =============================================================================
-// CONTACT FORM SECTION
-// Centered, focused form layout
-// =============================================================================
-
-function ContactFormSection() {
-  return (
-    <section className="bg-[var(--web-off-white)] pt-8 md:pt-[var(--web-section-gap)] pb-[var(--web-section-gap)]">
-      <Container size="sm">
-        <LeadForm mode="contact" theme="light" autoFocus={false} />
-      </Container>
-    </section>
   )
 }
 

@@ -165,6 +165,26 @@ const PREFERRED_CONTACT_LABELS: Record<string, string> = {
   "whatsapp": "WhatsApp",
 }
 
+// Property enquiry labels (for CRM readability)
+const ENQUIRY_INTENT_LABELS: Record<string, string> = {
+  "pricing": "Pricing & payment plans",
+  "investment-analysis": "Investment analysis / ROI",
+  "compare": "Compare with similar properties",
+  "availability": "Check unit availability",
+  "developer-info": "Understand the developer",
+}
+
+const PROPERTY_APPEAL_LABELS: Record<string, string> = {
+  "location": "Location",
+  "price-point": "Price point",
+  "lifestyle": "Lifestyle fit",
+  "payment-plan": "Payment plan flexibility",
+  "rental-yield": "Rental yield potential",
+  "developer": "Developer reputation",
+  "completion-timeline": "Completion timeline",
+  "distressed-pricing": "Below-market pricing",
+}
+
 // =============================================================================
 // FORM NAME HELPER
 // =============================================================================
@@ -208,6 +228,7 @@ function getFormName(formMode: string, pageUrl: string): string {
     "landing": "Quick Enquiry",
     "download": "Download Request",
     "private": "Private Enquiry",
+    "property-enquiry": "Property Enquiry",
   }
 
   const modeName = modeNames[formMode] || formMode
@@ -220,12 +241,12 @@ function getFormName(formMode: string, pageUrl: string): string {
 // =============================================================================
 
 const leadSchema = z.object({
-  // Required fields with length limits
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
-  email: z.string().email().max(100),
-  whatsapp: z.string().min(1).max(20),
-  formMode: z.enum(["contact", "landing", "download", "private"]),
+  // Contact fields (optional for returning leads in property-enquiry mode)
+  firstName: z.string().max(100).optional().default(""),
+  lastName: z.string().max(100).optional().default(""),
+  email: z.string().max(100).optional().default(""),
+  whatsapp: z.string().max(20).optional().default(""),
+  formMode: z.enum(["contact", "landing", "download", "private", "property-enquiry"]),
   submittedAt: z.string(),
   pageUrl: z.string().max(500),
 
@@ -251,6 +272,12 @@ const leadSchema = z.object({
   deploymentRange: z.string().max(100).optional(),
   preferredContact: z.string().max(100).optional(),
   privateContext: z.string().max(500).optional(),
+
+  // Property enquiry fields
+  bitrixLeadId: z.string().max(50).optional(),
+  enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
+  propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
+  enquiryNotes: z.string().max(1000).optional(),
 
   // Lead tagging for CRM categorisation
   leadTag: z.string().max(100).optional(),
@@ -375,6 +402,14 @@ export async function POST(request: NextRequest) {
       preferredContactLabel: PREFERRED_CONTACT_LABELS[leadData.preferredContact || ""] || null,
       privateContext: leadData.privateContext || null,
       
+      // Property enquiry fields
+      bitrixLeadId: leadData.bitrixLeadId || null,
+      enquiryIntent: leadData.enquiryIntent || [],
+      enquiryIntentLabels: leadData.enquiryIntent?.map(i => ENQUIRY_INTENT_LABELS[i]).filter(Boolean) || [],
+      propertyAppeals: leadData.propertyAppeals || [],
+      propertyAppealsLabels: leadData.propertyAppeals?.map(a => PROPERTY_APPEAL_LABELS[a]).filter(Boolean) || [],
+      enquiryNotes: leadData.enquiryNotes || null,
+
       // Lead tagging for CRM categorisation
       leadTag: leadData.leadTag || null,
       leadTagLabel: leadData.leadTag

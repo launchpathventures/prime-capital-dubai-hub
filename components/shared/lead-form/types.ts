@@ -56,7 +56,7 @@ export type DeploymentRange =
 
 export type PreferredContact = "phone" | "email" | "whatsapp"
 
-export type FormMode = "contact" | "landing" | "download" | "private"
+export type FormMode = "contact" | "landing" | "download" | "private" | "property-enquiry"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================
@@ -88,6 +88,12 @@ export interface LeadFormData {
   // Step 5: Questions
   hasQuestions?: boolean
   questionsText?: string
+
+  // Step: Property Interest (property-enquiry mode)
+  bitrixLeadId?: string
+  enquiryIntent?: string[]
+  propertyAppeals?: string[]
+  enquiryNotes?: string
 
   // Step: Private Context (private mode only)
   privateRole?: PrivateRole
@@ -153,6 +159,12 @@ export interface LeadFormProps {
 
   /** Optional: Tag for CRM categorisation (e.g. "distressed") */
   tag?: string
+
+  /** Optional: Property context for property-enquiry mode */
+  propertyContext?: PropertyContext
+
+  /** Optional: Bitrix Lead ID for returning leads */
+  bitrixLeadId?: string
 }
 
 // =============================================================================
@@ -167,6 +179,7 @@ export type StepId =
   | "property"
   | "questions"
   | "private-context"
+  | "property-interest"
   | "success"
 
 export interface StepConfig {
@@ -242,3 +255,48 @@ export const PREFERRED_CONTACT_OPTIONS: SelectOption<PreferredContact>[] = [
   { value: "email", label: "Email" },
   { value: "whatsapp", label: "WhatsApp" },
 ]
+
+// =============================================================================
+// PROPERTY ENQUIRY
+// =============================================================================
+
+export interface PropertyContext {
+  slug: string
+  title: string
+  isOffPlan: boolean
+  isDistressed: boolean
+  hasDeveloper: boolean
+  hasRentalYield: boolean
+  developerName?: string
+  coverImage?: string
+}
+
+export const ENQUIRY_INTENT_OPTIONS: SelectOption[] = [
+  { value: "pricing", label: "Pricing & payment plans" },
+  { value: "investment-analysis", label: "Investment analysis / ROI" },
+  { value: "compare", label: "Compare with similar properties" },
+  { value: "availability", label: "Check unit availability" },
+  { value: "developer-info", label: "Understand the developer" },
+]
+
+export const PROPERTY_APPEAL_OPTIONS: SelectOption[] = [
+  { value: "location", label: "Location" },
+  { value: "price-point", label: "Price point" },
+  { value: "lifestyle", label: "Lifestyle fit" },
+]
+
+export const CONDITIONAL_APPEAL_OPTIONS: (SelectOption & { condition: (ctx: PropertyContext) => boolean })[] = [
+  { value: "payment-plan", label: "Payment plan flexibility", condition: (ctx) => ctx.isOffPlan },
+  { value: "rental-yield", label: "Rental yield potential", condition: (ctx) => ctx.hasRentalYield },
+  { value: "developer", label: "Developer reputation", condition: (ctx) => ctx.hasDeveloper },
+  { value: "completion-timeline", label: "Completion timeline", condition: (ctx) => ctx.isOffPlan },
+  { value: "distressed-pricing", label: "Below-market pricing", condition: (ctx) => ctx.isDistressed },
+]
+
+export const INTENT_LABELS: Record<string, string> = Object.fromEntries(
+  ENQUIRY_INTENT_OPTIONS.map((o) => [o.value, o.label])
+)
+
+export const APPEAL_LABELS: Record<string, string> = Object.fromEntries(
+  [...PROPERTY_APPEAL_OPTIONS, ...CONDITIONAL_APPEAL_OPTIONS].map((o) => [o.value, o.label])
+)

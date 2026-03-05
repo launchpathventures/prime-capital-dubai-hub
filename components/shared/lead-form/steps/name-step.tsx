@@ -51,9 +51,13 @@ export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: Nam
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
         <h2 className="lead-form__question">
-          {mode === "private" ? "Your name" : "Hello. Who am I speaking with today?"}
+          {mode === "private"
+            ? "Your name"
+            : mode === "property-enquiry"
+              ? "Let\u2019s start with your name"
+              : "Hello. Who am I speaking with today?"}
         </h2>
-        {mode !== "private" && (
+        {mode !== "private" && mode !== "property-enquiry" && (
           <p className="lead-form__subtext">
             So we know who we&#39;re speaking with
           </p>

@@ -15,6 +15,7 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PropertyMap } from "@/components/shared/property-map"
+import { BidPersistence } from "./bid-persistence"
 import { JsonLd, propertyJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 import {
   ArrowLeftIcon,
@@ -26,6 +27,7 @@ import {
   BuildingIcon,
   CheckIcon,
   BathIcon,
+  TagIcon,
 } from "lucide-react"
 
 // =============================================================================
@@ -53,6 +55,7 @@ interface InvestmentData {
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ bid?: string }>
 }
 
 // Format completion dates like "2029-Q4", "2029-04", or "2025-06-01"
@@ -106,8 +109,9 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-export default async function PropertyDetailPage({ params }: PageProps) {
+export default async function PropertyDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { bid } = await searchParams
   const property = await getWebPropertyBySlug(slug)
 
   if (!property) {
@@ -115,7 +119,13 @@ export default async function PropertyDetailPage({ params }: PageProps) {
   }
 
   const statusBadge = property.completionStatus === "off-plan" ? "Off-Plan" : "Ready"
+  const isDistressed = property.tags?.includes("distressed")
   const investment = property.investment as InvestmentData | null
+
+  // Build contact URL with property context + optional bid param
+  const contactParams = new URLSearchParams({ property: property.slug })
+  if (bid) contactParams.set("bid", bid)
+  const contactUrl = `/contact?${contactParams.toString()}`
 
   return (
     <div className="web-property-detail">
@@ -172,6 +182,12 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             <Stack gap="sm">
               {/* Badges */}
               <div className="flex gap-2">
+                {isDistressed && (
+                  <Badge className="bg-[var(--web-ash)] text-[var(--web-serenity)] text-[10px] uppercase tracking-wider rounded-[2px] border border-[var(--web-serenity)]/30">
+                    <TagIcon className="h-3 w-3 mr-1" />
+                    Distressed Sale
+                  </Badge>
+                )}
                 <Badge className="bg-[var(--web-spruce)] text-[var(--web-off-white)] text-[10px] uppercase tracking-wider rounded-[2px] border-0">
                   {statusBadge}
                 </Badge>
@@ -211,7 +227,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
               <Button
                 className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                render={<Link href={`/contact?property=${encodeURIComponent(property.slug)}`} />}
+                render={<Link href={contactUrl} />}
               >
                 Enquire Now
                 <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -402,7 +418,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </Text>
                 <Button
                   className="w-full h-12 bg-transparent text-[var(--web-off-white)] hover:bg-[var(--web-off-white)] hover:text-[var(--web-ash)] border border-[var(--web-off-white)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-                  render={<Link href={`/contact?property=${encodeURIComponent(property.slug)}`} />}
+                  render={<Link href={contactUrl} />}
                 >
                   Enquire Now
                   <ArrowRightIcon className="ml-2 h-4 w-4" />
@@ -412,6 +428,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           </Grid>
         </Container>
       </section>
+      {/* Persist bid param in sessionStorage for cross-page navigation */}
+      {bid && <BidPersistence bid={bid} />}
     </div>
   )
 }

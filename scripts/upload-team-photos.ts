@@ -33,22 +33,44 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 // Keep this list in sync when adding/removing team members.
 // ============================================================================
 const teamPhotos: { slug: string; file: string }[] = [
+  // Founders
+  { slug: "tahir-majitia",             file: "tahir-majithia.png" },
+  { slug: "shaad-haji",                file: "Shaad Haji .jpeg" },
+  { slug: "rohit-saluja",              file: "Rohit-Saluja.jpg" },
+  // Associate Directors
   { slug: "ahmed-ashfaq",              file: "Ahmed Ashfaq .jpg" },
   { slug: "anisha-mehrotra",           file: "Anisha Mehrotra .jpg" },
+  { slug: "ghada-mary-benitez",        file: "Ghada Mary Benitez.jpg" },
+  // Operations
+  { slug: "virna-ann-trinidad",        file: "Virna Ann Trinidad.jpg" },
+  // Senior Property Consultants
+  { slug: "gina-sadana",               file: "Divneet Gina Sadana.jpg" },
+  { slug: "kyle-lopez",                file: "Kyle Lopes.jpg" },
+  { slug: "rakshima-mehra",            file: "Rakshhima Mehra .jpg" },
+  { slug: "sourav-umesh-lakhiyani",    file: "Sourav Lakhyani.jpg" },
+  { slug: "arman-kabir",               file: "Arman Kabir.jpg" },
+  { slug: "zorica-dimitrijievic",      file: "Zorica Dimitrijievic.jpg" },
+  { slug: "jiezelle-claire-clemente",  file: "Jiezelle Claire Clemente.jpg" },
+  // Property Consultants
+  { slug: "hamzah-khaleeli",           file: "Hamzah Hassan Khaleeli.jpg" },
   { slug: "harshini-shetty",           file: "Harshini Shetty .jpg" },
-  { slug: "kyle-lopez",               file: "Kyle Lopez.jpg" },
-  { slug: "manu-agarwal",             file: "Manu Agarwal .jpg" },
-  { slug: "mohib-malgi",              file: "Mohib Malgi .jpg" },
-  { slug: "rakshima-mehra",            file: "Rakshhima Mehra .jpg" },   // DB slug: rakshima (single h)
+  { slug: "ismat-sultana",             file: "Ismat Sultana.jpg" },
+  { slug: "khaseibah-rashed-saeed",    file: "Khaseibah Rashed Saeed.jpg" },
+  { slug: "mohib-malgi",               file: "Mohib Malgi .jpg" },
+  { slug: "mujibunnissa-sattar",       file: "Mujibunnissa Sattar.jpg" },
+  { slug: "parisa-lakhu",              file: "Parisa Lakhu.jpg" },
+  { slug: "rachel-matai",              file: "Rachel Matai.jpg" },
   { slug: "rishabh-arora",             file: "Rishabh Arora .jpg" },
-  { slug: "riyam-al-mayyahi",          file: "Riyam Almayyahi.jpg" },    // DB slug has hyphen: al-mayyahi
-  { slug: "rohit-saluja",              file: "Rohit-Saluja.jpg" },
-  { slug: "ruhaan-chawla",            file: "Ruhaan Chawla .JPG" },
-  { slug: "shaad-haji",                file: "Shaad-Haji.png" },
-  { slug: "silvia-fernandes",          file: "Silvia Fernandez.jpg" },   // DB slug: fernandes (s not z)
-  { slug: "sourav-umesh-lakhiyani",    file: "Sourav Lakhyani.jpg" },    // DB slug: sourav-umesh-lakhiyani
+  { slug: "riyam-al-mayyahi",          file: "Riyam Almayyahi.jpg" },
+  { slug: "silvia-fernandes",          file: "Silvia Fernandez.jpg" },
   { slug: "subha-arora",               file: "Subha Arora.png" },
-  { slug: "tahir-majitia",             file: "tahir-majithia.png" },     // DB slug: majitia (no h)
+  { slug: "svitlana-tereshchenko",     file: "Svitlana Tereshchenko.jpg" },
+  { slug: "aysha-ali",                 file: "Aysha Ali.jpg" },
+  { slug: "aysha-sana",                file: "Aysha Sana.jpg" },
+  { slug: "muhammad-wajahat",          file: "Muhammad Wajahat.jpg" },
+  { slug: "raghav-passan",             file: "Raghav Passan.jpg" },
+  { slug: "rabir-saluja",              file: "Rabir Saluja.jpg" },
+  { slug: "ruhaan-chawla",             file: "Ruhaan Chawla .JPG" },
 ]
 
 // ============================================================================

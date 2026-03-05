@@ -2,14 +2,28 @@
  * CATALYST - Distressed Property Landing Page
  *
  * Campaign landing page for distressed property leads.
- * Simple hero with form card — optimised for quick capture.
+ * Hero with form card + property preview cards + value props.
  * All leads tagged "distressed" for Bitrix CRM routing.
  */
+
+export const revalidate = 300 // 5 minutes ISR
 
 import Image from "next/image"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
-import { CheckIcon, ClockIcon, ShieldCheckIcon, PhoneIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { getWebDistressedProperties } from "@/lib/content"
+import { formatPriceRange, formatSizeRange } from "@/lib/content-types"
+import {
+  CheckIcon,
+  ClockIcon,
+  ShieldCheckIcon,
+  PhoneIcon,
+  MapPinIcon,
+  BedDoubleIcon,
+  RulerIcon,
+  TagIcon,
+} from "lucide-react"
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2500&auto=format&fit=crop"
 
@@ -30,10 +44,13 @@ export const metadata = {
   },
 }
 
-export default function DistressedPage() {
+export default async function DistressedPage() {
+  const properties = await getWebDistressedProperties()
+
   return (
     <div className="web-distressed">
       <HeroSection />
+      {properties.length > 0 && <DealsPreviewSection properties={properties} />}
       <WhySection />
       <CTASection />
     </div>
@@ -159,6 +176,143 @@ function HeroSection() {
         </div>
       </Container>
     </section>
+  )
+}
+
+// =============================================================================
+// DEALS PREVIEW SECTION
+// Shows distressed property cards from the database.
+// =============================================================================
+
+import type { Property } from "@/lib/content-types"
+
+function DealsPreviewSection({ properties }: { properties: Property[] }) {
+  return (
+    <section className="py-[var(--web-section-gap)] bg-white">
+      <Container size="lg">
+        <Stack gap="md" align="center" className="text-center mb-14">
+          <span className="text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em]">
+            Current Opportunities
+          </span>
+          <Title
+            as="h2"
+            align="center"
+            className="font-headline text-[var(--web-ash)] text-[clamp(28px,4vw,40px)] font-normal leading-[1.25]"
+          >
+            Available Distressed Deals
+          </Title>
+          <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-[520px]">
+            Below-market properties from motivated sellers. Register your interest to get full details.
+          </Text>
+        </Stack>
+
+        <Grid cols={1} className="md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {properties.map((property) => (
+            <DistressedPropertyCard key={property.id} property={property} />
+          ))}
+        </Grid>
+
+        {/* CTA below cards */}
+        <div className="text-center mt-12">
+          <a
+            href="#enquiry-form"
+            className="btn-hover-lift inline-flex items-center justify-center h-12 px-10 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-spruce)]/90 rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em] transition-colors"
+          >
+            Enquire About These Deals
+          </a>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+function DistressedPropertyCard({ property }: { property: Property }) {
+  const hasDiscount = property.priceFrom && property.priceTo && property.priceFrom < property.priceTo
+
+  return (
+    <div className="group overflow-hidden rounded-[2px] border border-[var(--web-ash)]/8 bg-white transition-all hover:shadow-lg hover:border-[var(--web-spruce)]/20">
+      {/* Image */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-[var(--web-off-white)]">
+        {property.images[0] ? (
+          <Image
+            src={property.images[0]}
+            alt={property.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-[var(--web-spruce)]/40 text-sm">No image</span>
+          </div>
+        )}
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex gap-2">
+          <Badge className="bg-[var(--web-ash)] text-[var(--web-serenity)] border-0 text-[10px] uppercase tracking-wider">
+            <TagIcon className="h-3 w-3 mr-1" />
+            Distressed Sale
+          </Badge>
+        </div>
+        <div className="absolute top-3 right-3">
+          <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-[10px] capitalize border-0">
+            {property.type}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <h3 className="font-headline text-[var(--web-ash)] text-[16px] font-medium leading-tight mb-2 line-clamp-2">
+          {property.title}
+        </h3>
+
+        <div className="flex items-center gap-1.5 text-[var(--web-spruce)] text-[13px] mb-3">
+          <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
+          <span>{property.location}</span>
+        </div>
+
+        {/* Price */}
+        <div className="mb-3">
+          <div className="text-[var(--web-ash)] text-[20px] font-semibold">
+            {formatPriceRange(property.priceFrom, property.priceFrom, property.currency)}
+          </div>
+          {hasDiscount && (
+            <div className="text-[var(--web-spruce)]/60 text-[13px] line-through">
+              Original: {formatPriceRange(property.priceTo, property.priceTo, property.currency)}
+            </div>
+          )}
+        </div>
+
+        {/* Specs */}
+        <div className="flex items-center gap-4 text-[13px] text-[var(--web-spruce)] mb-4">
+          <div className="flex items-center gap-1.5">
+            <BedDoubleIcon className="h-3.5 w-3.5" />
+            <span>{property.bedroomsFrom} Bed</span>
+          </div>
+          {(property.sizeFrom || property.sizeTo) && (
+            <div className="flex items-center gap-1.5">
+              <RulerIcon className="h-3.5 w-3.5" />
+              <span>{formatSizeRange(property.sizeFrom, property.sizeTo, property.sizeUnit)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Key features preview */}
+        {property.features.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {property.features.slice(0, 3).map((feature) => (
+              <span
+                key={feature}
+                className="text-[11px] px-2 py-0.5 rounded-sm bg-[var(--web-off-white)] text-[var(--web-spruce)] border border-[var(--web-ash)]/5"
+              >
+                {feature}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
