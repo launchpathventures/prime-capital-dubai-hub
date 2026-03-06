@@ -349,11 +349,15 @@ export async function POST(request: NextRequest) {
     const leadData: LeadData = result.data
     const referenceId = Date.now()
 
-    // Get Zapier webhook URL from environment
-    const zapierWebhookUrl = process.env.ZAPIER_LEAD_WEBHOOK_URL
+    // Route to the correct Zapier webhook:
+    // - Returning leads (with BID) use a separate webhook for Bitrix lead updates
+    // - New leads (with email) use the standard webhook for Bitrix lead creation
+    const zapierWebhookUrl = leadData.bitrixLeadId
+      ? process.env.ZAPIER_BID_WEBHOOK_URL
+      : process.env.ZAPIER_LEAD_WEBHOOK_URL
 
     if (!zapierWebhookUrl) {
-      console.warn("[Leads API] ZAPIER_LEAD_WEBHOOK_URL not configured")
+      console.warn("[Leads API] Zapier webhook URL not configured for", leadData.bitrixLeadId ? "BID" : "lead")
       // Log reference ID and mode only, not PII
       console.log(`[Leads API] Lead received (no webhook): mode=${leadData.formMode}, ref=${referenceId}`)
       return NextResponse.json({
