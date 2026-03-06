@@ -8,7 +8,7 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Container } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
 import type { PropertyContext } from "@/components/shared/lead-form/types"
@@ -20,15 +20,8 @@ interface ContactFormSectionProps {
 }
 
 export function ContactFormSection({ propertyContext, bidFromUrl }: ContactFormSectionProps) {
-  const [bid, setBid] = useState(bidFromUrl)
-
-  // Recover bid from sessionStorage if not in URL
-  useEffect(() => {
-    if (!bid) {
-      const stored = getStoredBid()
-      if (stored) setBid(stored)
-    }
-  }, [bid])
+  // Resolve bid synchronously: URL param first, then sessionStorage fallback
+  const [bid] = useState(() => bidFromUrl || getStoredBid() || undefined)
 
   const isPropertyEnquiry = !!propertyContext
   const isReturningLead = !!bid

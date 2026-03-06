@@ -23,7 +23,8 @@ interface StepDef {
 const STEPS: StepDef[] = [
   { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
   { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
-  { id: "property-interest", modes: ["property-enquiry"] },
+  { id: "enquiry-intent", modes: ["property-enquiry"] },
+  { id: "property-appeal", modes: ["property-enquiry"] },
   { id: "goals", modes: ["contact"] },
   {
     id: "timeline-budget",
@@ -118,7 +119,7 @@ export function useLeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Steps to skip for returning leads (they only see property-interest → success)
+  // Returning leads see: enquiry-intent → property-appeal → success
   const returningLeadSkipSteps: StepId[] = ["name", "contact", "goals", "timeline-budget", "property", "questions"]
 
   // Calculate available steps based on mode and conditions
@@ -194,8 +195,8 @@ export function useLeadForm({
         deploymentRange: mergedData.deploymentRange,
         preferredContact: mergedData.preferredContact,
         privateContext: mergedData.privateContext,
-        // Property enquiry fields
-        bitrixLeadId: mergedData.bitrixLeadId,
+        // Property enquiry fields — use prop directly as authoritative source
+        bitrixLeadId: bitrixLeadId || mergedData.bitrixLeadId,
         enquiryIntent: mergedData.enquiryIntent,
         propertyAppeals: mergedData.propertyAppeals,
         enquiryNotes: mergedData.enquiryNotes,
@@ -232,7 +233,7 @@ export function useLeadForm({
     } finally {
       setIsSubmitting(false)
     }
-  }, [data, mode, utm, honeypot, nextStep, onSuccess])
+  }, [data, mode, utm, honeypot, bitrixLeadId, tag, nextStep, onSuccess])
 
   return {
     currentStep,

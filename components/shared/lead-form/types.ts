@@ -179,7 +179,8 @@ export type StepId =
   | "property"
   | "questions"
   | "private-context"
-  | "property-interest"
+  | "enquiry-intent"
+  | "property-appeal"
   | "success"
 
 export interface StepConfig {

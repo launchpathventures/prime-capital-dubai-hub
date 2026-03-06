@@ -24,7 +24,8 @@ import {
   PropertyStep,
   QuestionsStep,
   PrivateContextStep,
-  PropertyInterestStep,
+  EnquiryIntentStep,
+  PropertyAppealStep,
   SuccessStep,
 } from "./steps"
 import type { LeadFormProps } from "./types"
@@ -85,7 +86,7 @@ export function LeadForm({
 
   // Determine if contact step is the last step (for landing/download modes)
   const isContactLastStep = mode === "landing" || mode === "download"
-  // For returning leads, property-interest is the last step before success
+  // For returning leads, property-appeal is the last step before success
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
 
   // Render current step
@@ -167,9 +168,19 @@ export function LeadForm({
           />
         )
 
-      case "property-interest":
+      case "enquiry-intent":
+        return (
+          <EnquiryIntentStep
+            data={data}
+            onUpdate={updateData}
+            onNext={nextStep}
+            theme={theme}
+          />
+        )
+
+      case "property-appeal":
         return propertyContext ? (
-          <PropertyInterestStep
+          <PropertyAppealStep
             data={data}
             onUpdate={updateData}
             onNext={nextStep}
