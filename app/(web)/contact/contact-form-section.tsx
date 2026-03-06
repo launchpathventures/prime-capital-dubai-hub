@@ -46,7 +46,9 @@ export function ContactFormSection({ propertyContext, bidFromUrl }: ContactFormS
           successMessage={
             isReturningLead && isPropertyEnquiry
               ? "Your agent has been notified. They'll follow up with the details you requested."
-              : undefined
+              : isReturningLead
+                ? "Thank you — we've linked your enquiry to your previous conversation."
+                : undefined
           }
         />
       </Container>

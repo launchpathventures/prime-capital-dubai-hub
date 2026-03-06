@@ -23,23 +23,24 @@ interface StepDef {
 const STEPS: StepDef[] = [
   { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
   { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
-  // Property interest comes before goals in property-enquiry mode
   { id: "property-interest", modes: ["property-enquiry"] },
-  { id: "goals", modes: ["contact", "property-enquiry"] },
+  { id: "goals", modes: ["contact"] },
   {
     id: "timeline-budget",
     modes: ["contact", "property-enquiry"],
     condition: (data) => {
+      // In property-enquiry mode, always show (no goals gating)
+      if (data.formMode === "property-enquiry") return true
       const buyerGoals: LeadGoal[] = ["invest-offplan", "buy-ready", "build", "build-wealth"]
       return data.goals?.some((g) => buyerGoals.includes(g)) ?? false
     },
   },
   {
     id: "property",
-    modes: ["contact", "property-enquiry"],
+    modes: ["contact"],
     condition: (data) => data.goals?.includes("sell") ?? false,
   },
-  { id: "questions", modes: ["contact", "property-enquiry"] },
+  { id: "questions", modes: ["contact"] },
   { id: "private-context", modes: ["private"] },
   { id: "success", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
 ]
