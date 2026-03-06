@@ -9,8 +9,10 @@
  */
 
 import "./web.css"
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import { WebShell } from "./_surface/web-shell"
+import { BidPersistence } from "./_surface/bid-persistence"
 import { Analytics } from "@vercel/analytics/next"
 
 export const revalidate = 300
@@ -29,6 +31,9 @@ export default function WebGroupLayout({
 }) {
   return (
     <>
+      <Suspense fallback={null}>
+        <BidPersistence />
+      </Suspense>
       <WebShell>{children}</WebShell>
       <Analytics debug={process.env.NODE_ENV === "development"} />
     </>

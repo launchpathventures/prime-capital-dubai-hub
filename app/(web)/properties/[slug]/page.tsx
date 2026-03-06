@@ -15,7 +15,6 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PropertyMap } from "@/components/shared/property-map"
-import { BidPersistence } from "./bid-persistence"
 import { JsonLd, propertyJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 import {
   ArrowLeftIcon,
@@ -428,8 +427,6 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
           </Grid>
         </Container>
       </section>
-      {/* Persist bid param in sessionStorage for cross-page navigation */}
-      {bid && <BidPersistence bid={bid} />}
     </div>
   )
 }

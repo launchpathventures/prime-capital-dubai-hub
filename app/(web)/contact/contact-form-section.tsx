@@ -12,7 +12,7 @@ import { useEffect, useState } from "react"
 import { Container } from "@/components/core"
 import { LeadForm } from "@/components/shared/lead-form"
 import type { PropertyContext } from "@/components/shared/lead-form/types"
-import { getStoredBid } from "../properties/[slug]/bid-persistence"
+import { getStoredBid } from "../_surface/bid-persistence"
 
 interface ContactFormSectionProps {
   propertyContext?: PropertyContext
