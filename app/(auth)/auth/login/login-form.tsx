@@ -21,6 +21,8 @@ import { Loader2Icon, AlertCircleIcon, InfoIcon } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import type { AuthMode } from "@/lib/auth/config"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
+import { getURL } from "@/lib/auth/get-url"
+import { ALLOWED_EMAIL_DOMAINS, isAllowedEmail } from "@/lib/auth/config"
 import Link from "next/link"
 
 // -----------------------------------------------------------------------------
@@ -40,6 +42,8 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
+  const [isGoogleLoading, setIsGoogleLoading] = React.useState(false)
+
   // Form state
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -47,6 +51,23 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
 
   // Determine which fields to show
   const showEmail = mode === "supabase" || mode === "custom" || mode === "demo"
+
+  async function signInWithGoogle() {
+    setIsGoogleLoading(true)
+    setError(null)
+    const supabase = createSupabaseBrowserClient()
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${getURL()}api/auth/callback?next=${redirectTo}`,
+        // Domain enforcement happens server-side in the auth callback
+      },
+    })
+    if (error) {
+      setError(error.message)
+      setIsGoogleLoading(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -76,6 +97,12 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
             break
 
           case "supabase": {
+            // Validate email domain before attempting sign-in
+            if (!isAllowedEmail(email)) {
+              setError(`Only ${ALLOWED_EMAIL_DOMAINS.map(d => `@${d}`).join(" and ")} accounts can sign in.`)
+              break
+            }
+
             // Real Supabase authentication
             const supabase = createSupabaseBrowserClient()
             
@@ -146,16 +173,48 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
   }
 
   return (
+    <Stack gap="md">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircleIcon className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Google Sign-In (Supabase mode only) */}
+      {mode === "supabase" && (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={isLoading || isGoogleLoading}
+            onClick={signInWithGoogle}
+          >
+            {isGoogleLoading ? (
+              <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+            )}
+            Sign in with Google
+          </Button>
+
+          <div className="relative flex items-center gap-4 py-1">
+            <div className="flex-1 border-t border-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="flex-1 border-t border-border" />
+          </div>
+        </>
+      )}
+
     <form onSubmit={handleSubmit}>
       <Stack gap="md">
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircleIcon className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         {/* Email Field (not shown in password-only mode) */}
         {showEmail && (
           <Stack gap="xs">
@@ -230,6 +289,7 @@ export function LoginForm({ mode, redirectTo }: LoginFormProps) {
         )}
       </Stack>
     </form>
+    </Stack>
   )
 }
 

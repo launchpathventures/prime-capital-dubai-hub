@@ -13,6 +13,7 @@
 
 import "server-only"
 import { createClient, createStaticClient } from "@/lib/supabase/server"
+import { isSupabaseConfigured } from "@/lib/supabase/config"
 import { unstable_cache } from "next/cache"
 import { trackSupabaseError } from "@/lib/error-tracking"
 
@@ -288,6 +289,7 @@ function mapService(row: ServiceRow): Service {
 // =============================================================================
 
 async function fetchPublicSiteConfig(): Promise<SiteConfig> {
+  if (!isSupabaseConfigured()) return getDefaultSiteConfig()
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -344,6 +346,7 @@ async function fetchPublicSiteConfig(): Promise<SiteConfig> {
 }
 
 async function fetchPublicProperties(): Promise<Property[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -364,6 +367,7 @@ async function fetchPublicProperties(): Promise<Property[]> {
 }
 
 async function fetchPublicPropertyBySlug(slug: string): Promise<Property | null> {
+  if (!isSupabaseConfigured()) return null
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -385,6 +389,7 @@ async function fetchPublicPropertyBySlug(slug: string): Promise<Property | null>
 }
 
 async function fetchPublicTeamMembers(): Promise<TeamMember[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -406,6 +411,7 @@ async function fetchPublicTeamMembers(): Promise<TeamMember[]> {
 }
 
 async function fetchPublicTeamMemberBySlug(slug: string): Promise<TeamMember | null> {
+  if (!isSupabaseConfigured()) return null
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -428,6 +434,7 @@ async function fetchPublicTeamMemberBySlug(slug: string): Promise<TeamMember | n
 }
 
 async function fetchPublicTestimonials(): Promise<Testimonial[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -448,6 +455,7 @@ async function fetchPublicTestimonials(): Promise<Testimonial[]> {
 }
 
 async function fetchPublicStats(): Promise<Stat[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -468,6 +476,7 @@ async function fetchPublicStats(): Promise<Stat[]> {
 }
 
 async function fetchPublicServices(): Promise<Service[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase
@@ -506,6 +515,7 @@ const getCachedWebProperties = unstable_cache(
 )
 
 async function fetchPublicDistressedProperties(): Promise<Property[]> {
+  if (!isSupabaseConfigured()) return []
   try {
     const supabase = createStaticClient()
     const { data, error } = await supabase

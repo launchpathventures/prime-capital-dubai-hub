@@ -68,7 +68,13 @@ export function trackError(
   context: ErrorContext,
   severity: ErrorSeverity = "error"
 ): void {
-  const errorObj = error instanceof Error ? error : new Error(String(error))
+  // Supabase PostgrestError is a plain object, not an Error instance
+  const errorMessage = error instanceof Error
+    ? error.message
+    : (typeof error === "object" && error !== null && "message" in error)
+      ? String((error as { message: unknown }).message)
+      : String(error)
+  const errorObj = error instanceof Error ? error : new Error(errorMessage)
   const digestMatch = (error as { digest?: string })?.digest
 
   const tracked: TrackedError = {

@@ -10,16 +10,18 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
-import { 
-  BookOpenIcon, 
-  ClockIcon, 
+import {
+  BookOpenIcon,
+  ClockIcon,
   LockIcon,
   PlayIcon,
   GraduationCapIcon,
   ArrowRightIcon,
+  CheckCircle2Icon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { AcademyTour } from "./_surface/academy-tour"
+import { getMyProgress, type CompetencyProgress } from "@/lib/lms/admin-queries"
 
 export const metadata: Metadata = {
   title: "Dashboard | Learning Portal",
@@ -89,15 +91,26 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
 // =============================================================================
 
 export default async function LearnDashboardPage() {
-  const competencies = await getCompetenciesWithModules()
-  
+  const [competencies, myProgress] = await Promise.all([
+    getCompetenciesWithModules(),
+    getMyProgress(),
+  ])
+
   const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
   const totalDuration = competencies.reduce(
     (sum, c) => sum + c.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0),
     0
   )
   const availableCompetencies = competencies.filter(c => c.modules.length > 0)
-  
+
+  // Build competency slug -> progress lookup
+  const progressBySlug: Record<string, CompetencyProgress> = {}
+  if (myProgress) {
+    for (const cp of myProgress.competencyProgress) {
+      progressBySlug[cp.slug] = cp
+    }
+  }
+
   // Find first competency with modules for CTA
   const firstCompetency = availableCompetencies[0]
   
@@ -130,6 +143,12 @@ export default async function LearnDashboardPage() {
                 <span className="lms-hero__stat-value">~{Math.round((totalDuration || totalModules * 25) / 60)}h</span>
                 <span className="lms-hero__stat-label">Duration</span>
               </div>
+              {myProgress && (
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{myProgress.overallProgress}%</span>
+                  <span className="lms-hero__stat-label">Your Progress</span>
+                </div>
+              )}
             </div>
             {firstCompetency && (
               <div className="lms-hero__actions">
@@ -189,14 +208,20 @@ export default async function LearnDashboardPage() {
               )
             }
             
+            const cp = progressBySlug[comp.slug]
+            const completed = cp?.completedModules ?? 0
+            const total = cp?.totalModules ?? comp.modules.length
+            const percent = cp?.progressPercent ?? 0
+            const isComplete = completed === total && total > 0
+
             return (
               <Link
                 key={comp.id}
                 href={`/learn/${comp.slug}`}
                 className="lms-card lms-card--clickable competency-card"
               >
-                <div className="competency-card__index">
-                  {index + 1}
+                <div className={`competency-card__index${isComplete ? " competency-card__index--complete" : ""}`}>
+                  {isComplete ? <CheckCircle2Icon className="h-5 w-5" /> : index + 1}
                 </div>
                 <div className="competency-card__body">
                   <h3 className="competency-card__title">{comp.name}</h3>
@@ -206,7 +231,7 @@ export default async function LearnDashboardPage() {
                   <div className="competency-card__meta">
                     <span className="competency-card__meta-item">
                       <BookOpenIcon className="h-3 w-3" />
-                      {comp.modules.length} modules
+                      {completed}/{total} modules
                     </span>
                     {duration > 0 && (
                       <span className="competency-card__meta-item">
@@ -215,6 +240,17 @@ export default async function LearnDashboardPage() {
                       </span>
                     )}
                   </div>
+                  {/* Progress bar */}
+                  {total > 0 && (
+                    <div className="competency-card__progress">
+                      <div className="competency-card__progress-bar">
+                        <div
+                          className={`competency-card__progress-fill${isComplete ? " competency-card__progress-fill--complete" : ""}`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="competency-card__action">
                   <ArrowRightIcon className="h-4 w-4" />

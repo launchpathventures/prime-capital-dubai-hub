@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-import { getAuthConfig } from "@/lib/auth"
+import { getAuthConfig, isAllowedEmail } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
   // 2. Handle token hash verification (some email flows)
   if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({
-      type: type as "email_change" | "signup" | "recovery" | "email",
+      type: type as "email_change" | "signup" | "recovery" | "email" | "magiclink",
       token_hash: tokenHash,
     })
     if (error) {
@@ -75,6 +75,34 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_error`)
+  }
+
+  // 4. Verify email domain — only allowed company domains
+  if (user.email && !isAllowedEmail(user.email)) {
+    await supabase.auth.signOut()
+    return NextResponse.redirect(`${origin}/auth/login?error=invalid_domain`)
+  }
+
+  // 5. Ensure user_profiles exists (defensive fallback for DB trigger)
+  const { data: existingProfile } = await supabase
+    .from("user_profiles")
+    .select("id")
+    .eq("id", user.id)
+    .single()
+
+  if (!existingProfile) {
+    const fullName = user.user_metadata?.full_name
+      || user.user_metadata?.name
+      || user.email?.split("@")[0]
+      || "User"
+
+    const role = user.email?.endsWith("@launchpathventures.com") ? "admin" : "learner"
+    await supabase.from("user_profiles").insert({
+      id: user.id,
+      full_name: fullName,
+      role,
+      certification_status: "in_progress",
+    })
   }
 
   // Determine toast based on context
