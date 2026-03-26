@@ -793,7 +793,7 @@
 
 .lms-certificate-banner__description {
   font-size: 0.8125rem;
-  color: var(--gray-500);
+  color: var(--color-gray-500);
   margin: 0.125rem 0 0;
 }
 
@@ -902,7 +902,7 @@
   flex: 1;
   height: 0.25rem;
   border-radius: 999px;
-  background: var(--gray-150, var(--gray-100));
+  background: var(--color-gray-150, var(--color-gray-100));
   overflow: hidden;
 }
 
@@ -916,7 +916,7 @@
 .competency-card__progress-label {
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--gray-400);
+  color: var(--color-gray-400);
   flex-shrink: 0;
 }
 
@@ -10674,7 +10674,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-muted-foreground);
-  background: var(--gray-50);
+  background: var(--color-gray-50);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -10693,7 +10693,7 @@
 }
 
 .cert-admin-cert-row:hover {
-  background: var(--gray-50);
+  background: var(--color-gray-50);
 }
 
 .cert-admin-cert-row__name {

@@ -8,6 +8,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextRequest, NextResponse } from "next/server"
+import { config } from "@/lib/config"
 
 export async function POST(request: NextRequest) {
   // Verify current user is admin
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Build the auth callback URL with the token
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const appUrl = config.app.url
   const loginUrl = `${appUrl}/api/auth/callback?token_hash=${linkData.properties.hashed_token}&type=magiclink&next=/learn`
 
   return NextResponse.json({

@@ -155,15 +155,9 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
       }
     }
 
-    // Generate certificate ID: PCD-{YEAR}-{NNNN}
-    // Count existing certificates to determine next number
-    const { count: existingCount } = await supabase
-      .from("completion_certificates")
-      .select("*", { count: "exact", head: true })
-
-    const seqNum = (existingCount || 0) + 1
-    const year = new Date().getFullYear()
-    const certificateId = `PCD-${year}-${String(seqNum).padStart(4, "0")}`
+    // Generate certificate ID atomically via database sequence
+    const { data: certificateId, error: seqError } = await supabase.rpc("generate_certificate_id")
+    if (seqError || !certificateId) throw seqError ?? new Error("Failed to generate certificate ID")
 
     // Get user profile for name
     const { data: profile } = await supabase

@@ -10,6 +10,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { XCircleIcon, Loader2Icon } from "lucide-react"
 import { revokeCertificate } from "@/lib/actions/certificate"
 
@@ -41,12 +42,12 @@ export function RevokeCertificateButton({ certificateId }: RevokeCertificateButt
   if (confirming) {
     return (
       <div className="flex flex-col gap-1.5">
-        <input
+        <Input
           type="text"
           placeholder="Reason for revocation"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className="text-xs px-2 py-1 border rounded"
+          className="h-7 text-xs"
           autoFocus
         />
         <div className="flex gap-1">

@@ -80,7 +80,7 @@ export default async function PublicCertificatePage({
       <div className="cert-public__card">
         <div className="cert-public__border">
           <div className="cert-public__inner">
-            <div className="cert-public__company">Prime Capital Dubai</div>
+            <div className="cert-public__company">{config.app.name}</div>
             <div className="cert-public__divider" />
             <h1 className="cert-public__title">Certificate of Completion</h1>
             <p className="cert-public__subtitle">Training Programme</p>
@@ -99,7 +99,7 @@ export default async function PublicCertificatePage({
             </div>
             <div className="cert-public__divider" />
             <div className="cert-public__footer">
-              <span className="cert-public__footer-company">PRIME CAPITAL DUBAI</span>
+              <span className="cert-public__footer-company">{config.app.name.toUpperCase()}</span>
               <span className="cert-public__id">{certificate.certificateId}</span>
             </div>
           </div>

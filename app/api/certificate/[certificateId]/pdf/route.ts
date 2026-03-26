@@ -16,6 +16,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer"
 import { getCertificateByPublicId } from "@/lib/lms/certificate-queries"
+import { config } from "@/lib/config"
 
 // =============================================================================
 // Font Registration
@@ -190,7 +191,7 @@ function CertificateDocument({
 
   return React.createElement(
     Document,
-    { title: `Certificate - ${learnerName}`, author: "Prime Capital Dubai" },
+    { title: `Certificate - ${learnerName}`, author: config.app.name },
     React.createElement(
       Page,
       { size: "A4", style: styles.page },
@@ -201,7 +202,7 @@ function CertificateDocument({
       React.createElement(
         View,
         { style: styles.content },
-        React.createElement(Text, { style: styles.companyName }, "Prime Capital Dubai"),
+        React.createElement(Text, { style: styles.companyName }, config.app.name),
         React.createElement(View, { style: styles.dividerTop }),
         React.createElement(Text, { style: styles.title }, "Certificate of Completion"),
         React.createElement(Text, { style: styles.subtitle }, "Training Programme"),
@@ -232,7 +233,7 @@ function CertificateDocument({
         React.createElement(
           View,
           { style: styles.footer },
-          React.createElement(Text, { style: styles.footerCompany }, "PRIME CAPITAL DUBAI"),
+          React.createElement(Text, { style: styles.footerCompany }, config.app.name.toUpperCase()),
           React.createElement(Text, { style: styles.certificateIdText }, certificateId)
         )
       )
