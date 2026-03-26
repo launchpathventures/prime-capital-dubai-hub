@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
 import { AuthCard } from "../../_surface/auth-card"
 import { AuthDevCard } from "../../_surface/auth-dev-card"
+import { headers } from "next/headers"
 
 export const metadata = {
   title: "Sign In | Catalyst",
@@ -33,10 +34,16 @@ const ERROR_MESSAGES: Record<string, string> = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authConfig = getAuthConfig()
   const params = await searchParams
+  const headersList = await headers()
+  const host = headersList.get("host") || ""
+  const isLocalhost = host.startsWith("localhost") || host.startsWith("127.0.0.1")
 
   // Use ?next param if provided, otherwise fall back to config
   const redirectTo = params.next || authConfig.redirectTo
   const errorMessage = params.error ? ERROR_MESSAGES[params.error] : null
+
+  // Production supabase mode: Google-only
+  const isGoogleOnly = authConfig.mode === "supabase" && !isLocalhost
 
   return (
     <>
@@ -56,9 +63,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Welcome back
             </Title>
             <Text variant="muted" size="sm">
-              {authConfig.mode === "password"
-                ? "Enter the password to sign in"
-                : "Enter your credentials to sign in"
+              {isGoogleOnly
+                ? "Sign in with your company Google account"
+                : authConfig.mode === "password"
+                  ? "Enter the password to sign in"
+                  : "Enter your credentials to sign in"
               }
             </Text>
           </Stack>
@@ -67,13 +76,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <LoginForm
             mode={authConfig.mode}
             redirectTo={redirectTo}
+            showPasswordLogin={isLocalhost}
           />
 
         </Stack>
       </AuthCard>
 
-      {/* Dev Card */}
-      <AuthDevCard mode={authConfig.mode} />
+      {/* Dev Card (localhost only) */}
+      {isLocalhost && <AuthDevCard mode={authConfig.mode} />}
     </>
   )
 }
