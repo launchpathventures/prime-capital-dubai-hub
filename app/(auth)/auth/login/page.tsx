@@ -9,11 +9,12 @@
  */
 
 import { LoginForm } from "./login-form"
-import { getAuthConfig, isRegistrationEnabled } from "@/lib/auth"
+import { getAuthConfig } from "@/lib/auth"
 import { Text, Title, Stack } from "@/components/core"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircleIcon } from "lucide-react"
 import { AuthCard } from "../../_surface/auth-card"
 import { AuthDevCard } from "../../_surface/auth-dev-card"
-import Link from "next/link"
 
 export const metadata = {
   title: "Sign In | Catalyst",
@@ -21,28 +22,41 @@ export const metadata = {
 }
 
 interface LoginPageProps {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; error?: string }>
+}
+
+const ERROR_MESSAGES: Record<string, string> = {
+  invalid_domain: "Only authorized company accounts can sign in.",
+  auth_callback_error: "Authentication failed. Please try again.",
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authConfig = getAuthConfig()
-  const showRegister = isRegistrationEnabled()
   const params = await searchParams
-  
+
   // Use ?next param if provided, otherwise fall back to config
   const redirectTo = params.next || authConfig.redirectTo
+  const errorMessage = params.error ? ERROR_MESSAGES[params.error] : null
 
   return (
     <>
       <AuthCard>
         <Stack gap="lg">
+          {/* Domain/auth error */}
+          {errorMessage && (
+            <Alert variant="destructive">
+              <AlertCircleIcon className="h-4 w-4" />
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
+
           {/* Header */}
           <Stack gap="xs" className="text-center">
             <Title size="h4" align="center">
               Welcome back
             </Title>
             <Text variant="muted" size="sm">
-              {authConfig.mode === "password" 
+              {authConfig.mode === "password"
                 ? "Enter the password to sign in"
                 : "Enter your credentials to sign in"
               }
@@ -50,23 +64,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </Stack>
 
           {/* Login Form */}
-          <LoginForm 
-            mode={authConfig.mode} 
-            redirectTo={redirectTo} 
+          <LoginForm
+            mode={authConfig.mode}
+            redirectTo={redirectTo}
           />
 
-          {/* Registration link (Supabase mode only) */}
-          {showRegister && (
-            <Text size="sm" variant="muted" className="text-center">
-              Don&apos;t have an account?{" "}
-              <Link 
-                href="/auth/register" 
-                className="text-primary hover:underline font-medium"
-              >
-                Sign up
-              </Link>
-            </Text>
-          )}
         </Stack>
       </AuthCard>
 

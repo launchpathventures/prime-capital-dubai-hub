@@ -15,6 +15,8 @@ import "server-only"
 export {
   type AuthMode,
   type AuthConfig,
+  ALLOWED_EMAIL_DOMAINS,
+  isAllowedEmail,
   getAuthMode,
   getAuthConfig,
   isRegistrationEnabled,

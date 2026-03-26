@@ -23,6 +23,8 @@ import {
   formatRelativeTime,
   type LearnerSummary,
 } from "@/lib/lms/admin-queries"
+import { InviteLearnerButton } from "./invite-learner"
+import { MagicLinkButton } from "./magic-link-button"
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic"
@@ -46,26 +48,35 @@ export default async function AdminProgressPage() {
     <Container size="lg" className="py-6">
       <Stack gap="xl">
         {/* Page Header */}
-        <Stack gap="xs">
-          <Title size="h3">Team Progress</Title>
-          <Text variant="muted">
-            Monitor learner progress and certification readiness across the team.
-          </Text>
-        </Stack>
+        <Row justify="between" align="center">
+          <Stack gap="xs">
+            <Title size="h3">Learners</Title>
+            <Text variant="muted">
+              Monitor learner progress and certification readiness across the team.
+            </Text>
+          </Stack>
+          <InviteLearnerButton />
+        </Row>
 
         {/* Stats Overview */}
         <Grid cols={4} gap="md">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Average Progress
+                <Row gap="xs" align="center">
+                  <UsersIcon className="h-4 w-4" />
+                  Total Learners
+                </Row>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Row gap="sm" align="baseline">
-                <Title size="h2">{stats.averageProgress}%</Title>
+                <Title size="h2">{stats.totalLearners}</Title>
+                <Text size="sm" variant="muted">accounts</Text>
               </Row>
-              <Progress value={stats.averageProgress} className="h-2 mt-2" />
+              <Text size="xs" variant="muted" className="mt-1">
+                {stats.averageProgress}% avg. progress
+              </Text>
             </CardContent>
           </Card>
 
@@ -273,14 +284,17 @@ function LearnerRow({ learner }: LearnerRowProps) {
         </Text>
       </td>
 
-      {/* View Details */}
+      {/* Actions */}
       <td className="px-4 py-3">
-        <Link
-          href={`/admin/progress/${learner.id}`}
-          className="text-sm text-primary hover:underline"
-        >
-          View
-        </Link>
+        <Row gap="xs" align="center">
+          <MagicLinkButton email={learner.email} />
+          <Link
+            href={`/admin/progress/${learner.id}`}
+            className="text-sm text-primary hover:underline"
+          >
+            View
+          </Link>
+        </Row>
       </td>
     </tr>
   )

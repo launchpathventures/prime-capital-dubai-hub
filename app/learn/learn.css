@@ -954,6 +954,35 @@
   transform: translateX(2px);
 }
 
+/* Competency progress bar */
+.competency-card__progress {
+  margin-top: 0.5rem;
+}
+
+.competency-card__progress-bar {
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.competency-card__progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.competency-card__progress-fill--complete {
+  background: var(--primary-600);
+}
+
+/* Completed competency index badge */
+.competency-card__index--complete {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--primary-700) 100%);
+  color: white;
+}
+
 /* =============================================================================
    Module List - Premium
    

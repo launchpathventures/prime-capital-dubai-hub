@@ -12,10 +12,9 @@ import { usePathname } from "next/navigation"
 import { Text, Stack } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { DevCard, DevCardBadge } from "@/components/shared"
-import { 
-  LogInIcon, 
-  UserPlusIcon, 
-  KeyIcon, 
+import {
+  LogInIcon,
+  KeyIcon,
   MailIcon,
   ShieldCheckIcon,
   CheckCircleIcon,
@@ -29,7 +28,7 @@ import { authModeConfigs } from "./auth-modes"
 
 const authScreens = [
   { href: "/auth/login", label: "Sign in", icon: LogInIcon },
-  { href: "/auth/register", label: "Register", icon: UserPlusIcon },
+
   { href: "/auth/forgot-password", label: "Forgot", icon: MailIcon },
   { href: "/auth/reset-password", label: "Reset", icon: KeyIcon },
   { href: "/auth/verify-email", label: "Verify", icon: ShieldCheckIcon },
