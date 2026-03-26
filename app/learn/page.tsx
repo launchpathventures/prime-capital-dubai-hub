@@ -190,7 +190,7 @@ export default async function LearnDashboardPage() {
                   className="lms-card competency-card competency-card--locked"
                 >
                   <div className="competency-card__index">
-                    {index + 1}
+                    {index}
                   </div>
                   <div className="competency-card__body">
                     <h3 className="competency-card__title">{comp.name}</h3>
@@ -221,7 +221,7 @@ export default async function LearnDashboardPage() {
                 className="lms-card lms-card--clickable competency-card"
               >
                 <div className={`competency-card__index${isComplete ? " competency-card__index--complete" : ""}`}>
-                  {isComplete ? <CheckCircle2Icon className="h-5 w-5" /> : index + 1}
+                  {isComplete ? <CheckCircle2Icon className="h-5 w-5" /> : index}
                 </div>
                 <div className="competency-card__body">
                   <h3 className="competency-card__title">{comp.name}</h3>

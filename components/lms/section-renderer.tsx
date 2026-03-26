@@ -5,7 +5,7 @@
  * Each H2 heading starts a new section card.
  */
 
-import { Fragment } from "react"
+import React, { Fragment } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { Components } from "react-markdown"
@@ -498,6 +498,16 @@ function ParagraphComponent({ children }: { children: React.ReactNode }) {
     )
   }
   
+  // If children contain block-level elements (e.g. images rendered as <figure>),
+  // use <div> instead of <p> to avoid invalid HTML nesting
+  const hasBlockChildren = React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && (child.type === ImageComponent || child.type === "figure" || child.type === "div")
+  )
+
+  if (hasBlockChildren) {
+    return <div className="my-4 leading-relaxed">{children}</div>
+  }
+
   return <p className="my-4 leading-relaxed">{children}</p>
 }
 

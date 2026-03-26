@@ -216,7 +216,7 @@ export default async function CompetencyPage({ params }: PageProps) {
         <section className="lms-hero lms-hero--compact">
           <div className="lms-hero__content">
             <div className="lms-hero__eyebrow">
-              Competency {currentCompetency.display_order + 1}
+              Competency {currentCompetency.display_order}
             </div>
             <h1 className="lms-hero__title">
               {currentCompetency.name}

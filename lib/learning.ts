@@ -885,7 +885,7 @@ export async function getCompetenciesForSidebar(): Promise<SidebarCompetency[]> 
   return competencies.map((comp, index) => ({
     slug: comp.slug,
     name: comp.name,
-    number: index + 1,
+    number: index,
     locked: comp.modules.length === 0,
     modules: comp.modules.map((mod) => ({
       slug: mod.slug,

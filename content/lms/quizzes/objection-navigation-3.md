@@ -3,7 +3,7 @@ title: "Failure Scenarios & Resilience Quiz"
 slug: "objection-navigation-3"
 quizNumber: 3
 competency: "objection-navigation"
-relatedModule: "6.7-failure-resilience"
+relatedModule: "failure-resilience"
 description: "Test your understanding of failure scenarios and resilience practices."
 passingScore: 80
 questionCount: 10

@@ -3,7 +3,7 @@ title: "Transaction Management Quiz: Off-Plan Journey"
 slug: "transaction-management-1"
 quizNumber: 1
 competency: "transaction-management"
-relatedModule: "5.1-offplan-journey"
+relatedModule: "6.1-offplan-journey"
 description: "Test your understanding of the off-plan property purchase process from EOI through title deed issuance."
 passingScore: 80
 questionCount: 10
