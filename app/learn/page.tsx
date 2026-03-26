@@ -1,9 +1,9 @@
 /**
  * CATALYST - Learn Dashboard
- * 
- * Course overview page showing all competencies.
+ *
+ * Course overview page showing all competencies with per-competency progress.
  * Premium design with refined visual hierarchy.
- * 
+ *
  * Shell is provided by layout.tsx - this page only renders content.
  */
 
@@ -20,6 +20,7 @@ import {
   CheckCircle2Icon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { getMyCertificate } from "@/lib/lms/certificate-queries"
 import { AcademyTour } from "./_surface/academy-tour"
 import { getMyProgress, type CompetencyProgress } from "@/lib/lms/admin-queries"
 
@@ -55,7 +56,7 @@ interface Competency {
 
 async function getCompetenciesWithModules(): Promise<Competency[]> {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase
     .from("competencies")
     .select(`
@@ -73,12 +74,12 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
       )
     `)
     .order("display_order", { ascending: true })
-  
+
   if (error) {
     console.error("Failed to fetch competencies:", error)
     return []
   }
-  
+
   return (data as unknown as Competency[]).map(comp => ({
     ...comp,
     modules: ((comp as { learning_modules?: Module[] }).learning_modules || [])
@@ -91,17 +92,13 @@ async function getCompetenciesWithModules(): Promise<Competency[]> {
 // =============================================================================
 
 export default async function LearnDashboardPage() {
-  const [competencies, myProgress] = await Promise.all([
+  const [competencies, myProgress, certificate] = await Promise.all([
     getCompetenciesWithModules(),
     getMyProgress(),
+    getMyCertificate(),
   ])
 
-  const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
-  const totalDuration = competencies.reduce(
-    (sum, c) => sum + c.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0),
-    0
-  )
-  const availableCompetencies = competencies.filter(c => c.modules.length > 0)
+  const isAuthenticated = myProgress !== null
 
   // Build competency slug -> progress lookup
   const progressBySlug: Record<string, CompetencyProgress> = {}
@@ -111,9 +108,32 @@ export default async function LearnDashboardPage() {
     }
   }
 
-  // Find first competency with modules for CTA
-  const firstCompetency = availableCompetencies[0]
-  
+  const totalModules = competencies.reduce((sum, c) => sum + c.modules.length, 0)
+  const totalDuration = competencies.reduce(
+    (sum, c) => sum + c.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0),
+    0
+  )
+  const totalCompleted = myProgress?.completedModules ?? 0
+  const overallPercent = myProgress?.overallProgress ?? 0
+  const availableCompetencies = competencies.filter(c => c.modules.length > 0)
+
+  // Find the next competency to work on (first incomplete with modules)
+  const nextCompetency = isAuthenticated
+    ? availableCompetencies.find(c => {
+        const cp = progressBySlug[c.slug]
+        const completed = cp?.completedModules ?? 0
+        const total = cp?.totalModules ?? c.modules.length
+        return completed < total
+      }) || availableCompetencies[0]
+    : availableCompetencies[0]
+
+  // CTA text based on progress
+  const ctaText = !isAuthenticated || totalCompleted === 0
+    ? "Start Learning"
+    : overallPercent === 100
+      ? "Review Course"
+      : "Continue Learning"
+
   return (
     <div className="learn-content">
       {/* Hero Section */}
@@ -127,47 +147,78 @@ export default async function LearnDashboardPage() {
               Consultant Training Program
             </h1>
             <p className="lms-hero__description">
-              Master the skills and knowledge you need to succeed as a Prime Capital 
+              Master the skills and knowledge you need to succeed as a Prime Capital
               real estate consultant. Complete all competencies to earn your certification.
             </p>
-            <div className="lms-hero__stats">
-              <div className="lms-hero__stat">
-                <span className="lms-hero__stat-value">{competencies.length}</span>
-                <span className="lms-hero__stat-label">Competencies</span>
-              </div>
-              <div className="lms-hero__stat">
-                <span className="lms-hero__stat-value">{totalModules}</span>
-                <span className="lms-hero__stat-label">Modules</span>
-              </div>
-              <div className="lms-hero__stat">
-                <span className="lms-hero__stat-value">~{Math.round((totalDuration || totalModules * 25) / 60)}h</span>
-                <span className="lms-hero__stat-label">Duration</span>
-              </div>
-              {myProgress && (
+            {isAuthenticated && totalCompleted > 0 ? (
+              /* Progress-aware stats for returning users */
+              <div className="lms-hero__stats">
                 <div className="lms-hero__stat">
-                  <span className="lms-hero__stat-value">{myProgress.overallProgress}%</span>
-                  <span className="lms-hero__stat-label">Your Progress</span>
+                  <span className="lms-hero__stat-value">{overallPercent}%</span>
+                  <span className="lms-hero__stat-label">Complete</span>
                 </div>
-              )}
-            </div>
-            {firstCompetency && (
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{totalCompleted}/{totalModules}</span>
+                  <span className="lms-hero__stat-label">Modules</span>
+                </div>
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{Object.values(progressBySlug).filter(cp => cp.completedModules === cp.totalModules).length}/{competencies.length}</span>
+                  <span className="lms-hero__stat-label">Competencies</span>
+                </div>
+              </div>
+            ) : (
+              /* Default stats for new/unauthenticated users */
+              <div className="lms-hero__stats">
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{competencies.length}</span>
+                  <span className="lms-hero__stat-label">Competencies</span>
+                </div>
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">{totalModules}</span>
+                  <span className="lms-hero__stat-label">Modules</span>
+                </div>
+                <div className="lms-hero__stat">
+                  <span className="lms-hero__stat-value">~{Math.round((totalDuration || totalModules * 25) / 60)}h</span>
+                  <span className="lms-hero__stat-label">Duration</span>
+                </div>
+              </div>
+            )}
+            {nextCompetency && (
               <div className="lms-hero__actions">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="gap-2 bg-white text-primary-700 hover:bg-white/90"
-                  render={<Link href={`/learn/${firstCompetency.slug}`} />}
+                  render={<Link href={`/learn/${nextCompetency.slug}`} />}
                 >
                   <PlayIcon className="h-4 w-4" />
-                  Start Learning
+                  {ctaText}
                 </Button>
               </div>
             )}
           </div>
         </section>
-        
+
+        {/* Certificate Banner */}
+        {certificate && !certificate.revokedAt && (
+          <Link href="/learn/certification" className="lms-card lms-card--clickable lms-certificate-banner">
+            <div className="lms-certificate-banner__icon">
+              <GraduationCapIcon className="h-6 w-6" />
+            </div>
+            <div className="lms-certificate-banner__content">
+              <h3 className="lms-certificate-banner__title">Your Certificate is Ready</h3>
+              <p className="lms-certificate-banner__description">
+                You&apos;ve completed all modules. View and download your completion certificate.
+              </p>
+            </div>
+            <div className="lms-certificate-banner__action">
+              <ArrowRightIcon className="h-5 w-5" />
+            </div>
+          </Link>
+        )}
+
         {/* Academy Tour */}
         <AcademyTour />
-        
+
         {/* Competency List */}
         <section className="lms-section" id="learning-path">
           <div className="lms-section__header">
@@ -176,16 +227,16 @@ export default async function LearnDashboardPage() {
               {availableCompetencies.length} of {competencies.length} available
             </span>
           </div>
-          
+
           <div className="lms-list">
             {competencies.map((comp, index) => {
               const hasModules = comp.modules.length > 0
-            const duration = comp.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0)
-            const isLocked = !hasModules
-            
-            if (isLocked) {
+              const duration = comp.modules.reduce((s, m) => s + (m.duration_minutes || 0), 0)
+              const isLocked = !hasModules
+
+              if (isLocked) {
               return (
-                <div 
+                <div
                   key={comp.id}
                   className="lms-card competency-card competency-card--locked"
                 >
@@ -207,7 +258,7 @@ export default async function LearnDashboardPage() {
                 </div>
               )
             }
-            
+
             const cp = progressBySlug[comp.slug]
             const completed = cp?.completedModules ?? 0
             const total = cp?.totalModules ?? comp.modules.length
@@ -228,6 +279,7 @@ export default async function LearnDashboardPage() {
                   {comp.description && (
                     <p className="competency-card__description">{comp.description}</p>
                   )}
+
                   <div className="competency-card__meta">
                     <span className="competency-card__meta-item">
                       <BookOpenIcon className="h-3 w-3" />

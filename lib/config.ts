@@ -143,6 +143,8 @@ export const config = {
   learning: {
     /** Quiz pass threshold (percentage as decimal, e.g., 0.8 = 80%) */
     quizPassThreshold: 0.8,
+    /** Course name displayed on completion certificates */
+    courseName: "Prime Capital Consultant Training Programme",
     /** Core competency slugs in display order (matches content/lms/ structure) */
     competencies: [
       "foundations",
