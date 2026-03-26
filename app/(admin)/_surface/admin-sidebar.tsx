@@ -19,7 +19,6 @@ import {
   GraduationCapIcon,
   BookOpenIcon,
   UserCogIcon,
-  BarChart3Icon,
   SettingsIcon,
   UserIcon,
   ExternalLinkIcon,
@@ -113,32 +112,23 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
       <div className="admin-sidebar__section">
         <div className="admin-sidebar__heading">Learning Admin</div>
         <nav className="admin-sidebar__nav-list">
-          <Link 
-            href="/admin/learning/modules"
+          <Link
+            href="/admin/learning"
             className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/learning/modules")}
+            data-active={isActive("/admin/learning")}
             onClick={onNavigate}
           >
             <BookOpenIcon className="admin-sidebar__nav-icon" />
             <span>Modules</span>
           </Link>
-          <Link 
-            href="/admin/learning/users"
+          <Link
+            href="/admin/progress"
             className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/learning/users")}
+            data-active={isActive("/admin/progress")}
             onClick={onNavigate}
           >
             <UserCogIcon className="admin-sidebar__nav-icon" />
-            <span>Users</span>
-          </Link>
-          <Link 
-            href="/admin/learning/progress"
-            className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/learning/progress")}
-            onClick={onNavigate}
-          >
-            <BarChart3Icon className="admin-sidebar__nav-icon" />
-            <span>Progress</span>
+            <span>Learners</span>
           </Link>
         </nav>
       </div>

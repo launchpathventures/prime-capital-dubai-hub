@@ -17,6 +17,22 @@
 import { isSupabaseConfigured } from "@/lib/supabase/config"
 
 // -----------------------------------------------------------------------------
+// Domain Restriction
+// -----------------------------------------------------------------------------
+
+/** Domains allowed to sign in */
+export const ALLOWED_EMAIL_DOMAINS = [
+  "primecapitaldubai.com",
+  "launchpathventures.com",
+]
+
+/** Check if an email belongs to an allowed domain */
+export function isAllowedEmail(email: string): boolean {
+  const lower = email.toLowerCase()
+  return ALLOWED_EMAIL_DOMAINS.some((domain) => lower.endsWith(`@${domain}`))
+}
+
+// -----------------------------------------------------------------------------
 // Auth Mode Types
 // -----------------------------------------------------------------------------
 
@@ -129,14 +145,10 @@ export function getAuthConfig(): AuthConfig {
 
 /**
  * Check if registration is available.
- * - demo: Yes (UI preview)
- * - password: No (only sign in available)
- * - supabase: Yes (functional)
- * - custom: Yes (POST to custom endpoint)
+ * Registration is disabled — all users are provisioned via Google Workspace SSO.
  */
 export function isRegistrationEnabled(): boolean {
-  const mode = getAuthMode()
-  return mode === "supabase" || mode === "demo" || mode === "custom"
+  return false
 }
 
 /**

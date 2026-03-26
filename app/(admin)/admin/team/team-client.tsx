@@ -33,6 +33,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
+import { Progress } from "@/components/ui/progress"
 import {
   PlusIcon,
   PencilIcon,
@@ -41,16 +42,41 @@ import {
   Loader2Icon,
   DatabaseIcon,
   UserIcon,
+  ListIcon,
+  GroupIcon,
+  BookOpenIcon,
 } from "lucide-react"
 import { deleteTeamMember, type TeamMemberRow } from "@/lib/actions/cms"
 import { toast } from "@/components/ui/toast"
 
-type TeamClientProps = {
-  members: TeamMemberRow[]
+type LmsProgressInfo = {
+  overallProgress: number
+  certificationStatus: "in_progress" | "ready" | "certified"
+  completedModules: number
+  totalModules: number
 }
 
-export function TeamClient({ members }: TeamClientProps) {
+type TeamClientProps = {
+  members: TeamMemberRow[]
+  lmsProgress: Record<string, LmsProgressInfo>
+}
+
+export function TeamClient({ members, lmsProgress }: TeamClientProps) {
   const router = useRouter()
+  const [groupByRole, setGroupByRole] = useState(false)
+
+  // A-Z sorted list (default)
+  const sortedMembers = [...members].sort((a, b) => a.name.localeCompare(b.name))
+
+  // Grouped: sort by role then name within each role
+  const groupedByRole = sortedMembers.reduce<Record<string, TeamMemberRow[]>>((acc, member) => {
+    const role = member.role || "No Role"
+    if (!acc[role]) acc[role] = []
+    acc[role].push(member)
+    return acc
+  }, {})
+  const sortedRoles = Object.keys(groupedByRole).sort()
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [memberToDelete, setMemberToDelete] = useState<TeamMemberRow | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -116,10 +142,22 @@ export function TeamClient({ members }: TeamClientProps) {
         {/* Team Table */}
         <Card>
           <CardHeader>
-            <CardTitle>All Team Members ({members.length})</CardTitle>
-            <CardDescription>
-              Click edit to update a team member, or view to see the live page
-            </CardDescription>
+            <Row justify="between" align="center">
+              <Stack gap="xs">
+                <CardTitle>All Team Members ({members.length})</CardTitle>
+                <CardDescription>
+                  Click edit to update a team member, or view to see the live page
+                </CardDescription>
+              </Stack>
+              <Button
+                variant={groupByRole ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setGroupByRole(!groupByRole)}
+              >
+                {groupByRole ? <GroupIcon className="h-4 w-4 mr-2" /> : <ListIcon className="h-4 w-4 mr-2" />}
+                {groupByRole ? "Grouped by Role" : "A–Z"}
+              </Button>
+            </Row>
           </CardHeader>
           <CardContent>
             {members.length > 0 ? (
@@ -131,92 +169,30 @@ export function TeamClient({ members }: TeamClientProps) {
                     <TableHead>Role</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Expertise</TableHead>
+                    <TableHead>LMS Progress</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell>
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                          {member.photo ? (
-                            <Image
-                              src={member.photo}
-                              alt={member.name}
-                              width={40}
-                              height={40}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <UserIcon className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Text weight="medium">{member.name}</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Text size="sm">{member.role}</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Text size="sm" variant="muted">{member.email}</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Row gap="xs" wrap>
-                          {member.expertise?.slice(0, 2).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {member.expertise && member.expertise.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{member.expertise.length - 2}
-                            </Badge>
-                          )}
-                        </Row>
-                      </TableCell>
-                      <TableCell>
-                        <Row gap="xs">
-                          {member.published ? (
-                            <Badge variant="secondary">Published</Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">Draft</Badge>
-                          )}
-                          {member.is_founder && (
-                            <Badge>Founder</Badge>
-                          )}
-                        </Row>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Row gap="xs" justify="end">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            render={<Link href={`/team/${member.slug}`} target="_blank" />}
-                          >
-                            <ExternalLinkIcon className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            render={<Link href={`/admin/team/${member.id}`} />}
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => handleDeleteClick(member)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
-                        </Row>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {groupByRole ? (
+                    sortedRoles.map((role) => (
+                      <>
+                        <TableRow key={`role-${role}`} className="bg-muted/30 hover:bg-muted/30 border-t-2">
+                          <TableCell colSpan={8} className="py-2">
+                            <Text weight="medium" size="sm" variant="muted">{role}</Text>
+                          </TableCell>
+                        </TableRow>
+                        {groupedByRole[role].map((member) => (
+                          <MemberRow key={member.id} member={member} onDelete={handleDeleteClick} lmsProgress={member.email ? lmsProgress[member.email.toLowerCase()] : undefined} />
+                        ))}
+                      </>
+                    ))
+                  ) : (
+                    sortedMembers.map((member) => (
+                      <MemberRow key={member.id} member={member} onDelete={handleDeleteClick} lmsProgress={member.email ? lmsProgress[member.email.toLowerCase()] : undefined} />
+                    ))
+                  )}
                 </TableBody>
               </Table>
             ) : (
@@ -256,5 +232,107 @@ export function TeamClient({ members }: TeamClientProps) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  )
+}
+
+function MemberRow({ member, onDelete, lmsProgress }: { member: TeamMemberRow; onDelete: (m: TeamMemberRow) => void; lmsProgress?: LmsProgressInfo }) {
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
+          {member.photo ? (
+            <Image
+              src={member.photo}
+              alt={member.name}
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <UserIcon className="h-4 w-4 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <Text weight="medium">{member.name}</Text>
+      </TableCell>
+      <TableCell>
+        <Text size="sm">{member.role}</Text>
+      </TableCell>
+      <TableCell>
+        <Text size="sm" variant="muted">{member.email}</Text>
+      </TableCell>
+      <TableCell>
+        <Row gap="xs" wrap>
+          {member.expertise?.slice(0, 2).map((skill) => (
+            <Badge key={skill} variant="secondary" className="text-xs">
+              {skill}
+            </Badge>
+          ))}
+          {member.expertise && member.expertise.length > 2 && (
+            <Badge variant="outline" className="text-xs">
+              +{member.expertise.length - 2}
+            </Badge>
+          )}
+        </Row>
+      </TableCell>
+      <TableCell>
+        {lmsProgress ? (
+          <Stack gap="xs">
+            <Row gap="sm" align="center">
+              <Text size="sm" weight="medium">{lmsProgress.overallProgress}%</Text>
+              <Text size="xs" variant="muted">
+                ({lmsProgress.completedModules}/{lmsProgress.totalModules})
+              </Text>
+            </Row>
+            <Progress value={lmsProgress.overallProgress} className="h-1.5 w-24" />
+          </Stack>
+        ) : (
+          <Badge variant="outline" className="text-muted-foreground">
+            <BookOpenIcon className="h-3 w-3 mr-1" />
+            Not Started
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell>
+        <Row gap="xs">
+          {member.published ? (
+            <Badge variant="secondary">Published</Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground">Draft</Badge>
+          )}
+          {member.is_founder && (
+            <Badge>Founder</Badge>
+          )}
+        </Row>
+      </TableCell>
+      <TableCell className="text-right">
+        <Row gap="xs" justify="end">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            render={<Link href={`/team/${member.slug}`} target="_blank" />}
+          >
+            <ExternalLinkIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            render={<Link href={`/admin/team/${member.id}`} />}
+          >
+            <PencilIcon className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => onDelete(member)}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </Row>
+      </TableCell>
+    </TableRow>
   )
 }

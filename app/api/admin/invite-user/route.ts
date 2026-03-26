@@ -8,6 +8,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { rewriteMagicLink } from "@/lib/auth/magic-link"
 
 // Default password from environment (server-only, never expose to client)
 const DEFAULT_PASSWORD = process.env.AUTH_DEFAULT_PASSWORD
@@ -89,12 +90,24 @@ export async function POST(request: Request) {
         role: role,
         certification_status: 'in_progress',
       })
-    
+
     if (profileError) {
       console.error("Failed to create profile:", profileError)
       // User was created, but profile failed - still return success
     }
   }
-  
-  return NextResponse.json({ success: true, userId: data.user?.id })
+
+  // Generate a magic link so admin can share it directly
+  let magicLink: string | null = null
+  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  })
+  if (linkError) {
+    console.error("Failed to generate magic link:", linkError)
+  } else if (linkData?.properties?.action_link) {
+    magicLink = rewriteMagicLink(linkData.properties.action_link, request.url)
+  }
+
+  return NextResponse.json({ success: true, userId: data.user?.id, magicLink })
 }

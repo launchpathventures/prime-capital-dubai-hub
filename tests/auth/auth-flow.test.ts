@@ -106,32 +106,7 @@ describe("Auth Configuration", () => {
   // =============================================================================
 
   describe("isRegistrationEnabled", () => {
-    it("should return true for supabase mode", async () => {
-      process.env.AUTH_MODE = "supabase"
-
-      const { isRegistrationEnabled } = await import("@/lib/auth/config")
-      expect(isRegistrationEnabled()).toBe(true)
-    })
-
-    it("should return true for demo mode", async () => {
-      process.env.AUTH_MODE = "demo"
-
-      const { isRegistrationEnabled } = await import("@/lib/auth/config")
-      expect(isRegistrationEnabled()).toBe(true)
-    })
-
-    it("should return true for custom mode", async () => {
-      process.env.AUTH_MODE = "custom"
-      process.env.AUTH_CUSTOM_ENDPOINT = "https://api.example.com"
-
-      const { isRegistrationEnabled } = await import("@/lib/auth/config")
-      expect(isRegistrationEnabled()).toBe(true)
-    })
-
-    it("should return false for password mode", async () => {
-      process.env.AUTH_MODE = "password"
-      process.env.AUTH_PASSWORD = "test"
-
+    it("should always return false (registration disabled)", async () => {
       const { isRegistrationEnabled } = await import("@/lib/auth/config")
       expect(isRegistrationEnabled()).toBe(false)
     })
