@@ -116,6 +116,7 @@ export interface QuizResult {
   passed: boolean
   correctAnswers: string[]
   explanations: Record<string, string>
+  certificateEligible?: boolean
 }
 
 /**
@@ -237,12 +238,25 @@ export async function submitQuizAttempt(
 
   revalidatePath("/learn")
 
+  // Check certificate eligibility after a passing quiz
+  let certificateEligible = false
+  if (passed) {
+    try {
+      const { checkCertificateEligibility } = await import("@/lib/actions/certificate")
+      const eligibility = await checkCertificateEligibility(user.id)
+      certificateEligible = eligibility.eligible
+    } catch {
+      // Non-blocking — don't fail the quiz submission
+    }
+  }
+
   return {
     score,
     maxScore,
     passed,
     correctAnswers,
     explanations,
+    certificateEligible,
   }
 }
 

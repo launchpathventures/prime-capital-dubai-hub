@@ -8,7 +8,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { 
+import {
   AwardIcon,
   UserIcon,
   ClipboardCheckIcon,
@@ -21,9 +21,14 @@ import {
   UsersIcon,
   TrendingUpIcon,
   GraduationCapIcon,
+  ScrollTextIcon,
+  ShieldCheckIcon,
+  ShieldXIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { requireAdmin } from "@/lib/auth/require-auth"
+import { getAllCertificates } from "@/lib/lms/certificate-queries"
+import { RevokeCertificateButton } from "./_components/revoke-certificate-button"
 
 // =============================================================================
 // Types
@@ -332,12 +337,16 @@ export default async function CertificationAdminPage() {
   // Require admin access
   await requireAdmin()
 
-  const [attempts, trainees, stats, learners] = await Promise.all([
+  const [attempts, trainees, stats, learners, certificates] = await Promise.all([
     getCertificationAttempts(),
     getPendingTrainees(),
     getStats(),
     getAllLearners(),
+    getAllCertificates(),
   ])
+
+  const activeCertificates = certificates.filter(c => !c.revokedAt)
+  const revokedCertificates = certificates.filter(c => c.revokedAt)
 
   return (
     <div className="learn-content">
@@ -451,6 +460,62 @@ export default async function CertificationAdminPage() {
             </div>
           ) : (
             <EmptyState />
+          )}
+        </section>
+
+        {/* Completion Certificates */}
+        <section className="cert-admin-section">
+          <div className="cert-admin-section__header">
+            <h2 className="cert-admin-section__title">
+              <ScrollTextIcon className="h-5 w-5" />
+              Completion Certificates
+            </h2>
+            <span className="cert-admin-section__count">
+              {activeCertificates.length} active · {revokedCertificates.length} revoked
+            </span>
+          </div>
+          {certificates.length > 0 ? (
+            <div className="cert-admin-certificates">
+              <div className="cert-admin-certificates__header">
+                <span>Learner</span>
+                <span>Certificate ID</span>
+                <span>Issued</span>
+                <span>Status</span>
+                <span>Action</span>
+              </div>
+              {certificates.map((cert) => {
+                const date = new Date(cert.issuedAt).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
+                const isRevoked = !!cert.revokedAt
+                return (
+                  <div key={cert.id} className="cert-admin-cert-row">
+                    <span className="cert-admin-cert-row__name">{cert.fullName}</span>
+                    <span className="cert-admin-cert-row__id">{cert.certificateId}</span>
+                    <span className="cert-admin-cert-row__date">{date}</span>
+                    <span className={`cert-admin-cert-row__status cert-admin-cert-row__status--${isRevoked ? 'revoked' : 'active'}`}>
+                      {isRevoked ? (
+                        <><ShieldXIcon className="h-3.5 w-3.5" /> Revoked</>
+                      ) : (
+                        <><ShieldCheckIcon className="h-3.5 w-3.5" /> Active</>
+                      )}
+                    </span>
+                    <span>
+                      {!isRevoked && (
+                        <RevokeCertificateButton certificateId={cert.certificateId} />
+                      )}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="cert-admin-empty cert-admin-empty--small">
+              <ScrollTextIcon className="h-8 w-8 text-gray-300" />
+              <p>No completion certificates issued yet</p>
+            </div>
           )}
         </section>
 

@@ -145,6 +145,36 @@ export interface ProgressStats {
 }
 
 // =============================================================================
+// CERTIFICATE TYPES
+// =============================================================================
+
+export interface CompletionCertificate {
+  id: string
+  certificateId: string // Human-readable: "PCD-2026-0001"
+  userId: string
+  issuedAt: string
+  revokedAt: string | null
+  revokedBy: string | null
+  revokeReason: string | null
+  modulesCompleted: number
+  quizzesPassed: number
+  courseName: string
+  createdAt: string
+}
+
+export interface CertificateWithProfile extends CompletionCertificate {
+  fullName: string
+}
+
+export interface CertificateEligibility {
+  eligible: boolean
+  modulesCompleted: number
+  totalModules: number
+  quizzesPassed: number
+  totalQuizzes: number
+}
+
+// =============================================================================
 // ESSENTIALS TYPES
 // =============================================================================
 

@@ -18,6 +18,7 @@ import { requireAdmin } from "@/lib/auth/require-auth"
 import { revalidatePath } from "next/cache"
 import { UserEditForm } from "./user-edit-form"
 import { AddUserForm } from "./add-user-form"
+import { LoginAsButton } from "./login-as-button"
 import type { UserWithEmail } from "./types"
 
 // =============================================================================
@@ -244,6 +245,7 @@ function UserRow({ user }: { user: UserWithEmail }) {
         {joinedDate}
       </div>
       <div className="admin-users-row__actions">
+        <LoginAsButton userId={user.id} userName={user.full_name || user.email} />
         <UserEditForm user={user} />
       </div>
     </div>

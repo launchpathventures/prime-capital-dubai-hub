@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
   // 2. Handle token hash verification (some email flows)
   if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({
-      type: type as "email_change" | "signup" | "recovery" | "email",
+      type: type as "email_change" | "signup" | "recovery" | "email" | "magiclink",
       token_hash: tokenHash,
     })
     if (error) {

@@ -752,6 +752,71 @@
 }
 
 /* =============================================================================
+   Certificate Banner
+   ============================================================================= */
+
+.lms-certificate-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.06) 0%, oklch(from var(--color-primary) l c h / 0.02) 100%);
+  border: 1px solid oklch(from var(--color-primary) l c h / 0.15);
+  text-decoration: none;
+  color: inherit;
+}
+
+.lms-certificate-banner__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--primary-600) 100%);
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px oklch(from var(--color-primary) l c h / 0.3);
+}
+
+.lms-certificate-banner__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.lms-certificate-banner__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  margin: 0;
+}
+
+.lms-certificate-banner__description {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin: 0.125rem 0 0;
+}
+
+.lms-certificate-banner__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: oklch(from var(--color-primary) l c h / 0.08);
+  color: var(--color-primary);
+  flex-shrink: 0;
+  transition: all var(--lms-transition-fast);
+}
+
+.lms-card--clickable:hover .lms-certificate-banner__action {
+  background: var(--color-primary);
+  color: white;
+  transform: translateX(2px);
+}
+
+/* =============================================================================
    Competency Cards - Premium
    ============================================================================= */
 
@@ -817,6 +882,42 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Complete state for index badge */
+.competency-card__index--complete {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--primary-600) 100%);
+  color: white;
+}
+
+/* Per-competency progress bar */
+.competency-card__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.competency-card__progress-bar {
+  flex: 1;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--gray-150, var(--gray-100));
+  overflow: hidden;
+}
+
+.competency-card__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--primary-500) 100%);
+  transition: width var(--lms-transition-slow);
+}
+
+.competency-card__progress-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--gray-400);
+  flex-shrink: 0;
 }
 
 .competency-card__meta {
@@ -10427,5 +10528,202 @@
 :root.dark .price-table tbody tr:hover,
 :root.dark .budget-explorer tbody tr:hover {
   background: oklch(from var(--color-primary) l c h / 0.1);
+}
+
+/* =============================================================================
+   Completion Certificate Components
+   ============================================================================= */
+
+/* Certificate completion section */
+.cert-completion {
+  margin-bottom: 2rem;
+}
+
+/* Certificate Card (learner view) */
+.cert-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.05), oklch(from var(--color-primary) l c h / 0.02));
+  border: 1px solid oklch(from var(--color-primary) l c h / 0.15);
+  border-radius: var(--lms-radius-xl);
+}
+
+.cert-card__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), oklch(from var(--color-primary) calc(l + 0.1) c h));
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.cert-card__content {
+  margin-bottom: 1.5rem;
+}
+
+.cert-card__title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  margin-bottom: 0.25rem;
+}
+
+.cert-card__course {
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.cert-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+}
+
+.cert-card__dot {
+  opacity: 0.4;
+}
+
+.cert-card__stats {
+  font-size: 0.8125rem;
+  color: var(--color-muted-foreground);
+  margin-top: 0.25rem;
+}
+
+.cert-card__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Claim Certificate CTA */
+.cert-claim {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(135deg, oklch(from var(--color-primary) l c h / 0.08), oklch(from var(--color-primary) l c h / 0.03));
+  border: 1px solid oklch(from var(--color-primary) l c h / 0.2);
+  border-radius: var(--lms-radius-xl);
+}
+
+.cert-claim__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), oklch(from var(--color-primary) calc(l + 0.1) c h));
+  color: white;
+  margin-bottom: 1rem;
+  animation: cert-pulse 2s ease-in-out infinite;
+}
+
+@keyframes cert-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.cert-claim__title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.cert-claim__description {
+  font-size: 0.875rem;
+  color: var(--color-muted-foreground);
+  max-width: 28rem;
+  margin-bottom: 1.5rem;
+}
+
+.cert-claim__error {
+  font-size: 0.8125rem;
+  color: var(--color-destructive);
+  margin-bottom: 1rem;
+}
+
+/* Admin certificate table */
+.cert-admin-certificates {
+  border: 1px solid var(--color-border);
+  border-radius: var(--lms-radius-lg);
+  overflow: hidden;
+}
+
+.cert-admin-certificates__header {
+  display: grid;
+  grid-template-columns: 1fr 10rem 8rem 8rem 6rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted-foreground);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cert-admin-cert-row {
+  display: grid;
+  grid-template-columns: 1fr 10rem 8rem 8rem 6rem;
+  padding: 0.75rem 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.8125rem;
+  transition: background var(--lms-transition-fast);
+}
+
+.cert-admin-cert-row:last-child {
+  border-bottom: none;
+}
+
+.cert-admin-cert-row:hover {
+  background: var(--gray-50);
+}
+
+.cert-admin-cert-row__name {
+  font-weight: 500;
+  color: var(--color-foreground);
+}
+
+.cert-admin-cert-row__id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-muted-foreground);
+}
+
+.cert-admin-cert-row__date {
+  color: var(--color-muted-foreground);
+}
+
+.cert-admin-cert-row__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.cert-admin-cert-row__status--active {
+  color: var(--color-success);
+}
+
+.cert-admin-cert-row__status--revoked {
+  color: var(--color-destructive);
 }
 

@@ -9,7 +9,7 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Row, Text } from "@/components/core"
-import { 
+import {
   AwardIcon,
   CheckCircle2Icon,
   BookOpenIcon,
@@ -23,6 +23,11 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { config } from "@/lib/config"
+import { checkCertificateEligibility } from "@/lib/actions/certificate"
+import { getMyCertificate } from "@/lib/lms/certificate-queries"
+import { CertificateCard } from "./_components/certificate-card"
+import { ClaimCertificate } from "./_components/claim-certificate"
 
 export const metadata: Metadata = {
   title: "Certification | Learning Portal",
@@ -303,13 +308,15 @@ function PreparationTips() {
 // =============================================================================
 
 export default async function CertificationPage() {
-  const [profile, competencies] = await Promise.all([
+  const [profile, competencies, myCertificate, eligibility] = await Promise.all([
     getUserProfile(),
     getCompetencies(),
+    getMyCertificate(),
+    checkCertificateEligibility(),
   ])
-  
+
   // Get progress (would be real progress tracking in production)
-  const progress = profile 
+  const progress = profile
     ? await getUserProgress(profile.id)
     : {
         competenciesCompleted: 0,
@@ -320,29 +327,41 @@ export default async function CertificationPage() {
         totalQuizzes: competencies.reduce((sum, c) => sum + c.quiz_count, 0),
         averageQuizScore: null,
       }
-  
-  const isReadyForCertification = 
+
+  const isReadyForCertification =
     progress.modulesCompleted >= progress.totalModules &&
     progress.quizzesCompleted >= progress.totalQuizzes &&
     (progress.averageQuizScore ?? 0) >= 80
-  
+
   const isCertified = profile?.certification_status === 'certified'
+  const hasCertificate = myCertificate && !myCertificate.revokedAt
 
   return (
     <div className="learn-content">
+        {/* Completion Certificate Section */}
+        {hasCertificate ? (
+          <section className="cert-completion">
+            <CertificateCard certificate={myCertificate} appUrl={config.app.url} />
+          </section>
+        ) : eligibility.eligible ? (
+          <section className="cert-completion">
+            <ClaimCertificate />
+          </section>
+        ) : null}
+
         {/* Hero Section */}
         <section className="cert-hero">
           <div className="cert-hero__icon">
             <AwardIcon className="h-8 w-8" />
           </div>
           <h1 className="cert-hero__title">
-            {isCertified ? "You're Certified!" : "Certification Assessment"}
+            {isCertified ? "You're Certified!" : "Certification & Assessment"}
           </h1>
           <p className="cert-hero__description">
             {isCertified ? (
               "Congratulations! You've demonstrated readiness to represent Prime Capital to clients."
             ) : (
-              "The final step to becoming a Prime Capital consultant. Complete your training, then demonstrate your readiness in a practical assessment."
+              "Complete your training to earn your completion certificate, then demonstrate your readiness in a practical assessment."
             )}
           </p>
         </section>
