@@ -1,8 +1,8 @@
 ---
 quizId: "relationship-stewardship-1"
 title: "Relationship Stewardship Quiz: Referral Generation"
-competency: 7
-module: 7.3
+competency: 8
+module: 8.3
 description: "Test your understanding of referral timing, language, and recognition approaches."
 passingScore: 80
 questionCount: 10

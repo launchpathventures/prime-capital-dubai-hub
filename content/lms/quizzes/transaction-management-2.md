@@ -3,7 +3,7 @@ title: "Transaction Management Quiz: RERA Contracts"
 slug: "transaction-management-2"
 quizNumber: 2
 competency: "transaction-management"
-relatedModule: "5.3-rera-contracts"
+relatedModule: "6.3-rera-contracts"
 description: "Test your understanding of RERA-regulated contracts, including SPAs, Form F, buyer protections, and legal requirements."
 passingScore: 80
 questionCount: 10

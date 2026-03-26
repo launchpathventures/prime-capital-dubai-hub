@@ -3,7 +3,7 @@ title: "Market & Timing Objections Quiz"
 slug: "objection-navigation-2"
 quizNumber: 2
 competency: "objection-navigation"
-relatedModule: "6.2-market-objections"
+relatedModule: "market-objections"
 description: "Test your understanding of market and timing objections."
 passingScore: 80
 questionCount: 8

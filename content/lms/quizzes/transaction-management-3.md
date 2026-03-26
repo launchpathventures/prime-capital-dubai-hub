@@ -3,7 +3,7 @@ title: "Transaction Management Quiz: MOU & Form F"
 slug: "transaction-management-3"
 quizNumber: 3
 competency: "transaction-management"
-relatedModule: "5.9-mou-formf"
+relatedModule: "6.9-mou-formf"
 description: "Test your understanding of secondary market documentation, including Form F preparation, deposit handling, and completion requirements."
 passingScore: 80
 questionCount: 10
