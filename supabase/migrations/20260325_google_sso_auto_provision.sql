@@ -32,6 +32,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- 2. Trigger: fires after every new user creation
 -- -----------------------------------------------------------------------------
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -40,9 +41,15 @@ CREATE TRIGGER on_auth_user_created
 -- 3. RLS policy: allow users to insert their own profile (fallback provisioning)
 -- -----------------------------------------------------------------------------
 
-CREATE POLICY "Users can create own profile"
-  ON user_profiles FOR INSERT
-  WITH CHECK (auth.uid() = id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can create own profile' AND tablename = 'user_profiles'
+  ) THEN
+    CREATE POLICY "Users can create own profile"
+      ON user_profiles FOR INSERT
+      WITH CHECK (auth.uid() = id);
+  END IF;
+END $$;
 
 -- -----------------------------------------------------------------------------
 -- 4. Backfill: create profiles for existing users who are missing one
