@@ -92,6 +92,8 @@ export function PropertyForm({ property, open, onOpenChange }: PropertyFormProps
       features: (formData.get("features") as string)?.split(",").map(f => f.trim()).filter(Boolean) || null,
       cover_image: formData.get("cover_image") as string || null,
       images: (formData.get("images") as string)?.split(",").map(i => i.trim()).filter(Boolean) || null,
+      tags: property?.tags || [],
+      published: property?.published !== false,
       featured: formData.get("featured") === "on",
       display_order: formData.get("display_order") ? Number(formData.get("display_order")) : 0,
     }

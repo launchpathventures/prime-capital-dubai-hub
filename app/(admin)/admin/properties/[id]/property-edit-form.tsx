@@ -31,6 +31,7 @@ import {
   RulerIcon,
   CalendarIcon,
   BuildingIcon,
+  TagIcon,
 } from "lucide-react"
 import {
   createProperty,
@@ -65,8 +66,10 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const isEditing = !!property
 
-  // Form state for controlled inputs (images)
+  // Form state for controlled inputs
   const [coverImage, setCoverImage] = useState<string | null>(property?.cover_image || null)
+  const [isDistressed, setIsDistressed] = useState(property?.tags?.includes("distressed") || false)
+  const [isPublished, setIsPublished] = useState(property?.published !== false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -100,6 +103,8 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
       features: (formData.get("features") as string)?.split(",").map(f => f.trim()).filter(Boolean) || null,
       cover_image: coverImage,
       images: (formData.get("images") as string)?.split(",").map(i => i.trim()).filter(Boolean) || null,
+      tags: isDistressed ? ["distressed"] : [],
+      published: isPublished,
       featured: formData.get("featured") === "on",
       display_order: formData.get("display_order") ? Number(formData.get("display_order")) : 0,
     }
@@ -453,10 +458,16 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                   </div>
 
                   <Stack gap="xs">
-                    <Row gap="sm">
+                    <Row gap="sm" className="flex-wrap">
                       <Badge variant="outline" className="capitalize text-xs">
                         {property?.type || "villa"}
                       </Badge>
+                      {isDistressed && (
+                        <Badge variant="secondary" className="text-xs">
+                          <TagIcon className="h-3 w-3 mr-1" />
+                          Distressed
+                        </Badge>
+                      )}
                       {property?.featured && (
                         <Badge variant="secondary" className="text-xs">Featured</Badge>
                       )}
@@ -588,6 +599,33 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                     />
                     <Label htmlFor="featured">Featured Property</Label>
                   </Row>
+
+                  <Row align="center" gap="sm">
+                    <Switch
+                      id="distressed"
+                      checked={isDistressed}
+                      onCheckedChange={setIsDistressed}
+                    />
+                    <Label htmlFor="distressed" className="flex items-center gap-1">
+                      <TagIcon className="h-3 w-3" />
+                      Distressed Sale
+                    </Label>
+                  </Row>
+                  <Text size="xs" variant="muted" className="-mt-2">
+                    Marks this as a distressed/below-market deal
+                  </Text>
+
+                  <Row align="center" gap="sm">
+                    <Switch
+                      id="published"
+                      checked={isPublished}
+                      onCheckedChange={setIsPublished}
+                    />
+                    <Label htmlFor="published">Published</Label>
+                  </Row>
+                  <Text size="xs" variant="muted" className="-mt-2">
+                    Unpublished properties are hidden from the website
+                  </Text>
                 </Stack>
               </CardContent>
             </Card>

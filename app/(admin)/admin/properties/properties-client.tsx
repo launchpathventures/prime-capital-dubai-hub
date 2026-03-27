@@ -41,6 +41,7 @@ import {
   Loader2Icon,
   DatabaseIcon,
   BuildingIcon,
+  TagIcon,
 } from "lucide-react"
 import { deleteProperty, type PropertyRow } from "@/lib/actions/cms"
 import { toast } from "@/components/ui/toast"
@@ -193,6 +194,12 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
                         <Badge variant={property.status === "available" ? "default" : "secondary"}>
                           {property.status}
                         </Badge>
+                        {property.tags?.includes("distressed") && (
+                          <Badge variant="outline" className="ml-1">
+                            <TagIcon className="h-3 w-3 mr-1" />
+                            Distressed
+                          </Badge>
+                        )}
                         {property.featured && (
                           <Badge variant="outline" className="ml-1">Featured</Badge>
                         )}
