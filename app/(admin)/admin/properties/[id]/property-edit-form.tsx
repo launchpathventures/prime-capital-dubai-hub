@@ -21,17 +21,19 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ImageUpload } from "@/components/shared/image-upload"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import {
   ArrowLeftIcon,
   Loader2Icon,
   SaveIcon,
   EyeIcon,
-  MapPinIcon,
   BedDoubleIcon,
   RulerIcon,
   CalendarIcon,
   BuildingIcon,
   TagIcon,
+  HelpCircleIcon,
+  ChevronDownIcon,
 } from "lucide-react"
 import {
   createProperty,
@@ -138,9 +140,9 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Stack gap="xl">
+      <Stack gap="lg">
         {/* Page Header */}
-        <Row justify="between" align="center" className="sticky top-0 z-10 bg-background py-4 border-b -mx-6 px-6">
+        <Row justify="between" align="center" className="sticky top-0 z-10 bg-background py-3 border-b -mx-6 px-6">
           <Row gap="md" align="center">
             <Button
               type="button"
@@ -150,57 +152,59 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
             >
               <ArrowLeftIcon className="h-4 w-4" />
             </Button>
-            <Stack gap="none">
-              <Title size="h4">{isEditing ? "Edit Property" : "Add New Property"}</Title>
-              <Text size="sm" variant="muted">
-                {isEditing ? property.title : "Create a new property listing"}
-              </Text>
-            </Stack>
+            <Title size="h4">{isEditing ? "Edit Property" : "Add New Property"}</Title>
           </Row>
           <Row gap="sm">
             {isEditing && property.slug && (
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 render={<Link href={`/properties/${property.slug}`} target="_blank" />}
               >
-                <EyeIcon className="h-4 w-4 mr-2" />
+                <EyeIcon className="h-4 w-4 mr-1.5" />
                 View Live
               </Button>
             )}
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" size="sm" disabled={isLoading}>
               {isLoading ? (
-                <Loader2Icon className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2Icon className="h-4 w-4 mr-1.5 animate-spin" />
               ) : (
-                <SaveIcon className="h-4 w-4 mr-2" />
+                <SaveIcon className="h-4 w-4 mr-1.5" />
               )}
               {isEditing ? "Save Changes" : "Create Property"}
             </Button>
           </Row>
         </Row>
 
+        {/* Distressed Property Guide */}
+        <DistressedHelpGuide />
+
         {/* Main Content - Two Column Layout */}
-        <Grid cols={1} className="lg:grid-cols-[2fr_1fr] gap-8">
+        <Grid cols={1} className="lg:grid-cols-[1fr_320px] gap-6">
           {/* Left Column - Main Content */}
-          <Stack gap="lg">
-            {/* Hero Preview Card */}
+          <Stack gap="md">
+            {/* Cover Image */}
+            <Card>
+              <CardContent className="pt-6">
+                <ImageUpload
+                  label="Cover Image"
+                  value={coverImage}
+                  onChange={setCoverImage}
+                  folder="properties"
+                  aspectRatio="video"
+                  placeholder="Upload a high-quality cover image"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Core Details */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Cover Image & Title</CardTitle>
+                <CardTitle className="text-base">Property Details</CardTitle>
               </CardHeader>
               <CardContent>
                 <Stack gap="md">
-                  {/* Cover Image Upload */}
-                  <ImageUpload
-                    label="Cover Image"
-                    value={coverImage}
-                    onChange={setCoverImage}
-                    folder="properties"
-                    aspectRatio="video"
-                    placeholder="Upload a high-quality cover image"
-                  />
-
-                  {/* Title & Slug */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
                       <Label htmlFor="title">Property Title *</Label>
@@ -208,25 +212,14 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                         id="title"
                         name="title"
                         defaultValue={property?.title}
-                        placeholder="e.g. Palm Jumeirah Villa"
+                        placeholder="e.g. Sobha One Tower D — 1 Bed + Study"
                         required
-                        className="text-lg font-medium"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="slug">URL Slug</Label>
-                      <Input
-                        id="slug"
-                        name="slug"
-                        defaultValue={property?.slug}
-                        placeholder="auto-generated from title"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="type">Property Type *</Label>
-                      <Select name="type" defaultValue={property?.type || "villa"}>
+                      <Label htmlFor="type">Type *</Label>
+                      <Select name="type" defaultValue={property?.type || "apartment"}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
@@ -239,117 +232,7 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                         </SelectContent>
                       </Select>
                     </div>
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
 
-            {/* Location Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <MapPinIcon className="h-4 w-4" />
-                  Location
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="location">Location / Area *</Label>
-                    <Input
-                      id="location"
-                      name="location"
-                      defaultValue={property?.location}
-                      placeholder="e.g. Palm Jumeirah, Dubai"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      name="city"
-                      defaultValue={property?.city || "Dubai"}
-                      placeholder="Dubai"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      name="country"
-                      defaultValue={property?.country || "UAE"}
-                      placeholder="UAE"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Property Details Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <BuildingIcon className="h-4 w-4" />
-                  Property Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack gap="md">
-                  <div className="grid grid-cols-4 gap-4">
-                    <div>
-                      <Label htmlFor="bedrooms" className="flex items-center gap-1">
-                        <BedDoubleIcon className="h-3 w-3" />
-                        Bedrooms
-                      </Label>
-                      <Input
-                        id="bedrooms"
-                        name="bedrooms"
-                        defaultValue={property?.bedrooms || ""}
-                        placeholder="3-5"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="bathrooms">Bathrooms</Label>
-                      <Input
-                        id="bathrooms"
-                        name="bathrooms"
-                        type="number"
-                        defaultValue={property?.bathrooms || ""}
-                        placeholder="4"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="size_from" className="flex items-center gap-1">
-                        <RulerIcon className="h-3 w-3" />
-                        Size From
-                      </Label>
-                      <Input
-                        id="size_from"
-                        name="size_from"
-                        type="number"
-                        defaultValue={property?.size_from || ""}
-                        placeholder="5000"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="size_to">Size To</Label>
-                      <Input
-                        id="size_to"
-                        name="size_to"
-                        type="number"
-                        defaultValue={property?.size_to || ""}
-                        placeholder="8000"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="status">Status *</Label>
                       <Select name="status" defaultValue={property?.status || "available"}>
@@ -367,6 +250,104 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                     </div>
 
                     <div>
+                      <Label htmlFor="location">Location / Area *</Label>
+                      <Input
+                        id="location"
+                        name="location"
+                        defaultValue={property?.location}
+                        placeholder="e.g. Sobha Hartland, MBR City"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="developer">Developer</Label>
+                      <Input
+                        id="developer"
+                        name="developer"
+                        defaultValue={property?.developer || ""}
+                        placeholder="e.g. Emaar"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        defaultValue={property?.city || "Dubai"}
+                        placeholder="Dubai"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        name="country"
+                        defaultValue={property?.country || "UAE"}
+                        placeholder="UAE"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Specs row */}
+                  <div className="border-t pt-4">
+                    <div className="grid grid-cols-4 gap-4">
+                      <div>
+                        <Label htmlFor="bedrooms" className="flex items-center gap-1">
+                          <BedDoubleIcon className="h-3 w-3" />
+                          Beds
+                        </Label>
+                        <Input
+                          id="bedrooms"
+                          name="bedrooms"
+                          defaultValue={property?.bedrooms || ""}
+                          placeholder="1-3"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="bathrooms">Baths</Label>
+                        <Input
+                          id="bathrooms"
+                          name="bathrooms"
+                          type="number"
+                          defaultValue={property?.bathrooms || ""}
+                          placeholder="2"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="size_from" className="flex items-center gap-1">
+                          <RulerIcon className="h-3 w-3" />
+                          Size From
+                        </Label>
+                        <Input
+                          id="size_from"
+                          name="size_from"
+                          type="number"
+                          defaultValue={property?.size_from || ""}
+                          placeholder="740"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="size_to">Size To</Label>
+                        <Input
+                          id="size_to"
+                          name="size_to"
+                          type="number"
+                          defaultValue={property?.size_to || ""}
+                          placeholder="740"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Completion & slug */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <Label htmlFor="completion_date" className="flex items-center gap-1">
                         <CalendarIcon className="h-3 w-3" />
                         Completion Date
@@ -375,7 +356,17 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                         id="completion_date"
                         name="completion_date"
                         defaultValue={property?.completion_date || ""}
-                        placeholder="Q4 2025"
+                        placeholder="Q4 2026"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="slug">URL Slug</Label>
+                      <Input
+                        id="slug"
+                        name="slug"
+                        defaultValue={property?.slug}
+                        placeholder="auto-generated from title"
                       />
                     </div>
                   </div>
@@ -383,7 +374,7 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
               </CardContent>
             </Card>
 
-            {/* Description & Features Card */}
+            {/* Description & Features */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Description & Features</CardTitle>
@@ -396,8 +387,8 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                       id="description"
                       name="description"
                       defaultValue={property?.description || ""}
-                      placeholder="Detailed property description..."
-                      rows={6}
+                      placeholder="Property description — include discount details and payment terms for distressed deals..."
+                      rows={5}
                     />
                   </div>
 
@@ -407,7 +398,7 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                       id="features"
                       name="features"
                       defaultValue={property?.features?.join(", ") || ""}
-                      placeholder="Private pool, Beach access, Smart home, Gym"
+                      placeholder="Full Golf Course View, High Floor, 60% Paid by Seller"
                     />
                     <Text size="xs" variant="muted" className="mt-1">
                       Separate features with commas
@@ -423,9 +414,6 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                       placeholder="https://example.com/image1.jpg,&#10;https://example.com/image2.jpg"
                       rows={3}
                     />
-                    <Text size="xs" variant="muted" className="mt-1">
-                      Add additional gallery images (one URL per line or comma-separated)
-                    </Text>
                   </div>
                 </Stack>
               </CardContent>
@@ -433,34 +421,160 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
           </Stack>
 
           {/* Right Column - Sidebar */}
-          <Stack gap="lg">
-            {/* Preview Card */}
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="text-base">Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
+          <Stack gap="md">
+            {/* Pricing & Settings — single consolidated card */}
+            <Card className="sticky top-16">
+              <CardContent className="pt-6">
                 <Stack gap="md">
-                  {/* Mini preview */}
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                    {coverImage ? (
-                      <Image
-                        src={coverImage}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <BuildingIcon className="h-12 w-12 text-muted-foreground/30" />
+                  {/* Pricing */}
+                  <div>
+                    <Text size="sm" weight="medium" className="mb-3">Pricing</Text>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="price_from" className="text-xs">Price From</Label>
+                        <Input
+                          id="price_from"
+                          name="price_from"
+                          type="number"
+                          defaultValue={property?.price_from || ""}
+                          placeholder="1750000"
+                        />
                       </div>
+                      <div>
+                        <Label htmlFor="price_to" className="text-xs">Price To</Label>
+                        <Input
+                          id="price_to"
+                          name="price_to"
+                          type="number"
+                          defaultValue={property?.price_to || ""}
+                          placeholder="1870000"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <Label htmlFor="currency" className="text-xs">Currency</Label>
+                      <Select name="currency" defaultValue={property?.currency || "AED"}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AED">AED</SelectItem>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {isDistressed && (
+                      <Text size="xs" variant="muted" className="mt-2">
+                        For distressed: Price From = asking price, Price To = original price
+                      </Text>
                     )}
                   </div>
 
-                  <Stack gap="xs">
+                  {/* Divider */}
+                  <div className="border-t" />
+
+                  {/* Links */}
+                  <div>
+                    <Text size="sm" weight="medium" className="mb-3">Links</Text>
+                    <Stack gap="sm">
+                      <div>
+                        <Label htmlFor="developer_website" className="text-xs">Developer Website</Label>
+                        <Input
+                          id="developer_website"
+                          name="developer_website"
+                          type="url"
+                          defaultValue={property?.developer_website || ""}
+                          placeholder="https://..."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="project_website" className="text-xs">Project Website</Label>
+                        <Input
+                          id="project_website"
+                          name="project_website"
+                          type="url"
+                          defaultValue={property?.project_website || ""}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </Stack>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t" />
+
+                  {/* Toggles & display */}
+                  <div>
+                    <Text size="sm" weight="medium" className="mb-3">Visibility</Text>
+                    <Stack gap="sm">
+                      <Row align="center" gap="sm">
+                        <Switch
+                          id="published"
+                          checked={isPublished}
+                          onCheckedChange={setIsPublished}
+                        />
+                        <Label htmlFor="published" className="text-sm">Published</Label>
+                      </Row>
+
+                      <Row align="center" gap="sm">
+                        <Switch
+                          id="featured"
+                          name="featured"
+                          defaultChecked={property?.featured || false}
+                        />
+                        <Label htmlFor="featured" className="text-sm">Featured</Label>
+                      </Row>
+
+                      <Row align="center" gap="sm">
+                        <Switch
+                          id="distressed"
+                          checked={isDistressed}
+                          onCheckedChange={setIsDistressed}
+                        />
+                        <Label htmlFor="distressed" className="text-sm flex items-center gap-1">
+                          <TagIcon className="h-3 w-3" />
+                          Distressed Sale
+                        </Label>
+                      </Row>
+
+                      <div>
+                        <Label htmlFor="display_order" className="text-xs">Display Order</Label>
+                        <Input
+                          id="display_order"
+                          name="display_order"
+                          type="number"
+                          defaultValue={property?.display_order || 0}
+                          placeholder="0"
+                          className="mt-1"
+                        />
+                        <Text size="xs" variant="muted" className="mt-1">
+                          Lower numbers appear first
+                        </Text>
+                      </div>
+                    </Stack>
+                  </div>
+
+                  {/* Preview */}
+                  <div className="border-t pt-4">
+                    <div className="relative aspect-video rounded-md overflow-hidden bg-muted mb-3">
+                      {coverImage ? (
+                        <Image
+                          src={coverImage}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <BuildingIcon className="h-8 w-8 text-muted-foreground/20" />
+                        </div>
+                      )}
+                    </div>
                     <Row gap="sm" className="flex-wrap">
                       <Badge variant="outline" className="capitalize text-xs">
-                        {property?.type || "villa"}
+                        {property?.type || "apartment"}
                       </Badge>
                       {isDistressed && (
                         <Badge variant="secondary" className="text-xs">
@@ -468,170 +582,119 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                           Distressed
                         </Badge>
                       )}
-                      {property?.featured && (
-                        <Badge variant="secondary" className="text-xs">Featured</Badge>
+                      {!isPublished && (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">Draft</Badge>
                       )}
                     </Row>
-                    <Text weight="medium">{property?.title || "Property Title"}</Text>
-                    <Text size="sm" variant="muted">{property?.location || "Location"}</Text>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Pricing Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Pricing</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack gap="md">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="price_from">Price From</Label>
-                      <Input
-                        id="price_from"
-                        name="price_from"
-                        type="number"
-                        defaultValue={property?.price_from || ""}
-                        placeholder="5000000"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="price_to">Price To</Label>
-                      <Input
-                        id="price_to"
-                        name="price_to"
-                        type="number"
-                        defaultValue={property?.price_to || ""}
-                        placeholder="10000000"
-                      />
-                    </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="currency">Currency</Label>
-                    <Select name="currency" defaultValue={property?.currency || "AED"}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="AED">AED</SelectItem>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Developer Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Developer</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack gap="md">
-                  <div>
-                    <Label htmlFor="developer">Developer Name</Label>
-                    <Input
-                      id="developer"
-                      name="developer"
-                      defaultValue={property?.developer || ""}
-                      placeholder="e.g. Emaar"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="developer_website">Developer Website</Label>
-                    <Input
-                      id="developer_website"
-                      name="developer_website"
-                      type="url"
-                      defaultValue={property?.developer_website || ""}
-                      placeholder="https://..."
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="project_website">Project Website</Label>
-                    <Input
-                      id="project_website"
-                      name="project_website"
-                      type="url"
-                      defaultValue={property?.project_website || ""}
-                      placeholder="https://..."
-                    />
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Settings Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack gap="md">
-                  <div>
-                    <Label htmlFor="display_order">Display Order</Label>
-                    <Input
-                      id="display_order"
-                      name="display_order"
-                      type="number"
-                      defaultValue={property?.display_order || 0}
-                      placeholder="0"
-                    />
-                    <Text size="xs" variant="muted" className="mt-1">
-                      Lower numbers appear first
-                    </Text>
-                  </div>
-
-                  <Row align="center" gap="sm" className="pt-2">
-                    <Switch
-                      id="featured"
-                      name="featured"
-                      defaultChecked={property?.featured || false}
-                    />
-                    <Label htmlFor="featured">Featured Property</Label>
-                  </Row>
-
-                  <Row align="center" gap="sm">
-                    <Switch
-                      id="distressed"
-                      checked={isDistressed}
-                      onCheckedChange={setIsDistressed}
-                    />
-                    <Label htmlFor="distressed" className="flex items-center gap-1">
-                      <TagIcon className="h-3 w-3" />
-                      Distressed Sale
-                    </Label>
-                  </Row>
-                  <Text size="xs" variant="muted" className="-mt-2">
-                    Marks this as a distressed/below-market deal
-                  </Text>
-
-                  <Row align="center" gap="sm">
-                    <Switch
-                      id="published"
-                      checked={isPublished}
-                      onCheckedChange={setIsPublished}
-                    />
-                    <Label htmlFor="published">Published</Label>
-                  </Row>
-                  <Text size="xs" variant="muted" className="-mt-2">
-                    Unpublished properties are hidden from the website
-                  </Text>
                 </Stack>
               </CardContent>
             </Card>
           </Stack>
         </Grid>
+
       </Stack>
     </form>
+  )
+}
+
+// =============================================================================
+// DISTRESSED HELP GUIDE
+// Collapsible card with guidance for creating distressed property listings.
+// Shown in the main content area when the distressed toggle is on.
+// =============================================================================
+
+function DistressedHelpGuide() {
+  return (
+    <Card className="border-orange-200 bg-orange-50/50 dark:border-orange-900 dark:bg-orange-950/20">
+      <Collapsible>
+        <CardHeader className="pb-0">
+          <CollapsibleTrigger
+            render={<div role="button" tabIndex={0} />}
+            className="group flex items-center justify-between w-full cursor-pointer"
+          >
+            <Row gap="md" align="center">
+              <HelpCircleIcon className="h-5 w-5 text-orange-600 dark:text-orange-400 shrink-0" />
+              <Stack gap="none">
+                <Text weight="medium">Distressed listing guide</Text>
+                <Text size="xs" variant="muted">
+                  How to set up pricing, description, and features for a distressed deal
+                </Text>
+              </Stack>
+            </Row>
+            <ChevronDownIcon className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-data-[open]:rotate-180" />
+          </CollapsibleTrigger>
+        </CardHeader>
+
+        <CollapsibleContent>
+          <CardContent className="pt-4">
+            <div className="grid gap-6 md:grid-cols-2 text-sm">
+              {/* Left column */}
+              <Stack gap="md">
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Pricing setup</Text>
+                  <ul className="text-muted-foreground space-y-1 list-disc pl-4 text-sm">
+                    <li><strong>Price From</strong> — the current asking price (discounted)</li>
+                    <li><strong>Price To</strong> — the original price or market value</li>
+                    <li>The public page shows Price From as headline, Price To crossed out</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Description</Text>
+                  <ul className="text-muted-foreground space-y-1 list-disc pl-4 text-sm">
+                    <li>State the discount — &quot;Original AED X, now AED Y&quot;</li>
+                    <li>Mention payment plan status — &quot;60% paid by seller&quot;</li>
+                    <li>Include handover timeline if off-plan</li>
+                    <li>Factual, restrained tone — no urgency language</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Features to include</Text>
+                  <ul className="text-muted-foreground space-y-1 list-disc pl-4 text-sm">
+                    <li>Payment split — &quot;60% Paid by Seller&quot;</li>
+                    <li>Price context — &quot;Below Original Price&quot;</li>
+                    <li>Standout specs — floor, views, layout</li>
+                    <li>Keep to 4–5 concise items</li>
+                  </ul>
+                </div>
+              </Stack>
+
+              {/* Right column */}
+              <Stack gap="md">
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Example listing</Text>
+                  <div className="rounded-md border bg-background p-3 space-y-1.5 text-xs">
+                    <Text size="xs" weight="medium">Sobha One Tower D — 1 Bed + Study</Text>
+                    <Text size="xs" variant="muted">
+                      Price: AED 1,750,000 (original AED 1,870,000)
+                    </Text>
+                    <Text size="xs" variant="muted">
+                      &quot;High floor 1-bed + study with golf views. 60% paid by seller —
+                      buyer assumes 40% balance on handover.&quot;
+                    </Text>
+                    <Text size="xs" variant="muted">
+                      Features: Golf View · High Floor · 60% Paid · 40% on Handover
+                    </Text>
+                  </div>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Checklist</Text>
+                  <ul className="text-muted-foreground space-y-1 list-disc pl-4 text-sm">
+                    <li>Set Price From (asking) and Price To (original)</li>
+                    <li>Add a cover image</li>
+                    <li>Write description with discount and payment terms</li>
+                    <li>Add 4–5 features highlighting deal specifics</li>
+                    <li>Toggle &quot;Published&quot; when ready</li>
+                  </ul>
+                </div>
+              </Stack>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   )
 }
