@@ -48,6 +48,8 @@ export type PropertyRow = {
   features: string[] | null
   cover_image: string | null
   images: string[] | null
+  tags: string[] | null
+  published: boolean
   featured: boolean | null
   display_order: number | null
   created_at: string | null
