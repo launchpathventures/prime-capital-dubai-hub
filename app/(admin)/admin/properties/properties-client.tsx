@@ -33,15 +33,17 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
   ExternalLinkIcon,
   Loader2Icon,
-  DatabaseIcon,
   BuildingIcon,
   TagIcon,
+  HelpCircleIcon,
+  ChevronDownIcon,
 } from "lucide-react"
 import { deleteProperty, type PropertyRow } from "@/lib/actions/cms"
 import { toast } from "@/components/ui/toast"
@@ -114,20 +116,8 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
           </Button>
         </Row>
 
-        {/* Connected Badge */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-6">
-            <Row gap="md" align="start">
-              <DatabaseIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <Stack gap="xs">
-                <Text weight="medium">Connected to Supabase</Text>
-                <Text size="sm" variant="muted">
-                  Properties are stored in your Supabase database. Changes sync to the public website immediately.
-                </Text>
-              </Stack>
-            </Row>
-          </CardContent>
-        </Card>
+        {/* Distressed Property Guide */}
+        <DistressedPropertyGuide />
 
         {/* Properties Table */}
         <Card>
@@ -270,5 +260,113 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  )
+}
+
+// =============================================================================
+// DISTRESSED PROPERTY GUIDE
+// Collapsible help card explaining how to create distressed property listings.
+// =============================================================================
+
+function DistressedPropertyGuide() {
+  return (
+    <Card>
+      <Collapsible>
+        <CardHeader className="pb-0">
+          <CollapsibleTrigger
+            render={<div role="button" tabIndex={0} />}
+            className="group flex items-center justify-between w-full cursor-pointer"
+          >
+            <Row gap="md" align="start">
+              <HelpCircleIcon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+              <Stack gap="xs">
+                <Text weight="medium">How to create a distressed property listing</Text>
+                <Text size="sm" variant="muted">
+                  Guide for setting up below-market deals with the right pricing, description, and features
+                </Text>
+              </Stack>
+            </Row>
+            <ChevronDownIcon className="h-4 w-4 text-muted-foreground shrink-0 transition-transform group-data-[open]:rotate-180" />
+          </CollapsibleTrigger>
+        </CardHeader>
+
+        <CollapsibleContent>
+          <CardContent className="pt-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Left column */}
+              <Stack gap="md">
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">What is a distressed property?</Text>
+                  <Text size="sm" variant="muted">
+                    A property sold below market value by a motivated seller — typically due to financial
+                    pressure, payment plan assumptions, or urgent timelines. These appear on the dedicated
+                    distressed deals page and are tagged for CRM routing.
+                  </Text>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Setting up pricing</Text>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li><strong>Price From</strong> — the current asking price (discounted amount)</li>
+                    <li><strong>Price To</strong> — the original price or market value</li>
+                    <li>The public page shows Price From as the headline with Price To crossed out</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Writing the description</Text>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li>State the discount — &quot;Original price AED X, now offered at AED Y&quot;</li>
+                    <li>Mention payment plan status — e.g. &quot;60% already paid by seller&quot;</li>
+                    <li>Include handover timeline if off-plan</li>
+                    <li>Keep the tone factual and restrained — no urgency language</li>
+                  </ul>
+                </div>
+              </Stack>
+
+              {/* Right column */}
+              <Stack gap="md">
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Key features to include</Text>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li>Payment split — e.g. &quot;60% Paid by Seller&quot;, &quot;40% Balance on Handover&quot;</li>
+                    <li>Price context — e.g. &quot;Below Original Price&quot;, &quot;Lowest in Market&quot;</li>
+                    <li>Standout specs — floor level, views, layout type</li>
+                    <li>Keep to 4–5 concise features</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Before publishing checklist</Text>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li>Toggle &quot;Distressed Sale&quot; on in Settings</li>
+                    <li>Set Price From (asking) and Price To (original)</li>
+                    <li>Add a cover image</li>
+                    <li>Write a description explaining the discount and payment terms</li>
+                    <li>Add 4–5 features highlighting the deal specifics</li>
+                    <li>Toggle &quot;Published&quot; when ready</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <Text size="sm" weight="medium" className="mb-1">Example</Text>
+                  <div className="rounded-md border bg-muted/50 p-3 text-xs space-y-1">
+                    <Text size="xs" weight="medium">Sobha One Tower D — 1 Bed + Study</Text>
+                    <Text size="xs" variant="muted">Price: AED 1,750,000 (original AED 1,870,000)</Text>
+                    <Text size="xs" variant="muted">
+                      &quot;High floor 1-bed + study with golf course views. 60% paid by seller — buyer
+                      assumes 40% balance on handover.&quot;
+                    </Text>
+                    <Text size="xs" variant="muted">
+                      Features: Golf Course View · High Floor · 60% Paid · 40% on Handover
+                    </Text>
+                  </div>
+                </div>
+              </Stack>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   )
 }
