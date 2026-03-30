@@ -132,14 +132,31 @@ function SelectValue({ className, placeholder, children, ...props }: SelectValue
     )
   }
 
-  // Default: render placeholder or let Base UI handle it
+  // Default: use render function so placeholder doesn't override selected value
+  if (!children && placeholder) {
+    return (
+      <SelectPrimitive.Value
+        data-slot="select-value"
+        className={cn("flex flex-1 text-left", className)}
+        {...props}
+      >
+        {(value) => {
+          if (value === null || value === undefined) {
+            return <span className="text-muted-foreground">{placeholder}</span>
+          }
+          return String(value)
+        }}
+      </SelectPrimitive.Value>
+    )
+  }
+
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
       className={cn("flex flex-1 text-left", className)}
       {...props}
     >
-      {children ?? (placeholder ? <span className="text-muted-foreground">{placeholder}</span> : null)}
+      {children}
     </SelectPrimitive.Value>
   )
 }
