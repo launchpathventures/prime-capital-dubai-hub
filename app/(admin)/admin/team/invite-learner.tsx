@@ -34,7 +34,6 @@ export function InviteLearnerButton() {
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen)
     if (!nextOpen) {
-      // Reset state when closing
       setMagicLink(null)
       setCopied(false)
     }
@@ -89,15 +88,15 @@ export function InviteLearnerButton() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button />}>
         <UserPlusIcon className="h-4 w-4 mr-2" />
-        Add Learner
+        Invite User
       </DialogTrigger>
       <DialogContent>
         {magicLink ? (
           <>
             <DialogHeader>
-              <DialogTitle>Learner Created</DialogTitle>
+              <DialogTitle>User Created</DialogTitle>
               <DialogDescription>
-                Share this magic link with the learner — they can use it to log in without a password.
+                Share this magic link with the user — they can use it to log in without a password.
               </DialogDescription>
             </DialogHeader>
             <Stack gap="sm">
@@ -122,7 +121,7 @@ export function InviteLearnerButton() {
                 </Button>
               </div>
               <Text size="xs" variant="muted">
-                This link expires after use. Generate a new one from the learner&apos;s detail page if needed.
+                This link expires after use. Generate a new one from the user&apos;s row if needed.
               </Text>
             </Stack>
             <DialogFooter>
@@ -132,9 +131,9 @@ export function InviteLearnerButton() {
         ) : (
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>Add New Learner</DialogTitle>
+              <DialogTitle>Invite User</DialogTitle>
               <DialogDescription>
-                Create a learner account. A magic login link will be generated for you to share.
+                Create a user account. A magic login link will be generated for you to share.
               </DialogDescription>
             </DialogHeader>
             <Stack gap="md" className="py-4">
@@ -145,7 +144,7 @@ export function InviteLearnerButton() {
                   name="email"
                   type="email"
                   required
-                  placeholder="learner@primecapitaldubai.com"
+                  placeholder="user@primecapitaldubai.com"
                 />
               </Stack>
               <Stack gap="xs">

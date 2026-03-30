@@ -63,7 +63,7 @@ interface LearnShellProps {
   /** Competency data for sidebar */
   competencies?: Competency[]
   /** User role for admin visibility */
-  userRole?: "learner" | "admin"
+  userRole?: "learner" | "marketing" | "admin"
   /** Coach context for AI Coach */
   coachContext?: CoachContext
   /** User data for header menu */
