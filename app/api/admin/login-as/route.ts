@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   // Build the auth callback URL with the token
   const appUrl = config.app.url
-  const loginUrl = `${appUrl}/api/auth/callback?token_hash=${linkData.properties.hashed_token}&type=magiclink&next=/learn`
+  const loginUrl = `${appUrl}/api/auth/callback?token_hash=${linkData.properties.hashed_token}&type=magiclink&next=/auth/redirect`
 
   return NextResponse.json({
     success: true,
