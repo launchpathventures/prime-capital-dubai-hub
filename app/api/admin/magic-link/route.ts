@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   const callbackUrl = new URL("/api/auth/callback", origin)
   callbackUrl.searchParams.set("token_hash", tokenHash)
   callbackUrl.searchParams.set("type", "magiclink")
-  callbackUrl.searchParams.set("next", "/learn")
+  callbackUrl.searchParams.set("next", "/auth/redirect")
   const magicLink = callbackUrl.toString()
 
   return NextResponse.json({ success: true, magicLink })
