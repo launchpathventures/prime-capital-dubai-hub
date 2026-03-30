@@ -47,18 +47,33 @@ async function getUser(): Promise<AdminUser> {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (claims || user) {
+      const userId = user?.id || claims?.sub
       const email = claims?.email || user?.email || ""
-      const displayName = 
-        user?.user_metadata?.display_name ?? 
-        user?.user_metadata?.full_name ?? 
-        user?.user_metadata?.name ?? 
-        email?.split("@")[0] ?? 
+      const displayName =
+        user?.user_metadata?.display_name ??
+        user?.user_metadata?.full_name ??
+        user?.user_metadata?.name ??
+        email?.split("@")[0] ??
         "User"
+
+      // Fetch role from database
+      let role = "User"
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("id", userId)
+          .single()
+
+        if (profile?.role) {
+          role = profile.role
+        }
+      }
 
       return {
         name: displayName,
         email,
-        role: "User",
+        role,
         avatarUrl: user?.user_metadata?.avatar_url,
       }
     }

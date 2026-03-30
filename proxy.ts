@@ -168,9 +168,18 @@ export async function proxy(request: NextRequest) {
         .eq("id", user.id)
         .single()
 
-      if (adminProfile?.role !== "admin") {
-        // Non-admin users redirected to learn home
+      const adminRole = adminProfile?.role
+      if (adminRole !== "admin" && adminRole !== "marketing") {
+        // Non-admin/marketing users redirected to learn home
         return redirectWithCookies(new URL("/learn", request.url))
+      }
+
+      // Marketing users cannot access user management or learning admin pages
+      if (adminRole === "marketing") {
+        const blockedPaths = ["/admin/team", "/admin/progress", "/admin/learning"]
+        if (blockedPaths.some((p) => pathname.startsWith(p))) {
+          return redirectWithCookies(new URL("/admin/dashboard", request.url))
+        }
       }
     }
 

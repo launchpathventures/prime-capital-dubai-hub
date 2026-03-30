@@ -15,12 +15,14 @@ export interface LearnerSummary {
   id: string
   fullName: string
   email: string
+  role: "admin" | "marketing" | "learner"
   certificationStatus: "in_progress" | "ready" | "certified"
   overallProgress: number
   lastActivity: string | null
   completedModules: number
   totalModules: number
   isAtRisk: boolean
+  createdAt: string | null
 }
 
 export interface LearnerDetail extends LearnerSummary {
@@ -95,11 +97,10 @@ export interface ProgressStats {
 export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
   const supabase = await createClient()
 
-  // Get all learner profiles
+  // Get all user profiles (admins + learners)
   const { data: profiles, error: profilesError } = await supabase
     .from("user_profiles")
     .select("id, full_name, role, certification_status, created_at")
-    .eq("role", "learner")
 
   if (profilesError) {
     console.error("Failed to fetch learner profiles:", profilesError)
@@ -168,12 +169,14 @@ export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
       id: profile.id,
       fullName: profile.full_name || "No name",
       email: emailMap.get(profile.id) || "No email",
+      role: (["admin", "marketing", "learner"].includes(profile.role) ? profile.role : "learner") as "admin" | "marketing" | "learner",
       certificationStatus: profile.certification_status || "in_progress",
       overallProgress,
       lastActivity: lastActivityDate ? new Date(lastActivityDate).toISOString() : null,
       completedModules,
       totalModules: totalModules || 0,
       isAtRisk,
+      createdAt: profile.created_at || null,
     }
   })
 
@@ -463,12 +466,14 @@ export async function getLearnerDetail(userId: string): Promise<LearnerDetail | 
     id: profile.id,
     fullName: profile.full_name || "No name",
     email,
+    role: (["admin", "marketing", "learner"].includes(profile.role) ? profile.role : "learner") as "admin" | "marketing" | "learner",
     certificationStatus: profile.certification_status || "in_progress",
     overallProgress,
     lastActivity: lastActivityDate ? new Date(lastActivityDate).toISOString() : null,
     completedModules,
     totalModules,
     isAtRisk,
+    createdAt: null,
     competencyProgress,
     quizResults: Array.from(quizResultsMap.values()),
     scenarioProgress: scenarioCategoryProgress,

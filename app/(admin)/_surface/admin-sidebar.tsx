@@ -18,7 +18,6 @@ import {
   TrendingUpIcon,
   GraduationCapIcon,
   BookOpenIcon,
-  UserCogIcon,
   SettingsIcon,
   UserIcon,
   ExternalLinkIcon,
@@ -29,6 +28,8 @@ import {
 // -----------------------------------------------------------------------------
 
 interface AdminSidebarProps {
+  /** The current user's role (admin, marketing, learner) */
+  userRole: string
   /** Callback for mobile drawer close */
   onNavigate?: () => void
 }
@@ -37,12 +38,17 @@ interface AdminSidebarProps {
 // AdminSidebar Component
 // -----------------------------------------------------------------------------
 
-export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
+export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname()
+  const isAdmin = userRole === "admin"
   
   const isActive = (href: string) => {
     if (href === "/admin/dashboard") {
       return pathname === "/admin" || pathname === "/admin/dashboard"
+    }
+    // Team page also owns the user detail pages at /admin/progress/[id]
+    if (href === "/admin/team") {
+      return pathname === "/admin/team" || pathname.startsWith("/admin/team/") || pathname.startsWith("/admin/progress/")
     }
     return pathname === href || pathname.startsWith(href + "/")
   }
@@ -53,7 +59,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
       <div className="admin-sidebar__section">
         <div className="admin-sidebar__heading">Overview</div>
         <nav className="admin-sidebar__nav-list">
-          <Link 
+          <Link
             href="/admin/dashboard"
             className="admin-sidebar__nav-item"
             data-active={isActive("/admin/dashboard")}
@@ -62,14 +68,25 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
             <LayoutDashboardIcon className="admin-sidebar__nav-icon" />
             <span>Dashboard</span>
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin/team"
+              className="admin-sidebar__nav-item"
+              data-active={isActive("/admin/team")}
+              onClick={onNavigate}
+            >
+              <UsersIcon className="admin-sidebar__nav-icon" />
+              <span>Team</span>
+            </Link>
+          )}
         </nav>
       </div>
-      
+
       {/* Website Content Section */}
       <div className="admin-sidebar__section">
         <div className="admin-sidebar__heading">Website Content</div>
         <nav className="admin-sidebar__nav-list">
-          <Link 
+          <Link
             href="/admin/properties"
             className="admin-sidebar__nav-item"
             data-active={isActive("/admin/properties")}
@@ -78,16 +95,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
             <BuildingIcon className="admin-sidebar__nav-icon" />
             <span>Properties</span>
           </Link>
-          <Link 
-            href="/admin/team"
-            className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/team")}
-            onClick={onNavigate}
-          >
-            <UsersIcon className="admin-sidebar__nav-icon" />
-            <span>Team</span>
-          </Link>
-          <Link 
+          <Link
             href="/admin/testimonials"
             className="admin-sidebar__nav-item"
             data-active={isActive("/admin/testimonials")}
@@ -96,7 +104,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
             <MessageSquareQuoteIcon className="admin-sidebar__nav-icon" />
             <span>Testimonials</span>
           </Link>
-          <Link 
+          <Link
             href="/admin/stats"
             className="admin-sidebar__nav-item"
             data-active={isActive("/admin/stats")}
@@ -107,32 +115,25 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           </Link>
         </nav>
       </div>
-      
-      {/* Learning Admin Section */}
-      <div className="admin-sidebar__section">
-        <div className="admin-sidebar__heading">Learning Admin</div>
-        <nav className="admin-sidebar__nav-list">
-          <Link
-            href="/admin/learning"
-            className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/learning")}
-            onClick={onNavigate}
-          >
-            <BookOpenIcon className="admin-sidebar__nav-icon" />
-            <span>Modules</span>
-          </Link>
-          <Link
-            href="/admin/progress"
-            className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/progress")}
-            onClick={onNavigate}
-          >
-            <UserCogIcon className="admin-sidebar__nav-icon" />
-            <span>Learners</span>
-          </Link>
-        </nav>
-      </div>
-      
+
+      {/* Learning Admin Section — admin only */}
+      {isAdmin && (
+        <div className="admin-sidebar__section">
+          <div className="admin-sidebar__heading">Learning Admin</div>
+          <nav className="admin-sidebar__nav-list">
+            <Link
+              href="/admin/learning"
+              className="admin-sidebar__nav-item"
+              data-active={isActive("/admin/learning")}
+              onClick={onNavigate}
+            >
+              <BookOpenIcon className="admin-sidebar__nav-icon" />
+              <span>Modules</span>
+            </Link>
+          </nav>
+        </div>
+      )}
+
       {/* Learning Surface Link */}
       <div className="admin-sidebar__section admin-sidebar__section--highlight">
         <div className="admin-sidebar__heading">Go to Learning</div>

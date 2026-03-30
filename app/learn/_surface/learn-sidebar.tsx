@@ -57,7 +57,7 @@ interface LearnSidebarProps {
   /** Current module slug */
   currentModule?: string
   /** User role for admin visibility */
-  userRole?: "learner" | "admin"
+  userRole?: "learner" | "marketing" | "admin"
   /** Callback for mobile drawer close */
   onNavigate?: () => void
 }
@@ -298,12 +298,12 @@ export function LearnSidebar({
         </nav>
       </div>
       
-      {/* Admin Section - only for admins */}
-      {userRole === "admin" && (
+      {/* Admin Section - admins see all links, marketing sees dashboard link only */}
+      {(userRole === "admin" || userRole === "marketing") && (
         <div className="learn-sidebar__section learn-sidebar__section--admin">
           <div className="learn-sidebar__heading">Admin</div>
           <nav className="learn-sidebar__nav-list">
-            <Link 
+            <Link
               href="/admin/dashboard"
               className="learn-sidebar__nav-item"
               onClick={onNavigate}
@@ -311,51 +311,55 @@ export function LearnSidebar({
               <ShieldIcon className="learn-sidebar__nav-icon" />
               <span>Admin Dashboard</span>
             </Link>
-            <Link 
-              href="/learn/admin/users"
-              className="learn-sidebar__nav-item"
-              data-active={activeSection === "admin-users"}
-              onClick={onNavigate}
-            >
-              <UsersIcon className="learn-sidebar__nav-icon" />
-              <span>User Management</span>
-            </Link>
-            <Link 
-              href="/learn/admin/progress"
-              className="learn-sidebar__nav-item"
-              data-active={activeSection === "admin-progress"}
-              onClick={onNavigate}
-            >
-              <BarChart3Icon className="learn-sidebar__nav-icon" />
-              <span>Team Progress</span>
-            </Link>
-            <Link 
-              href="/learn/admin/feedback"
-              className="learn-sidebar__nav-item"
-              data-active={activeSection === "admin-feedback"}
-              onClick={onNavigate}
-            >
-              <MessageSquarePlusIcon className="learn-sidebar__nav-icon" />
-              <span>Content Feedback</span>
-            </Link>
-            <Link 
-              href="/learn/admin/certification"
-              className="learn-sidebar__nav-item"
-              data-active={activeSection === "admin"}
-              onClick={onNavigate}
-            >
-              <SettingsIcon className="learn-sidebar__nav-icon" />
-              <span>Certification Admin</span>
-            </Link>
-            <Link 
-              href="/learn/admin/prompts"
-              className="learn-sidebar__nav-item"
-              data-active={activeSection === "admin-prompts"}
-              onClick={onNavigate}
-            >
-              <SparklesIcon className="learn-sidebar__nav-icon" />
-              <span>AI Prompts</span>
-            </Link>
+            {userRole === "admin" && (
+              <>
+                <Link
+                  href="/learn/admin/users"
+                  className="learn-sidebar__nav-item"
+                  data-active={activeSection === "admin-users"}
+                  onClick={onNavigate}
+                >
+                  <UsersIcon className="learn-sidebar__nav-icon" />
+                  <span>User Management</span>
+                </Link>
+                <Link
+                  href="/learn/admin/progress"
+                  className="learn-sidebar__nav-item"
+                  data-active={activeSection === "admin-progress"}
+                  onClick={onNavigate}
+                >
+                  <BarChart3Icon className="learn-sidebar__nav-icon" />
+                  <span>Team Progress</span>
+                </Link>
+                <Link
+                  href="/learn/admin/feedback"
+                  className="learn-sidebar__nav-item"
+                  data-active={activeSection === "admin-feedback"}
+                  onClick={onNavigate}
+                >
+                  <MessageSquarePlusIcon className="learn-sidebar__nav-icon" />
+                  <span>Content Feedback</span>
+                </Link>
+                <Link
+                  href="/learn/admin/certification"
+                  className="learn-sidebar__nav-item"
+                  data-active={activeSection === "admin"}
+                  onClick={onNavigate}
+                >
+                  <SettingsIcon className="learn-sidebar__nav-icon" />
+                  <span>Certification Admin</span>
+                </Link>
+                <Link
+                  href="/learn/admin/prompts"
+                  className="learn-sidebar__nav-item"
+                  data-active={activeSection === "admin-prompts"}
+                  onClick={onNavigate}
+                >
+                  <SparklesIcon className="learn-sidebar__nav-icon" />
+                  <span>AI Prompts</span>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

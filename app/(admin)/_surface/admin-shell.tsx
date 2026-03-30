@@ -55,7 +55,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
         <div className="admin-shell__sidebar-header">
           <Logo />
         </div>
-        <AdminSidebar />
+        <AdminSidebar userRole={user.role} />
       </div>
 
       {/* Mobile Sidebar (Sheet) */}
@@ -65,7 +65,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
           <div className="admin-shell__sidebar-header">
             <Logo />
           </div>
-          <AdminSidebar onNavigate={() => setMobileOpen(false)} />
+          <AdminSidebar userRole={user.role} onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 

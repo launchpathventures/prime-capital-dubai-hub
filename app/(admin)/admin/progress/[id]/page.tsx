@@ -74,10 +74,10 @@ export default async function LearnerDetailPage({ params }: PageProps) {
       <Stack gap="xl">
         {/* Back Button */}
         <div>
-          <Link href="/admin/progress">
+          <Link href="/admin/team">
             <Button variant="ghost" size="sm">
               <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Learners
+              Back to Team
             </Button>
           </Link>
         </div>
