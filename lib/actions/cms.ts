@@ -121,6 +121,15 @@ function revalidateWebContent(tags: string[]) {
   tags.forEach((tag) => revalidateTag(tag, "max"))
 }
 
+/** Extract a user-facing error message from Supabase/PostgREST errors */
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === "object" && "message" in error) {
+    return String((error as { message: string }).message)
+  }
+  if (error instanceof Error) return error.message
+  return fallback
+}
+
 // =============================================================================
 // PROPERTIES
 // =============================================================================
@@ -137,7 +146,7 @@ export async function getPropertiesFromDb(): Promise<ActionResult<PropertyRow[]>
     return { success: true, data: data ?? [] }
   } catch (error) {
     trackActionError(error, "getPropertiesFromDb")
-    return { success: false, error: "Failed to fetch properties" }
+    return { success: false, error: getErrorMessage(error, "Failed to fetch properties") }
   }
 }
 
@@ -161,12 +170,17 @@ export async function getPropertyById(id: string): Promise<ActionResult<Property
 export async function createProperty(input: PropertyInput): Promise<ActionResult<PropertyRow>> {
   try {
     const supabase = await createClient()
+    // Strip null/undefined values to avoid "column not found" errors for columns
+    // that may have been added to the type but not yet to the database
+    const cleanInput = Object.fromEntries(
+      Object.entries(input).filter(([, v]) => v !== undefined)
+    )
     const { data, error } = await supabase
       .from("properties")
-      .insert(input)
+      .insert(cleanInput)
       .select()
       .single()
-    
+
     if (error) throw error
     revalidatePath("/admin/properties")
     revalidatePath("/properties")
@@ -174,16 +188,20 @@ export async function createProperty(input: PropertyInput): Promise<ActionResult
     return { success: true, data }
   } catch (error) {
     trackActionError(error, "createProperty")
-    return { success: false, error: "Failed to create property" }
+    return { success: false, error: getErrorMessage(error, "Failed to create property") }
   }
 }
 
 export async function updateProperty(id: string, input: Partial<PropertyInput>): Promise<ActionResult<PropertyRow>> {
   try {
     const supabase = await createClient()
+    // Strip null/undefined values to avoid "column not found" errors
+    const cleanInput = Object.fromEntries(
+      Object.entries(input).filter(([, v]) => v !== undefined)
+    )
     const { data, error } = await supabase
       .from("properties")
-      .update({ ...input, updated_at: new Date().toISOString() })
+      .update({ ...cleanInput, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select()
       .single()
@@ -196,7 +214,7 @@ export async function updateProperty(id: string, input: Partial<PropertyInput>):
     return { success: true, data }
   } catch (error) {
     trackActionError(error, "updateProperty", { id })
-    return { success: false, error: "Failed to update property" }
+    return { success: false, error: getErrorMessage(error, "Failed to update property") }
   }
 }
 
@@ -215,7 +233,7 @@ export async function deleteProperty(id: string): Promise<ActionResult> {
     return { success: true, data: undefined }
   } catch (error) {
     trackActionError(error, "deleteProperty", { id })
-    return { success: false, error: "Failed to delete property" }
+    return { success: false, error: getErrorMessage(error, "Failed to delete property") }
   }
 }
 

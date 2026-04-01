@@ -22,9 +22,14 @@ function Collapsible({ ...props }: CollapsiblePrimitive.Root.Props) {
   return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
 }
 
-function CollapsibleTrigger({ ...props }: CollapsiblePrimitive.Trigger.Props) {
+function CollapsibleTrigger({ nativeButton, render, ...props }: CollapsiblePrimitive.Trigger.Props) {
   return (
-    <CollapsiblePrimitive.Trigger data-slot="collapsible-trigger" {...props} />
+    <CollapsiblePrimitive.Trigger
+      data-slot="collapsible-trigger"
+      render={render}
+      nativeButton={nativeButton ?? !render}
+      {...props}
+    />
   )
 }
 
