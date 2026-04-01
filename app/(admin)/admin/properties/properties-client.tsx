@@ -124,10 +124,10 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
           <CardHeader>
             <CardTitle>All Properties ({properties.length})</CardTitle>
             <CardDescription>
-              Click edit to update a property, or view to see the live page
+              Click a row to edit, or use the action buttons
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             {properties.length > 0 ? (
               <Table>
                 <TableHeader>
@@ -138,12 +138,16 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
                     <TableHead>Location</TableHead>
                     <TableHead>Price Range</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right sticky right-0 bg-background pl-4 shadow-[inset_1px_0_0_var(--color-border)]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {properties.map((property) => (
-                    <TableRow key={property.id}>
+                    <TableRow
+                      key={property.id}
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/admin/properties/${property.id}`)}
+                    >
                       <TableCell>
                         <div className="w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
                           {property.cover_image ? (
@@ -194,7 +198,7 @@ export function PropertiesClient({ properties }: PropertiesClientProps) {
                           <Badge variant="outline" className="ml-1">Featured</Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right sticky right-0 bg-card pl-4 shadow-[inset_1px_0_0_var(--color-border)]" onClick={(e) => e.stopPropagation()}>
                         <Row gap="xs" justify="end">
                           <Button
                             variant="ghost"

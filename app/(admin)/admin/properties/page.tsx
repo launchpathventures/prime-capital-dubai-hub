@@ -19,6 +19,11 @@ export default async function PropertiesAdminPage() {
 
   return (
     <Container size="lg" className="py-6">
+      {!result.success && (
+        <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          Failed to load properties: {result.error}
+        </div>
+      )}
       <PropertiesClient properties={properties} />
     </Container>
   )
