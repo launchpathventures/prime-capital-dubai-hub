@@ -113,8 +113,10 @@ export const config = {
     support: null as string | null,
     /** Strategy Kit PDF download */
     strategyKit: "https://gamma.app/docs/The-Prime-Capital-2026-Investor-Strategy-Kit-nra1olekeesasny",
-    /** Calendly scheduling link */
+    /** Calendly scheduling link (30-minute consultation) */
     calendly: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/tahirmajithia/30min",
+    /** Calendly scheduling link (15-minute seller consultation) */
+    calendlySeller: "https://calendly.com/tahirmajithia/15min",
   },
 
   /**
