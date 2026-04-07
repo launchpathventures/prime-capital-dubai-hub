@@ -73,7 +73,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
 
     async create(payload: Partial<T> | Partial<T>[], options: CrudMutationOptions = {}) {
       const select = options.select || defaultSelect
-      const query = getTableQuery(client, config).insert(payload).select(select)
+      const query = getTableQuery(client, config).insert(payload as any).select(select)
       const finalQuery = options.query ? options.query(query) : query
       return await finalQuery
     },
@@ -85,7 +85,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
-        .update(values)
+        .update(values as any)
         .eq(primaryKey, id)
         .select(select)
         .maybeSingle()
@@ -110,7 +110,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
-        .upsert(payload, {
+        .upsert(payload as any, {
           onConflict: options.onConflict,
           ignoreDuplicates: options.ignoreDuplicates,
         })

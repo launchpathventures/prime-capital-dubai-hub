@@ -41,6 +41,8 @@ export function LeadForm({
   downloadAsset,
   calendlyUrl,
   propertyLabel,
+  showPropertyFields,
+  showConcerns,
   autoFocus = true,
   tag,
   propertyContext,
@@ -118,6 +120,8 @@ export function LeadForm({
             isSubmitting={isSubmitting}
             onSubmit={submit}
             propertyLabel={propertyLabel}
+            showPropertyFields={showPropertyFields}
+            showConcerns={showConcerns}
             submitLabel={calendlyUrl ? "Book Call" : undefined}
           />
         )

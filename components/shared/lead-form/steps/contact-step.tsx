@@ -21,8 +21,12 @@ interface ContactStepProps {
   isLastStep?: boolean
   isSubmitting?: boolean
   onSubmit?: (data: Partial<LeadFormData>) => void
-  /** Optional: show a property name/location field with this label */
+  /** Optional: show a combined property name/location field with this label */
   propertyLabel?: string
+  /** Optional: show separate property name and location fields */
+  showPropertyFields?: boolean
+  /** Optional: show a concerns/notes textarea */
+  showConcerns?: boolean
   /** Optional: custom label for the submit button when this is the last step */
   submitLabel?: string
 }
@@ -36,11 +40,15 @@ export function ContactStep({
   isSubmitting = false,
   onSubmit,
   propertyLabel,
+  showPropertyFields,
+  showConcerns,
   submitLabel,
 }: ContactStepProps) {
   const [email, setEmail] = useState(data.email || "")
   const [whatsapp, setWhatsapp] = useState(data.whatsapp || "")
+  const [propertyName, setPropertyName] = useState(data.propertyName || "")
   const [propertyLocation, setPropertyLocation] = useState(data.propertyLocation || "")
+  const [concerns, setConcerns] = useState(data.concerns || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +68,13 @@ export function ContactStep({
 
     setErrors({})
     const updates: Partial<LeadFormData> = { email, whatsapp }
-    if (propertyLabel) updates.propertyLocation = propertyLocation
+    if (showPropertyFields) {
+      updates.propertyName = propertyName
+      updates.propertyLocation = propertyLocation
+    } else if (propertyLabel) {
+      updates.propertyLocation = propertyLocation
+    }
+    if (showConcerns) updates.concerns = concerns
     if (isLastStep && onSubmit) {
       onSubmit(updates)
     } else {
@@ -137,7 +151,34 @@ export function ContactStep({
           )}
         </div>
 
-        {propertyLabel && (
+        {showPropertyFields ? (
+          <>
+            <div className="lead-form__field">
+              <label htmlFor="propertyName" className="lead-form__label">Property Name</label>
+              <input
+                id="propertyName"
+                type="text"
+                value={propertyName}
+                onChange={(e) => setPropertyName(e.target.value)}
+                placeholder="e.g. Marina Gate Tower 2"
+                className="lead-form__input"
+                autoComplete="off"
+              />
+            </div>
+            <div className="lead-form__field">
+              <label htmlFor="propertyLocation" className="lead-form__label">Location</label>
+              <input
+                id="propertyLocation"
+                type="text"
+                value={propertyLocation}
+                onChange={(e) => setPropertyLocation(e.target.value)}
+                placeholder="e.g. Dubai Marina"
+                className="lead-form__input"
+                autoComplete="off"
+              />
+            </div>
+          </>
+        ) : propertyLabel ? (
           <div className="lead-form__field">
             <label htmlFor="propertyLocation" className="lead-form__label">{propertyLabel}</label>
             <input
@@ -148,6 +189,21 @@ export function ContactStep({
               placeholder="e.g. Marina Gate Tower 2, Dubai Marina"
               className="lead-form__input"
               autoComplete="off"
+            />
+          </div>
+        ) : null}
+
+        {showConcerns && (
+          <div className="lead-form__field">
+            <label htmlFor="concerns" className="lead-form__label">Your Concerns</label>
+            <textarea
+              id="concerns"
+              value={concerns}
+              onChange={(e) => setConcerns(e.target.value)}
+              placeholder="Tell us about your situation or any concerns you have..."
+              className="lead-form__input"
+              rows={4}
+              style={{ resize: "vertical" }}
             />
           </div>
         )}

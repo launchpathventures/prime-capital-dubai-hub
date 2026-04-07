@@ -187,7 +187,8 @@ function HeroSection() {
                     mode="landing"
                     theme="light"
                     tag="seller"
-                    propertyLabel="Property Name / Location"
+                    showPropertyFields
+                    showConcerns
                     calendlyUrl={config.links.calendlySeller}
                     successMessage="Pick a time that works — Tahir will call you personally."
                   />

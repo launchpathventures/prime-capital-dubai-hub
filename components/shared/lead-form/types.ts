@@ -80,10 +80,14 @@ export interface LeadFormData {
   budget?: BudgetRange
 
   // Step 4b: Property Details (for sellers)
+  propertyName?: string
   propertyLocation?: string
   propertyType?: PropertyType
   saleTimeline?: SaleTimeline
   targetPrice?: PriceRange
+
+  // Concerns (landing mode — free text)
+  concerns?: string
 
   // Step 5: Questions
   hasQuestions?: boolean
@@ -159,6 +163,12 @@ export interface LeadFormProps {
 
   /** Optional: Show a property name/location field on the contact step with this label */
   propertyLabel?: string
+
+  /** Optional: Show separate property name and location fields instead of a single combined field */
+  showPropertyFields?: boolean
+
+  /** Optional: Show a concerns/notes textarea */
+  showConcerns?: boolean
 
   /** Optional: Auto-focus the first input on mount (default: true) */
   autoFocus?: boolean

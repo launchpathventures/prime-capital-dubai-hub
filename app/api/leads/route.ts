@@ -258,7 +258,9 @@ const leadSchema = z.object({
   budget: z.string().max(100).optional(),
 
   // Optional fields - seller qualification
+  propertyName: z.string().max(500).optional(),
   propertyLocation: z.string().max(500).optional(),
+  concerns: z.string().max(2000).optional(),
   propertyType: z.string().max(100).optional(),
   saleTimeline: z.string().max(100).optional(),
   targetPrice: z.string().max(100).optional(),
