@@ -1,16 +1,15 @@
 /**
  * CATALYST - Success Step
  *
- * Elegant confirmation after form submission.
- * Refined, celebratory but not excessive.
- * 
- * For download mode with a redirectUrl, shows success and then redirects
- * after a brief delay so users can see the confirmation.
+ * For download mode: shows success then redirects after a brief delay.
+ * For calendly mode: uses Calendly's official inline widget embed
+ * with Next.js Script component for proper loading.
  */
 
 "use client"
 
 import { useEffect, useState } from "react"
+import Script from "next/script"
 import { CheckIcon, ExternalLinkIcon } from "lucide-react"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
 
@@ -22,27 +21,26 @@ interface SuccessStepProps {
   customMessage?: string
   redirectUrl?: string
   redirectDelay?: number
+  calendlyUrl?: string
 }
 
 export function SuccessStep({
   data,
   mode,
-  // downloadAsset reserved for future use
   customMessage,
   redirectUrl,
   redirectDelay = 3000,
+  calendlyUrl,
 }: SuccessStepProps) {
   const firstName = data.firstName || "there"
   const [countdown, setCountdown] = useState(Math.ceil(redirectDelay / 1000))
-  // Initialize redirect state based on mode
-  const shouldRedirect = mode === "download" && !!redirectUrl
+  const shouldRedirect = mode === "download" && !!redirectUrl && !calendlyUrl
   const [isRedirecting] = useState(shouldRedirect)
 
   // Handle redirect for download mode
   useEffect(() => {
     if (!shouldRedirect) return
-      
-    // Countdown timer
+
     const countdownInterval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -53,7 +51,6 @@ export function SuccessStep({
       })
     }, 1000)
 
-    // Redirect after delay
     const redirectTimeout = setTimeout(() => {
       window.location.href = redirectUrl!
     }, redirectDelay)
@@ -64,12 +61,30 @@ export function SuccessStep({
     }
   }, [shouldRedirect, redirectUrl, redirectDelay])
 
-  // Default messages per mode
+  // Calendly mode
+  if (calendlyUrl) {
+    const embedUrl = buildCalendlyUrl(calendlyUrl, data)
+    return (
+      <>
+        <div
+          className="calendly-inline-widget"
+          data-url={embedUrl}
+          style={{ minWidth: "320px", height: "700px" }}
+        />
+        <Script
+          src="https://assets.calendly.com/assets/external/widget.js"
+          strategy="lazyOnload"
+        />
+      </>
+    )
+  }
+
+  // Standard success message
   const getDefaultMessage = () => {
     switch (mode) {
       case "download":
         if (redirectUrl && isRedirecting) {
-          return `Opening your Strategy Kit in ${countdown} second${countdown !== 1 ? 's' : ''}...`
+          return `Opening your Strategy Kit in ${countdown} second${countdown !== 1 ? "s" : ""}...`
         }
         return "Your download is ready. Check your email for the link."
       case "landing":
@@ -83,11 +98,8 @@ export function SuccessStep({
 
   const message = customMessage || getDefaultMessage()
 
-  // Manual redirect button for download mode
   const handleManualRedirect = () => {
-    if (redirectUrl) {
-      window.location.href = redirectUrl
-    }
+    if (redirectUrl) window.location.href = redirectUrl
   }
 
   return (
@@ -96,25 +108,17 @@ export function SuccessStep({
         <CheckIcon size={24} />
       </div>
 
-      <h2 className="lead-form__success-title">
-        Thank you, {firstName}
-      </h2>
-
+      <h2 className="lead-form__success-title">Thank you, {firstName}</h2>
       <p className="lead-form__success-message">{message}</p>
 
       {mode === "download" && redirectUrl && (
         <>
-          {/* Progress bar for redirect */}
           <div className="lead-form__redirect-progress" style={{ marginTop: "1.5rem" }}>
-            <div 
+            <div
               className="lead-form__redirect-bar"
-              style={{ 
-                animationDuration: `${redirectDelay}ms`,
-              }}
+              style={{ animationDuration: `${redirectDelay}ms` }}
             />
           </div>
-          
-          {/* Manual link as backup */}
           <button
             onClick={handleManualRedirect}
             className="lead-form__submit"
@@ -123,12 +127,39 @@ export function SuccessStep({
             <ExternalLinkIcon size={16} style={{ marginRight: "0.5rem" }} />
             Open Strategy Kit Now
           </button>
-          
           <p className="lead-form__redirect-note" style={{ marginTop: "0.75rem" }}>
-            You'll also receive a copy via email.
+            You&apos;ll also receive a copy via email.
           </p>
         </>
       )}
     </div>
   )
+}
+
+/**
+ * Build Calendly URL with prefill and display params.
+ * @see https://calendly.com/help/how-to-customize-your-embed
+ */
+function buildCalendlyUrl(baseUrl: string, data: Partial<LeadFormData>): string {
+  const params = new URLSearchParams()
+
+  // Brand colors (spruce / ash)
+  params.set("primary_color", "576c75")
+  params.set("text_color", "3f4142")
+
+  // Clean embed
+  params.set("hide_event_type_details", "1")
+  params.set("hide_gdpr_banner", "1")
+
+  // Invitee prefill
+  if (data.firstName)
+    params.set("name", `${data.firstName} ${data.lastName || ""}`.trim())
+  if (data.email) params.set("email", data.email)
+
+  // Custom question prefill
+  if (data.whatsapp) params.set("a1", data.whatsapp)
+  if (data.propertyLocation) params.set("a2", data.propertyLocation)
+
+  const separator = baseUrl.includes("?") ? "&" : "?"
+  return `${baseUrl}${separator}${params.toString()}`
 }

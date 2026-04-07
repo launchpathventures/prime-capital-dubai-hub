@@ -154,6 +154,12 @@ export interface LeadFormProps {
   /** Optional: Delay in ms before redirecting (default: 3000) */
   redirectDelay?: number
 
+  /** Optional: Calendly URL to embed inline after submission */
+  calendlyUrl?: string
+
+  /** Optional: Show a property name/location field on the contact step with this label */
+  propertyLabel?: string
+
   /** Optional: Auto-focus the first input on mount (default: true) */
   autoFocus?: boolean
 

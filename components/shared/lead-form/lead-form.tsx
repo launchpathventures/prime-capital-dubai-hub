@@ -39,6 +39,8 @@ export function LeadForm({
   redirectUrl,
   redirectDelay,
   downloadAsset,
+  calendlyUrl,
+  propertyLabel,
   autoFocus = true,
   tag,
   propertyContext,
@@ -115,6 +117,8 @@ export function LeadForm({
             isLastStep={isContactLastStep}
             isSubmitting={isSubmitting}
             onSubmit={submit}
+            propertyLabel={propertyLabel}
+            submitLabel={calendlyUrl ? "Book Call" : undefined}
           />
         )
 
@@ -202,6 +206,7 @@ export function LeadForm({
             customMessage={successMessage}
             redirectUrl={redirectUrl}
             redirectDelay={redirectDelay}
+            calendlyUrl={calendlyUrl}
           />
         )
 

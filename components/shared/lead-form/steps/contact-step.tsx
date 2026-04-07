@@ -21,6 +21,10 @@ interface ContactStepProps {
   isLastStep?: boolean
   isSubmitting?: boolean
   onSubmit?: (data: Partial<LeadFormData>) => void
+  /** Optional: show a property name/location field with this label */
+  propertyLabel?: string
+  /** Optional: custom label for the submit button when this is the last step */
+  submitLabel?: string
 }
 
 export function ContactStep({
@@ -31,9 +35,12 @@ export function ContactStep({
   isLastStep = false,
   isSubmitting = false,
   onSubmit,
+  propertyLabel,
+  submitLabel,
 }: ContactStepProps) {
   const [email, setEmail] = useState(data.email || "")
   const [whatsapp, setWhatsapp] = useState(data.whatsapp || "")
+  const [propertyLocation, setPropertyLocation] = useState(data.propertyLocation || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,10 +59,12 @@ export function ContactStep({
     }
 
     setErrors({})
+    const updates: Partial<LeadFormData> = { email, whatsapp }
+    if (propertyLabel) updates.propertyLocation = propertyLocation
     if (isLastStep && onSubmit) {
-      onSubmit({ email, whatsapp })
+      onSubmit(updates)
     } else {
-      onUpdate({ email, whatsapp })
+      onUpdate(updates)
       onNext()
     }
   }
@@ -127,6 +136,21 @@ export function ContactStep({
             <span id="whatsapp-error" role="alert" className="lead-form__error">{errors.whatsapp}</span>
           )}
         </div>
+
+        {propertyLabel && (
+          <div className="lead-form__field">
+            <label htmlFor="propertyLocation" className="lead-form__label">{propertyLabel}</label>
+            <input
+              id="propertyLocation"
+              type="text"
+              value={propertyLocation}
+              onChange={(e) => setPropertyLocation(e.target.value)}
+              placeholder="e.g. Marina Gate Tower 2, Dubai Marina"
+              className="lead-form__input"
+              autoComplete="off"
+            />
+          </div>
+        )}
       </div>
 
       <div className="lead-form__actions">
@@ -139,7 +163,7 @@ export function ContactStep({
           ) : isLastStep ? (
             <>
               <CheckIcon className="lead-form__submit-icon" style={{ marginRight: 4 }} />
-              Submit
+              {submitLabel || "Submit"}
             </>
           ) : (
             <>
