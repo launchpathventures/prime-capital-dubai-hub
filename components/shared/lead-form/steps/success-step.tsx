@@ -141,25 +141,32 @@ export function SuccessStep({
  * @see https://calendly.com/help/how-to-customize-your-embed
  */
 function buildCalendlyUrl(baseUrl: string, data: Partial<LeadFormData>): string {
-  const params = new URLSearchParams()
+  // Calendly expects %20 for spaces, not + (which URLSearchParams uses).
+  // Build the query string manually with encodeURIComponent.
+  const parts: string[] = []
+  const add = (key: string, value: string) => {
+    parts.push(`${key}=${encodeURIComponent(value)}`)
+  }
 
   // Brand colors (spruce / ash)
-  params.set("primary_color", "576c75")
-  params.set("text_color", "3f4142")
+  add("primary_color", "576c75")
+  add("text_color", "3f4142")
 
   // Clean embed
-  params.set("hide_event_type_details", "1")
-  params.set("hide_gdpr_banner", "1")
+  add("hide_event_type_details", "1")
+  add("hide_gdpr_banner", "1")
 
   // Invitee prefill
   if (data.firstName)
-    params.set("name", `${data.firstName} ${data.lastName || ""}`.trim())
-  if (data.email) params.set("email", data.email)
+    add("name", `${data.firstName} ${data.lastName || ""}`.trim())
+  if (data.email) add("email", data.email)
 
-  // Custom question prefill
-  if (data.whatsapp) params.set("a1", data.whatsapp)
-  if (data.propertyLocation) params.set("a2", data.propertyLocation)
+  // Custom question prefill (must match Calendly question order)
+  if (data.whatsapp) add("a1", data.whatsapp)
+  if (data.propertyName) add("a2", data.propertyName)
+  if (data.propertyLocation) add("a3", data.propertyLocation)
+  if (data.concerns) add("a4", data.concerns)
 
   const separator = baseUrl.includes("?") ? "&" : "?"
-  return `${baseUrl}${separator}${params.toString()}`
+  return `${baseUrl}${separator}${parts.join("&")}`
 }

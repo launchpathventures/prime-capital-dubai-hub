@@ -39,27 +39,43 @@ CREATE SEQUENCE IF NOT EXISTS certificate_seq START 1;
 ALTER TABLE completion_certificates ENABLE ROW LEVEL SECURITY;
 
 -- Public can view active certificates by certificate_id (shareable URLs)
-CREATE POLICY "Anyone can view certificates by certificate_id"
-  ON completion_certificates FOR SELECT
-  USING (true);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can view certificates by certificate_id' AND tablename = 'completion_certificates') THEN
+    CREATE POLICY "Anyone can view certificates by certificate_id"
+      ON completion_certificates FOR SELECT
+      USING (true);
+  END IF;
+END $$;
 
 -- Authenticated users can view their own certificates
-CREATE POLICY "Users can view own certificates"
-  ON completion_certificates FOR SELECT
-  USING (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own certificates' AND tablename = 'completion_certificates') THEN
+    CREATE POLICY "Users can view own certificates"
+      ON completion_certificates FOR SELECT
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- Authenticated users can insert their own certificates
-CREATE POLICY "Users can create own certificates"
-  ON completion_certificates FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can create own certificates' AND tablename = 'completion_certificates') THEN
+    CREATE POLICY "Users can create own certificates"
+      ON completion_certificates FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- Admins can manage all certificates
-CREATE POLICY "Admins can manage all certificates"
-  ON completion_certificates FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM user_profiles
-      WHERE user_profiles.id = auth.uid()
-      AND user_profiles.role = 'admin'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can manage all certificates' AND tablename = 'completion_certificates') THEN
+    CREATE POLICY "Admins can manage all certificates"
+      ON completion_certificates FOR ALL
+      USING (
+        EXISTS (
+          SELECT 1 FROM user_profiles
+          WHERE user_profiles.id = auth.uid()
+          AND user_profiles.role = 'admin'
+        )
+      );
+  END IF;
+END $$;
