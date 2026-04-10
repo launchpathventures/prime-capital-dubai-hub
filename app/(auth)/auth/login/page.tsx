@@ -29,6 +29,7 @@ interface LoginPageProps {
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_domain: "Only authorized company accounts can sign in.",
   auth_callback_error: "Authentication failed. Please try again.",
+  database_error: "Account setup failed. Please try again or contact support.",
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -40,7 +41,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   // Use ?next param if provided, otherwise fall back to config
   const redirectTo = params.next || authConfig.redirectTo
-  const errorMessage = params.error ? ERROR_MESSAGES[params.error] : null
+  const errorMessage = params.error
+    ? (ERROR_MESSAGES[params.error] || "Authentication failed. Please try again.")
+    : null
 
   // Production supabase mode: Google-only
   const isGoogleOnly = authConfig.mode === "supabase" && !isLocalhost

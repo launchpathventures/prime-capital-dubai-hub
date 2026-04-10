@@ -29,14 +29,18 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createClient()
 
-  // Handle error passed from Supabase (e.g., expired link)
+  // Handle error passed from Supabase (e.g., expired link, trigger failure)
   if (errorParam) {
     console.error("[Auth Callback] Supabase error:", errorParam, errorDescription)
     // For email change, redirect to profile with helpful message
     if (type === "email_change") {
       return redirectWithToast(origin, "/admin/profile", "email-link-expired")
     }
-    return NextResponse.redirect(`${origin}/auth/login?error=${errorParam}`)
+    // Map Supabase errors to friendly error codes
+    const errorCode = errorDescription?.includes("Database error")
+      ? "database_error"
+      : "auth_callback_error"
+    return NextResponse.redirect(`${origin}/auth/login?error=${errorCode}`)
   }
 
   // 1. Handle PKCE code exchange (OAuth, magic link, email change)
@@ -97,12 +101,15 @@ export async function GET(request: NextRequest) {
       || "User"
 
     const role = user.email?.endsWith("@launchpathventures.com") ? "admin" : "learner"
-    await supabase.from("user_profiles").insert({
+    const { error: profileError } = await supabase.from("user_profiles").insert({
       id: user.id,
       full_name: fullName,
       role,
       certification_status: "in_progress",
     })
+    if (profileError) {
+      console.error("[Auth Callback] Failed to create user profile:", profileError.message)
+    }
   }
 
   // Determine toast based on context
