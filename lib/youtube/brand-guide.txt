@@ -1,0 +1,802 @@
+# Prime Capital Dubai — Brand & Copywriting Guide
+
+**Version 1.0 | April 2026**
+**Purpose:** Structured reference for AI-assisted copy production across all channels. Parse as rule sets, not narrative.
+
+---
+
+## 1. Identity Block
+
+| Field | Value |
+|-------|-------|
+| **Entity** | Prime Capital Dubai |
+| **Type** | Boutique real estate advisory |
+| **Positioning** | The "private banker" of Dubai real estate |
+| **Founder / Voice** | Tahir Majithia |
+| **Promise** | "We move complexity out of sight." |
+| **Motto** | "With a plan, not a pitch." |
+| **Track Record** | AED 3 billion+ deployed across multiple market cycles. 20+ years market experience. |
+| **Target Client** | International HNW investors, $2M+ net worth — business owners, C-suite, senior professionals |
+| **Geography** | Primarily UK, Europe, North America, GCC |
+| **Anti-Position** | Not a volume agency. Not flashy. Not transactional. Not part of the "Dubai hustle." |
+
+### Value Pillars (Reference in Order of Priority)
+
+1. One relationship, complete service — acquisition through exit
+2. Institutional-grade expertise in a boutique setting
+3. Full transparency — fees, risks, and process disclosed upfront
+4. Long-term partnership — success measured across years, not transactions
+
+### Differentiators (Use When Positioning Against Market)
+
+1. Boutique focus — selective client base, dedicated attention
+2. End-to-end service — no coordinating multiple providers
+3. International expertise — cross-border tax, legal, and structuring knowledge
+4. Technology-enabled — modern tools, seamless communication
+5. Human-first — real relationships, not volume processing
+
+---
+
+## 2. Voice Rules
+
+### Core Voice Definition
+
+Prime Capital sounds like a **thoughtful senior advisor explaining something important to a peer** — measured, clear, grounded in evidence, and occasionally direct. Never performing. Never selling.
+
+### Voice Parameters
+
+| Parameter | Setting | Enforcement |
+|-----------|---------|-------------|
+| **Register** | Professional but human. Not academic, not casual. | Avoid both jargon-heavy prose and slang/colloquialisms |
+| **Sentence length** | Medium. Target 12–22 words average. | Break any sentence over 30 words into two |
+| **Paragraph length** | 2–4 sentences for client-facing copy. Max 5 for long-form. | Hard limit: no paragraph over 5 sentences |
+| **Pronoun usage** | "We" for Prime Capital. "You" / "Your" for the client. Never "I" unless Tahir is the attributed speaker. | Exception: YouTube scripts and LinkedIn posts from Tahir's personal account use "I" |
+| **Contractions** | Yes — use them. "We're" not "We are." "It's" not "It is." | Contractions make copy sound human. Formal ≠ stiff. |
+| **Authority signals** | Reference patterns observed, cycles lived through, anonymized client scenarios, specific data points | Never claim authority ("We're the best"). Demonstrate it through specificity. |
+| **Warmth signals** | Collaborative language, acknowledgment of the client's intelligence, respect for their time | Never over-familiar, never sycophantic, never performatively friendly |
+| **Confidence level** | State positions clearly. Acknowledge uncertainty where it exists. | The balance: conviction backed by evidence, with intellectual honesty about unknowns |
+
+### Pronoun Rules
+
+| Context | Correct | Incorrect |
+|---------|---------|-----------|
+| Describing Prime Capital's work | "We analyse..." | "Our team analyses..." (too corporate) |
+| Addressing the client | "Your portfolio..." | "The client's portfolio..." (too distant) |
+| Tahir speaking (video, LinkedIn personal) | "I've seen this pattern..." | "We at Prime Capital have seen..." (too formal for personal channel) |
+| Tahir speaking about the team | "My team and I..." | "Prime Capital's dedicated professionals..." (too corporate) |
+| General market commentary | "What we're seeing..." | "What the market is showing us..." (acceptable alternative) |
+
+### Rhythm and Cadence
+
+- Vary sentence length. Follow a long sentence with a short one.
+- Use single-sentence paragraphs sparingly but deliberately — they signal importance.
+- Start sentences with conjunctions occasionally ("And that changes the calculation." / "But here's what most people miss."). This is intentional, not poor grammar.
+- End paragraphs on the strongest point, not a trailing qualifier.
+
+---
+
+## 3. Tone Calibration Matrix
+
+Tone operates on four dials. Each piece of copy should be calibrated before writing.
+
+### The Four Dials
+
+| Dial | Low End (1) | High End (10) |
+|------|-------------|---------------|
+| **Authority** | Conversational peer | Expert commanding the room |
+| **Warmth** | Formal, reserved | Approachable, personal |
+| **Urgency** | Reflective, patient | Time-sensitive, action-oriented |
+| **Detail** | High-level, conceptual | Granular, data-dense |
+
+### Dial Settings by Channel × Context
+
+| Channel | Context | Authority | Warmth | Urgency | Detail |
+|---------|---------|-----------|--------|---------|--------|
+| **Website** | Homepage hero | 7 | 6 | 2 | 3 |
+| **Website** | Service pages | 8 | 5 | 2 | 7 |
+| **Website** | Property descriptions | 6 | 5 | 1 | 8 |
+| **Website** | About / Team | 6 | 8 | 1 | 5 |
+| **Email** | First contact response | 5 | 8 | 2 | 4 |
+| **Email** | Market update | 8 | 4 | 3 | 8 |
+| **Email** | Follow-up after meeting | 5 | 7 | 3 | 5 |
+| **Email** | Nurture sequence | 7 | 6 | 2 | 6 |
+| **LinkedIn** | Market commentary | 8 | 5 | 3 | 7 |
+| **LinkedIn** | Thought leadership | 9 | 4 | 2 | 6 |
+| **LinkedIn** | Company update | 5 | 7 | 2 | 4 |
+| **LinkedIn** | Personal (Tahir) | 8 | 7 | 2 | 6 |
+| **YouTube** | Script — market analysis | 9 | 6 | 3 | 9 |
+| **YouTube** | Script — area guide | 7 | 6 | 2 | 8 |
+| **YouTube** | Script — process explainer | 6 | 7 | 2 | 8 |
+| **Ads** | Awareness (cold) | 7 | 5 | 3 | 3 |
+| **Ads** | Retargeting (warm) | 6 | 6 | 4 | 5 |
+| **Ads** | Lead magnet promotion | 7 | 5 | 4 | 4 |
+| **WhatsApp / DM** | Client conversation | 4 | 9 | 3 | 4 |
+| **Property factsheet** | Print / PDF | 6 | 3 | 1 | 9 |
+| **Presentation deck** | Investor pitch | 8 | 5 | 2 | 7 |
+
+---
+
+## 4. Language Constraints
+
+### 4.1 Banned Words and Phrases
+
+These are **hard bans**. Never use in any Prime Capital copy regardless of channel.
+
+| Banned Word / Phrase | Reason |
+|----------------------|--------|
+| Luxury | Overused in Dubai marketing; signals flash over substance |
+| Amazing | Superlative — erodes credibility |
+| Incredible | Superlative — erodes credibility |
+| Breathtaking | Superlative — erodes credibility |
+| Stunning | Superlative — erodes credibility |
+| Don't miss out | Urgency tactic — signals desperation |
+| Act now | Pressure tactic |
+| Hurry | Pressure tactic |
+| Limited time | False urgency |
+| Best deal | Transactional language |
+| Steal / Bargain | Transactional language |
+| Trust us / Trust me | Trust is demonstrated, never claimed |
+| Exclusive | Cliché, overused |
+| Once in a lifetime | Cliché, unbelievable |
+| Passive income | Influencer language, too casual for audience |
+| No-brainer | Dismissive of the viewer's analytical process |
+| Game-changer | Buzzword |
+| Unlock (as in "unlock your potential") | Marketing cliché |
+| Dream home | Consumer language, not investor language |
+| Hottest market | Hype language |
+| Booming | Hype language |
+| Skyrocketing | Hype language |
+| Cash cow | Too casual, too aggressive |
+| Guaranteed returns | Legally problematic, brand-damaging |
+| Risk-free | Nothing is risk-free; dishonest framing |
+
+### 4.2 Banned Punctuation and Formatting
+
+| Banned | Reason |
+|--------|--------|
+| Exclamation marks | Loud, promotional. Zero tolerance in headlines and CTAs. Maximum one per 500 words in body copy, and only in genuinely warm/congratulatory contexts. |
+| ALL CAPS words | Shouting. Never use for emphasis. |
+| Emoji in formal copy | Off-brand. Exception: LinkedIn personal posts may use sparingly (max 1–2 per post, never in opening line). |
+| Ellipsis for suspense ("And the answer is...") | Cheap trick. State the point directly. |
+| Multiple question marks (??) or exclamation marks (!!) | Never. |
+
+### 4.3 Required Alternatives
+
+When the instinct is to reach for a banned word, use these instead:
+
+| Instead of... | Use... |
+|---------------|--------|
+| Luxury property | Exceptional property / Prime property / Institutional-grade asset |
+| Amazing opportunity | Compelling opportunity / Strategic acquisition |
+| Best deal in Dubai | Strong value relative to fundamentals |
+| Don't miss out | Worth examining closely / Worth considering for your portfolio |
+| Buy now | When you're ready to move forward / When the timing aligns |
+| Passive income | Rental yield / Income-generating asset |
+| We're the best | Our approach differs... / What we've found over 20 years is... |
+| Exclusive access | Priority access / Early-stage access |
+| Stunning views | Unobstructed views / Panoramic sightlines |
+| Dream investment | Strategic investment / Well-positioned asset |
+| Huge potential | Structural growth thesis / Strong fundamentals |
+| Hot area | High-momentum corridor / Outperforming submarket |
+| Guaranteed | Historically consistent / Structurally supported |
+| Perfect for investors | Well-suited to income-focused strategies |
+
+### 4.4 Preferred Vocabulary
+
+Use these terms naturally across all copy. They reinforce the advisory positioning.
+
+**Market & Investment Language:**
+- Yield compression / expansion
+- Capital appreciation
+- Entry point / exit strategy
+- Market cycle positioning
+- Secondary market dynamics
+- Off-plan / ready asset
+- Payment plan structure
+- Rental demand corridor
+- Developer track record
+- Due diligence
+- Portfolio allocation
+- Risk-adjusted return
+
+**Advisory & Relationship Language:**
+- Strategic guidance
+- Tailored approach
+- End-to-end service
+- Single point of contact
+- Investment thesis
+- Transparent process
+- Long-term partnership
+- Proactive management
+- Full disclosure
+
+**Dubai-Specific Terms (Use Accurately):**
+- DLD (Dubai Land Department) fees
+- RERA (Real Estate Regulatory Agency)
+- Golden Visa
+- Escrow account protections
+- Service charges
+- Freehold / leasehold zones
+- ORN (Office Registration Number)
+- BRN (Broker Registration Number)
+
+---
+
+## 5. Audience Model
+
+### 5.1 Persona Attributes
+
+| Attribute | Value | Copy Implication |
+|-----------|-------|------------------|
+| Net worth | $2M+ | Don't explain basic investment concepts. Reference cap rates, yield compression, and market cycles without over-explaining. |
+| Professional background | Business owners, C-suite, senior professionals | They read balance sheets and evaluate risk professionally. Write to that level. |
+| Decision style | Analytical, research-driven, skeptical | Lead with data and evidence, not assertions. |
+| Language | Often non-native English speakers | Use clear, direct language. Avoid idioms, complex clause structures, and culturally specific references. |
+| Time sensitivity | Extremely time-poor | Get to the point. Every sentence must earn its place. |
+| Trust threshold | High — earned through consistency and transparency | Never claim trust. Demonstrate it through honesty, disclosure, and substance. |
+| Hype sensitivity | Very high — actively repelled by sales language | Anything that sounds promotional triggers skepticism. Substance over shine, always. |
+
+### 5.2 ESL Optimisation Rules
+
+Many clients speak English as a second or third language. Apply these rules to all client-facing copy:
+
+| Rule | Example |
+|------|---------|
+| Avoid idioms and metaphors | ❌ "Hit the ground running" → ✅ "Start immediately" |
+| Avoid phrasal verbs where a single verb works | ❌ "We'll look into it" → ✅ "We'll investigate" |
+| One idea per sentence | ❌ "We'll handle the legal work, coordinate with the developer, and ensure your payment schedule aligns with milestones, which is something many buyers overlook." → ✅ "We handle the legal work and developer coordination. We also align your payment schedule with construction milestones — a step many buyers miss." |
+| Define acronyms on first use | "DLD (Dubai Land Department) fees" then "DLD fees" thereafter |
+| Use active voice | ❌ "The property was acquired by the client" → ✅ "The client acquired the property" |
+| Avoid double negatives | ❌ "Not uncommon" → ✅ "Common" |
+
+### 5.3 Fear-Motivation Response Map
+
+When copy addresses a specific client concern, use the corresponding framing. Never dismiss a fear — acknowledge it, then counter with evidence.
+
+| Client Fear | Framing Approach | Example Copy Pattern |
+|-------------|-----------------|---------------------|
+| "Is Dubai a bubble?" | Reference structural demand drivers, population data, regulatory maturity. Compare to 2008 and explain what's different. | "The comparison to 2008 is understandable — but it misses what's structurally changed. [Evidence]" |
+| "Will developers delay?" | Discuss vetting criteria, escrow protections, completion track records. | "This is exactly why developer selection matters more than location in off-plan. [Criteria]" |
+| "Hidden fees?" | Proactively list all costs. Full disclosure framing. | "Here's the full cost structure — no surprises. [Breakdown]" |
+| "Can I sell when I want?" | Address liquidity by area, secondary market data, realistic exit timelines. | "Liquidity varies significantly by area and property type. [Specifics]" |
+| "Will I find tenants?" | Occupancy data, rental demand drivers, tenant demographics. | "Rental demand in [area] is driven by [specific factors]. Current occupancy sits at [X%]." |
+| "Is the region stable?" | Regulatory framework, government vision, institutional investment flows. | "The regulatory infrastructure has fundamentally changed. [Evidence]" |
+| "Are contracts legitimate?" | Legal process, RERA protections, law firm partnerships. | "Every transaction is governed by [specific protections]. We work with [process]." |
+| "How do I manage from abroad?" | Property management infrastructure, reporting, single point of contact. | "You receive [specific deliverables] — without needing to be in Dubai." |
+
+**Critical rule:** Never respond to a fear with "Don't worry" or reassurance alone. Always follow with specific, verifiable evidence.
+
+---
+
+## 6. Channel Specifications
+
+### 6.1 LinkedIn
+
+#### LinkedIn — Tahir's Personal Account
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | First person ("I") |
+| Length | 150–300 words optimal. Hard max 500. |
+| Structure | Hook line → Insight/observation → Evidence or example → Implication → Soft CTA or question |
+| Hook | First line must stop the scroll. Contrarian observation, specific data point, or direct question. Never generic ("Excited to share..."). |
+| Hashtags | 3–5 maximum. Industry-relevant only (#DubaiRealEstate #PropertyInvestment #GoldenVisa). No vanity hashtags. |
+| CTA style | Soft — question to drive comments, or "Link in comments" for resources. Never "DM me" or "Book a call" as the primary frame. |
+| Formatting | Short paragraphs (1–2 sentences). Line breaks between paragraphs. No bullet points in main body unless listing data. |
+| Emoji | Maximum 1–2 per post. Never in the opening line. Never as bullet replacements. Optional, not required. |
+| Posting cadence context | Content categories: market insights, investment principles, client lessons (anonymized), contrarian takes, process transparency |
+
+**LinkedIn Hook Formulas (Tahir Personal):**
+
+```
+[Specific data point] + [Counterintuitive implication]
+"Rental yields in [area] dropped 140 basis points in 18 months. Most people read that as bad news. It's not."
+
+[Contrarian statement] + [Promise of explanation]
+"The worst time to buy property in Dubai is when everyone tells you it's the best time."
+
+[Client scenario] + [Universal lesson]
+"A client walked away from a property last month that ticked every box. Here's why that was the right call."
+
+[Industry observation] + [What it reveals]
+"I reviewed 40 off-plan launches this quarter. Only 6 met our criteria. That ratio tells you everything."
+
+[Direct question that challenges assumptions]
+"What's the real cost of buying property in Dubai? Most breakdowns miss at least two line items."
+```
+
+#### LinkedIn — Company Page
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | Third person or "we" |
+| Length | 100–200 words. Shorter than personal. |
+| Structure | Observation or insight → Brief supporting point → CTA to resource or website |
+| Tone | More formal than Tahir's personal. Still warm, not corporate. |
+| Content types | Market updates, new listings (positioned as opportunities, not ads), team/company milestones, resource promotions |
+
+### 6.2 Email
+
+#### Email — Client Communication
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | "We" for Prime Capital. "I" when Tahir sends personally. |
+| Subject line length | 4–8 words. Specific, never clickbait. |
+| Opening | Never "I hope this email finds you well." Get to the point or reference the last interaction. |
+| Length | 150–300 words for transactional. Up to 500 for market updates. |
+| CTA | One clear CTA per email. Stated explicitly, not buried. |
+| Sign-off | "Warm regards" / "Best regards" / "Kind regards" — all acceptable. Never "Cheers" or "Thanks!" |
+| Formatting | Short paragraphs. No walls of text. Bold sparingly for key figures or dates only. |
+
+**Email Subject Line Formulas:**
+
+```
+[Topic]: [Specific detail]
+"Market Update: Q1 Transaction Data"
+
+[Action]: [Context]
+"Your Strategy Call: Preparation Notes"
+
+[Property/Area]: [Key Detail]
+"Business Bay: Yield Analysis Complete"
+
+[Direct and clear]
+"Following Up on Our Conversation"
+"Three Properties Matching Your Criteria"
+```
+
+**Email Opening Patterns:**
+
+| Context | Opening |
+|---------|---------|
+| First response to inquiry | "Thank you for reaching out. Let me address your questions directly." |
+| Follow-up after meeting | "Good to speak with you [day]. Here's a summary of what we discussed." |
+| Sending requested information | "As discussed, here's [the specific thing]." |
+| Market update (nurture) | "Two developments this month that are relevant to your investment thesis:" |
+| Re-engagement | "It's been [timeframe] since we last spoke. A few things have shifted in the market that are worth noting:" |
+
+**Email Closing Patterns:**
+
+| Context | Closing |
+|---------|---------|
+| Next step is a call | "If this aligns with your timeline, I'm happy to walk through the detail on a call. [Scheduling link]" |
+| Next step is review | "Take your time reviewing this. When you're ready, we can discuss next steps." |
+| Nurture / no immediate action | "As always, we're here when the timing is right." |
+| After sending analysis | "Let me know if any questions come up as you review this." |
+
+#### Email — Sequences and Campaigns
+
+| Type | Emails | Spacing | Tone Arc |
+|------|--------|---------|----------|
+| Post-inquiry nurture | 5–7 emails | Days 0, 3, 7, 14, 21, 30, 45 | Warm welcome → Educational value → Specific insights → Soft CTA → Patience signal |
+| Market update | Monthly | Monthly | Authoritative, data-forward, brief |
+| Post-meeting follow-up | 1–3 emails | Days 0, 3, 7 | Summary → Additional value → Open door |
+| Re-engagement | 2–3 emails | Days 0, 7, 21 | New information → Relevance reminder → Graceful close |
+
+**Sequence rule:** Never increase urgency across a sequence. If anything, the tone should become *more* patient and *less* frequent over time. Desperation repels this audience.
+
+### 6.3 YouTube
+
+Refer to the full Script Generator v2.0 for detailed script architecture. Key copy rules specific to YouTube:
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | First person — Tahir speaking directly to camera |
+| Script format | Plain text, teleprompter-ready. No markdown, no bold, no stage directions. |
+| Paragraph length | 2–4 sentences max |
+| Standard length | 1,500–2,000 words (8–12 min) |
+| Hook requirement | Two versions per script (Hypothetical/Question + Warning/Contrarian). Must create open loop in first 2 sentences. |
+| CTA placement | Mid-roll (after Section 1) + End-roll (after final section). Nowhere else. |
+| Title rules | Speak to the investor, not the tourist. Include tension or question. Use specifics. Never ALL CAPS. No excessive punctuation. |
+| Data density | Minimum 3 specific data points per script. At least one anonymized client scenario. |
+
+**YouTube Title Formulas:**
+
+```
+[Contrarian/Challenge]: [Specific Angle]
+"The Real Risk of Buying Off-Plan in Dubai (What Agents Won't Tell You)"
+
+[Credential Signal] + [Actionable Promise]
+"I've Deployed AED 3 Billion in Dubai — Here's What I'd Buy Today"
+
+[Area/Topic] + [Investor Frame]
+"Dubai Property in 2026: Where the Smart Money Is Actually Going"
+
+[Correction Frame]
+"The Dubai Areas Most Investors Get Wrong (And Where to Look Instead)"
+```
+
+### 6.4 Ads (Paid Social / Google / Display)
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | "We" or third-person depending on platform format |
+| Headline length | 5–10 words. Specific, not generic. |
+| Body length | 30–90 words for social. 15–30 words for search. |
+| CTA | One per ad. Clear, low-pressure. "Download the Guide" / "See the Analysis" / "Book a Strategy Call" |
+| Value proposition | Lead with insight or information, not the service. The ad offers knowledge; the service follows. |
+| Targeting implication | Copy should self-qualify the audience. Use language that signals "this is for serious investors" without saying it explicitly. |
+
+**Ad Copy Frameworks:**
+
+**Framework 1 — Insight Lead**
+```
+[Specific market observation]
+[What it means for the investor]
+[CTA to resource]
+
+Example:
+"Dubai rental yields compressed 140bps in 18 months — but capital values tell a different story. 
+Our 2026 Strategy Kit breaks down where yields are heading and which corridors are mispriced.
+Download free →"
+```
+
+**Framework 2 — Fear Address**
+```
+[Acknowledge the concern]
+[Brief counter-evidence]
+[CTA to deeper resource]
+
+Example:
+"Worried about buying at the top of a Dubai cycle? 
+The data suggests we're in a different phase than most people think.
+See the full market analysis →"
+```
+
+**Framework 3 — Qualification Filter**
+```
+[Statement that resonates with target, filters out non-targets]
+[Value proposition]
+[CTA]
+
+Example:
+"If you're allocating $1M+ into Dubai property, the strategy matters more than the listing.
+We help global investors build portfolios with a plan, not a pitch.
+Book a strategy call →"
+```
+
+**Ad Copy Don'ts:**
+- No countdown timers or false scarcity
+- No "LAST CHANCE" or "LIMITED SPOTS"
+- No price anchoring tricks ("Was $X, now $Y")
+- No stock imagery of keys, handshakes, or skyscrapers with lens flare
+- No copy that could apply to any agency — if you can swap in a competitor's name and it still works, rewrite it
+
+### 6.5 Website Copy
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | "We" throughout. Tahir's personal voice on About/Team pages. |
+| Headline style | Palatino, statement-driven. Calm and authoritative. Not clever — clear. |
+| Body style | Lato Light. Short paragraphs. Generous whitespace. |
+| Page length | Vary by purpose. Homepage: concise. Service pages: thorough. |
+| CTA placement | End of each major section. Never floating/sticky CTAs. Never pop-ups. |
+| SEO consideration | Write for the reader first. Integrate keywords naturally, never at the expense of voice. |
+
+**Website Headline Patterns:**
+
+```
+[Simple, authoritative statement]
+"Strategic Property Investment in Dubai"
+"End-to-End Advisory for Global Investors"
+
+[Promise-driven, understated]
+"One Relationship. Complete Service."
+"We Move Complexity Out of Sight."
+
+[Investor-focused, not property-focused]
+"Your Investment Strategy, Executed with Precision"
+"Built Around Your Objectives, Not Our Inventory"
+```
+
+### 6.6 Property Descriptions
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | Third person, objective |
+| Structure | Location context → Property specification → Investment rationale → Key figures |
+| Length | 150–250 words |
+| Data required | Size (sq ft), bedrooms, price, yield estimate (if available), area context, developer, completion status |
+| Tone | Factual, precise, understated. Let the property speak through data. |
+
+**Property Description Template:**
+
+```
+[Area Context — 1 sentence on location and its investment profile]
+[Property Overview — type, size, configuration, developer, completion status]
+[Key Features — 2-3 specific, factual features. No superlatives.]
+[Investment Rationale — yield context, demand drivers, or capital growth thesis for this micro-location]
+[Key Figures — structured as data, not prose]
+```
+
+**Example:**
+
+```
+Positioned in the Burj Khalifa District, this 1,200 sq ft two-bedroom apartment 
+occupies a mid-floor unit in [Development Name] by [Developer] — a developer with 
+a 94% on-time completion record across 12 projects.
+
+The unit offers an open-plan layout with floor-to-ceiling glazing facing the Canal. 
+Handover-ready with a DLD-registered title deed.
+
+This corridor has seen 11.2% capital appreciation over the last 12 months, with 
+average rental yields for comparable units at 6.1% net. Tenant demand in the 
+district is driven by proximity to DIFC and a limited supply of completed two-bedroom 
+stock.
+
+Price: AED 2,850,000
+Size: 1,200 sq ft | 2 bed, 3 bath
+Service charge: AED 18/sq ft
+Estimated net yield: 6.1%
+Status: Ready | Title deed issued
+Developer: [Name]
+```
+
+**Property Description Don'ts:**
+- No "stunning views" or "breathtaking panoramas" — describe what the view *is* (Canal view, sea view, park view)
+- No "perfect for families" or "ideal for investors" — state the facts and let the reader conclude
+- No developer marketing language copy-pasted from brochures
+- No unverifiable claims about future performance
+
+### 6.7 WhatsApp / Direct Messages
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | First person, conversational, warm |
+| Length | 1–3 short paragraphs. Max 100 words per message. |
+| Tone | Warm 9/10. Professional but personal. Like messaging a trusted advisor. |
+| Response time framing | Never apologize for delay with "Sorry for the late reply." Instead: "Good to connect." |
+| CTA | Conversational, not formatted. "Shall I send over the analysis?" not "Click here to download." |
+| Formality | Lower than email, higher than texting a friend. No abbreviations (u, ur, thx). |
+
+### 6.8 Presentations / Pitch Decks
+
+| Parameter | Value |
+|-----------|-------|
+| Voice | "We" throughout |
+| Slide text | Maximum 25 words per slide body. Headlines do the work. |
+| Headline style | Statement-driven, not question-driven. Each headline should convey a complete thought. |
+| Data presentation | Clean, minimal charts. No decorative elements. Let the numbers speak. |
+| CTA slide | Final slide. One clear next step. Contact details. No pressure language. |
+| Visual style | Prime Capital brand palette (Spruce, Ash, Off White, Serenity). Palatino headlines, Lato body. Generous whitespace. No stock photography. |
+
+---
+
+## 7. Copy Patterns & Formulas
+
+### 7.1 Headline Structures
+
+**For all channels — adapt length to context:**
+
+| Formula | Structure | Example |
+|---------|-----------|---------|
+| **Data Anchor** | [Specific number] + [Implication] | "6.1% Net Yield in a Market Where Most Settle for 4" |
+| **Contrarian** | [Challenge common belief] | "The Worst Time to Buy in Dubai Is When Everyone Says It's the Best" |
+| **Investor Question** | [Question the audience is already asking] | "Where Does Dubai Sit in the Market Cycle Right Now?" |
+| **Process Transparency** | [Reveal what usually stays hidden] | "The Full Cost of Buying Property in Dubai — Every Line Item" |
+| **Credential + Insight** | [Authority signal] + [Valuable claim] | "After AED 3 Billion Deployed: The Three Mistakes I See Every Quarter" |
+| **Correction Frame** | [Common approach] + [Better alternative] | "Stop Comparing Headline Prices. Start Comparing These Five Metrics." |
+
+### 7.2 CTA Patterns
+
+**Rule:** Every CTA must feel earned. It appears after value has been delivered, never before.
+
+| CTA Type | When to Use | Pattern |
+|----------|-------------|---------|
+| **Resource download** | After demonstrating relevant expertise | "We've put this into a guide — [Resource Name]. Free to download. Link [below/in bio/in description]." |
+| **Strategy call** | After thorough educational content | "If you want this tailored to your specific situation — budget, timeline, passport — book a strategy call with my team. And if Dubai doesn't make sense for you right now, we'll tell you that too." |
+| **Soft engage** | LinkedIn, early-stage content | "What's your read on this? Interested to hear from investors who've been through a cycle." |
+| **Content bridge** | YouTube outros, email series | "That's [topic covered]. But it raises a question I haven't answered yet — [specific next topic]. That's what I'll cover next." |
+| **Open door** | End of nurture sequences, re-engagement | "As always, we're here when the timing is right for you." |
+
+**CTA Don'ts:**
+- Never "Book NOW" — always "When you're ready"
+- Never "Limited spots available" — scarcity is not our tool
+- Never "Don't miss this" — patience is our tool
+- Never multiple CTAs competing in the same piece — one CTA per output
+
+### 7.3 Opening Patterns by Channel
+
+| Channel | Pattern | Example |
+|---------|---------|---------|
+| **LinkedIn** | Lead with data or contrarian observation | "Rental yields in JVC dropped below 7% for the first time in three years. Here's what that actually signals." |
+| **Email (inquiry response)** | Acknowledge and address directly | "Thank you for reaching out. You asked about [specific question] — here's our view." |
+| **Email (market update)** | Lead with the most important development | "Two things shifted in the Dubai market this month that are worth your attention." |
+| **YouTube** | Open loop — scenario or challenge | "If you had $2 million to put into Dubai property today — one shot — where would you put it? Because the obvious answers are probably wrong." |
+| **Ad** | Self-qualifying statement or insight | "Allocating $1M+ into Dubai real estate demands a different approach than browsing listings." |
+| **Website** | Clear, authoritative value statement | "Strategic property investment for global investors." |
+| **Property description** | Location and investment context | "Positioned in [area], a corridor that has delivered [X%] capital appreciation over [timeframe]." |
+
+---
+
+## 8. Examples Bank
+
+### 8.1 On-Brand vs Off-Brand Comparisons
+
+#### LinkedIn Post
+
+**Off-brand:**
+> 🔥 Exciting news! Dubai's property market is BOOMING and there's never been a better time to invest! Our amazing team at Prime Capital just closed another incredible deal. Don't miss out on the opportunity of a lifetime! DM us now to get started! 🏠💰 #Dubai #RealEstate #Luxury #Investment #DontMissOut
+
+**Violations:** Banned words (booming, amazing, incredible, don't miss out, opportunity of a lifetime, luxury). Exclamation marks. ALL CAPS. Emoji overuse. Urgency tactics. Self-congratulatory. No substance. Could be any agency.
+
+**On-brand:**
+> We reviewed 40 off-plan launches in Q1. Six met our investment criteria.
+>
+> The gap isn't quality — most projects are well-built. It's the fundamentals behind them: oversupplied micro-locations, developers without completion track records, and pricing that assumes best-case rental demand.
+>
+> The six that passed share three things: proven developers, undersupplied corridors, and entry prices that leave margin for error.
+>
+> That selectivity is the point. In a market with this much new supply, what you say no to matters more than what you say yes to.
+
+**Why this works:** Specific data. Demonstrates rigour. Teaches a framework. No sales language. Self-qualifies the audience. Builds trust through transparency about rejection rate.
+
+---
+
+#### Email Subject Line
+
+**Off-brand:**
+> 🏠 AMAZING Dubai Property Deals — Act Now Before They're Gone!!!
+
+**On-brand:**
+> Three Properties Matching Your Criteria
+
+---
+
+#### Property Description
+
+**Off-brand:**
+> This STUNNING luxury apartment boasts breathtaking views of the iconic Dubai skyline! An incredible opportunity to own your dream home in one of the most exclusive addresses in the world. This amazing property won't last long — contact us TODAY!
+
+**On-brand:**
+> A 1,450 sq ft two-bedroom unit on the 34th floor of [Development Name], facing the Marina waterfront. Completed in 2023 by [Developer], who has delivered 8 projects on schedule in this corridor. Current comparable rentals in the building indicate a net yield of 5.8%. Service charges: AED 16/sq ft. Price: AED 3,200,000.
+
+---
+
+#### Ad Copy
+
+**Off-brand:**
+> Want to make money in Dubai real estate? 🤑 Our experts will find you the BEST deals! Trust us — we've been doing this for years. Book a FREE consultation today!
+
+**On-brand:**
+> Dubai rental yields compressed 140bps in 18 months — but that tells a different story than most people think.
+>
+> Our 2026 Investor Strategy Kit breaks down where yields are heading and which corridors are structurally mispriced.
+>
+> Download free →
+
+---
+
+#### YouTube Hook
+
+**Off-brand:**
+> "Hey guys! Welcome back to the channel! Today we're going to talk about something really exciting — the Dubai property market is absolutely on fire right now and I'm going to show you how to make some serious money!"
+
+**On-brand:**
+> "If you had $2 million to put into Dubai real estate today — just one property, one shot — where would you put it? Because the obvious answers are probably wrong. And in this video, I'm going to show you exactly where the data says the smart money should go in 2026 — and it's not where most agents will point you."
+
+---
+
+#### WhatsApp Message
+
+**Off-brand:**
+> Hi! 😊 Hope ur doing great!! Just wanted to let u know we have an AMAZING new property thats perfect for u!! Let me know if ur interested!!! 🏠🔥
+
+**On-brand:**
+> Good morning. Following up on our conversation last week — I've identified two properties in the corridor we discussed. Both meet your yield threshold and budget parameters. Want me to send the analysis across?
+
+---
+
+### 8.2 Annotated Voice Calibration Examples
+
+**Too aggressive (sounds like every Dubai agent):**
+> "This is the hottest market in the world right now and if you're not buying, you're losing money every single day."
+
+*Violations: "hottest" (hype), urgency/pressure ("losing money every single day"), unsubstantiated claim*
+
+**Too passive (sounds like a textbook):**
+> "Dubai's real estate market has experienced notable growth metrics in recent quarters, suggesting potential opportunities for consideration."
+
+*Issues: Vague ("notable growth metrics"), hedged to the point of saying nothing, no specificity, reads like a report not a person*
+
+**Correct — the Prime Capital voice:**
+> "Here's what the data is actually showing us. Over the last 18 months, we've seen rental yields in key corridors compress from 7.2% to around 5.8%. Now, that sounds like bad news — but it's not. What it tells us is that capital values are catching up to rental demand. And that's a very different signal than what most people think it means."
+
+*Why this works: Specific data (7.2% → 5.8%). Acknowledges the counterargument. Explains the mechanic. Takes a clear position. Conversational but authoritative.*
+
+---
+
+## 9. Pre-Output Validation Checklist
+
+Run this checklist against every piece of copy before delivery. Every item is binary pass/fail.
+
+### 9.1 Language Compliance
+
+- [ ] Zero banned words or phrases from Section 4.1
+- [ ] Zero banned punctuation patterns from Section 4.2
+- [ ] No superlatives without supporting data
+- [ ] No urgency or pressure tactics
+- [ ] No unsubstantiated claims or guarantees
+- [ ] ESL-friendly — no idioms, no complex clause structures, no double negatives
+
+### 9.2 Voice Compliance
+
+- [ ] Correct pronoun usage for channel and speaker (Section 2)
+- [ ] Tone dials match the channel × context setting (Section 3)
+- [ ] Reads naturally aloud — not stiff, not slangy
+- [ ] Could not be attributed to a generic competitor — voice is distinctly Prime Capital
+- [ ] Authority is demonstrated through specificity, not claimed through assertion
+
+### 9.3 Audience Compliance
+
+- [ ] Appropriate sophistication level — not condescending, not impenetrable
+- [ ] Addresses investor concerns with evidence, not reassurance
+- [ ] Self-qualifies the audience — signals "this is for serious investors"
+- [ ] Respects the reader's time — no filler, no redundancy
+
+### 9.4 Structure Compliance
+
+- [ ] Follows channel-specific structure from Section 6
+- [ ] One clear CTA (not multiple competing CTAs)
+- [ ] CTA appears after value delivery, not before
+- [ ] CTA uses approved patterns from Section 7.2
+- [ ] Opening line earns continued reading — no generic openings
+
+### 9.5 The Quiet Luxury Test
+
+- [ ] Does this sound like a trusted advisor — or a salesperson?
+- [ ] Would a sophisticated investor find this credible?
+- [ ] Is this substance over shine?
+- [ ] Does it address real concerns — or just hype benefits?
+- [ ] Would we be comfortable if a skeptical prospect read this?
+- [ ] If you removed the brand name, would this still be recognisable as Prime Capital?
+
+**If any item fails — revise before delivering.**
+
+---
+
+## 10. Quick Decision Logic
+
+Use these conditional rules for common production decisions:
+
+```
+IF writing about market performance:
+  → Include at least one specific data point (%, AED figure, timeframe)
+  → Never state direction without evidence
+  → Acknowledge counter-arguments or risks
+
+IF writing a CTA:
+  → Check: has enough value been delivered first?
+  → Use "when you're ready" framing, never "act now"
+  → One CTA per piece. No exceptions.
+
+IF describing a property:
+  → Lead with facts (size, location, yield, developer)
+  → Never use subjective adjectives without factual backup
+  → Always include price and key financial metrics
+
+IF addressing a client concern:
+  → Acknowledge the concern explicitly ("This is a fair question")
+  → Respond with evidence, not reassurance
+  → Never dismiss ("Don't worry about that")
+
+IF writing for Tahir's personal voice:
+  → Use "I" and "my team"
+  → Reference personal experience and pattern recognition
+  → More conversational than company copy, same substance level
+
+IF unsure whether a word/phrase is on-brand:
+  → Check Section 4 banned list first
+  → Apply the substitution: could a competitor say this identically? If yes, it's too generic.
+  → Apply the skeptic test: would this make a sophisticated investor trust you less?
+
+IF the copy is longer than needed:
+  → Cut. Always cut. The audience is time-poor.
+  → Every sentence must earn its place. If removing it changes nothing, remove it.
+```
+
+---
+
+*Prime Capital Dubai — Brand & Copywriting Guide v1.0*
+*"With a plan, not a pitch."*

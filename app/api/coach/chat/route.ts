@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
 
     // Stream response from Claude
     const stream = await anthropic.messages.stream({
-      model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
+      model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
       max_tokens: 512, // Keep responses concise
       temperature: 0.7,
       system: systemPrompt,

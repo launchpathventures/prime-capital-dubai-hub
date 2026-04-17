@@ -7,10 +7,9 @@
 
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { 
+import {
   LayoutDashboardIcon,
   BuildingIcon,
   UsersIcon,
@@ -21,6 +20,7 @@ import {
   SettingsIcon,
   UserIcon,
   ExternalLinkIcon,
+  VideoIcon,
 } from "lucide-react"
 
 // -----------------------------------------------------------------------------
@@ -112,6 +112,22 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
           >
             <TrendingUpIcon className="admin-sidebar__nav-icon" />
             <span>Stats</span>
+          </Link>
+        </nav>
+      </div>
+
+      {/* Content Section */}
+      <div className="admin-sidebar__section">
+        <div className="admin-sidebar__heading">Content</div>
+        <nav className="admin-sidebar__nav-list">
+          <Link
+            href="/admin/youtube"
+            className="admin-sidebar__nav-item"
+            data-active={isActive("/admin/youtube")}
+            onClick={onNavigate}
+          >
+            <VideoIcon className="admin-sidebar__nav-icon" />
+            <span>YouTube Scripts</span>
           </Link>
         </nav>
       </div>
