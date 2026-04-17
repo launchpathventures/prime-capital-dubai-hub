@@ -195,6 +195,7 @@ export function LoginForm({ mode, redirectTo, showPasswordLogin = false }: Login
           className="w-full"
           disabled={isLoading || isGoogleLoading}
           onClick={signInWithGoogle}
+          autoFocus={googleOnly}
         >
           {isGoogleLoading ? (
             <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
