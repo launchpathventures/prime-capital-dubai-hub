@@ -9,17 +9,22 @@
 
 import * as React from "react"
 import Link from "next/link"
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core"
 import { Stack, Row, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -69,14 +74,6 @@ const COLUMNS: {
   { status: "script_live", label: "Script Live", icon: TvIcon, color: "text-green-500" },
 ]
 
-const STATUS_OPTIONS: { value: ScriptStatus; label: string }[] = [
-  { value: "idea", label: "Idea" },
-  { value: "script_drafted", label: "Script Drafted" },
-  { value: "script_ready", label: "Script Ready" },
-  { value: "script_recorded", label: "Script Recorded" },
-  { value: "script_live", label: "Script Live" },
-]
-
 // =============================================================================
 // MAIN COMPONENT
 // =============================================================================
@@ -85,6 +82,13 @@ export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScrip
   const [scripts, setScripts] = React.useState(initialScripts)
   const [deleteTarget, setDeleteTarget] = React.useState<YouTubeScript | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [activeDragId, setActiveDragId] = React.useState<string | null>(null)
+
+  // 8px activation distance so clicks on the card (navigation) still work.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor)
+  )
 
   const columns = React.useMemo(() => {
     const grouped = new Map<ScriptStatus, YouTubeScript[]>()
@@ -96,16 +100,44 @@ export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScrip
     return grouped
   }, [scripts])
 
-  async function handleStatusChange(script: YouTubeScript, newStatus: ScriptStatus) {
+  const activeScript = React.useMemo(
+    () => (activeDragId ? scripts.find((s) => s.id === activeDragId) ?? null : null),
+    [activeDragId, scripts]
+  )
+
+  async function updateStatus(script: YouTubeScript, newStatus: ScriptStatus) {
+    const previousStatus = script.status
+    setScripts((prev) =>
+      prev.map((s) => (s.id === script.id ? { ...s, status: newStatus } : s))
+    )
     const result = await updateScriptStatus(script.id, newStatus)
     if (result.success) {
-      setScripts((prev) =>
-        prev.map((s) => (s.id === script.id ? { ...s, status: newStatus } : s))
-      )
       toast("Status updated")
     } else {
+      setScripts((prev) =>
+        prev.map((s) => (s.id === script.id ? { ...s, status: previousStatus } : s))
+      )
       toast("Failed to update status", { type: "error" })
     }
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveDragId(String(event.active.id))
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveDragId(null)
+    const { active, over } = event
+    if (!over) return
+    const script = scripts.find((s) => s.id === active.id)
+    if (!script) return
+    const newStatus = over.id as ScriptStatus
+    if (script.status === newStatus) return
+    void updateStatus(script, newStatus)
+  }
+
+  function handleDragCancel() {
+    setActiveDragId(null)
   }
 
   async function handleDelete() {
@@ -139,39 +171,27 @@ export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScrip
       </Row>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
-        {COLUMNS.map((col) => {
-          const colScripts = columns.get(col.status) || []
-          const Icon = col.icon
-          return (
-            <Stack key={col.status} gap="sm" className="min-w-0">
-              <Row gap="sm" align="center" className="px-1">
-                <Icon className={cn("h-4 w-4", col.color)} />
-                <Title size="h5">{col.label}</Title>
-                <Badge variant="secondary" size="sm">
-                  {colScripts.length}
-                </Badge>
-              </Row>
-
-              <Stack gap="xs" className="rounded-lg bg-muted/30 p-2 min-h-32">
-                {colScripts.length === 0 && (
-                  <Text variant="muted" size="sm" className="text-center py-6">
-                    No scripts
-                  </Text>
-                )}
-                {colScripts.map((script) => (
-                  <ScriptCard
-                    key={script.id}
-                    script={script}
-                    onStatusChange={handleStatusChange}
-                    onDelete={(s) => setDeleteTarget(s)}
-                  />
-                ))}
-              </Stack>
-            </Stack>
-          )
-        })}
-      </div>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
+          {COLUMNS.map((col) => (
+            <DroppableColumn
+              key={col.status}
+              col={col}
+              scripts={columns.get(col.status) || []}
+              activeDragId={activeDragId}
+              onDelete={(s) => setDeleteTarget(s)}
+            />
+          ))}
+        </div>
+        <DragOverlay dropAnimation={null}>
+          {activeScript ? <ScriptCardContent script={activeScript} /> : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Delete Confirmation */}
       <AlertDialog
@@ -208,130 +228,189 @@ export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScrip
 }
 
 // =============================================================================
+// DROPPABLE COLUMN
+// =============================================================================
+
+function DroppableColumn({
+  col,
+  scripts,
+  activeDragId,
+  onDelete,
+}: {
+  col: (typeof COLUMNS)[number]
+  scripts: YouTubeScript[]
+  activeDragId: string | null
+  onDelete: (script: YouTubeScript) => void
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: col.status })
+  const Icon = col.icon
+
+  return (
+    <Stack gap="sm" className="min-w-0">
+      <Row gap="sm" align="center" className="px-1">
+        <Icon className={cn("h-4 w-4", col.color)} />
+        <Title size="h5">{col.label}</Title>
+        <Badge variant="secondary" size="sm">
+          {scripts.length}
+        </Badge>
+      </Row>
+
+      <Stack
+        ref={setNodeRef}
+        gap="xs"
+        className={cn(
+          "rounded-lg bg-muted/30 p-2 min-h-32 transition-colors",
+          isOver && "bg-muted/70 ring-2 ring-primary/40"
+        )}
+      >
+        {scripts.length === 0 && (
+          <Text variant="muted" size="sm" className="text-center py-6">
+            No scripts
+          </Text>
+        )}
+        {scripts.map((script) => (
+          <ScriptCard
+            key={script.id}
+            script={script}
+            isDragging={activeDragId === script.id}
+            onDelete={onDelete}
+          />
+        ))}
+      </Stack>
+    </Stack>
+  )
+}
+
+// =============================================================================
 // SCRIPT CARD
 // =============================================================================
 
 function ScriptCard({
   script,
-  onStatusChange,
+  isDragging,
   onDelete,
 }: {
   script: YouTubeScript
-  onStatusChange: (script: YouTubeScript, status: ScriptStatus) => void
+  isDragging: boolean
   onDelete: (script: YouTubeScript) => void
+}) {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: script.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={cn("touch-none", isDragging && "opacity-40")}
+    >
+      <ScriptCardContent script={script} onDelete={onDelete} />
+    </div>
+  )
+}
+
+function ScriptCardContent({
+  script,
+  onDelete,
+}: {
+  script: YouTubeScript
+  onDelete?: (script: YouTubeScript) => void
 }) {
   const hasScript = !!script.script_body
   const hasValidation = script.validation_score !== null
 
+  // Card-wide Link overlay sits behind a pointer-events-none CardContent so the
+  // whole card navigates without nesting interactive elements inside the anchor.
   return (
-    <Link href={`/admin/youtube/${script.id}`} className="block">
-      <Card className="cursor-pointer hover:bg-muted/50 transition-colors group">
-        <CardContent className="p-3">
-          <Stack gap="xs">
-            <Text size="sm" className="font-medium line-clamp-2">
-              {script.title}
+    <Card className="relative cursor-grab active:cursor-grabbing hover:bg-muted/50 transition-colors group">
+      <Link
+        href={`/admin/youtube/${script.id}`}
+        draggable={false}
+        aria-label={`Open ${script.title}`}
+        className="absolute inset-0 rounded-lg"
+      />
+      {onDelete && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute top-1 right-1 z-10 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete(script)
+          }}
+        >
+          <TrashIcon className="h-3.5 w-3.5" />
+        </Button>
+      )}
+      <CardContent className="relative pointer-events-none p-2.5">
+        <Stack gap="xs">
+          <Text size="sm" className="font-medium line-clamp-2">
+            {script.title}
+          </Text>
+
+          {script.topic && (
+            <Text variant="muted" size="sm" className="line-clamp-2">
+              {script.topic}
             </Text>
+          )}
 
-            {script.topic && (
-              <Text variant="muted" size="sm" className="line-clamp-2">
-                {script.topic}
-              </Text>
+          <Row gap="xs" wrap align="center">
+            {script.target_length && (
+              <Badge variant="outline" size="sm">
+                {script.target_length.replace(/_/g, " ")}
+              </Badge>
             )}
-
-            <Row gap="xs" wrap align="center">
-              {script.target_length && (
-                <Badge variant="outline" size="sm">
-                  {script.target_length.replace(/_/g, " ")}
-                </Badge>
-              )}
-              {hasScript && (
-                <Badge variant="secondary" size="sm">
-                  <FileTextIcon className="h-3 w-3 mr-1" />
-                  Script
-                </Badge>
-              )}
-              {hasValidation && (
-                <Badge
-                  variant={script.validation_score! >= 70 ? "default" : "destructive"}
-                  size="sm"
-                >
-                  {script.validation_score! >= 70 ? (
-                    <CheckCircleIcon className="h-3 w-3 mr-1" />
-                  ) : (
-                    <XCircleIcon className="h-3 w-3 mr-1" />
-                  )}
-                  {script.validation_score}%
-                </Badge>
-              )}
-            </Row>
-
-            <Row className="justify-between text-xs text-muted-foreground">
-              {script.word_count ? (
-                <span>{script.word_count.toLocaleString()} words</span>
-              ) : (
-                <span />
-              )}
-              <span>
-                {script.created_at
-                  ? new Date(script.created_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                    })
-                  : ""}
-              </span>
-            </Row>
-
-            {/* Generate Script CTA for ideas without a script */}
-            {script.status === "idea" && !hasScript && (
-              <Button
-                size="sm"
-                className="w-full gap-1.5"
-                onClick={(e) => {
-                  e.preventDefault()
-                  window.location.href = `/admin/youtube/${script.id}`
-                }}
-              >
-                <SparklesIcon className="h-3.5 w-3.5" />
-                Generate Script
-              </Button>
+            {hasScript && (
+              <Badge variant="secondary" size="sm">
+                <FileTextIcon className="h-3 w-3 mr-1" />
+                Script
+              </Badge>
             )}
-
-            <Row gap="xs" align="center" className="pt-1">
-              <div className="flex-1" onClick={(e) => e.preventDefault()}>
-                <Select
-                  value={script.status}
-                  onValueChange={(value) =>
-                    onStatusChange(script, value as ScriptStatus)
-                  }
-                  items={STATUS_OPTIONS}
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                variant="ghost"
+            {hasValidation && (
+              <Badge
+                variant={script.validation_score! >= 70 ? "default" : "destructive"}
                 size="sm"
-                className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.preventDefault()
-                  onDelete(script)
-                }}
               >
-                <TrashIcon className="h-3.5 w-3.5" />
-              </Button>
-            </Row>
-          </Stack>
-        </CardContent>
-      </Card>
-    </Link>
+                {script.validation_score! >= 70 ? (
+                  <CheckCircleIcon className="h-3 w-3 mr-1" />
+                ) : (
+                  <XCircleIcon className="h-3 w-3 mr-1" />
+                )}
+                {script.validation_score}%
+              </Badge>
+            )}
+          </Row>
+
+          <Row className="justify-between text-xs text-muted-foreground">
+            {script.word_count ? (
+              <span>{script.word_count.toLocaleString()} words</span>
+            ) : (
+              <span />
+            )}
+            <span>
+              {script.created_at
+                ? new Date(script.created_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })
+                : ""}
+            </span>
+          </Row>
+
+          {/* Generate Script CTA for ideas without a script */}
+          {script.status === "idea" && !hasScript && (
+            <Button
+              size="sm"
+              className="w-full gap-1.5 pointer-events-auto"
+              onPointerDown={(e) => e.stopPropagation()}
+              render={<Link href={`/admin/youtube/${script.id}`} />}
+            >
+              <SparklesIcon className="h-3.5 w-3.5" />
+              Generate Script
+            </Button>
+          )}
+        </Stack>
+      </CardContent>
+    </Card>
   )
 }
