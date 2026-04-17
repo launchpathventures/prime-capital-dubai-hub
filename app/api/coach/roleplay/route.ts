@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const response = await anthropic.messages.create({
-          model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
+          model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
           max_tokens: 1024,
           temperature: 0.3,
           system: prompts.roleplay_evaluation,
@@ -355,7 +355,7 @@ export async function POST(request: NextRequest) {
 
       // Stream response for natural feel
       const stream = await anthropic.messages.stream({
-        model: process.env.COACH_MODEL || "claude-sonnet-4-20250514",
+        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 256,
         temperature: 0.7,
         system: roleplaySystemPrompt,

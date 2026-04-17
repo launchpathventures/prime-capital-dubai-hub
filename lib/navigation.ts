@@ -16,6 +16,7 @@ import {
   SettingsIcon,
   LayersIcon,
   GraduationCapIcon,
+  VideoIcon,
 } from "lucide-react"
 import { type NavItem, type NavGroup } from "@/components/layout/collapsible-sidebar-nav"
 
@@ -84,6 +85,13 @@ export const appNavItems: NavGroup[] = [
       { label: "Team", href: "/admin/team" },
       { label: "Testimonials", href: "/admin/testimonials" },
       { label: "Stats", href: "/admin/stats" },
+    ],
+  },
+  {
+    label: "Content",
+    icon: VideoIcon,
+    items: [
+      { label: "YouTube Scripts", href: "/admin/youtube" },
     ],
   },
   {
