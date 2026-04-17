@@ -19,7 +19,6 @@ import {
 import { requireAdmin } from "@/lib/auth/require-auth"
 import {
   getAllLearnersWithProgress,
-  getProgressStats,
   formatRelativeTime,
   type LearnerSummary,
 } from "@/lib/lms/admin-queries"
@@ -34,13 +33,39 @@ export const dynamic = "force-dynamic"
 export default async function AdminProgressPage() {
   await requireAdmin()
 
-  const [learners, stats] = await Promise.all([
-    getAllLearnersWithProgress(),
-    getProgressStats(),
-  ])
+  const allUsers = await getAllLearnersWithProgress()
 
-  // Sort by progress descending by default
-  const sortedLearners = [...learners].sort((a, b) => b.overallProgress - a.overallProgress)
+  // Show every team member regardless of role — admins and marketing users
+  // also progress through the LMS. Exclude only system/test accounts.
+  const EXCLUDED_EMAILS = new Set(["tim@launchpathventures.com", "ai@primecapitaldubai.com"])
+  const learners = allUsers.filter((u) => !EXCLUDED_EMAILS.has(u.email.toLowerCase()))
+
+  // Sort: users with any progress first, then by role (admin → marketing →
+  // learner), then by progress descending, then alphabetically by name.
+  const ROLE_ORDER: Record<string, number> = { admin: 0, marketing: 1, learner: 2 }
+  const sortedLearners = [...learners].sort((a, b) => {
+    const aHas = a.overallProgress > 0 ? 0 : 1
+    const bHas = b.overallProgress > 0 ? 0 : 1
+    if (aHas !== bHas) return aHas - bHas
+
+    const roleDiff = (ROLE_ORDER[a.role] ?? 99) - (ROLE_ORDER[b.role] ?? 99)
+    if (roleDiff !== 0) return roleDiff
+
+    if (b.overallProgress !== a.overallProgress) return b.overallProgress - a.overallProgress
+
+    return a.fullName.toLowerCase().localeCompare(b.fullName.toLowerCase())
+  })
+
+  const totalLearners = learners.length
+  const stats = {
+    totalLearners,
+    averageProgress: totalLearners > 0
+      ? Math.round(learners.reduce((sum, l) => sum + l.overallProgress, 0) / totalLearners)
+      : 0,
+    readyCount: learners.filter((l) => l.certificationStatus === "ready").length,
+    certifiedCount: learners.filter((l) => l.certificationStatus === "certified").length,
+    atRiskCount: learners.filter((l) => l.isAtRisk).length,
+  }
 
   return (
     <Container size="lg" className="py-6">
