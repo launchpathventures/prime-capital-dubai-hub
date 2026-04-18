@@ -396,6 +396,8 @@ async function fetchPublicTeamMembers(): Promise<TeamMember[]> {
       .from("team_members")
       .select("*")
       .eq("published", true)
+      .not("photo", "is", null)
+      .neq("photo", "")
       .order("display_order")
 
     if (error) {
@@ -419,6 +421,8 @@ async function fetchPublicTeamMemberBySlug(slug: string): Promise<TeamMember | n
       .select("*")
       .eq("slug", slug)
       .eq("published", true)
+      .not("photo", "is", null)
+      .neq("photo", "")
       .single()
 
     if (error) {

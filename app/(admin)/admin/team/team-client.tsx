@@ -102,6 +102,23 @@ const ROLE_ITEMS = ROLES.map((role) => ({
   label: ROLE_CONFIG[role].label,
 }))
 
+// Title sort priority — matches recruitment hierarchy.
+// Titles not in this list are sorted after, alphabetically.
+const TITLE_ORDER = [
+  "Associate Director",
+  "Senior Property Consultant",
+  "Property Consultant",
+  "Operations Manager",
+]
+
+function titleRank(title: string | null | undefined): number {
+  if (!title) return TITLE_ORDER.length + 1
+  const idx = TITLE_ORDER.findIndex(
+    (t) => t.toLowerCase() === title.toLowerCase(),
+  )
+  return idx === -1 ? TITLE_ORDER.length : idx
+}
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -152,19 +169,32 @@ export function TeamClient({ users, teamProfiles, orphanProfiles }: Props) {
       )
     }
 
-    return result.sort((a, b) => a.fullName.localeCompare(b.fullName))
-  }, [users, search, roleFilter])
+    return result.sort((a, b) => {
+      const titleA = teamProfiles[a.email.toLowerCase()]?.role
+      const titleB = teamProfiles[b.email.toLowerCase()]?.role
+      const rankDiff = titleRank(titleA) - titleRank(titleB)
+      if (rankDiff !== 0) return rankDiff
+      return a.fullName.localeCompare(b.fullName)
+    })
+  }, [users, teamProfiles, search, roleFilter])
 
   // Filtered orphan profiles
   const filteredOrphans = useMemo(() => {
     if (roleFilter !== "all") return [] // Orphans have no system role
-    if (!search.trim()) return orphanProfiles
-    const q = search.toLowerCase()
-    return orphanProfiles.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.email && p.email.toLowerCase().includes(q))
-    )
+    let result = orphanProfiles
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.email && p.email.toLowerCase().includes(q))
+      )
+    }
+    return [...result].sort((a, b) => {
+      const rankDiff = titleRank(a.role) - titleRank(b.role)
+      if (rankDiff !== 0) return rankDiff
+      return a.name.localeCompare(b.name)
+    })
   }, [orphanProfiles, search, roleFilter])
 
   function handleRoleChange(userId: string, name: string, newRole: UserRole) {
@@ -277,6 +307,9 @@ export function TeamClient({ users, teamProfiles, orphanProfiles }: Props) {
                 <TableHead className="px-4 py-3 w-24">
                   <Text size="sm" weight="medium" variant="muted">Role</Text>
                 </TableHead>
+                <TableHead className="px-4 py-3 w-48">
+                  <Text size="sm" weight="medium" variant="muted">Title</Text>
+                </TableHead>
                 <TableHead className="px-4 py-3 w-44">
                   <Text size="sm" weight="medium" variant="muted">Progress</Text>
                 </TableHead>
@@ -303,7 +336,7 @@ export function TeamClient({ users, teamProfiles, orphanProfiles }: Props) {
               {filteredOrphans.length > 0 && (
                 <>
                   <TableRow className="bg-muted/20 hover:bg-muted/20">
-                    <TableCell colSpan={5} className="px-4 py-2">
+                    <TableCell colSpan={6} className="px-4 py-2">
                       <Text size="xs" weight="medium" variant="muted">
                         Public profiles without a user account ({filteredOrphans.length})
                       </Text>
@@ -455,6 +488,15 @@ function UserRow({
         )}
       </TableCell>
 
+      {/* Title */}
+      <TableCell className="px-4 py-3">
+        {teamProfile?.role ? (
+          <Text size="sm" className="truncate">{teamProfile.role}</Text>
+        ) : (
+          <Text size="sm" variant="muted">—</Text>
+        )}
+      </TableCell>
+
       {/* Progress + Status (combined) */}
       <TableCell className="px-4 py-3">
         <Row gap="sm" align="center">
@@ -568,7 +610,7 @@ function OrphanRow({
           <Stack gap="none" className="min-w-0">
             <Text weight="medium" className="truncate">{profile.name}</Text>
             <Text size="xs" variant="muted" className="truncate">
-              {profile.email || "No email"} · {profile.role || "No role"}
+              {profile.email || "No email"}
             </Text>
           </Stack>
         </Row>
@@ -577,6 +619,15 @@ function OrphanRow({
       {/* Role — no system account */}
       <TableCell className="px-4 py-3">
         <Badge variant="outline" className="text-xs text-muted-foreground">No account</Badge>
+      </TableCell>
+
+      {/* Title */}
+      <TableCell className="px-4 py-3">
+        {profile.role ? (
+          <Text size="sm" className="truncate">{profile.role}</Text>
+        ) : (
+          <Text size="sm" variant="muted">—</Text>
+        )}
       </TableCell>
 
       {/* Progress — N/A */}
