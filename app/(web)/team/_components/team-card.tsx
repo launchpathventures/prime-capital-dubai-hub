@@ -20,7 +20,6 @@ interface TeamMember {
   email?: string | null
   phone?: string | null
   linkedin?: string | null
-  isFounder?: boolean
 }
 
 export function TeamCard({ member }: { member: TeamMember }) {
@@ -46,13 +45,6 @@ export function TeamCard({ member }: { member: TeamMember }) {
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <UserIcon className="h-20 w-20 text-[var(--web-spruce)]/30" />
-            </div>
-          )}
-          
-          {/* Founder badge */}
-          {member.isFounder && (
-            <div className="absolute top-4 left-4 bg-[var(--web-ash)] text-[var(--web-off-white)] text-[10px] uppercase tracking-wider px-3 py-1 rounded-[2px]">
-              Founder
             </div>
           )}
         </div>
