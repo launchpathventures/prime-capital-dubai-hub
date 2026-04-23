@@ -89,7 +89,7 @@ export function LeadForm({
   }, [currentStep])
 
   // Determine if contact step is the last step (for landing/download modes)
-  const isContactLastStep = mode === "landing" || mode === "download"
+  const isContactLastStep = mode === "landing" || mode === "download" || mode === "event"
   // For returning leads, property-appeal is the last step before success
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
 

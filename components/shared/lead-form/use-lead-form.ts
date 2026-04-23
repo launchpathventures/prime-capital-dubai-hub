@@ -21,8 +21,8 @@ interface StepDef {
 }
 
 const STEPS: StepDef[] = [
-  { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
-  { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
+  { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
+  { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
   { id: "enquiry-intent", modes: ["property-enquiry"] },
   { id: "property-appeal", modes: ["property-enquiry"] },
   { id: "goals", modes: ["contact"] },
@@ -43,7 +43,7 @@ const STEPS: StepDef[] = [
   },
   { id: "questions", modes: ["contact"] },
   { id: "private-context", modes: ["private"] },
-  { id: "success", modes: ["contact", "landing", "download", "private", "property-enquiry"] },
+  { id: "success", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
 ]
 
 // =============================================================================
