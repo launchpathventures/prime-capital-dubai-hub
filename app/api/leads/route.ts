@@ -214,6 +214,8 @@ function getFormName(formMode: string, pageUrl: string): string {
       pageName = "Private Channel"
     } else if (path === "about") {
       pageName = "About Page"
+    } else if (path.startsWith("live/")) {
+      pageName = "Livestream"
     } else {
       // Capitalize and format the path
       pageName = path.split("/")[0].replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())
@@ -229,6 +231,7 @@ function getFormName(formMode: string, pageUrl: string): string {
     "download": "Download Request",
     "private": "Private Enquiry",
     "property-enquiry": "Property Enquiry",
+    "event": "Event Registration",
   }
 
   const modeName = modeNames[formMode] || formMode
@@ -246,7 +249,7 @@ const leadSchema = z.object({
   lastName: z.string().max(100).optional().default(""),
   email: z.string().max(100).optional().default(""),
   whatsapp: z.string().max(20).optional().default(""),
-  formMode: z.enum(["contact", "landing", "download", "private", "property-enquiry"]),
+  formMode: z.enum(["contact", "landing", "download", "private", "property-enquiry", "event"]),
   submittedAt: z.string(),
   pageUrl: z.string().max(500),
 

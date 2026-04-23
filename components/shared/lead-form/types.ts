@@ -56,7 +56,7 @@ export type DeploymentRange =
 
 export type PreferredContact = "phone" | "email" | "whatsapp"
 
-export type FormMode = "contact" | "landing" | "download" | "private" | "property-enquiry"
+export type FormMode = "contact" | "landing" | "download" | "private" | "property-enquiry" | "event"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================

@@ -93,6 +93,8 @@ export function SuccessStep({
         return "A senior member of our team will be in touch to arrange a call at your convenience."
       case "contact":
         return "We've received your enquiry. A member of our team will reach out within one business day."
+      case "event":
+        return "You're registered. Check your email and WhatsApp for the confirmation and live link."
     }
   }
 

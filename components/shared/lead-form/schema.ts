@@ -48,7 +48,7 @@ export const propertyTypeSchema = z.enum([
   "commercial",
 ])
 
-export const formModeSchema = z.enum(["contact", "landing", "download", "private", "property-enquiry"])
+export const formModeSchema = z.enum(["contact", "landing", "download", "private", "property-enquiry", "event"])
 
 // =============================================================================
 // STEP SCHEMAS
@@ -156,8 +156,11 @@ const baseSchema = z.object({
 // Download mode: Just name + contact
 export const downloadFormSchema = baseSchema
 
-// Landing mode: Just name + contact  
+// Landing mode: Just name + contact
 export const landingFormSchema = baseSchema
+
+// Event mode: Just name + contact (webinar / livestream registration)
+export const eventFormSchema = baseSchema
 
 // Contact mode: Full qualification
 export const contactFormSchema = baseSchema.extend({
@@ -232,7 +235,7 @@ export const returningLeadFormSchema = z.object({
 // DYNAMIC SCHEMA SELECTOR
 // =============================================================================
 
-export function getFormSchema(mode: "contact" | "landing" | "download" | "private" | "property-enquiry") {
+export function getFormSchema(mode: "contact" | "landing" | "download" | "private" | "property-enquiry" | "event") {
   switch (mode) {
     case "contact":
       return contactFormSchema
@@ -244,6 +247,8 @@ export function getFormSchema(mode: "contact" | "landing" | "download" | "privat
       return privateFormSchema
     case "property-enquiry":
       return propertyEnquiryFormSchema
+    case "event":
+      return eventFormSchema
     default:
       return baseSchema
   }
@@ -262,6 +267,7 @@ export type QuestionsStepData = z.infer<typeof questionsStepSchema>
 export type ContactFormData = z.infer<typeof contactFormSchema>
 export type DownloadFormData = z.infer<typeof downloadFormSchema>
 export type LandingFormData = z.infer<typeof landingFormSchema>
+export type EventFormData = z.infer<typeof eventFormSchema>
 export type PrivateFormData = z.infer<typeof privateFormSchema>
 export type PropertyInterestStepData = z.infer<typeof propertyInterestStepSchema>
 export type PropertyEnquiryFormData = z.infer<typeof propertyEnquiryFormSchema>
