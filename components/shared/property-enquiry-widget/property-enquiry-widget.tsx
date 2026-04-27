@@ -5,7 +5,10 @@
  * "/contact" CTA on PDPs — the CRM is the source of truth for property leads.
  *
  * - Compact proposal card by default; expands to chat/form on click.
- * - 460px initial height; resizes via postMessage (transition: height 220ms).
+ * - 540px initial height; resizes via postMessage (transition: height 220ms).
+ *   Resize floor clamps to the initial height — the widget occasionally posts
+ *   transient sub-compact heights mid-animation that would visually collapse
+ *   the iframe.
  * - Forwards UTM params from the page URL when mounted.
  * - Listens for widget.enquiry.submitted to fire GA4 `generate_lead`.
  *
@@ -35,7 +38,9 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
-const INITIAL_HEIGHT = 460
+const INITIAL_HEIGHT = 540
+/** Resize floor — never let the iframe shrink below the compact-card height. */
+const MIN_HEIGHT = INITIAL_HEIGHT
 
 interface WidgetMessage {
   type?: string
@@ -127,7 +132,7 @@ export function PropertyEnquiryWidget({
           const iframe = iframeRef.current
           const height = data.payload?.height
           if (iframe && typeof height === "number" && Number.isFinite(height)) {
-            iframe.style.height = `${Math.ceil(height)}px`
+            iframe.style.height = `${Math.max(MIN_HEIGHT, Math.ceil(height))}px`
           }
           break
         }

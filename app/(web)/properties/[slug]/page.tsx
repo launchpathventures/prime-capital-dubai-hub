@@ -566,9 +566,6 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                   {property.developer && (
                     <DetailRow label="Developer" value={property.developer} />
                   )}
-                  {property.reference && (
-                    <DetailRow label="Reference" value={property.reference} />
-                  )}
                   <DetailRow
                     label="Property Type"
                     value={<span className="capitalize">{property.propertyType}</span>}
