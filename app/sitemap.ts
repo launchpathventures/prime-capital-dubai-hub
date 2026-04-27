@@ -8,7 +8,8 @@
 import type { MetadataRoute } from "next"
 
 import { config } from "@/lib/config"
-import { getWebProperties, getWebTeamMembers } from "@/lib/content"
+import { getWebTeamMembers } from "@/lib/content"
+import { getCrmProperties } from "@/lib/crm/client"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = config.app.url
@@ -66,11 +67,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Dynamic property pages
+  // Dynamic property pages — sourced from the CRM. The list endpoint is
+  // hard-gated to top-promoted properties; sold/off-market are intentionally
+  // excluded from the sitemap (deep links still resolve via the detail API).
   const propertyPages: MetadataRoute.Sitemap = []
   if (config.features.properties) {
     try {
-      const properties = await getWebProperties()
+      const { properties } = await getCrmProperties({ limit: 50 })
       properties.forEach((property) => {
         propertyPages.push({
           url: `${baseUrl}/properties/${property.slug}`,

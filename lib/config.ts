@@ -139,6 +139,16 @@ export const config = {
   },
 
   /**
+   * AgentCRM Configuration
+   * Source of truth for property listings + inline enquiry widget on PDPs.
+   * baseUrl is also the postMessage origin allowlist for the widget bridge.
+   */
+  crm: {
+    baseUrl: process.env.NEXT_PUBLIC_CRM_BASE_URL || "https://crm.primecapitaldubai.com",
+    agencyUuid: process.env.NEXT_PUBLIC_CRM_AGENCY_UUID || "",
+  },
+
+  /**
    * Learning Management System Configuration
    * Settings for the LMS/learning portal.
    */

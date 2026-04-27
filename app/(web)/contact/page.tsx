@@ -10,7 +10,8 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { ParallaxHero } from "../_surface/parallax-hero"
 import { ContactBar } from "./contact-bar"
 import { ContactFormSection } from "./contact-form-section"
-import { getWebPropertyBySlug } from "@/lib/content"
+import { getCrmPropertyBySlug } from "@/lib/crm/client"
+import { isOffPlanListing } from "@/lib/crm"
 import type { PropertyContext } from "@/components/shared/lead-form/types"
 import contactImage from "@/public/images/hero/contact.jpg"
 
@@ -44,17 +45,17 @@ export default async function ContactPage({ searchParams }: PageProps) {
   // If arriving from a property page, fetch property data for context
   let propertyContext: PropertyContext | undefined
   if (propertySlug) {
-    const property = await getWebPropertyBySlug(propertySlug)
+    const property = await getCrmPropertyBySlug(propertySlug)
     if (property) {
       propertyContext = {
         slug: property.slug,
         title: property.title,
-        isOffPlan: property.completionStatus === "off-plan",
-        isDistressed: property.tags?.includes("distressed") ?? false,
+        isOffPlan: isOffPlanListing(property),
+        isDistressed: false,
         hasDeveloper: !!property.developer,
-        hasRentalYield: !!(property.investment as Record<string, unknown> | null)?.rentalYield,
+        hasRentalYield: false,
         developerName: property.developer ?? undefined,
-        coverImage: property.coverImage ?? undefined,
+        coverImage: property.images[0],
       }
     }
   }

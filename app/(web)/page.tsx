@@ -53,12 +53,17 @@ export const metadata: Metadata = {
 import Image from "next/image"
 import { config } from "@/lib/config"
 import {
-  getWebProperties,
   getWebTestimonials,
   getWebStats,
-  type Property,
   type Testimonial,
 } from "@/lib/content"
+import { getCrmProperties } from "@/lib/crm/client"
+import {
+  formatCrmBedrooms,
+  formatCrmPriceRange,
+  isOffPlanListing,
+  type CrmProperty,
+} from "@/lib/crm"
 import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRightIcon } from "lucide-react"
@@ -85,16 +90,17 @@ export default async function HomePage() {
     redirect(config.features.rootRedirect)
   }
 
-  const [properties, testimonials, stats] = await Promise.all([
-    getWebProperties(),
+  const [propertiesResult, testimonials, stats] = await Promise.all([
+    getCrmProperties({ limit: 12 }),
     getWebTestimonials(),
     getWebStats(),
   ])
+  const properties = propertiesResult.properties
   const featuredProperties = properties.slice(0, 3)
 
   // Extract unique values from actual property data for search bar
-  const propertyTypes = [...new Set(properties.map((p) => p.type))].sort()
-  const propertyLocations = [...new Set(properties.map((p) => p.location))].sort()
+  const propertyTypes = [...new Set(properties.map((p) => p.propertyType))].sort()
+  const propertyLocations = [...new Set(properties.map((p) => p.area))].sort()
 
   // Fallback stats when database is empty (must match data/stats.json)
   const fallbackStats = [
@@ -212,7 +218,7 @@ function PositioningSection() {
 // PROPERTIES SECTION
 // =============================================================================
 
-function PropertiesSection({ properties }: { properties: Property[] }) {
+function PropertiesSection({ properties }: { properties: CrmProperty[] }) {
   return (
     <section className="bg-[var(--web-off-white)] pb-[var(--web-section-gap)]">
       <Container size="xl">
@@ -235,56 +241,61 @@ function PropertiesSection({ properties }: { properties: Property[] }) {
 
           {/* Property Cards */}
           <Grid cols={1} className="md:grid-cols-3 gap-6">
-            {properties.map((property) => (
-              <Link
-                key={property.id}
-                href={`/properties/${property.slug}`}
-                className="group"
-              >
-                <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
-                  {/* Property Image */}
-                  <div className="relative h-[280px] overflow-hidden">
-                    <Image
-                      src={property.coverImage || propertyTypeImages[property.type] || propertyTypeImages.default}
-                      alt={property.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                    {/* Gradient overlay */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none"
-                      style={{
-                        background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
-                      }}
-                    />
-                    {/* Status badge */}
-                    <Badge
-                      variant={property.completionStatus === "ready" ? "default" : "secondary"}
-                      className="absolute top-4 left-4 text-[11px] uppercase tracking-wider"
-                    >
-                      {property.completionStatus === "ready" ? "Ready" : "Off-Plan"}
-                    </Badge>
-                  </div>
+            {properties.map((property) => {
+              const isOffPlan = isOffPlanListing(property)
+              const cardImage =
+                property.images[0] ||
+                propertyTypeImages[property.propertyType.toLowerCase()] ||
+                propertyTypeImages.default
 
-                  {/* Property Info */}
-                  <div className="p-6">
-                    <div className="text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.15em] mb-2">
-                      {property.type} · {property.bedroomsFrom === property.bedroomsTo ? `${property.bedroomsFrom} Beds` : `${property.bedroomsFrom}-${property.bedroomsTo} Beds`}
+              return (
+                <Link
+                  key={property.id}
+                  href={`/properties/${property.slug}`}
+                  className="group"
+                >
+                  <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
+                    <div className="relative h-[280px] overflow-hidden">
+                      <Image
+                        src={cardImage}
+                        alt={property.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none"
+                        style={{
+                          background:
+                            "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)",
+                        }}
+                      />
+                      <Badge
+                        variant={isOffPlan ? "secondary" : "default"}
+                        className="absolute top-4 left-4 text-[11px] uppercase tracking-wider"
+                      >
+                        {isOffPlan ? "Off-Plan" : "Ready"}
+                      </Badge>
                     </div>
-                    <h3 className="font-headline text-[var(--web-ash)] text-xl font-normal mb-3 leading-tight">
-                      {property.title}
-                    </h3>
-                    <div className="flex justify-between items-center pt-3 border-t border-[var(--web-serenity)]/20">
-                      <span className="text-[var(--web-spruce)] text-sm">
-                        From {property.sizeFrom?.toLocaleString()} {property.sizeUnit}
-                      </span>
-                      <ArrowRightIcon className="h-4 w-4 text-[var(--web-spruce)]" />
+
+                    <div className="p-6">
+                      <div className="text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.15em] mb-2 capitalize">
+                        {property.propertyType} · {formatCrmBedrooms(property)}
+                      </div>
+                      <h3 className="font-headline text-[var(--web-ash)] text-xl font-normal mb-3 leading-tight">
+                        {property.title}
+                      </h3>
+                      <div className="flex justify-between items-center pt-3 border-t border-[var(--web-serenity)]/20">
+                        <span className="text-[var(--web-spruce)] text-sm">
+                          {formatCrmPriceRange(property)}
+                        </span>
+                        <ArrowRightIcon className="h-4 w-4 text-[var(--web-spruce)]" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </Grid>
 
           {/* View All Link */}

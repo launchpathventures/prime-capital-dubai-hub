@@ -30,7 +30,7 @@ export function PropertySearch({ types, locations }: PropertySearchProps) {
         <div className="property-search__select-wrap">
           <select
             id="search-type"
-            name="type"
+            name="property_type"
             defaultValue=""
             className="property-search__select"
             aria-label="Property type"
