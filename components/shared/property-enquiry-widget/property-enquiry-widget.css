@@ -1,25 +1,143 @@
 /**
  * CATALYST - Property Enquiry Widget styles
  *
- * The transition is required — without it the height resize is jarring.
+ * The shell wraps the iframe in a card that visually frames it as part of the
+ * sidebar. The skeleton sits absolutely positioned over the iframe, hidden
+ * once the widget posts widget.ready.
+ *
+ * `transition: height 220ms ease` is required — without it the resize is
+ * jarring.
  */
 
 .property-enquiry-widget {
   width: 100%;
 }
 
+.property-enquiry-widget__shell {
+  position: relative;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
 .property-enquiry-widget__iframe {
   display: block;
   width: 100%;
   border: 0;
-  border-radius: 12px;
-  background-color: var(--color-background, transparent);
+  background-color: transparent;
   transition: height 220ms ease;
   color-scheme: normal;
 }
 
-.property-enquiry-widget__placeholder {
+/* Loading skeleton — stacked over the iframe until widget.ready fires */
+.property-enquiry-widget__skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background-color: #ffffff;
+  pointer-events: none;
+  animation: property-enquiry-widget-fade-in 200ms ease;
+}
+
+.property-enquiry-widget__skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.property-enquiry-widget__skeleton-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: oklch(from var(--color-foreground, #0f172a) l c h / 0.06);
+}
+
+.property-enquiry-widget__skeleton-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.property-enquiry-widget__skeleton-line {
+  height: 0.75rem;
+  border-radius: 4px;
+  background: oklch(from var(--color-foreground, #0f172a) l c h / 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.property-enquiry-widget__skeleton-line::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(from var(--color-foreground, #0f172a) l c h / 0.04) 50%,
+    transparent 100%
+  );
+  animation: property-enquiry-widget-shimmer 1.4s linear infinite;
+}
+
+.property-enquiry-widget__skeleton-line--title {
+  width: 65%;
+  height: 0.9rem;
+}
+
+.property-enquiry-widget__skeleton-line--subtitle {
+  width: 45%;
+  height: 0.7rem;
+}
+
+.property-enquiry-widget__skeleton-line--full {
   width: 100%;
-  border-radius: 12px;
-  background: oklch(from var(--color-foreground) l c h / 0.04);
+}
+
+.property-enquiry-widget__skeleton-line--short {
+  width: 60%;
+}
+
+.property-enquiry-widget__skeleton-divider {
+  height: 1px;
+  background: oklch(from var(--color-foreground, #0f172a) l c h / 0.06);
+  margin: 0.5rem 0;
+}
+
+.property-enquiry-widget__skeleton-button {
+  margin-top: auto;
+  height: 3rem;
+  border-radius: 999px;
+  background: oklch(from var(--color-foreground, #0f172a) l c h / 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.property-enquiry-widget__skeleton-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(from var(--color-foreground, #0f172a) l c h / 0.04) 50%,
+    transparent 100%
+  );
+  animation: property-enquiry-widget-shimmer 1.4s linear infinite;
+}
+
+@keyframes property-enquiry-widget-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes property-enquiry-widget-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
