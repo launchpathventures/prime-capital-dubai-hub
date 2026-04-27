@@ -32,12 +32,9 @@
 .property-enquiry-widget__iframe {
   display: block;
   width: 100%;
-  /* Workaround for CRM widget bug — see IFRAME_HEIGHT_PX in
-   * property-enquiry-widget.tsx. The widget's chat view is styled
-   * `height: 640; max-height: 90vh` and its body fills the iframe, so vh
-   * inside the iframe = iframe height. We need iframe ≥ 720 so 90vh ≥ 640
-   * and the chat view can render at its full design height. */
-  height: 720px;
+  /* No fixed height. Iframe ships at the HTML attribute height (460, the
+   * compact card) and grows/shrinks via the resize listener as the widget
+   * reports its state. */
   border: 0;
   border-radius: 12px;
   background-color: #ffffff;

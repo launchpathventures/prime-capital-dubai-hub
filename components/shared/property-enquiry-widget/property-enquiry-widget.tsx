@@ -3,18 +3,17 @@
  *
  * Inline iframe embed of the AgentCRM enquiry widget on PDPs.
  *
- * Sizing contract (per the CRM team's official integration docs, 2026-04):
- * - Widget is intrinsically short (~460px compact card) and grows to ~640px
- *   when the visitor opens chat or enquire.
- * - Iframe must listen for `widget.resize` postMessage events and update its
- *   own height. Without it, the chat is cropped on expand.
- * - Initial height = 460px. Don't fix any other height; don't use 100%.
+ * Sizing contract (post CRM bundle fix, drops the maxHeight: 90vh feedback
+ * loop that previously trapped the iframe at its initial size):
+ * - Initial iframe height = 460px (compact card).
+ * - Listen for `widget.resize` postMessages and update iframe.style.height
+ *   imperatively via ref. Honours grow (chat opens → 640) and shrink (chat
+ *   closes → 460).
  * - `transition: height 220ms ease` on the iframe smooths every resize.
  *
  * Right-column composition: we use Pattern A (sticky widget at `lg:top-24`)
- * on the PDP — see `app/(web)/properties/[slug]/page.tsx`. That keeps the
- * widget visually anchored as the visitor scrolls past the longer left
- * column, so any empty space below the sticky widget feels intentional.
+ * on the PDP so the empty space below the sticky widget stays visually
+ * anchored as visitors scroll past the longer left column.
  *
  * Skeleton:
  * - Sits stacked over the iframe in the same wrapper.
@@ -49,22 +48,10 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
-/**
- * Iframe height. We hold a fixed 720px to work around a CRM-widget bug:
- * the chat view is styled `height: 640px; maxHeight: 90vh` and the widget
- * body fills the iframe (`html, body { height: 100% }`), so `vh` inside
- * the iframe = iframe height. With iframe at 460 → 90vh = 414 → chat view
- * caps at 414, never 640. Widget then posts 414 via widget.resize, we
- * honour it, iframe stays at 460, feedback loop. The only way to break
- * the loop is to give the iframe enough headroom up-front so 90vh ≥ 640.
- *
- * 720 is the lowest workable value (90vh = 648 ≥ 640). Compact card has
- * empty space below — unavoidable until CRM removes the maxHeight: 90vh
- * or replaces height: 640 with min-height: 640 on the chat view.
- */
-const IFRAME_HEIGHT_PX = 720
+/** Widget compact-card height, per CRM docs. Resize handler grows from here. */
+const INITIAL_HEIGHT_PX = 460
 
-/** Cap any oversized widget.resize payloads (defensive). */
+/** Defensive cap so a malformed payload can't blow the iframe off-screen. */
 const MAX_HEIGHT_PX = 2000
 
 /** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
@@ -175,16 +162,7 @@ export function PropertyEnquiryWidget({
           setIsReady(true)
           const iframe = iframeRef.current
           const h = data.payload?.height
-          // Only honour reports that EXCEED our base height (e.g. long chat
-          // history that genuinely overflows the 640 chat view). Anything at
-          // or below the base is a no-op — the iframe's CSS already gives
-          // the widget enough headroom for compact + chat states.
-          if (
-            iframe &&
-            typeof h === "number" &&
-            Number.isFinite(h) &&
-            h > IFRAME_HEIGHT_PX
-          ) {
+          if (iframe && typeof h === "number" && Number.isFinite(h)) {
             iframe.style.height = `${Math.min(Math.ceil(h), MAX_HEIGHT_PX)}px`
           }
           break
@@ -221,7 +199,7 @@ export function PropertyEnquiryWidget({
             src={src}
             title={title}
             width="100%"
-            height={IFRAME_HEIGHT_PX}
+            height={INITIAL_HEIGHT_PX}
             className="property-enquiry-widget__iframe"
             data-ready={isReady ? "true" : "false"}
             loading="lazy"
