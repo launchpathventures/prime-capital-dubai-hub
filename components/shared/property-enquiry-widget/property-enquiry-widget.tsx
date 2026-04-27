@@ -3,21 +3,26 @@
  *
  * Inline iframe embed of the AgentCRM enquiry widget on PDPs.
  *
- * Sizing contract (post bundle fix, 2026-04):
- * - Embedder owns iframe sizing; widget fills the box.
- * - Iframe is set to height: 100% of a sized parent (.frame), which uses a
- *   clamp() expression so the widget gets a 640px floor and grows with the
- *   viewport on taller screens (up to 880px). No more compact-vs-chat height
- *   negotiation; the chat surface fills whatever we give it.
- * - widget.resize is now inert (echoes the iframe's own height back); we
- *   ignore it. Origin allowlist still applies for security.
+ * Sizing contract (per the CRM team's official integration docs, 2026-04):
+ * - Widget is intrinsically short (~460px compact card) and grows to ~640px
+ *   when the visitor opens chat or enquire.
+ * - Iframe must listen for `widget.resize` postMessage events and update its
+ *   own height. Without it, the chat is cropped on expand.
+ * - Initial height = 460px. Don't fix any other height; don't use 100%.
+ * - `transition: height 220ms ease` on the iframe smooths every resize.
+ *
+ * Right-column composition: we use Pattern A (sticky widget at `lg:top-24`)
+ * on the PDP — see `app/(web)/properties/[slug]/page.tsx`. That keeps the
+ * widget visually anchored as the visitor scrolls past the longer left
+ * column, so any empty space below the sticky widget feels intentional.
  *
  * Skeleton:
  * - Sits stacked over the iframe in the same wrapper.
- * - Cross-fades via opacity. Iframe stays mounted at all times so postMessage
+ * - Cross-fade via opacity. Iframe stays mounted at all times so postMessage
  *   keeps working underneath.
- * - isReady flips on the first of: widget.ready, iframe onLoad (extension-
- *   blocked postMessage safety net), 8s setTimeout (network hang).
+ * - isReady flips on the first of: widget.ready, any widget.resize (proves
+ *   the widget has painted), iframe onLoad (extension-blocked postMessage
+ *   safety net), 8s setTimeout (network hang).
  *
  * Origin allowlist: explicit Set, no wildcards. Add new origins here AND in
  * next.config.ts CSP frame-src or messages get dropped silently.
@@ -25,7 +30,7 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { buildWidgetUrl, getCrmOrigin, type WidgetUrlParams } from "@/lib/crm/widget"
 
@@ -44,6 +49,9 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
+/** Per CRM docs: 460 is the widget's compact-card height. Let resize grow it. */
+const INITIAL_HEIGHT_PX = 460
+
 /** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
 const READY_FALLBACK_MS = 8000
 
@@ -56,6 +64,7 @@ const ALLOWED_ORIGINS: ReadonlySet<string> = new Set([getCrmOrigin()])
 interface WidgetMessage {
   type?: string
   payload?: {
+    height?: number
     leadUuid?: string
     contactId?: string
     propertyRef?: string
@@ -110,6 +119,7 @@ export function PropertyEnquiryWidget({
 }: PropertyEnquiryWidgetProps) {
   const [src, setSrc] = useState<string | null>(null)
   const [isReady, setIsReady] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   // Build the iframe URL on mount so we can fold in UTM params from
   // window.location.search before the iframe loads (single load, no flash).
@@ -126,7 +136,9 @@ export function PropertyEnquiryWidget({
     setSrc(buildWidgetUrl(params))
   }, [slug, propertyName, propertyUrl, prefill])
 
-  // postMessage bridge: ready + analytics. Always validate origin.
+  // postMessage bridge: ready + resize + analytics. Always validate origin.
+  // Height write is imperative via ref so React reconciliation can't stutter
+  // the CSS height transition during rapid resize streams.
   useEffect(() => {
     function handler(event: MessageEvent<WidgetMessage>) {
       if (!ALLOWED_ORIGINS.has(event.origin)) return
@@ -144,21 +156,29 @@ export function PropertyEnquiryWidget({
           setIsReady(true)
           break
         }
+        case "widget.resize": {
+          setIsReady(true)
+          const iframe = iframeRef.current
+          const h = data.payload?.height
+          if (iframe && typeof h === "number" && Number.isFinite(h)) {
+            iframe.style.height = `${Math.ceil(h)}px`
+          }
+          break
+        }
         case "widget.enquiry.submitted": {
           fireAnalyticsLead(data.payload)
           break
         }
         default:
-          // widget.resize is intentionally not handled — the new bundle
-          // echoes the iframe's own height back at us, so it's a no-op.
           break
       }
     }
 
     window.addEventListener("message", handler)
 
-    // Final safety net: if neither widget.ready nor onLoad fires within 8s
-    // (extension-blocked postMessage / hung CRM), drop the skeleton anyway.
+    // Final safety net: if neither widget.ready, widget.resize, nor onLoad
+    // fire within 8s (extension-blocked postMessage / hung CRM), drop the
+    // skeleton anyway so we never get a stuck shimmer.
     const fallback = window.setTimeout(() => setIsReady(true), READY_FALLBACK_MS)
 
     return () => {
@@ -172,9 +192,12 @@ export function PropertyEnquiryWidget({
       <div className="property-enquiry-widget__frame">
         {src ? (
           <iframe
+            ref={iframeRef}
             id="agentcrm-widget"
             src={src}
             title={title}
+            width="100%"
+            height={INITIAL_HEIGHT_PX}
             className="property-enquiry-widget__iframe"
             data-ready={isReady ? "true" : "false"}
             loading="lazy"
