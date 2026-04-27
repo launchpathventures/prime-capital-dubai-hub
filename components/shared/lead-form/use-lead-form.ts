@@ -6,8 +6,8 @@
 
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
-import { useUTMParams } from "@/lib/hooks/use-utm-params"
+import { useState, useCallback, useMemo, useRef } from "react"
+import { useAttribution, generateSubmissionId } from "@/lib/hooks/use-attribution"
 import type { LeadFormData, FormMode, StepId, LeadGoal } from "./types"
 
 // =============================================================================
@@ -100,7 +100,12 @@ export function useLeadForm({
 }: UseLeadFormOptions): UseLeadFormReturn {
   // Returning lead: has Bitrix Lead ID, skips name/contact/goals/budget
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
-  const utm = useUTMParams()
+  const attribution = useAttribution()
+
+  // Stable submissionId for the lifetime of this form instance — survives
+  // retries so the CRM can dedupe network glitches.
+  const submissionIdRef = useRef<string>("")
+  if (!submissionIdRef.current) submissionIdRef.current = generateSubmissionId()
 
   // Read context params from URL (property, team member)
   const contextParams = useMemo(() => {
@@ -113,12 +118,16 @@ export function useLeadForm({
     }
   }, [])
 
-  // Form data state
+  // Form data state — seed with submissionId + sessionId so downstream
+  // steps (including the success/Calendly step) can carry them on the
+  // post-booking follow-up POST.
   const [data, setData] = useState<Partial<LeadFormData>>({
     formMode: mode,
     goals: [],
     ...contextParams,
     ...(bitrixLeadId ? { bitrixLeadId } : {}),
+    submissionId: submissionIdRef.current,
+    sessionId: attribution.sessionId,
   })
 
   // Current step index (among available steps)
@@ -191,6 +200,9 @@ export function useLeadForm({
         goals: mergedData.goals || [],
         investTimeline: mergedData.investTimeline,
         budget: mergedData.budget,
+        propertyTypes: mergedData.propertyTypes,
+        locations: mergedData.locations,
+        bedrooms: mergedData.bedrooms,
         propertyName: mergedData.propertyName,
         propertyLocation: mergedData.propertyLocation,
         concerns: mergedData.concerns,
@@ -212,7 +224,10 @@ export function useLeadForm({
         formMode: mode,
         submittedAt: new Date().toISOString(),
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
-        ...utm,
+        // Attribution (last-touch + first-touch + sessionId)
+        ...attribution,
+        // Idempotency
+        submissionId: submissionIdRef.current,
         // Context from referring pages
         referringProperty: mergedData.referringProperty,
         referringTeamMember: mergedData.referringTeamMember,
@@ -242,7 +257,7 @@ export function useLeadForm({
     } finally {
       setIsSubmitting(false)
     }
-  }, [data, mode, utm, honeypot, bitrixLeadId, tag, nextStep, onSuccess])
+  }, [data, mode, attribution, honeypot, bitrixLeadId, tag, nextStep, onSuccess])
 
   return {
     currentStep,

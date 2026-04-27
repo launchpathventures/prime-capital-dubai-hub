@@ -8,7 +8,7 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Script from "next/script"
 import { CheckIcon, ExternalLinkIcon } from "lucide-react"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
@@ -66,6 +66,7 @@ export function SuccessStep({
     const embedUrl = buildCalendlyUrl(calendlyUrl, data)
     return (
       <>
+        <CalendlyBookingListener data={data} />
         <div
           className="calendly-inline-widget"
           data-url={embedUrl}
@@ -136,6 +137,102 @@ export function SuccessStep({
       )}
     </div>
   )
+}
+
+/**
+ * Listens for Calendly's `event_scheduled` postMessage and fires a
+ * follow-up POST to /api/leads marking the lead as having booked a
+ * meeting. The CRM dedups against the original submission via
+ * submissionId / email and upgrades the lead to HOT tier.
+ *
+ * The basic Calendly widget only exposes event/invitee URIs in the
+ * postMessage payload — actual meeting time + invitee details are
+ * available via Calendly's webhook or API. We forward the URIs so the
+ * CRM can resolve them server-side if needed.
+ *
+ * @see https://help.calendly.com/hc/en-us/articles/360020052833
+ */
+function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
+  // Guard against double-firing if Calendly emits the same event twice
+  // for any reason (e.g. iframe reload).
+  const firedRef = useRef(false)
+
+  useEffect(() => {
+    function isCalendlyEvent(event: MessageEvent): boolean {
+      return (
+        event.origin === "https://calendly.com" &&
+        typeof event.data === "object" &&
+        event.data !== null &&
+        typeof (event.data as { event?: unknown }).event === "string" &&
+        (event.data as { event: string }).event.startsWith("calendly.")
+      )
+    }
+
+    function handler(event: MessageEvent) {
+      if (!isCalendlyEvent(event)) return
+      const payload = event.data as {
+        event: string
+        payload?: {
+          event?: { uri?: string }
+          invitee?: { uri?: string }
+        }
+      }
+      if (payload.event !== "calendly.event_scheduled") return
+      if (firedRef.current) return
+      firedRef.current = true
+
+      const meetingPayload = {
+        // Identity carried forward so the CRM can reconcile against the
+        // original submission. submissionId is the canonical idempotency
+        // key — same value on both POSTs means the CRM knows it's the
+        // same person, not a new lead.
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        whatsapp: data.whatsapp,
+        formMode: data.formMode || "contact",
+        pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        submittedAt: new Date().toISOString(),
+        submissionId: data.submissionId,
+        sessionId: data.sessionId,
+
+        // Booking signal
+        scheduledMeeting: true,
+        meetingEventUri: payload.payload?.event?.uri,
+        meetingInviteeUri: payload.payload?.invitee?.uri,
+        meetingInviteeName: [data.firstName, data.lastName]
+          .filter(Boolean)
+          .join(" ") || undefined,
+        meetingInviteeEmail: data.email,
+
+        // Forward routing context so the CRM can re-confirm assignment.
+        referringProperty: data.referringProperty,
+        referringTeamMember: data.referringTeamMember,
+        referringTeamMemberEmail: data.referringTeamMemberEmail,
+        leadTag: data.leadTag,
+
+        // Honeypot stays empty.
+        website: "",
+      }
+
+      // Fire-and-forget. Failure here is non-blocking — the meeting is
+      // still booked in Calendly, and Calendly's own webhook into the
+      // CRM is the authoritative path.
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(meetingPayload),
+        keepalive: true,
+      }).catch((err) => {
+        console.warn("[CalendlyBookingListener] follow-up POST failed", err)
+      })
+    }
+
+    window.addEventListener("message", handler)
+    return () => window.removeEventListener("message", handler)
+  }, [data])
+
+  return null
 }
 
 /**
