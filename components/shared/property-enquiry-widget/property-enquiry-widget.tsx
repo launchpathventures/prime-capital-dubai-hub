@@ -1,26 +1,32 @@
 /**
  * CATALYST - Property Enquiry Widget
  *
- * Inline iframe embed of the AgentCRM enquiry widget. Replaces the previous
- * "/contact" CTA on PDPs — the CRM is the source of truth for property leads.
+ * Inline iframe embed of the AgentCRM enquiry widget on PDPs.
  *
- * - Wrapped in a card shell (matches the sibling Property Details card so the
- *   widget reads as part of the sidebar, not a raw iframe stuck on the page).
- * - 700px initial height covers both the compact card (~460) and the expanded
- *   chat/form state (~640) without clipping if the widget never sends a resize
- *   message (or sends it late).
- * - Skeleton overlay sits on top of the blank iframe during the CRM page's
- *   network load, fading out once the widget posts `widget.ready`.
- * - Resizes via postMessage (transition: height 220ms). The handler trusts
- *   whatever height the widget reports above a sanity floor — anything below
- *   that is a glitch (the widget emits height: 0 during state transitions,
- *   which would otherwise visually collapse the iframe to a strip).
- * - Forwards UTM params from the page URL when mounted.
- * - Listens for widget.enquiry.submitted to fire GA4 `generate_lead`.
+ * Sizing strategy (per Steven Leckie's working integration):
+ * - Initial height intentionally BELOW the widget's natural compact-card
+ *   height (~340-460). Means widget.resize always animates upward, reading
+ *   as the widget settling rather than collapsing.
+ * - Resize handler does an imperative DOM write via ref — routing every
+ *   widget.resize through React state causes reconciliation churn that
+ *   visibly stutters the height transition during chat streaming.
+ * - Defensive height extraction: the widget contract is
+ *   { type: "widget.resize", payload: { height } } but real payloads drift,
+ *   so we accept payload.height/contentHeight/scrollHeight, top-level height,
+ *   and string forms ("640px").
+ * - MAX_HEIGHT_PX caps a malformed payload from blowing the iframe off-screen.
  *
- * Mounts client-side so we can read UTM params from window.location.search.
- * Renders a same-height skeleton during SSR / before hydration to avoid layout
- * shift.
+ * Skeleton:
+ * - Sits stacked over the iframe in the same wrapper.
+ * - Cross-fade via opacity. iframe stays mounted at all times so postMessage
+ *   keeps working underneath.
+ * - isReady flips on the FIRST of: widget.ready, any widget.resize (proves
+ *   the widget has painted), iframe onLoad (extension-blocked postMessage
+ *   safety net), 8s setTimeout (network hang).
+ *
+ * Origin allowlist: explicit Set, no wildcards. Add new origins here AND in
+ * next.config.ts's CSP frame-src or the iframe loads but resize messages
+ * get dropped at the origin check.
  */
 
 "use client"
@@ -44,30 +50,33 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
-/**
- * 700px is roomy enough for the chat/form state (~640) without clipping if
- * the widget never sends a resize message; the resize handler can shrink it
- * back to the compact card height (~460) once the widget reports its actual
- * size.
- */
-const INITIAL_HEIGHT = 700
+/** Below the widget's observed compact-card floor so resize animates upward. */
+const INITIAL_HEIGHT_PX = 320
+
+/** Defensive cap so a malformed payload can't blow the iframe off-screen. */
+const MAX_HEIGHT_PX = 2000
+
+/** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
+const READY_FALLBACK_MS = 8000
 
 /**
- * Sanity floor for postMessage resize messages. Anything below this is a
- * glitch (the widget emits height: 0 mid-transition); honour everything else.
+ * Explicit allowlist — no wildcards. Add new origins here AND in
+ * next.config.ts CSP frame-src or messages get dropped silently.
  */
-const SANITY_MIN_HEIGHT = 200
+const ALLOWED_ORIGINS: ReadonlySet<string> = new Set([getCrmOrigin()])
 
 interface WidgetMessage {
   type?: string
   payload?: {
-    height?: number
+    height?: number | string
+    contentHeight?: number | string
+    scrollHeight?: number | string
     leadUuid?: string
     contactId?: string
     propertyRef?: string
-    event?: string
-    properties?: Record<string, unknown>
+    [k: string]: unknown
   }
+  height?: number | string
 }
 
 declare global {
@@ -75,6 +84,36 @@ declare global {
     dataLayer?: Array<Record<string, unknown>>
     gtag?: (...args: unknown[]) => void
   }
+}
+
+function parsePixelValue(v: unknown): number | null {
+  if (typeof v === "number" && Number.isFinite(v)) return v
+  if (typeof v === "string") {
+    const m = v.match(/^(\d+(?:\.\d+)?)/)
+    if (m) {
+      const n = Number(m[1])
+      return Number.isFinite(n) ? n : null
+    }
+  }
+  return null
+}
+
+/**
+ * Real widgets drift. Try documented payload.height first, fall back through
+ * common alternates, finally accept top-level height / string forms.
+ */
+function extractResizeHeight(data: WidgetMessage): number | null {
+  const candidates: unknown[] = [
+    data.payload?.height,
+    data.payload?.contentHeight,
+    data.payload?.scrollHeight,
+    data.height,
+  ]
+  for (const c of candidates) {
+    const n = parsePixelValue(c)
+    if (n !== null) return n
+  }
+  return null
 }
 
 function readAttributionParams(): Pick<
@@ -97,9 +136,9 @@ function fireAnalyticsLead(payload: WidgetMessage["payload"]): void {
   if (typeof window === "undefined") return
   const eventPayload = {
     event: "generate_lead",
-    lead_id: payload?.leadUuid ?? null,
-    contact_id: payload?.contactId ?? null,
-    property_ref: payload?.propertyRef ?? null,
+    lead_id: (payload?.leadUuid as string | undefined) ?? null,
+    contact_id: (payload?.contactId as string | undefined) ?? null,
+    property_ref: (payload?.propertyRef as string | undefined) ?? null,
   }
   window.dataLayer = window.dataLayer ?? []
   window.dataLayer.push(eventPayload)
@@ -116,12 +155,11 @@ export function PropertyEnquiryWidget({
   title = "Enquire about this property",
 }: PropertyEnquiryWidgetProps) {
   const [src, setSrc] = useState<string | null>(null)
-  const [ready, setReady] = useState(false)
+  const [isReady, setIsReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   // Build the iframe URL on mount so we can fold in UTM params from
   // window.location.search before the iframe loads (single load, no flash).
-  // Server returns null (skeleton); client computes the full URL once.
   useEffect(() => {
     const params: WidgetUrlParams = {
       property: slug,
@@ -131,34 +169,36 @@ export function PropertyEnquiryWidget({
       ...readAttributionParams(),
       ...(prefill ?? {}),
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- defer-mount pattern: read window once on the client.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- defer-mount: read window once on the client.
     setSrc(buildWidgetUrl(params))
   }, [slug, propertyName, propertyUrl, prefill])
 
-  // postMessage bridge: resize + ready + analytics. Always validate event.origin.
+  // postMessage bridge: resize + ready + analytics. Always validate origin.
+  // setIsReady(true) is idempotent, so calling it on every relevant event
+  // is fine (React bails on same-value setState).
   useEffect(() => {
-    const expectedOrigin = getCrmOrigin()
     function handler(event: MessageEvent<WidgetMessage>) {
-      if (event.origin !== expectedOrigin) return
+      if (!ALLOWED_ORIGINS.has(event.origin)) return
       const data = event.data
       if (!data || typeof data.type !== "string") return
       if (!data.type.startsWith("widget.")) return
 
+      if (process.env.NODE_ENV !== "production") {
+        // Protocol-drift visibility — strip if tracing a noisy flow.
+        console.debug("[widget]", data.type, data)
+      }
+
       switch (data.type) {
         case "widget.ready": {
-          setReady(true)
+          setIsReady(true)
           break
         }
         case "widget.resize": {
+          setIsReady(true)
           const iframe = iframeRef.current
-          const height = data.payload?.height
-          if (
-            iframe &&
-            typeof height === "number" &&
-            Number.isFinite(height) &&
-            height >= SANITY_MIN_HEIGHT
-          ) {
-            iframe.style.height = `${Math.ceil(height)}px`
+          const h = extractResizeHeight(data)
+          if (iframe && h !== null) {
+            iframe.style.height = `${Math.min(Math.ceil(h), MAX_HEIGHT_PX)}px`
           }
           break
         }
@@ -172,12 +212,21 @@ export function PropertyEnquiryWidget({
     }
 
     window.addEventListener("message", handler)
-    return () => window.removeEventListener("message", handler)
+
+    // Final safety net: if neither widget.ready, widget.resize, nor onLoad
+    // fire within 8s (extension-blocked postMessage / hung CRM), drop the
+    // skeleton anyway so we never get a stuck shimmer.
+    const fallback = window.setTimeout(() => setIsReady(true), READY_FALLBACK_MS)
+
+    return () => {
+      window.removeEventListener("message", handler)
+      window.clearTimeout(fallback)
+    }
   }, [])
 
   return (
     <div className="property-enquiry-widget" data-slot="property-enquiry-widget">
-      <div className="property-enquiry-widget__shell" style={{ minHeight: INITIAL_HEIGHT }}>
+      <div className="property-enquiry-widget__frame">
         {src ? (
           <iframe
             ref={iframeRef}
@@ -185,42 +234,35 @@ export function PropertyEnquiryWidget({
             src={src}
             title={title}
             width="100%"
-            height={INITIAL_HEIGHT}
+            height={INITIAL_HEIGHT_PX}
             className="property-enquiry-widget__iframe"
+            data-ready={isReady ? "true" : "false"}
             loading="lazy"
+            onLoad={() => setIsReady(true)}
           />
         ) : null}
-        {!ready && <WidgetSkeleton />}
-      </div>
-    </div>
-  )
-}
-
-/**
- * Skeleton matches the compact-card layout the widget settles into so the
- * transition from skeleton → live widget reads as content arriving rather
- * than a layout shift.
- */
-function WidgetSkeleton() {
-  return (
-    <div
-      className="property-enquiry-widget__skeleton"
-      role="status"
-      aria-label="Loading enquiry widget"
-    >
-      <div className="property-enquiry-widget__skeleton-row">
-        <div className="property-enquiry-widget__skeleton-avatar" />
-        <div className="property-enquiry-widget__skeleton-stack">
-          <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--title" />
-          <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--subtitle" />
+        <div
+          className="property-enquiry-widget__skeleton"
+          data-visible={isReady ? "false" : "true"}
+          aria-hidden={isReady}
+          style={{ height: INITIAL_HEIGHT_PX }}
+          role="status"
+          aria-label="Loading enquiry widget"
+        >
+          <div className="property-enquiry-widget__skeleton-row">
+            <div className="property-enquiry-widget__skeleton-avatar" />
+            <div className="property-enquiry-widget__skeleton-stack">
+              <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--title" />
+              <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--subtitle" />
+            </div>
+          </div>
+          <div className="property-enquiry-widget__skeleton-divider" />
+          <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--full" />
+          <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--full" />
+          <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--short" />
+          <div className="property-enquiry-widget__skeleton-button" />
         </div>
       </div>
-      <div className="property-enquiry-widget__skeleton-divider" />
-      <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--full" />
-      <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--full" />
-      <div className="property-enquiry-widget__skeleton-line property-enquiry-widget__skeleton-line--short" />
-      <div className="property-enquiry-widget__skeleton-divider" />
-      <div className="property-enquiry-widget__skeleton-button" />
     </div>
   )
 }

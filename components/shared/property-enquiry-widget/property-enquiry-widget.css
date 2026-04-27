@@ -1,37 +1,41 @@
 /**
  * CATALYST - Property Enquiry Widget styles
  *
- * The shell wraps the iframe in a card that visually frames it as part of the
- * sidebar. The skeleton sits absolutely positioned over the iframe, hidden
- * once the widget posts widget.ready.
- *
- * `transition: height 220ms ease` is required — without it the resize is
- * jarring.
+ * Sizing rules per the Steven Leckie integration:
+ * - The transition lives ON THE IFRAME directly. Don't add a height transition
+ *   to the wrapper or you get double-animation jitter.
+ * - max-width: 480 on the frame — widget is a card, not a page section.
+ * - Skeleton sits absolutely positioned over the iframe; cross-fade via
+ *   opacity so the iframe stays mounted (postMessage keeps working underneath).
  */
 
 .property-enquiry-widget {
   width: 100%;
 }
 
-.property-enquiry-widget__shell {
+.property-enquiry-widget__frame {
   position: relative;
   width: 100%;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  max-width: 480px;
 }
 
 .property-enquiry-widget__iframe {
   display: block;
   width: 100%;
   border: 0;
-  background-color: transparent;
-  transition: height 220ms ease;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: height 220ms ease, opacity 200ms ease;
   color-scheme: normal;
+  opacity: 1;
 }
 
-/* Loading skeleton — stacked over the iframe until widget.ready fires */
+.property-enquiry-widget__iframe[data-ready="false"] {
+  opacity: 0;
+}
+
+/* Skeleton overlay — same card shape; cross-fades out when isReady flips */
 .property-enquiry-widget__skeleton {
   position: absolute;
   inset: 0;
@@ -40,8 +44,16 @@
   gap: 0.75rem;
   padding: 1.25rem;
   background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: opacity 200ms ease;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.property-enquiry-widget__skeleton[data-visible="false"] {
+  opacity: 0;
   pointer-events: none;
-  animation: property-enquiry-widget-fade-in 200ms ease;
 }
 
 .property-enquiry-widget__skeleton-row {
@@ -135,9 +147,4 @@
 @keyframes property-enquiry-widget-shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
-}
-
-@keyframes property-enquiry-widget-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
