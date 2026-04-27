@@ -638,6 +638,20 @@
   margin-bottom: 0.625rem;
 }
 
+.lead-form__section-optional {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 300;
+  color: var(--lf-text-subtle);
+  margin-left: 0.4rem;
+}
+
+.lead-form__option--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* =============================================================================
    LOADING STATE
    ============================================================================= */
