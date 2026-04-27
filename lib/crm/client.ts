@@ -212,13 +212,21 @@ export async function getCrmProperties(
 /**
  * Fetch a single property by slug or UUID. Returns null on 404 / failure so
  * the PDP can fall back to notFound().
+ *
+ * The detail endpoint wraps the property in `{ data: ... }` (matching the list
+ * endpoint envelope), even though the published spec describes a flat shape.
+ * We unwrap defensively so either form works.
  */
 export async function getCrmPropertyBySlug(
   slugOrId: string,
   opts?: FetchOptions
 ): Promise<CrmPropertyFull | null> {
   if (!isCrmConfigured()) return null
-  const data = await crmFetch<CrmPropertyDetail>(buildDetailUrl(slugOrId), opts)
-  if (!data) return null
-  return mapDetail(data)
+  const response = await crmFetch<CrmDetailResponse>(buildDetailUrl(slugOrId), opts)
+  if (!response) return null
+  const row = "data" in response ? response.data : response
+  if (!row) return null
+  return mapDetail(row)
 }
+
+type CrmDetailResponse = CrmPropertyDetail | { data: CrmPropertyDetail }

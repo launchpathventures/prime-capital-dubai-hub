@@ -171,7 +171,7 @@ function PropertyCard({ property }: { property: CrmProperty }) {
           <div className="text-[var(--web-spruce)] text-[14px] font-light mb-4">
             {formatCrmBedrooms(property)}
             {property.bathrooms != null ? ` • ${property.bathrooms} Bath` : ""}
-            {property.sqft != null ? ` • ${property.sqft.toLocaleString("en-AE")} sqft` : ""}
+            {property.sqft != null && property.sqft > 0 ? ` • ${property.sqft.toLocaleString("en-AE")} sqft` : ""}
           </div>
 
           <div className="flex items-center justify-between">

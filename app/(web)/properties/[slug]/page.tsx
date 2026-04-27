@@ -225,7 +225,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {property.sqft != null && (
+            {property.sqft != null && property.sqft > 0 && (
               <div className="text-center">
                 <RulerIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
                 <div className="font-headline text-[var(--web-off-white)] text-xl">
@@ -330,7 +330,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                             <td className="px-4 py-3 font-medium text-[var(--web-ash)]">{unit.name}</td>
                             <td className="px-4 py-3">{unit.bedrooms ?? "—"}</td>
                             <td className="px-4 py-3">
-                              {unit.size_sqft != null
+                              {unit.size_sqft != null && unit.size_sqft > 0
                                 ? `${unit.size_sqft.toLocaleString("en-AE")} sqft`
                                 : "—"}
                             </td>
