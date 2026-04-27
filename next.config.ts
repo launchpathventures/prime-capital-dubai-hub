@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
         hostname: "vhgtbeimnkitqgekvtrz.supabase.co",
       },
       {
+        // AgentCRM property-images bucket (CRM is the source of truth)
+        protocol: "https",
+        hostname: "uozpalmasfxjsxhfyghn.supabase.co",
+      },
+      {
         protocol: "https",
         hostname: "pplx-res.cloudinary.com",
       },
@@ -75,7 +80,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://assets.calendly.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://pplx-res.cloudinary.com https://static.propsearch.ae https://skyviewdubai.com; font-src 'self'; media-src 'self' https://vhgtbeimnkitqgekvtrz.supabase.co; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src https://calendly.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://assets.calendly.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://uozpalmasfxjsxhfyghn.supabase.co https://api.mapbox.com https://pplx-res.cloudinary.com https://static.propsearch.ae https://skyviewdubai.com; font-src 'self'; media-src 'self' https://vhgtbeimnkitqgekvtrz.supabase.co; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com; frame-src https://calendly.com https://crm.primecapitaldubai.com;",
           },
         ],
       },
