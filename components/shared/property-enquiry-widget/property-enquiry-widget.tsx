@@ -69,16 +69,12 @@ const MAX_HEIGHT_PX = 2000
 /** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
 const READY_FALLBACK_MS = 8000
 
-/**
- * The widget posts heights around 340-460 for its compact card and around
- * 600+ for chat/form. When it crosses CHAT_THRESHOLD_PX, the user has
- * opened the chat — give it CHAT_ROOMY_HEIGHT_PX so multiple lines of
- * conversation are visible without falling back on the chat's internal
- * scroll. The widget's chat container has `flex: 1` inside a flex-column
- * root, so giving it more iframe room translates to a taller chat surface.
- */
-const CHAT_THRESHOLD_PX = 500
-const CHAT_ROOMY_HEIGHT_PX = 760
+// NOTE: We previously tried to boost iframe height to a "roomy" value when
+// the widget opened chat. It doesn't work — the CRM widget hardcodes its
+// chat surface to `height: 640px` (inline style on the chat view's outer
+// div). Growing the iframe beyond that just adds dead space below the
+// widget. To give visitors more chat room, the CRM team needs to remove
+// that fixed height or expose it as a config.
 
 /**
  * Explicit allowlist — no wildcards. Add new origins here AND in
@@ -221,13 +217,7 @@ export function PropertyEnquiryWidget({
           const iframe = iframeRef.current
           const h = extractResizeHeight(data)
           if (iframe && h !== null) {
-            let target = Math.min(Math.ceil(h), MAX_HEIGHT_PX)
-            // When the widget transitions to chat (height crosses the
-            // compact/chat threshold), give it a roomy target so the chat
-            // surface has visible breathing room.
-            if (target >= CHAT_THRESHOLD_PX) {
-              target = Math.max(target, CHAT_ROOMY_HEIGHT_PX)
-            }
+            const target = Math.min(Math.ceil(h), MAX_HEIGHT_PX)
             // Only-grow: the widget's ResizeObserver reports contentRect
             // (content box, not border box) which can transiently shrink
             // during state transitions while the rendered element stays
