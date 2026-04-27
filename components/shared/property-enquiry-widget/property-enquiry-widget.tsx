@@ -5,10 +5,12 @@
  * "/contact" CTA on PDPs — the CRM is the source of truth for property leads.
  *
  * - Compact proposal card by default; expands to chat/form on click.
- * - 540px initial height; resizes via postMessage (transition: height 220ms).
- *   Resize floor clamps to the initial height — the widget occasionally posts
- *   transient sub-compact heights mid-animation that would visually collapse
- *   the iframe.
+ * - 480px initial — close to the widget's natural compact-card height so we
+ *   don't ship dead space below the CTA before the first resize message.
+ * - Resizes via postMessage (transition: height 220ms). The handler trusts
+ *   whatever height the widget reports above a sanity floor — anything below
+ *   that is a glitch (the widget occasionally emits height: 0 during state
+ *   transitions, which would visually collapse the iframe to a strip).
  * - Forwards UTM params from the page URL when mounted.
  * - Listens for widget.enquiry.submitted to fire GA4 `generate_lead`.
  *
@@ -38,9 +40,12 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
-const INITIAL_HEIGHT = 540
-/** Resize floor — never let the iframe shrink below the compact-card height. */
-const MIN_HEIGHT = INITIAL_HEIGHT
+const INITIAL_HEIGHT = 480
+/**
+ * Sanity floor for postMessage resize messages. Anything below this is a
+ * glitch (the widget emits height: 0 mid-transition); honour everything else.
+ */
+const SANITY_MIN_HEIGHT = 200
 
 interface WidgetMessage {
   type?: string
@@ -131,8 +136,13 @@ export function PropertyEnquiryWidget({
         case "widget.resize": {
           const iframe = iframeRef.current
           const height = data.payload?.height
-          if (iframe && typeof height === "number" && Number.isFinite(height)) {
-            iframe.style.height = `${Math.max(MIN_HEIGHT, Math.ceil(height))}px`
+          if (
+            iframe &&
+            typeof height === "number" &&
+            Number.isFinite(height) &&
+            height >= SANITY_MIN_HEIGHT
+          ) {
+            iframe.style.height = `${Math.ceil(height)}px`
           }
           break
         }
