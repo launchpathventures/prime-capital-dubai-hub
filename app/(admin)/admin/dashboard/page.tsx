@@ -57,7 +57,7 @@ export default async function DashboardPage() {
           <ContentCard
             title="Properties"
             count={properties.length}
-            href="/admin/properties"
+            href={`${config.crm.baseUrl}/app/properties`}
             icon={BuildingIcon}
             enabled={config.features.properties}
           />
@@ -93,14 +93,20 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <Stack gap="sm">
-                <Button 
-                  variant="outline" 
-                  className="justify-start w-full" 
-                  render={<Link href="/admin/properties" />}
+                <Button
+                  variant="outline"
+                  className="justify-start w-full"
+                  render={
+                    <a
+                      href={`${config.crm.baseUrl}/app/properties`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
                 >
                   <BuildingIcon className="h-4 w-4" />
-                  Manage Properties
-                  <ArrowRightIcon className="h-4 w-4 ml-auto" />
+                  Manage Properties (CRM)
+                  <ExternalLinkIcon className="h-4 w-4 ml-auto" />
                 </Button>
                 <Button 
                   variant="outline" 
@@ -171,12 +177,19 @@ export default async function DashboardPage() {
                   <CardTitle>Recent Properties</CardTitle>
                   <CardDescription>Latest property listings</CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
-                  render={<Link href="/admin/properties" />}
+                  render={
+                    <a
+                      href={`${config.crm.baseUrl}/app/properties`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />
+                  }
                 >
                   View All
+                  <ExternalLinkIcon className="h-3.5 w-3.5 ml-1" />
                 </Button>
               </Row>
             </CardHeader>
@@ -237,29 +250,38 @@ function ContentCard({
   icon: React.ElementType
   enabled: boolean
 }) {
-  return (
-    <Link href={href}>
-      <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
-          <Icon className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <Row justify="between" align="end">
-            <div className="text-2xl font-bold">{count}</div>
-            {!enabled && (
-              <Badge variant="secondary" className="text-xs">
-                <EyeOffIcon className="h-3 w-3 mr-1" />
-                Hidden
-              </Badge>
-            )}
-          </Row>
-        </CardContent>
-      </Card>
-    </Link>
+  const isExternal = /^https?:\/\//.test(href)
+  const card = (
+    <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground inline-flex items-center gap-1.5">
+          {title}
+          {isExternal && <ExternalLinkIcon className="h-3 w-3 opacity-60" />}
+        </CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <Row justify="between" align="end">
+          <div className="text-2xl font-bold">{count}</div>
+          {!enabled && (
+            <Badge variant="secondary" className="text-xs">
+              <EyeOffIcon className="h-3 w-3 mr-1" />
+              Hidden
+            </Badge>
+          )}
+        </Row>
+      </CardContent>
+    </Card>
   )
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {card}
+      </a>
+    )
+  }
+  return <Link href={href}>{card}</Link>
 }
 
 function FeatureStatus({

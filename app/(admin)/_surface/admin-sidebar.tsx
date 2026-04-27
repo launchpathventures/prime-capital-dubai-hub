@@ -23,6 +23,8 @@ import {
   VideoIcon,
 } from "lucide-react"
 
+import { config } from "@/lib/config"
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -86,15 +88,17 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
       <div className="admin-sidebar__section">
         <div className="admin-sidebar__heading">Website Content</div>
         <nav className="admin-sidebar__nav-list">
-          <Link
-            href="/admin/properties"
-            className="admin-sidebar__nav-item"
-            data-active={isActive("/admin/properties")}
+          <a
+            href={`${config.crm.baseUrl}/app/properties`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-sidebar__nav-item admin-sidebar__nav-item--external"
             onClick={onNavigate}
           >
             <BuildingIcon className="admin-sidebar__nav-icon" />
             <span>Properties</span>
-          </Link>
+            <ExternalLinkIcon className="admin-sidebar__external-icon" />
+          </a>
           <Link
             href="/admin/testimonials"
             className="admin-sidebar__nav-item"
