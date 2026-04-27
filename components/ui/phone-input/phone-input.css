@@ -1,0 +1,98 @@
+/**
+ * CATALYST - Phone Input Styles
+ *
+ * Wraps react-phone-number-input so the country picker + tel field render
+ * as a single bordered control matching .lead-form__input.
+ */
+
+.ui-phone-input {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  background: var(--lf-input-bg, #fff);
+  border: 1px solid var(--lf-border, rgba(87, 108, 117, 0.2));
+  border-radius: 2px;
+  transition: border-color 150ms cubic-bezier(0, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.ui-phone-input:focus-within {
+  border-color: var(--lf-accent, #576C75);
+}
+
+.ui-phone-input--error {
+  border-color: #c62828;
+}
+
+/* Country picker (flag + dial code) */
+.ui-phone-input .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.625rem 0 0.875rem;
+  border-right: 1px solid var(--lf-border, rgba(87, 108, 117, 0.2));
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.ui-phone-input .PhoneInputCountrySelect {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: 0;
+  z-index: 1;
+}
+
+.ui-phone-input .PhoneInputCountrySelect:focus-visible + .PhoneInputCountryIcon {
+  outline: 2px solid var(--lf-accent, #576C75);
+  outline-offset: 2px;
+}
+
+.ui-phone-input .PhoneInputCountryIcon {
+  width: 1.25em;
+  height: 1.25em;
+  box-shadow: none;
+  background: transparent;
+}
+
+.ui-phone-input .PhoneInputCountryIcon--border {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.ui-phone-input .PhoneInputCountrySelectArrow {
+  display: block;
+  content: "";
+  width: 0.35em;
+  height: 0.35em;
+  margin-left: 0.1em;
+  border-style: solid;
+  border-color: var(--lf-text-muted, #576C75);
+  border-top-width: 0;
+  border-bottom-width: 1px;
+  border-left-width: 0;
+  border-right-width: 1px;
+  transform: rotate(45deg);
+  opacity: 0.7;
+}
+
+/* Inner phone input */
+.ui-phone-input .PhoneInputInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  font-size: var(--lf-font-body, 14px);
+  color: var(--lf-text, #3F4142);
+  background: transparent;
+  border: 0;
+  outline: none;
+  font-family: inherit;
+}
+
+.ui-phone-input .PhoneInputInput::placeholder {
+  color: var(--lf-text-subtle, #A6B5B0);
+  font-weight: 300;
+}

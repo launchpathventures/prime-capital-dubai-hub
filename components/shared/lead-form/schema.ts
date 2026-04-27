@@ -14,28 +14,26 @@ export const leadGoalSchema = z.enum([
   "invest-offplan",
   "buy-ready",
   "sell",
-  "build",
   "build-wealth",
+  "golden-visa",
   "advice-only",
 ])
 
 export const investTimelineSchema = z.enum([
-  "now",
   "immediate",
-  "short-term",
-  "mid-term",
-  "long-term",
-  "undecided",
+  "3_6_months",
+  "6_12_months",
+  "12_24_months",
+  "24_plus_months",
+  "flexible",
 ])
 
 export const budgetRangeSchema = z.enum([
   "under-1m",
   "1m-3m",
-  "3m-6m",
-  "6m-10m",
-  "10m-15m",
-  "15m-20m",
-  "20m-50m",
+  "3m-5m",
+  "5m-10m",
+  "10m-20m",
   "50m-plus",
 ])
 
@@ -44,11 +42,24 @@ export const propertyTypeSchema = z.enum([
   "villa",
   "townhouse",
   "penthouse",
+  "studio",
+  "duplex",
   "land",
   "commercial",
+  "office",
 ])
 
-export const formModeSchema = z.enum(["contact", "landing", "download", "private", "property-enquiry", "event"])
+export const formModeSchema = z.enum([
+  "contact",
+  "landing",
+  "download",
+  "private",
+  "property-enquiry",
+  "newsletter",
+  "event",
+])
+
+export const visitorTypeSchema = z.enum(["investor", "agent", "vendor"])
 
 // =============================================================================
 // STEP SCHEMAS
@@ -65,15 +76,15 @@ export const nameStepSchema = z.object({
     .max(50, "Last name must be less than 50 characters"),
 })
 
+// E.164: starts with +, country code 1-9, then 7-14 digits.
+// Must include country code so AgentCRM can dedup against existing contacts.
+const e164Regex = /^\+[1-9]\d{6,14}$/
+
 export const contactStepSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   whatsapp: z
     .string()
-    .min(8, "Please enter a valid phone number")
-    .regex(
-      /^\+?[0-9\s\-()]+$/,
-      "Please enter a valid phone number"
-    ),
+    .regex(e164Regex, "Please enter a valid phone number including country code"),
 })
 
 export const goalsStepSchema = z.object({
@@ -107,7 +118,7 @@ export const questionsStepSchema = z.object({
 
 // Private mode enums
 export const privateRoleSchema = z.enum(["investor", "advisor", "family-office"])
-export const deploymentRangeSchema = z.enum(["5m-10m", "10m-20m", "20m-50m", "50m-plus"])
+export const deploymentRangeSchema = z.enum(["5m-10m", "10m-20m", "50m-plus"])
 export const preferredContactSchema = z.enum(["phone", "email", "whatsapp"])
 
 export const privateContextStepSchema = z.object({
@@ -140,7 +151,7 @@ const baseSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
-  whatsapp: z.string().min(8),
+  whatsapp: z.string().regex(e164Regex),
   formMode: formModeSchema,
   submittedAt: z.string(),
   pageUrl: z.string(),
@@ -165,17 +176,20 @@ export const eventFormSchema = baseSchema
 // Contact mode: Full qualification
 export const contactFormSchema = baseSchema.extend({
   goals: z.array(leadGoalSchema).min(1),
-  
+
   // Buyer fields (optional - conditional)
   investTimeline: investTimelineSchema.optional(),
   budget: budgetRangeSchema.optional(),
-  
+  propertyTypes: z.array(propertyTypeSchema).max(9).optional(),
+  locations: z.array(z.string().max(100)).max(5).optional(),
+  bedrooms: z.number().int().min(0).max(20).optional(),
+
   // Seller fields (optional - conditional)
   propertyLocation: z.string().optional(),
   propertyType: propertyTypeSchema.optional(),
   saleTimeline: investTimelineSchema.optional(),
   targetPrice: budgetRangeSchema.optional(),
-  
+
   // Questions
   hasQuestions: z.boolean().optional(),
   questionsText: z.string().optional(),
@@ -196,6 +210,9 @@ export const propertyEnquiryFormSchema = baseSchema.extend({
   // Buyer fields (optional - conditional)
   investTimeline: investTimelineSchema.optional(),
   budget: budgetRangeSchema.optional(),
+  propertyTypes: z.array(propertyTypeSchema).max(9).optional(),
+  locations: z.array(z.string().max(100)).max(5).optional(),
+  bedrooms: z.number().int().min(0).max(20).optional(),
 
   // Seller fields (optional - conditional)
   propertyLocation: z.string().optional(),
@@ -235,7 +252,7 @@ export const returningLeadFormSchema = z.object({
 // DYNAMIC SCHEMA SELECTOR
 // =============================================================================
 
-export function getFormSchema(mode: "contact" | "landing" | "download" | "private" | "property-enquiry" | "event") {
+export function getFormSchema(mode: "contact" | "landing" | "download" | "private" | "property-enquiry" | "newsletter" | "event") {
   switch (mode) {
     case "contact":
       return contactFormSchema
@@ -247,6 +264,8 @@ export function getFormSchema(mode: "contact" | "landing" | "download" | "privat
       return privateFormSchema
     case "property-enquiry":
       return propertyEnquiryFormSchema
+    case "newsletter":
+      return baseSchema
     case "event":
       return eventFormSchema
     default:

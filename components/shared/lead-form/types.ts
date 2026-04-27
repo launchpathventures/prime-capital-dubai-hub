@@ -8,32 +8,34 @@
 // ENUM TYPES
 // =============================================================================
 
+// Canonical enums — match AgentCRM expected values exactly.
+// Anything outside these lists is stored as opaque metadata, not used
+// for scoring/routing.
+
 export type LeadGoal =
   | "invest-offplan"
   | "buy-ready"
   | "sell"
-  | "build"
   | "build-wealth"
+  | "golden-visa"
   | "advice-only"
 
 export type InvestTimeline =
-  | "now" // Within a month
-  | "immediate" // Within 3 months
-  | "short-term" // 3-6 months
-  | "mid-term" // 6-12 months
-  | "long-term" // 1-2 years
-  | "undecided"
+  | "immediate"
+  | "3_6_months"
+  | "6_12_months"
+  | "12_24_months"
+  | "24_plus_months"
+  | "flexible"
 
 export type SaleTimeline = InvestTimeline
 
 export type BudgetRange =
   | "under-1m"
   | "1m-3m"
-  | "3m-6m"
-  | "6m-10m"
-  | "10m-15m"
-  | "15m-20m"
-  | "20m-50m"
+  | "3m-5m"
+  | "5m-10m"
+  | "10m-20m"
   | "50m-plus"
 
 export type PriceRange = BudgetRange
@@ -43,20 +45,32 @@ export type PropertyType =
   | "villa"
   | "townhouse"
   | "penthouse"
+  | "studio"
+  | "duplex"
   | "land"
   | "commercial"
+  | "office"
 
 export type PrivateRole = "investor" | "advisor" | "family-office"
 
-export type DeploymentRange =
-  | "5m-10m"
-  | "10m-20m"
-  | "20m-50m"
-  | "50m-plus"
+// Deployment is a subset of BudgetRange (UHNW = 5m+).
+export type DeploymentRange = "5m-10m" | "10m-20m" | "50m-plus"
 
 export type PreferredContact = "phone" | "email" | "whatsapp"
 
-export type FormMode = "contact" | "landing" | "download" | "private" | "property-enquiry" | "event"
+// Internal modes. `event` is internal-only; mapped to `contact` when sent
+// to AgentCRM (event name carried in formName + leadMagnet).
+export type FormMode =
+  | "contact"
+  | "landing"
+  | "download"
+  | "private"
+  | "property-enquiry"
+  | "newsletter"
+  | "event"
+
+// Pipeline router (CRM uses to assign leads). Default is investor.
+export type VisitorType = "investor" | "agent" | "vendor"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================
@@ -78,6 +92,10 @@ export interface LeadFormData {
   // Step 4a: Timeline & Budget (for buyers/investors)
   investTimeline?: InvestTimeline
   budget?: BudgetRange
+  // Buyer multi-select qualification (serious investor flow)
+  propertyTypes?: PropertyType[]
+  locations?: string[]
+  bedrooms?: number
 
   // Step 4b: Property Details (for sellers)
   propertyName?: string
@@ -105,8 +123,12 @@ export interface LeadFormData {
   preferredContact?: PreferredContact
   privateContext?: string
 
-  // Tagging (set by parent component)
-  leadTag?: string
+  // Lead magnet / tagging
+  leadMagnet?: string  // e.g. "Dubai Off-Plan Guide 2026"
+  leadTag?: string     // e.g. "distressed", "livestream-q2-2026"
+
+  // Pipeline router
+  visitorType?: VisitorType
 
   // Meta (auto-captured)
   formMode: FormMode
@@ -119,6 +141,33 @@ export interface LeadFormData {
   manychat?: string
   submittedAt: string
   pageUrl: string
+
+  // First-touch attribution (set from 30-day cookie if present)
+  firstTouchUtmSource?: string
+  firstTouchUtmMedium?: string
+  firstTouchUtmCampaign?: string
+  firstTouchUtmContent?: string
+  firstTouchUtmTerm?: string
+  firstTouchReferrer?: string
+  firstTouchLandingPage?: string
+  firstTouchAt?: string
+  referrer?: string  // last-touch referrer
+
+  // Idempotency + journey
+  submissionId?: string
+  sessionId?: string
+
+  // Calendly meeting metadata (post-booking follow-up payload)
+  scheduledMeeting?: boolean
+  meetingStartTime?: string
+  meetingEndTime?: string
+  meetingInviteeName?: string
+  meetingInviteeEmail?: string
+  meetingEventType?: string
+  meetingEventUri?: string
+  meetingInviteeUri?: string
+  meetingRescheduleUrl?: string
+  meetingCancelUrl?: string
 
   // Context from referring pages
   referringProperty?: string         // Property slug from query param
@@ -220,28 +269,26 @@ export const GOAL_OPTIONS: SelectOption<LeadGoal>[] = [
   { value: "invest-offplan", label: "Invest in off-plan property" },
   { value: "buy-ready", label: "Buy a move-in-ready property" },
   { value: "sell", label: "Sell a property" },
-  { value: "build", label: "Build a property" },
   { value: "build-wealth", label: "Build wealth through the property market" },
+  { value: "golden-visa", label: "Secure a Golden Visa through property" },
   { value: "advice-only", label: "I am only seeking advice at this time" },
 ]
 
 export const TIMELINE_OPTIONS: SelectOption<InvestTimeline>[] = [
-  { value: "now", label: "Now: within a month" },
-  { value: "immediate", label: "Immediate: within the next 3 months" },
-  { value: "short-term", label: "Short-term: within the next 3-6 months" },
-  { value: "mid-term", label: "Mid-term: within the next 6-12 months" },
-  { value: "long-term", label: "Long-term: within the next 1-2 years" },
-  { value: "undecided", label: "Undecided" },
+  { value: "immediate", label: "Immediate (next 3 months)" },
+  { value: "3_6_months", label: "3-6 months" },
+  { value: "6_12_months", label: "6-12 months" },
+  { value: "12_24_months", label: "1-2 years" },
+  { value: "24_plus_months", label: "2+ years" },
+  { value: "flexible", label: "Flexible / Undecided" },
 ]
 
 export const BUDGET_OPTIONS: SelectOption<BudgetRange>[] = [
   { value: "under-1m", label: "Less than AED 1 million" },
   { value: "1m-3m", label: "AED 1-3 million" },
-  { value: "3m-6m", label: "AED 3-6 million" },
-  { value: "6m-10m", label: "AED 6-10 million" },
-  { value: "10m-15m", label: "AED 10-15 million" },
-  { value: "15m-20m", label: "AED 15-20 million" },
-  { value: "20m-50m", label: "AED 20-50 million" },
+  { value: "3m-5m", label: "AED 3-5 million" },
+  { value: "5m-10m", label: "AED 5-10 million" },
+  { value: "10m-20m", label: "AED 10-20 million" },
   { value: "50m-plus", label: "AED 50+ million" },
 ]
 
@@ -250,8 +297,34 @@ export const PROPERTY_TYPE_OPTIONS: SelectOption<PropertyType>[] = [
   { value: "villa", label: "Villa" },
   { value: "townhouse", label: "Townhouse" },
   { value: "penthouse", label: "Penthouse" },
+  { value: "studio", label: "Studio" },
+  { value: "duplex", label: "Duplex" },
   { value: "land", label: "Land" },
   { value: "commercial", label: "Commercial" },
+  { value: "office", label: "Office" },
+]
+
+// Canonical Dubai location list (used by the buyer multi-select).
+// Match casing exactly — CRM uses these strings for filtering/segmentation.
+export const LOCATION_OPTIONS: SelectOption<string>[] = [
+  { value: "Downtown Dubai", label: "Downtown Dubai" },
+  { value: "Dubai Marina", label: "Dubai Marina" },
+  { value: "Palm Jumeirah", label: "Palm Jumeirah" },
+  { value: "Business Bay", label: "Business Bay" },
+  { value: "Dubai Hills Estate", label: "Dubai Hills Estate" },
+  { value: "JBR", label: "JBR" },
+  { value: "DIFC", label: "DIFC" },
+  { value: "Jumeirah Lakes Towers (JLT)", label: "Jumeirah Lakes Towers (JLT)" },
+  { value: "Arabian Ranches", label: "Arabian Ranches" },
+  { value: "Mohammed Bin Rashid City (MBR)", label: "Mohammed Bin Rashid City (MBR)" },
+  { value: "Emaar Beachfront", label: "Emaar Beachfront" },
+  { value: "Bluewaters Island", label: "Bluewaters Island" },
+  { value: "Dubai Creek Harbour", label: "Dubai Creek Harbour" },
+  { value: "Jumeirah Village Circle (JVC)", label: "Jumeirah Village Circle (JVC)" },
+  { value: "Tilal Al Ghaf", label: "Tilal Al Ghaf" },
+  { value: "Sobha Hartland", label: "Sobha Hartland" },
+  { value: "Damac Hills", label: "Damac Hills" },
+  { value: "Dubai South", label: "Dubai South" },
 ]
 
 export const PRIVATE_ROLE_OPTIONS: SelectOption<PrivateRole>[] = [
@@ -263,7 +336,6 @@ export const PRIVATE_ROLE_OPTIONS: SelectOption<PrivateRole>[] = [
 export const DEPLOYMENT_RANGE_OPTIONS: SelectOption<DeploymentRange>[] = [
   { value: "5m-10m", label: "AED 5–10 million" },
   { value: "10m-20m", label: "AED 10–20 million" },
-  { value: "20m-50m", label: "AED 20–50 million" },
   { value: "50m-plus", label: "AED 50 million +" },
 ]
 

@@ -9,6 +9,7 @@
 import { useState } from "react"
 import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { PhoneInput } from "@/components/ui/phone-input/phone-input"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
 import { contactStepSchema } from "../schema"
 
@@ -133,18 +134,16 @@ export function ContactStep({
 
         <div className="lead-form__field">
           <label htmlFor="whatsapp" className="lead-form__label">WhatsApp / Mobile</label>
-          <input
+          <PhoneInput
             id="whatsapp"
-            type="tel"
             value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="+971 50 123 4567"
-            aria-required="true"
+            onChange={(v) => setWhatsapp(v ?? "")}
+            placeholder="50 123 4567"
+            aria-required
             aria-invalid={!!errors.whatsapp}
             aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
-            className={cn("lead-form__input", errors.whatsapp && "lead-form__input--error")}
+            error={!!errors.whatsapp}
             autoComplete="tel"
-            inputMode="tel"
           />
           {errors.whatsapp && (
             <span id="whatsapp-error" role="alert" className="lead-form__error">{errors.whatsapp}</span>

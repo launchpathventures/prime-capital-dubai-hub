@@ -32,7 +32,14 @@ const STEPS: StepDef[] = [
     condition: (data) => {
       // In property-enquiry mode, always show (no goals gating)
       if (data.formMode === "property-enquiry") return true
-      const buyerGoals: LeadGoal[] = ["invest-offplan", "buy-ready", "build", "build-wealth"]
+      // Buyer-side goals (everything except "sell" and "advice-only") gate
+      // the timeline + budget step.
+      const buyerGoals: LeadGoal[] = [
+        "invest-offplan",
+        "buy-ready",
+        "build-wealth",
+        "golden-visa",
+      ]
       return data.goals?.some((g) => buyerGoals.includes(g)) ?? false
     },
   },
