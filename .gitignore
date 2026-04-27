@@ -45,3 +45,6 @@ next-env.d.ts
 /REF
 package-lock.json
 .env*.local
+
+# supabase CLI local state (auto-generated, don't track)
+supabase/.temp/
