@@ -96,6 +96,12 @@ export function SuccessStep({
         return "We've received your enquiry. A member of our team will reach out within one business day."
       case "event":
         return "You're registered. Check your email and WhatsApp for the confirmation and live link."
+      case "newsletter":
+        return "You're subscribed. Look out for our next briefing."
+      case "property-enquiry":
+        return "Thanks — your property enquiry is in. A specialist will be in touch shortly."
+      default:
+        return "Thanks — we'll be in touch shortly."
     }
   }
 
@@ -156,6 +162,11 @@ function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
   // Guard against double-firing if Calendly emits the same event twice
   // for any reason (e.g. iframe reload).
   const firedRef = useRef(false)
+  // Pin the latest form data in a ref so the listener stays mounted across
+  // re-renders. Reading from the ref inside the handler always sees the
+  // current value without re-binding the listener every render.
+  const dataRef = useRef(data)
+  dataRef.current = data
 
   useEffect(() => {
     function isCalendlyEvent(event: MessageEvent): boolean {
@@ -181,35 +192,35 @@ function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
       if (firedRef.current) return
       firedRef.current = true
 
+      const d = dataRef.current
       const meetingPayload = {
         // Identity carried forward so the CRM can reconcile against the
         // original submission. submissionId is the canonical idempotency
         // key — same value on both POSTs means the CRM knows it's the
         // same person, not a new lead.
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        whatsapp: data.whatsapp,
-        formMode: data.formMode || "contact",
+        firstName: d.firstName,
+        lastName: d.lastName,
+        email: d.email,
+        whatsapp: d.whatsapp,
+        formMode: d.formMode || "contact",
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
         submittedAt: new Date().toISOString(),
-        submissionId: data.submissionId,
-        sessionId: data.sessionId,
+        submissionId: d.submissionId,
+        sessionId: d.sessionId,
 
         // Booking signal
         scheduledMeeting: true,
         meetingEventUri: payload.payload?.event?.uri,
         meetingInviteeUri: payload.payload?.invitee?.uri,
-        meetingInviteeName: [data.firstName, data.lastName]
-          .filter(Boolean)
-          .join(" ") || undefined,
-        meetingInviteeEmail: data.email,
+        meetingInviteeName:
+          [d.firstName, d.lastName].filter(Boolean).join(" ") || undefined,
+        meetingInviteeEmail: d.email,
 
         // Forward routing context so the CRM can re-confirm assignment.
-        referringProperty: data.referringProperty,
-        referringTeamMember: data.referringTeamMember,
-        referringTeamMemberEmail: data.referringTeamMemberEmail,
-        leadTag: data.leadTag,
+        referringProperty: d.referringProperty,
+        referringTeamMember: d.referringTeamMember,
+        referringTeamMemberEmail: d.referringTeamMemberEmail,
+        leadTag: d.leadTag,
 
         // Honeypot stays empty.
         website: "",
@@ -230,7 +241,7 @@ function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
 
     window.addEventListener("message", handler)
     return () => window.removeEventListener("message", handler)
-  }, [data])
+  }, [])
 
   return null
 }

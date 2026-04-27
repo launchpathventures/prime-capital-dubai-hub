@@ -20,9 +20,19 @@ interface StepDef {
   condition?: (data: Partial<LeadFormData>) => boolean
 }
 
+const ALL_MODES: FormMode[] = [
+  "contact",
+  "landing",
+  "download",
+  "private",
+  "property-enquiry",
+  "newsletter",
+  "event",
+]
+
 const STEPS: StepDef[] = [
-  { id: "name", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
-  { id: "contact", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
+  { id: "name", modes: ALL_MODES },
+  { id: "contact", modes: ALL_MODES },
   { id: "enquiry-intent", modes: ["property-enquiry"] },
   { id: "property-appeal", modes: ["property-enquiry"] },
   { id: "goals", modes: ["contact"] },
@@ -50,7 +60,18 @@ const STEPS: StepDef[] = [
   },
   { id: "questions", modes: ["contact"] },
   { id: "private-context", modes: ["private"] },
-  { id: "success", modes: ["contact", "landing", "download", "private", "property-enquiry", "event"] },
+  { id: "success", modes: ALL_MODES },
+]
+
+// Returning leads (property-enquiry with bitrixLeadId) skip these steps —
+// they go straight to enquiry-intent → property-appeal → success.
+const RETURNING_LEAD_SKIP_STEPS: StepId[] = [
+  "name",
+  "contact",
+  "goals",
+  "timeline-budget",
+  "property",
+  "questions",
 ]
 
 // =============================================================================
@@ -135,21 +156,17 @@ export function useLeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Returning leads see: enquiry-intent → property-appeal → success
-  const returningLeadSkipSteps: StepId[] = ["name", "contact", "goals", "timeline-budget", "property", "questions"]
-
   // Calculate available steps based on mode and conditions
   const availableSteps = useMemo(() => {
     return STEPS.filter((step) => {
       // Must be available for this mode
       if (!step.modes.includes(mode)) return false
       // Returning leads skip most steps
-      if (isReturningLead && returningLeadSkipSteps.includes(step.id)) return false
+      if (isReturningLead && RETURNING_LEAD_SKIP_STEPS.includes(step.id)) return false
       // Must pass condition if present
       if (step.condition && !step.condition(data)) return false
       return true
     }).map((s) => s.id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, data, isReturningLead])
 
   const currentStep = availableSteps[stepIndex] ?? "name"

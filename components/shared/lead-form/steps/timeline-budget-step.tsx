@@ -173,7 +173,9 @@ export function TimelineBudgetStep({
         {errors.budget && <p id="budget-error" role="alert" className="lead-form__error">{errors.budget}</p>}
       </div>
 
-      {/* Bedrooms (optional) */}
+      {/* Bedrooms (optional, single-select). Field is optional in the
+          payload via "skip" — once selected, the user picks a different
+          option to change it (standard radio-group semantics). */}
       <div className="lead-form__section" role="radiogroup" aria-label="How many bedrooms?">
         <p className="lead-form__section-label">
           How many bedrooms?{" "}
@@ -188,9 +190,7 @@ export function TimelineBudgetStep({
                 type="button"
                 role="radio"
                 aria-checked={isSelected}
-                onClick={() =>
-                  setBedrooms(isSelected ? undefined : option.value)
-                }
+                onClick={() => setBedrooms(option.value)}
                 className={cn(
                   "lead-form__option",
                   isSelected && "lead-form__option--selected",

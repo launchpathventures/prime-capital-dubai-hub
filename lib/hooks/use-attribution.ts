@@ -66,8 +66,13 @@ function writeCookie(name: string, value: string, maxAgeDays: number) {
   if (typeof document === "undefined") return
   const maxAgeSec = maxAgeDays * 24 * 60 * 60
   // SameSite=Lax keeps cookies on top-level navigations (CTAs from emails,
-  // ads etc.) but blocks unrelated third-party use.
-  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeSec}; Path=/; SameSite=Lax`
+  // ads etc.) but blocks unrelated third-party use. Add Secure on HTTPS so
+  // the cookie can't leak over an HTTP downgrade in production.
+  const secure =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? "; Secure"
+      : ""
+  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAgeSec}; Path=/; SameSite=Lax${secure}`
 }
 
 function generateUUID(): string {

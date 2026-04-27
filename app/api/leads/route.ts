@@ -1,9 +1,13 @@
 /**
  * CATALYST - Lead Capture API
  *
- * Receives form submissions and forwards to Zapier webhook.
- * Validates data with Zod before forwarding.
- * Maps form values to Bitrix24 codes for CRM integration.
+ * Receives form submissions, validates them with Zod, and parallel-writes
+ * to two destinations:
+ *   - AgentCRM (primary): direct Bearer-authenticated POST to the public
+ *     enquiry endpoint.
+ *   - Zapier → Bitrix24 (legacy parallel-write during cutover): kept
+ *     running so leads keep flowing into Bitrix while AgentCRM proves out.
+ * Both forwarders are best-effort; failures don't block the user.
  */
 
 import { NextRequest, NextResponse } from "next/server"
@@ -269,12 +273,29 @@ const KNOWN_AGENT_EMAILS: Record<string, string> = {
 
 const PRIME_EMAIL_REGEX = /^[a-z0-9._-]+@primecapitaldubai\.com$/i
 
+// Shared inboxes / role addresses that exist in the Prime Google Workspace
+// but aren't agents. A naive derivation from a URL like ?teamMember=admin
+// would otherwise route a lead into a non-routing inbox.
+const SHARED_INBOX_DENYLIST = new Set([
+  "admin",
+  "ai",
+  "careers",
+  "compliance",
+  "content",
+  "info",
+  "marketing",
+  "sales",
+  "support",
+])
+
 /**
  * Resolve the agent email used for CRM auto-assignment.
  * Order of precedence:
  *   1. Trust the URL param if it's a valid Prime domain address.
  *   2. Look up the slug in our canonical map.
- *   3. Derive `<first-segment-of-slug>@primecapitaldubai.com` as a last resort.
+ *   3. Derive `<first-segment-of-slug>@primecapitaldubai.com` ONLY when the
+ *      slug looks like a real agent (contains a hyphen — i.e. firstname-lastname)
+ *      and the first segment isn't a known shared-inbox name.
  * Returns null if we can't determine an address.
  */
 function resolveTeamMemberEmail(
@@ -287,8 +308,12 @@ function resolveTeamMemberEmail(
   if (!slug) return null
   const normalised = slug.trim().toLowerCase()
   if (KNOWN_AGENT_EMAILS[normalised]) return KNOWN_AGENT_EMAILS[normalised]
+  // Require a hyphen so we don't derive from single-word slugs like "admin"
+  // or "marketing" that map to shared inboxes.
+  if (!normalised.includes("-")) return null
   const firstName = normalised.split("-")[0]
   if (!firstName || !/^[a-z]+$/.test(firstName)) return null
+  if (SHARED_INBOX_DENYLIST.has(firstName)) return null
   return `${firstName}@primecapitaldubai.com`
 }
 
@@ -820,8 +845,12 @@ export async function POST(request: NextRequest) {
     // Validate with Zod
     const result = leadSchema.safeParse(body)
     if (!result.success) {
-      // Log detailed error server-side only
-      console.error("[Leads API] Validation error:", result.error.errors)
+      // Log only field paths + Zod error codes — never the failing values,
+      // which can include partial PII (phone digits, email fragments).
+      const fieldErrors = result.error.errors
+        .map((e) => `${e.path.join(".") || "(root)"}=${e.code}`)
+        .join(",")
+      console.error("[Leads API] Validation failed:", fieldErrors)
       // Return generic message to client
       return NextResponse.json(
         { error: "Please check your form and try again." },
@@ -919,10 +948,21 @@ export async function POST(request: NextRequest) {
       _timestamp: new Date().toISOString(),
     }
 
-    // Pick the right Zapier webhook (BID for returning leads).
-    const zapierWebhookUrl = leadData.bitrixLeadId
-      ? process.env.ZAPIER_BID_WEBHOOK_URL
-      : process.env.ZAPIER_LEAD_WEBHOOK_URL
+    // Pick the right Zapier webhook (BID for returning leads). Fall back to
+    // the regular lead webhook when BID is unset so a missing env var
+    // doesn't silently drop returning-lead updates from Bitrix24.
+    let zapierWebhookUrl: string | undefined
+    if (leadData.bitrixLeadId) {
+      zapierWebhookUrl = process.env.ZAPIER_BID_WEBHOOK_URL
+      if (!zapierWebhookUrl) {
+        console.warn(
+          `[Leads API] ZAPIER_BID_WEBHOOK_URL missing — falling back to ZAPIER_LEAD_WEBHOOK_URL (sub=${submissionId})`,
+        )
+        zapierWebhookUrl = process.env.ZAPIER_LEAD_WEBHOOK_URL
+      }
+    } else {
+      zapierWebhookUrl = process.env.ZAPIER_LEAD_WEBHOOK_URL
+    }
 
     // Parallel-write: Zapier (legacy, kept during cutover) + AgentCRM (new).
     // Both are best-effort — failures don't block the user.
