@@ -70,6 +70,17 @@ const MAX_HEIGHT_PX = 2000
 const READY_FALLBACK_MS = 8000
 
 /**
+ * The widget posts heights around 340-460 for its compact card and around
+ * 600+ for chat/form. When it crosses CHAT_THRESHOLD_PX, the user has
+ * opened the chat — give it CHAT_ROOMY_HEIGHT_PX so multiple lines of
+ * conversation are visible without falling back on the chat's internal
+ * scroll. The widget's chat container has `flex: 1` inside a flex-column
+ * root, so giving it more iframe room translates to a taller chat surface.
+ */
+const CHAT_THRESHOLD_PX = 500
+const CHAT_ROOMY_HEIGHT_PX = 760
+
+/**
  * Explicit allowlist — no wildcards. Add new origins here AND in
  * next.config.ts CSP frame-src or messages get dropped silently.
  */
@@ -210,7 +221,13 @@ export function PropertyEnquiryWidget({
           const iframe = iframeRef.current
           const h = extractResizeHeight(data)
           if (iframe && h !== null) {
-            const target = Math.min(Math.ceil(h), MAX_HEIGHT_PX)
+            let target = Math.min(Math.ceil(h), MAX_HEIGHT_PX)
+            // When the widget transitions to chat (height crosses the
+            // compact/chat threshold), give it a roomy target so the chat
+            // surface has visible breathing room.
+            if (target >= CHAT_THRESHOLD_PX) {
+              target = Math.max(target, CHAT_ROOMY_HEIGHT_PX)
+            }
             // Only-grow: the widget's ResizeObserver reports contentRect
             // (content box, not border box) which can transiently shrink
             // during state transitions while the rendered element stays
