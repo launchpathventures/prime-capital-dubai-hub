@@ -3,7 +3,9 @@
  *
  * Inline iframe embed of the AgentCRM enquiry widget on PDPs.
  *
- * Sizing strategy (per Steven Leckie's working integration):
+ * Sizing strategy (per Steven Leckie's working integration, plus a high-
+ * water-mark guard to handle CRM-side ResizeObserver jitter our widget
+ * version exhibits):
  * - Initial height intentionally BELOW the widget's natural compact-card
  *   height (~340-460). Means widget.resize always animates upward, reading
  *   as the widget settling rather than collapsing.
@@ -15,6 +17,14 @@
  *   so we accept payload.height/contentHeight/scrollHeight, top-level height,
  *   and string forms ("640px").
  * - MAX_HEIGHT_PX caps a malformed payload from blowing the iframe off-screen.
+ * - Only-grow guard: the widget posts t.contentRect.height (CONTENT box,
+ *   not border box). When the widget's internal padding/border or layout
+ *   transitions during an interaction, contentRect can transiently shrink
+ *   while the rendered element is unchanged — visible to the user as the
+ *   iframe collapsing mid-click. We track max height seen this session and
+ *   ignore reports below it. Trade-off: closing chat back to compact leaves
+ *   some empty space below the compact card, but that beats clipping or
+ *   visible shrinkage during active use.
  *
  * Skeleton:
  * - Sits stacked over the iframe in the same wrapper.
@@ -157,6 +167,8 @@ export function PropertyEnquiryWidget({
   const [src, setSrc] = useState<string | null>(null)
   const [isReady, setIsReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement | null>(null)
+  /** High-water mark for applied iframe height — see only-grow guard above. */
+  const maxAppliedHeightRef = useRef<number>(INITIAL_HEIGHT_PX)
 
   // Build the iframe URL on mount so we can fold in UTM params from
   // window.location.search before the iframe loads (single load, no flash).
@@ -198,7 +210,15 @@ export function PropertyEnquiryWidget({
           const iframe = iframeRef.current
           const h = extractResizeHeight(data)
           if (iframe && h !== null) {
-            iframe.style.height = `${Math.min(Math.ceil(h), MAX_HEIGHT_PX)}px`
+            const target = Math.min(Math.ceil(h), MAX_HEIGHT_PX)
+            // Only-grow: the widget's ResizeObserver reports contentRect
+            // (content box, not border box) which can transiently shrink
+            // during state transitions while the rendered element stays
+            // the same size. Ignoring shrinks prevents visible collapse.
+            if (target > maxAppliedHeightRef.current) {
+              maxAppliedHeightRef.current = target
+              iframe.style.height = `${target}px`
+            }
           }
           break
         }
