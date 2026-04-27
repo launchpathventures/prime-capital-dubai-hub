@@ -52,6 +52,15 @@ interface PropertyEnquiryWidgetProps {
 /** Per CRM docs: 460 is the widget's compact-card height. Let resize grow it. */
 const INITIAL_HEIGHT_PX = 460
 
+/**
+ * Sanity floor for resize messages. The widget posts transient sub-compact
+ * heights during the compact→chat React mount/remount cycle (the observed
+ * root briefly has no children between renders, ResizeObserver fires with
+ * near-zero values). 460 matches the widget's smallest legitimate state
+ * (compact card), so anything below is glitch noise.
+ */
+const SANITY_MIN_HEIGHT_PX = 460
+
 /** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
 const READY_FALLBACK_MS = 8000
 
@@ -161,7 +170,9 @@ export function PropertyEnquiryWidget({
           const iframe = iframeRef.current
           const h = data.payload?.height
           if (iframe && typeof h === "number" && Number.isFinite(h)) {
-            iframe.style.height = `${Math.ceil(h)}px`
+            // Clamp at compact-card floor — see SANITY_MIN_HEIGHT_PX.
+            const target = Math.max(SANITY_MIN_HEIGHT_PX, Math.ceil(h))
+            iframe.style.height = `${target}px`
           }
           break
         }

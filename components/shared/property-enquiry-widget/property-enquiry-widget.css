@@ -32,6 +32,10 @@
 .property-enquiry-widget__iframe {
   display: block;
   width: 100%;
+  /* Floor the iframe at the compact-card height. The JS resize handler
+   * also clamps, but this is belt-and-braces against any frame where the
+   * inline `height` is briefly set lower (mount-cycle glitches). */
+  min-height: 460px;
   border: 0;
   border-radius: 12px;
   background-color: #ffffff;
