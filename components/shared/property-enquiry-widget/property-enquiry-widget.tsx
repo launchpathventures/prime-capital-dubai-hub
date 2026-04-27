@@ -49,17 +49,23 @@ interface PropertyEnquiryWidgetProps {
   title?: string
 }
 
-/** Per CRM docs: 460 is the widget's compact-card height. Let resize grow it. */
-const INITIAL_HEIGHT_PX = 460
-
 /**
- * Sanity floor for resize messages. The widget posts transient sub-compact
- * heights during the compact→chat React mount/remount cycle (the observed
- * root briefly has no children between renders, ResizeObserver fires with
- * near-zero values). 460 matches the widget's smallest legitimate state
- * (compact card), so anything below is glitch noise.
+ * Iframe height. We hold a fixed 720px to work around a CRM-widget bug:
+ * the chat view is styled `height: 640px; maxHeight: 90vh` and the widget
+ * body fills the iframe (`html, body { height: 100% }`), so `vh` inside
+ * the iframe = iframe height. With iframe at 460 → 90vh = 414 → chat view
+ * caps at 414, never 640. Widget then posts 414 via widget.resize, we
+ * honour it, iframe stays at 460, feedback loop. The only way to break
+ * the loop is to give the iframe enough headroom up-front so 90vh ≥ 640.
+ *
+ * 720 is the lowest workable value (90vh = 648 ≥ 640). Compact card has
+ * empty space below — unavoidable until CRM removes the maxHeight: 90vh
+ * or replaces height: 640 with min-height: 640 on the chat view.
  */
-const SANITY_MIN_HEIGHT_PX = 460
+const IFRAME_HEIGHT_PX = 720
+
+/** Cap any oversized widget.resize payloads (defensive). */
+const MAX_HEIGHT_PX = 2000
 
 /** Drop the skeleton even if no postMessage / onLoad arrives within 8s. */
 const READY_FALLBACK_MS = 8000
@@ -169,10 +175,17 @@ export function PropertyEnquiryWidget({
           setIsReady(true)
           const iframe = iframeRef.current
           const h = data.payload?.height
-          if (iframe && typeof h === "number" && Number.isFinite(h)) {
-            // Clamp at compact-card floor — see SANITY_MIN_HEIGHT_PX.
-            const target = Math.max(SANITY_MIN_HEIGHT_PX, Math.ceil(h))
-            iframe.style.height = `${target}px`
+          // Only honour reports that EXCEED our base height (e.g. long chat
+          // history that genuinely overflows the 640 chat view). Anything at
+          // or below the base is a no-op — the iframe's CSS already gives
+          // the widget enough headroom for compact + chat states.
+          if (
+            iframe &&
+            typeof h === "number" &&
+            Number.isFinite(h) &&
+            h > IFRAME_HEIGHT_PX
+          ) {
+            iframe.style.height = `${Math.min(Math.ceil(h), MAX_HEIGHT_PX)}px`
           }
           break
         }
@@ -208,7 +221,7 @@ export function PropertyEnquiryWidget({
             src={src}
             title={title}
             width="100%"
-            height={INITIAL_HEIGHT_PX}
+            height={IFRAME_HEIGHT_PX}
             className="property-enquiry-widget__iframe"
             data-ready={isReady ? "true" : "false"}
             loading="lazy"
