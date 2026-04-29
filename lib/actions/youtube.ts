@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { trackActionError } from "@/lib/error-tracking"
 import type { ActionResult } from "./cms"
+import type { Format } from "@/lib/youtube/prompts"
 
 // =============================================================================
 // TYPES
@@ -23,6 +24,7 @@ export type YouTubeScript = {
   topic: string | null
   input_text: string | null
   status: ScriptStatus
+  format: Format | null
   hook_v1: string | null
   hook_v2: string | null
   packaging: string | null
@@ -52,6 +54,7 @@ export type YouTubeScriptInput = {
   topic?: string
   input_text?: string
   status?: ScriptStatus
+  format?: Format
   hook_v1?: string
   hook_v2?: string
   packaging?: string
