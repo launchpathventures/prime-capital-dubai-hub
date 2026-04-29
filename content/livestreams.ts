@@ -182,7 +182,7 @@ export const LIVESTREAMS: Livestream[] = [
       name: "Tahir Majithia",
       role: "Founder, Prime Capital Dubai",
       bio: "Tahir advises international investors on Dubai property — apartments, villas, branded residences, and off-plan. He's on the ground every day, transacting through every market condition, and known for straight-talk analysis over narrative.",
-      imageUrl: "/images/team/tahir-majithia.png",
+      imageUrl: "/images/team/tahir-majithia.jpg",
       teamSlug: "tahir-majithia",
       quote:
         "The story on the news isn't the story on the ground. People are waiting for a crash that isn't coming — and the gap between what they're seeing and what's actually happening is costing them their best moves.",

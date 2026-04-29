@@ -34,7 +34,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 // ============================================================================
 const teamPhotos: { slug: string; file: string }[] = [
   // Founders
-  { slug: "tahir-majitia",             file: "tahir-majithia.png" },
+  { slug: "tahir-majithia",            file: "tahir-majithia.jpg" },
   { slug: "shaad-haji",                file: "Shaad Haji .jpeg" },
   { slug: "rohit-saluja",              file: "Rohit-Saluja.jpg" },
   // Associate Directors
