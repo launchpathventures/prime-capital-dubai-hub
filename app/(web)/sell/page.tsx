@@ -306,7 +306,7 @@ function AdvisorSection() {
               {/* Photo */}
               <div className="relative aspect-[3/4] md:aspect-auto bg-[var(--web-ash)]">
                 <Image
-                  src="/images/team/tahir-majithia.png"
+                  src="/images/team/tahir-majithia.jpg"
                   alt="Tahir Majithia, Managing Director of Prime Capital Dubai"
                   fill
                   className="object-cover"
