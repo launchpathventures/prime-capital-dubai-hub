@@ -4,7 +4,8 @@
  * POST /api/admin/youtube/validate-script
  *
  * Runs a comprehensive validation on a generated script, checking:
- * - Adherence to Script Generator v2.0 structure
+ * - Adherence to the format-specific structure (Authority Analysis, Myth-Buster,
+ *   Reaction, Case Study, Listicle, or Q&A) loaded at runtime
  * - Prime Capital brand compliance
  * - Language quality and banned word detection
  * - YouTube best practices for retention
@@ -14,6 +15,12 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { BRAND_GUIDE } from "@/lib/youtube/brand-guide"
+import {
+  getSystemPrompt,
+  toFormat,
+  FORMAT_META,
+  type Format,
+} from "@/lib/youtube/prompts"
 import {
   checkRateLimit,
   getClientIP,
@@ -28,69 +35,76 @@ const anthropic = new Anthropic({
 interface ValidateRequest {
   scriptId: string
   scriptBody: string
+  format?: string
   packaging?: string
   hookV1?: string
   hookV2?: string
 }
 
-const VALIDATION_PROMPT = `You are a senior content quality analyst for Prime Capital Dubai. Your job is to validate YouTube scripts against the brand's strict quality standards.
+const VALIDATION_PROMPT = `You are a senior content quality analyst for Prime Capital Dubai. Your job is to validate YouTube scripts against the brand's strict quality standards AND the script's specific format spec.
+
+You will be given:
+1. The script to validate (in <script_to_validate> tags)
+2. The format the script was generated in (e.g., Authority Analysis, Myth-Buster)
+3. The full format prompt (the same prompt the generator used) appended below — use this as the source of truth for structural validation
+4. The brand guide for voice / vocabulary checks
 
 You must evaluate the script across these categories and provide a structured assessment:
 
 ## Validation Categories
 
 ### 1. STRUCTURE COMPLIANCE
-Check the script follows the required architecture:
-- Packaging section (title options, thumbnail concept, CTA focus, target length)
-- Two distinct hook versions (Hypothetical/Question + Warning/Contrarian)
-- Context Loop (Authority → Trap → Consequence)
-- Three body sections, each with (Misconception → Evidence → Explanation → Actionable Takeaway)
-- Mid-roll CTA after Section 1
-- End-roll CTA after final section
-- Outro with Bridge + Tease
+Validate against the **format-specific structure** described in the format prompt below. Each format has a different structure — use the format's "Output structure (Markdown)" and "Format-specific QC checklist" sections as the authoritative reference. Do NOT apply Authority Analysis structure rules to a Myth-Buster, Reaction, Listicle, Case Study, or Q&A. Specifically:
+- Authority Analysis: 2 hook versions, Context Loop, 3 body sections, mid-roll + end-roll + outro CTA
+- Myth-Buster: 1 hook (Direct Contradiction), 3 sections (Myth steelman → What's Actually True → What This Means For You), CTAs #1, #2, #3
+- Reaction: 1 hook, 3 sections (What Happened → What It Means → What I'm Telling Clients), **single CTA only** (CTA #2), no watch-next tease
+- Case Study: 1 hook, 4 sections (Brief → What I Looked At → What I Recommended → What Actually Happened), CTAs #1, #2, #3, anonymisation declared
+- Listicle: 1 hook (number-led), criteria framing, the list (with mid-list CTA #1), how to use, CTA #2, CTA #3
+- Q&A: 1 hook (Direct Address), 4–7 questions each with one-sentence-answer + reasoning + risk caveat, CTA #1 mid, CTA #2 end, CTA #3 outro
+
+Refer to the format prompt below for the complete signature patterns required for the specific format.
 
 ### 2. LANGUAGE COMPLIANCE
 Check for banned words and phrases:
 BANNED: luxury, amazing, incredible, breathtaking, stunning, don't miss out, act now, hurry, limited time, best deal, steal, bargain, trust us, trust me, exclusive, once in a lifetime, passive income, no-brainer, game-changer, unlock, dream home, hottest market, booming, skyrocketing, cash cow, guaranteed returns, risk-free
-Also check: no ALL CAPS, no excessive exclamation marks, no emoji, no ellipsis for suspense
+Also check: no ALL CAPS, no excessive exclamation marks, no emoji, no ellipsis for suspense, **UK English** (colour, analyse, centre — not American spellings)
 
 ### 3. VOICE & BRAND
-- Does it sound like Tahir — measured, evidence-based, conversational but authoritative?
+- Does it sound like Tahir — measured, evidence-based, confident, restrained, grounded, direct, warm, assured?
 - Is it the "private banker" voice, not a salesperson?
 - Does it demonstrate authority through specificity, not claims?
-- Would a CEO find the tone respectful of their intelligence?
-- Is it distinctly Prime Capital — not interchangeable with another agency?
+- Is the credibility anchor (AED 3 billion+, 20+ years, multiple market cycles) referenced in the opening minute?
+- Is the sign-off line exact: "I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."?
 
 ### 4. DATA & EVIDENCE
-- Are there at least 3 specific data points?
-- At least one anonymized client scenario?
+- Are there at least 3 specific data points (DLD AED figures, % YoY, occupancy, named regulatory dates, RERA stats)?
+- At least one anonymised client scenario (where the format calls for one)?
 - Are claims supported, not vague?
-- Are area names, percentages, and timeframes cited?
+- Are sources named only from the allowed list (DLD, RERA, Central Bank UAE, Fitch, Moody's, S&P)? Other sources must use generic attribution (e.g., "industry research").
+- No US-imported metrics ("housing market," "months of inventory")?
 
 ### 5. RETENTION MECHANICS
 - Does the hook create an open loop in the first 2 sentences?
-- Are there 2-3 open loops planted and resolved?
-- Pattern interrupts every 90-120 seconds?
-- Mid-roll CTA feels natural, not interruptive?
-- End-roll CTA feels earned?
-- Outro points to specific next video?
+- Does the format-specific signature pattern hold (e.g., "Most investors think…" openers in Authority Analysis sections; steelman before dismantle in Myth-Buster; date-stamp + named source in Reaction; anonymisation declaration in Case Study; number-led title in Listicle; direct one-sentence answer in Q&A)?
+- Is the "what are the risks of being wrong?" beat present where the format requires it?
+- CTAs feel earned, not interruptive?
 
-### 6. YOUTUBE BEST PRACTICES
-- Would the title attract clicks from informed investors (not clickbait)?
-- Is the pacing appropriate for the target length?
-- Are transitions natural for spoken delivery?
-- Would this work on a teleprompter (plain text, short paragraphs)?
+### 6. CTA INVENTORY COMPLIANCE
+- Only the three locked CTAs from the format prompt's CTA inventory used?
+- CTA count matches the format (Reaction = 1; all others = 3)?
+- The non-negotiable trust line "and if it doesn't make sense, we'll tell you that too" present in CTA #2?
+- No invented CTAs, no webinar/newsletter/Telegram/etc.?
 
 ## Output Format
 Return a JSON object:
 {
-  "overall": "A 2-3 sentence summary of the script's quality",
+  "overall": "A 2-3 sentence summary of the script's quality, mentioning the format checked",
   "score": 0-100,
   "checks": [
     {
       "category": "Structure Compliance",
       "passed": true/false,
-      "notes": "Specific feedback"
+      "notes": "Specific feedback referencing the format's structure requirements"
     },
     {
       "category": "Language Compliance",
@@ -113,7 +127,7 @@ Return a JSON object:
       "notes": "Specific feedback"
     },
     {
-      "category": "YouTube Best Practices",
+      "category": "CTA Inventory Compliance",
       "passed": true/false,
       "notes": "Specific feedback"
     }
@@ -143,7 +157,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: ValidateRequest = await request.json()
-    const { scriptId, scriptBody, packaging, hookV1, hookV2 } = body
+    const { scriptId, scriptBody, format: rawFormat, packaging, hookV1, hookV2 } = body
 
     if (!scriptBody?.trim()) {
       return NextResponse.json(
@@ -165,6 +179,13 @@ export async function POST(request: NextRequest) {
     const cappedHookV1 = hookV1?.slice(0, MAX_SECTION)
     const cappedHookV2 = hookV2?.slice(0, MAX_SECTION)
 
+    // Resolve format and load the matching format spec for the validator's
+    // structural reference. Falls back to authority_analysis for legacy
+    // scripts that pre-date format-tagging.
+    const format: Format = toFormat(rawFormat)
+    const meta = FORMAT_META[format]
+    const formatSpec = getSystemPrompt(format)
+
     const fullScript = [
       cappedPackaging && `PACKAGING:\n${cappedPackaging}`,
       cappedHookV1 && `HOOK V1:\n${cappedHookV1}`,
@@ -174,16 +195,45 @@ export async function POST(request: NextRequest) {
       .filter(Boolean)
       .join("\n\n---\n\n")
 
+    const systemPrompt = `${VALIDATION_PROMPT}
+
+---
+
+## Format being validated: ${meta.label}
+
+Hook formula: ${meta.hookFormula} — ${meta.hookName}
+Target length: ${meta.minutesLabel} (${meta.wordsLabel})
+CTA count: ${meta.ctaCount}
+Funnel position: ${meta.funnel}-funnel
+
+The full format prompt (the same prompt the generator was instructed with) is below. Use its "Output structure (Markdown)" and "Format-specific QC checklist" sections as the structural source of truth.
+
+<format_prompt>
+${formatSpec}
+</format_prompt>
+
+---
+
+## Brand Guide Reference
+
+<brand_guide>
+${BRAND_GUIDE}
+</brand_guide>`
+
     const response = await anthropic.messages.create(
       {
         model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 4096,
         temperature: 0.3,
-        system: `${VALIDATION_PROMPT}\n\n## Brand Guide Reference\n${BRAND_GUIDE}`,
+        system: systemPrompt,
         messages: [
           {
             role: "user",
-            content: `Validate this YouTube script for Prime Capital Dubai:\n\n${fullScript}`,
+            content: `Validate this YouTube script for Prime Capital Dubai. The script was generated in the **${meta.label}** format — apply that format's structural rules.
+
+<script_to_validate>
+${fullScript}
+</script_to_validate>`,
           },
         ],
       },

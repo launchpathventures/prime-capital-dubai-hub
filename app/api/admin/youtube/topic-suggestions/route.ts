@@ -13,10 +13,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import {
+  FORMAT_META,
+  isFormat,
+  type Format,
+} from "@/lib/youtube/prompts"
+import {
   checkRateLimit,
   getClientIP,
   createRateLimitResponse,
-  RATE_LIMITS,
 } from "@/lib/rate-limit"
 
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
@@ -65,6 +69,28 @@ interface PerplexityResponse {
   choices?: { message?: PerplexityMessage }[]
 }
 
+/**
+ * Per-format guidance for the market-scan prompt. Tells Perplexity what kind
+ * of topics work well for each format so the suggestions land on briefs that
+ * the idea generator and script generator can both run on cleanly.
+ */
+function formatTopicGuidance(format: Format): string {
+  switch (format) {
+    case "authority_analysis":
+      return "macro theses, supply analysis, cycle commentary, market structure pieces. Topics rich in DLD / RERA / Central Bank UAE data."
+    case "myth_buster":
+      return "widely circulated property-bro narratives ripe for dismantling — common buyer mistakes, 'everyone says X but…' patterns, contested orthodoxies in Dubai property. The narrative must be currently circulating, not historic."
+    case "reaction":
+      return "concrete news events from the last 14 days with named sources from the allowed list: DLD, RERA, Central Bank UAE, Fitch, Moody's, S&P. Each suggestion MUST cite the specific news item, the date, and the source. Without a fresh peg, do not propose a Reaction topic."
+    case "case_study":
+      return "anonymisable client situations or recent transaction patterns that illustrate a teachable principle. Note: these will need real-deal grounding from the operator — propose topics where a client situation could plausibly anchor the analysis."
+    case "listicle":
+      return "rankable / countable patterns — corridors to avoid, mistakes investors make, criteria to filter launches, questions to evaluate developers. Topics that naturally produce 3, 5, or 7 items each with a specific data point."
+    case "qa_mailbag":
+      return "clusters of related questions investors are asking right now — across timing, financing, exit liquidity, regional stability. Suggest themes that could anchor 4–7 viewer questions, real or composite."
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     if (!PERPLEXITY_API_KEY) {
@@ -99,9 +125,21 @@ export async function POST(request: NextRequest) {
       ? body.focus.trim().slice(0, 500)
       : ""
 
-    const userPrompt = focus
-      ? `Scan the Dubai real estate market for the latest developments, with a focus on: ${focus}.\n\nToday's date context matters — prioritise news and data from the last 30-60 days. Return 5 topic prompts as the JSON array specified.`
+    // Optional: user can pre-select formats. When set, steer suggestions
+    // toward topics that work well for those formats (reactions need news
+    // pegs; listicles need rankable patterns; myth-busters need circulating
+    // narratives; etc).
+    const rawFormats = Array.isArray(body?.formats) ? body.formats : []
+    const formats: Format[] = rawFormats.filter(isFormat) as Format[]
+
+    const formatGuidance = formats.length > 0
+      ? `\n\n## Format constraint\nThe operator has pre-selected the following script format(s) for any video generated from these topics: ${formats.map((f) => FORMAT_META[f].label).join(", ")}. Bias the topic suggestions toward developments that work well for these formats:\n${formats.map((f) => `- **${FORMAT_META[f].label}**: ${formatTopicGuidance(f)}`).join("\n")}\n\nDistribute the 5 suggestions across the selected formats. If a selected format is **Live Reaction**, every suggestion under that format MUST cite a specific news event from the last 14 days with a named source from this allowed list: DLD, RERA, Central Bank UAE, Fitch, Moody's, S&P. Do not propose Live Reaction topics without a concrete news peg.`
+      : ""
+
+    const userPrompt = (focus
+      ? `Scan the Dubai real estate market for the latest developments, with a focus on the area provided by the operator below.\n\n<operator_focus>\n${focus}\n</operator_focus>\n\nToday's date context matters — prioritise news and data from the last 30-60 days. Return 5 topic prompts as the JSON array specified.`
       : `Scan the Dubai real estate market for the most significant developments in the last 30-60 days. Return 5 topic prompts as the JSON array specified.`
+    ) + formatGuidance
 
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",

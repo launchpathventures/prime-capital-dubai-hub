@@ -54,6 +54,7 @@ import {
   updateScriptStatus,
   deleteYouTubeScript,
 } from "@/lib/actions/youtube"
+import { FORMAT_META, DEFAULT_FORMAT } from "@/lib/youtube/prompts"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 
@@ -205,7 +206,7 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         body: JSON.stringify({
           title: script.title,
           topic: script.topic || script.title,
-          target_length: script.target_length || "standard",
+          format: script.format || DEFAULT_FORMAT,
           scriptId: script.id,
           previousScript: hasScript ? script.script_body : undefined,
           validationFeedback,
@@ -300,6 +301,7 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         body: JSON.stringify({
           scriptId: src.id,
           scriptBody: body,
+          format: src.format || DEFAULT_FORMAT,
           packaging: src.packaging,
           hookV1: src.hook_v1,
           hookV2: src.hook_v2,
@@ -382,6 +384,16 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
             <Text variant="muted" size="sm" className="line-clamp-2">
               {script.topic}
             </Text>
+          )}
+          {script.format && (
+            <Row gap="xs" align="center">
+              <Badge variant="outline" size="sm">
+                {FORMAT_META[script.format].label}
+              </Badge>
+              <Text variant="muted" size="sm">
+                {FORMAT_META[script.format].minutesLabel} · {FORMAT_META[script.format].wordsLabel}
+              </Text>
+            </Row>
           )}
         </Stack>
       </Row>
