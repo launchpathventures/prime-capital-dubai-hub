@@ -8,7 +8,8 @@
  *   when the visitor opens chat or enquire.
  * - Iframe must listen for `widget.resize` postMessage events and update its
  *   own height. Without it, the chat is cropped on expand.
- * - Initial height = 460px. Don't fix any other height; don't use 100%.
+ * - Initial height = 460px (matches SL's inline-chat container). Don't fix
+ *   any other height; don't use 100%.
  * - `transition: height 220ms ease` on the iframe smooths every resize.
  *
  * Right-column composition: we use Pattern A (sticky widget at `lg:top-24`)
@@ -50,19 +51,21 @@ interface PropertyEnquiryWidgetProps {
 }
 
 /**
- * Iframe height. We hold a fixed 720px to work around a CRM-widget bug:
- * the chat view is styled `height: 640px; maxHeight: 90vh` and the widget
- * body fills the iframe (`html, body { height: 100% }`), so `vh` inside
- * the iframe = iframe height. With iframe at 460 → 90vh = 414 → chat view
- * caps at 414, never 640. Widget then posts 414 via widget.resize, we
- * honour it, iframe stays at 460, feedback loop. The only way to break
- * the loop is to give the iframe enough headroom up-front so 90vh ≥ 640.
+ * Iframe initial height. Mirrors the SL inline-chat container pattern
+ * (`steven-leckie-web/components/shared/ai-chat/ai-chat-inline.tsx`):
+ * a stable 460px wrapper, with chat scrolling internally inside it.
  *
- * 720 is the lowest workable value (90vh = 648 ≥ 640). Compact card has
- * empty space below — unavoidable until CRM removes the maxHeight: 90vh
- * or replaces height: 640 with min-height: 640 on the chat view.
+ * Trade-off vs the previous 720px reservation: when the visitor opens the
+ * chat view, it caps at the CRM widget's `90vh = 414px` and scrolls its
+ * own message list — same UX as SL's React chat. We accept that internal
+ * scroll in exchange for losing ~260px of dead space below the compact
+ * card, which is the visible bug.
+ *
+ * The resize handler below still honours genuine grows above 460 (long
+ * chat history, expanded enquire form, etc.), so the widget can opt out
+ * of the cap whenever it wants more room.
  */
-const IFRAME_HEIGHT_PX = 720
+const IFRAME_HEIGHT_PX = 340
 
 /** Cap any oversized widget.resize payloads (defensive). */
 const MAX_HEIGHT_PX = 2000

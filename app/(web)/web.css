@@ -1198,6 +1198,174 @@
   color: var(--web-ash);
 }
 
+/* Property markdown prose (CRM rich-text fields on PDP) */
+.property-prose > * + * {
+  margin-top: 1rem;
+}
+
+.property-prose > :first-child {
+  margin-top: 0;
+}
+
+.property-prose p {
+  color: var(--web-spruce);
+  font-size: 15px;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.property-prose h2,
+.property-prose h3 {
+  font-family: var(--font-headline), "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  color: var(--web-ash);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin-top: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.property-prose h2 {
+  font-size: clamp(20px, 2vw, 24px);
+}
+
+.property-prose h3 {
+  font-size: 18px;
+}
+
+.property-prose h4,
+.property-prose h5,
+.property-prose h6 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--web-spruce);
+  letter-spacing: 0;
+  line-height: 1.4;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--web-serenity) 25%, transparent);
+}
+
+.property-prose > h4:first-child,
+.property-prose > h5:first-child,
+.property-prose > h6:first-child {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.property-prose strong {
+  font-weight: 500;
+  color: var(--web-ash);
+}
+
+.property-prose em {
+  font-style: italic;
+  color: var(--web-spruce);
+}
+
+.property-prose a {
+  color: var(--web-spruce);
+  border-bottom: 1px solid var(--web-serenity);
+  transition: color 200ms ease, border-color 200ms ease;
+}
+
+.property-prose a:hover {
+  color: var(--web-ash);
+  border-bottom-color: var(--web-ash);
+}
+
+.property-prose ul,
+.property-prose ol {
+  margin: 0.75rem 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.property-prose ul li,
+.property-prose ol li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--web-spruce);
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.property-prose ul li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.7em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--web-serenity);
+}
+
+.property-prose ol {
+  counter-reset: prose-counter;
+}
+
+.property-prose ol li {
+  counter-increment: prose-counter;
+}
+
+.property-prose ol li::before {
+  content: counter(prose-counter) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 13px;
+  color: var(--web-serenity);
+  font-variant-numeric: tabular-nums;
+}
+
+.property-prose blockquote {
+  border-left: 2px solid var(--web-serenity);
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  font-style: italic;
+  color: var(--web-spruce);
+}
+
+.property-prose hr {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--web-serenity) 30%, transparent);
+  margin: 2rem 0;
+}
+
+.property-prose code {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--web-serenity) 12%, transparent);
+  padding: 0.1em 0.35em;
+  border-radius: 2px;
+}
+
+/* When PropertyProse is used inside a dark card (e.g. "Why Invest") */
+.bg-\[var\(--web-ash\)\] .property-prose p,
+.bg-\[var\(--web-ash\)\] .property-prose ul li,
+.bg-\[var\(--web-ash\)\] .property-prose ol li {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bg-\[var\(--web-ash\)\] .property-prose h2,
+.bg-\[var\(--web-ash\)\] .property-prose h3,
+.bg-\[var\(--web-ash\)\] .property-prose h4,
+.bg-\[var\(--web-ash\)\] .property-prose h5,
+.bg-\[var\(--web-ash\)\] .property-prose h6,
+.bg-\[var\(--web-ash\)\] .property-prose strong {
+  color: var(--web-off-white);
+}
+
+.bg-\[var\(--web-ash\)\] .property-prose h4,
+.bg-\[var\(--web-ash\)\] .property-prose h5,
+.bg-\[var\(--web-ash\)\] .property-prose h6 {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
 /* Company details grid (section 01) */
 .terms-details-grid {
   display: grid;
