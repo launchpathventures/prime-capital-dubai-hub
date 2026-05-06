@@ -33,6 +33,12 @@ import {
   BuildingIcon,
   CheckIcon,
   BathIcon,
+  BellIcon,
+  SparklesIcon,
+  HomeIcon,
+  CreditCardIcon,
+  ImagesIcon,
+  FileTextIcon,
 } from "lucide-react"
 
 export const revalidate = 300 // Match the CRM Cache-Control max-age
@@ -215,7 +221,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {property.bathrooms != null && (
+            {property.bathrooms != null && property.bathrooms > 0 && (
               <div className="text-center">
                 <BathIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
                 <div className="font-headline text-[var(--web-off-white)] text-xl">{property.bathrooms}</div>
@@ -257,10 +263,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
             {/* Main content */}
             <Stack gap="xl">
               {property.notes.length > 0 && (
-                <div className="bg-[var(--web-serenity)]/10 border border-[var(--web-serenity)]/30 rounded-[2px] p-6">
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
-                    Latest Updates
-                  </span>
+                <SectionCard title="Latest Updates" icon={BellIcon}>
                   <Stack gap="sm">
                     {property.notes.slice(0, 5).map((note) => (
                       <div key={note.id} className="flex flex-col gap-1">
@@ -274,41 +277,27 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       </div>
                     ))}
                   </Stack>
-                </div>
+                </SectionCard>
               )}
 
               {property.reasonsToInvest && (
-                <div className="bg-[var(--web-ash)] rounded-[2px] p-8">
-                  <Title
-                    as="h2"
-                    className="font-headline text-[var(--web-off-white)] text-xl font-normal mb-6"
-                  >
-                    Why Invest in {property.title}?
-                  </Title>
-                  <PropertyProse
-                    content={property.reasonsToInvest}
-                    className="text-white/80 text-[14px]"
-                  />
-                </div>
+                <SectionCard
+                  title={`Why Invest in ${property.title}?`}
+                  icon={SparklesIcon}
+                >
+                  <PropertyProse content={property.reasonsToInvest} />
+                </SectionCard>
               )}
 
               {property.description && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
-                    About This Property
-                  </span>
-                  <Text className="text-[var(--web-spruce)] text-[15px] font-light leading-relaxed whitespace-pre-line">
-                    {property.description}
-                  </Text>
-                </div>
+                <SectionCard title="About This Property" icon={BuildingIcon}>
+                  <PropertyProse content={property.description} />
+                </SectionCard>
               )}
 
               {isDevelopment && property.unitTypes && property.unitTypes.length > 0 && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-4">
-                    Available Unit Types
-                  </span>
-                  <div className="bg-white rounded-[2px] overflow-hidden border border-[var(--web-serenity)]/30">
+                <SectionCard title="Available Unit Types" icon={HomeIcon}>
+                  <div className="overflow-hidden border border-[var(--web-serenity)]/25 rounded-[2px]">
                     <table className="w-full text-[13px]">
                       <thead className="bg-[var(--web-serenity)]/10">
                         <tr>
@@ -351,14 +340,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       </tbody>
                     </table>
                   </div>
-                </div>
+                </SectionCard>
               )}
 
               {property.paymentPlan && property.paymentPlan.installments.length > 0 && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
-                    Payment Plan
-                  </span>
+                <SectionCard title="Payment Plan" icon={CreditCardIcon}>
                   {property.paymentPlan.summary && (
                     <Text className="text-[var(--web-ash)] text-[15px] font-medium mb-4">
                       {property.paymentPlan.summary}
@@ -406,32 +392,23 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       <PropertyProse content={property.paymentPlanDetails} />
                     </div>
                   )}
-                </div>
+                </SectionCard>
               )}
 
               {property.locationAndViews && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
-                    Location & Views
-                  </span>
+                <SectionCard title="Location & Views" icon={MapPinIcon}>
                   <PropertyProse content={property.locationAndViews} />
-                </div>
+                </SectionCard>
               )}
 
               {property.aboutDeveloper && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-3">
-                    About the Developer
-                  </span>
+                <SectionCard title="About the Developer" icon={BuildingIcon}>
                   <PropertyProse content={property.aboutDeveloper} />
-                </div>
+                </SectionCard>
               )}
 
               {property.features.length > 0 && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-4">
-                    Key Features
-                  </span>
+                <SectionCard title="Key Features" icon={CheckIcon}>
                   <Grid cols={2} className="gap-3">
                     {property.features.map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
@@ -442,14 +419,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       </div>
                     ))}
                   </Grid>
-                </div>
+                </SectionCard>
               )}
 
               {property.amenities.length > 0 && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-4">
-                    Amenities
-                  </span>
+                <SectionCard title="Amenities" icon={SparklesIcon}>
                   <Grid cols={2} className="gap-3">
                     {property.amenities.map((item) => (
                       <div key={item} className="flex items-center gap-2">
@@ -458,14 +432,11 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       </div>
                     ))}
                   </Grid>
-                </div>
+                </SectionCard>
               )}
 
               {galleryImages.length > 0 && (
-                <div>
-                  <span className="block text-[var(--web-spruce)] text-[11px] font-normal uppercase tracking-[0.2em] mb-4">
-                    Gallery
-                  </span>
+                <SectionCard title="Gallery" icon={ImagesIcon}>
                   <Grid cols={2} className="gap-4">
                     {galleryImages.map((image, index) => (
                       <div
@@ -482,7 +453,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                       </div>
                     ))}
                   </Grid>
-                </div>
+                </SectionCard>
               )}
 
               {(property.media?.brochure_url ||
@@ -490,78 +461,66 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 property.masterPlanUrl ||
                 property.media?.video_url ||
                 property.media?.tour_3d_url) && (
-                <div className="flex flex-wrap gap-3">
-                  {property.media?.brochure_url && (
-                    <a
-                      href={property.media.brochure_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)]"
-                    >
-                      Download brochure
-                    </a>
-                  )}
-                  {property.factsheetUrl && (
-                    <a
-                      href={property.factsheetUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)]"
-                    >
-                      Factsheet
-                    </a>
-                  )}
-                  {property.masterPlanUrl && (
-                    <a
-                      href={property.masterPlanUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
-                    >
-                      Master plan
-                    </a>
-                  )}
-                  {property.media?.video_url && (
-                    <a
-                      href={property.media.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
-                    >
-                      Video
-                    </a>
-                  )}
-                  {property.media?.tour_3d_url && (
-                    <a
-                      href={property.media.tour_3d_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
-                    >
-                      3D tour
-                    </a>
-                  )}
-                </div>
+                <SectionCard title="Documents & Media" icon={FileTextIcon}>
+                  <div className="flex flex-wrap gap-3">
+                    {property.media?.brochure_url && (
+                      <a
+                        href={property.media.brochure_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)]"
+                      >
+                        Download brochure
+                      </a>
+                    )}
+                    {property.factsheetUrl && (
+                      <a
+                        href={property.factsheetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)]"
+                      >
+                        Factsheet
+                      </a>
+                    )}
+                    {property.masterPlanUrl && (
+                      <a
+                        href={property.masterPlanUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
+                      >
+                        Master plan
+                      </a>
+                    )}
+                    {property.media?.video_url && (
+                      <a
+                        href={property.media.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
+                      >
+                        Video
+                      </a>
+                    )}
+                    {property.media?.tour_3d_url && (
+                      <a
+                        href={property.media.tour_3d_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-[2px] text-[12px] uppercase tracking-wider border border-[var(--web-spruce)] text-[var(--web-spruce)] hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
+                      >
+                        3D tour
+                      </a>
+                    )}
+                  </div>
+                </SectionCard>
               )}
             </Stack>
 
             {/* Sidebar */}
             <Stack gap="lg">
-              <div className="lg:sticky lg:top-24">
-                <PropertyEnquiryWidget
-                  slug={property.slug}
-                  propertyName={property.title}
-                  propertyUrl={propertyUrl}
-                />
-              </div>
-
-              <div className="bg-white rounded-[2px] p-6 shadow-sm">
-                <Title
-                  as="h3"
-                  className="font-headline text-[var(--web-ash)] text-lg font-normal mb-6"
-                >
-                  Property Details
-                </Title>
+              <SectionCard title="Property Details" icon={FileTextIcon}>
                 <Stack gap="md">
                   {property.developer && (
                     <DetailRow label="Developer" value={property.developer} />
@@ -596,6 +555,14 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                     }
                   />
                 </Stack>
+              </SectionCard>
+
+              <div className="lg:sticky lg:top-24">
+                <PropertyEnquiryWidget
+                  slug={property.slug}
+                  propertyName={property.title}
+                  propertyUrl={propertyUrl}
+                />
               </div>
             </Stack>
           </Grid>
@@ -610,6 +577,31 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
     <div className="flex justify-between gap-3">
       <span className="text-[var(--web-spruce)] text-[13px]">{label}</span>
       <span className="text-[var(--web-ash)] text-[13px] font-medium text-right">{value}</span>
+    </div>
+  )
+}
+
+function SectionCard({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon?: React.ComponentType<{ className?: string }>
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="bg-white rounded-[2px] border border-[var(--web-serenity)]/30 shadow-sm">
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-[var(--web-serenity)]/25">
+        {Icon && <Icon className="h-4 w-4 text-[var(--web-spruce)]" />}
+        <Title
+          as="h2"
+          className="font-headline text-[var(--web-ash)] text-[15px] font-normal uppercase tracking-[0.15em] leading-none"
+        >
+          {title}
+        </Title>
+      </div>
+      <div className="px-6 py-6">{children}</div>
     </div>
   )
 }
