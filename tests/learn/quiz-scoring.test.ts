@@ -235,6 +235,51 @@ describe("Quiz Scoring", () => {
       // 3/5 = 0.6 which is below 0.8
       expect(result.passed).toBe(false)
     })
+
+    it("should dedupe duplicate answers so score never exceeds maxScore", async () => {
+      // Regression test: a buggy client (QuizSheet pre-fix) submitted the last answer
+      // twice. The server must dedupe by questionId so score <= maxScore.
+      const mockQuestions = [
+        { id: "q1", options: [{ text: "A", correct: true }, { text: "B", correct: false }] },
+        { id: "q2", options: [{ text: "A", correct: true }, { text: "B", correct: false }] },
+      ]
+
+      mockSupabase.from.mockImplementation((table) => {
+        if (table === "quiz_questions") {
+          return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockResolvedValue({ data: mockQuestions, error: null }),
+          }
+        }
+        if (table === "quiz_attempts") {
+          return {
+            insert: vi.fn().mockResolvedValue({ error: null }),
+          }
+        }
+        if (table === "learning_progress") {
+          return {
+            upsert: vi.fn().mockResolvedValue({ error: null }),
+          }
+        }
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({ data: null }),
+        }
+      })
+
+      const { submitQuizAttempt } = await import("@/lib/actions/learning")
+
+      const result = await submitQuizAttempt("module-uuid-123456789012-123456789012", [
+        { questionId: "q1", selectedOption: 0 }, // Correct
+        { questionId: "q2", selectedOption: 0 }, // Correct
+        { questionId: "q2", selectedOption: 0 }, // Duplicate - must not double-count
+      ])
+
+      expect(result.score).toBe(2)
+      expect(result.maxScore).toBe(2)
+      expect(result.score).toBeLessThanOrEqual(result.maxScore)
+    })
   })
 
   // =============================================================================

@@ -500,10 +500,15 @@ export async function syncQuizzes(): Promise<{ quizzes: number; questions: numbe
     const quizSlug = (frontmatter.slug as string) || filename
 
     // Determine competency slug
-    const competencySlug = 
-      (frontmatter.competency as string) || 
-      folderCompetency || 
+    const competencySlug =
+      (frontmatter.competency as string) ||
+      folderCompetency ||
       quizSlug.split("-").slice(0, -1).join("-")
+
+    // Normalize relatedModule the same way module slugs are normalized in parseMarkdownFile
+    // (strip leading numeric prefix like "0.3-" or "8.7-"). Without this, quiz.related_module
+    // won't match learning_modules.slug and module completion on quiz pass won't fire.
+    const relatedModule = (frontmatter.relatedModule as string)?.replace(/^\d+(\.\d+)?-/, "")
 
     // Parse questions from markdown content first, then fall back to frontmatter
     let questions = parseQuizQuestions(content)
@@ -516,7 +521,7 @@ export async function syncQuizzes(): Promise<{ quizzes: number; questions: numbe
       {
         slug: quizSlug,
         competency_slug: competencySlug,
-        related_module: frontmatter.relatedModule as string,
+        related_module: relatedModule,
         title: (frontmatter.title as string) || quizSlug,
         description: frontmatter.description as string,
         passing_score: (frontmatter.passingScore as number) || 80,
@@ -544,7 +549,7 @@ export async function syncQuizzes(): Promise<{ quizzes: number; questions: numbe
       const { error } = await supabase.from("quiz_questions").insert({
         quiz_slug: quizSlug,
         competency_slug: competencySlug,
-        related_module: frontmatter.relatedModule as string,
+        related_module: relatedModule,
         question_number: index + 1,
         question_text: q.question,
         question: q.question, // Legacy column
