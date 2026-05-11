@@ -77,6 +77,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
   const [score, setScore] = React.useState(0)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = React.useState(false)
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
   
   const currentQuestion = questions[currentIndex]
   const totalQuestions = questions.length
@@ -115,27 +116,32 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
     } else {
       // Quiz complete - submit to server
       setIsSubmitting(true)
+      setSubmitError(null)
       try {
-        const quizAnswers: QuizAnswer[] = Object.entries(answers).map(([qId, opt]) => ({
+        // Defensive merge: `answers` already includes the last answer (set in handleSubmit),
+        // but re-spread guards against React state batching edge cases. Same key dedupes naturally.
+        const finalAnswers = { ...answers, [currentQuestion.id]: selectedOption! }
+        const quizAnswers: QuizAnswer[] = Object.entries(finalAnswers).map(([qId, opt]) => ({
           questionId: qId,
           selectedOption: opt,
         }))
-        // Add the last answer
-        quizAnswers.push({
-          questionId: currentQuestion.id,
-          selectedOption: selectedOption!,
-        })
         await submitQuizAttempt(quiz.slug, quizAnswers)
+        setIsSubmitting(false)
+        setState("complete")
+
+        // Notify parent
+        const finalScore = lastAnswerCorrect ? score + 1 : score
+        const passed = (finalScore / totalQuestions) >= (quiz.passing_score / 100)
+        onComplete?.(passed, finalScore, totalQuestions)
       } catch (error) {
         console.error("Failed to save quiz attempt:", error)
+        setIsSubmitting(false)
+        // Stay on feedback screen so the user can retry. Without this, the results
+        // screen would render with no attempt persisted — masking the failure.
+        setSubmitError(
+          error instanceof Error ? error.message : "Couldn't save your results. Please try again."
+        )
       }
-      setIsSubmitting(false)
-      setState("complete")
-      
-      // Notify parent
-      const finalScore = lastAnswerCorrect ? score + 1 : score
-      const passed = (finalScore / totalQuestions) >= (quiz.passing_score / 100)
-      onComplete?.(passed, finalScore, totalQuestions)
     }
   }
   
@@ -146,8 +152,9 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
     setScore(0)
     setState("in-progress")
     setLastAnswerCorrect(false)
+    setSubmitError(null)
   }
-  
+
   const handleClose = () => {
     setOpen(false)
     // Reset state after animation
@@ -158,6 +165,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
       setScore(0)
       setState("in-progress")
       setLastAnswerCorrect(false)
+      setSubmitError(null)
     }, 300)
   }
   
@@ -244,6 +252,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
               isSubmitting={isSubmitting}
               showFeedback={state === "showing-feedback"}
               isCorrect={lastAnswerCorrect}
+              submitError={submitError}
               onOptionSelect={handleOptionSelect}
               onSubmit={handleSubmit}
               onContinue={handleContinue}
@@ -268,6 +277,7 @@ interface QuizQuestionViewProps {
   isSubmitting: boolean
   showFeedback: boolean
   isCorrect: boolean
+  submitError: string | null
   onOptionSelect: (index: number) => void
   onSubmit: () => void
   onContinue: () => void
@@ -282,6 +292,7 @@ function QuizQuestionView({
   isSubmitting,
   showFeedback,
   isCorrect,
+  submitError,
   onOptionSelect,
   onSubmit,
   onContinue,
@@ -329,6 +340,21 @@ function QuizQuestionView({
                   {question.explanation}
                 </Text>
               )}
+            </Stack>
+          </div>
+        )}
+
+        {/* Submit Error Banner */}
+        {submitError && (
+          <div className="p-4 rounded-lg flex items-start gap-3 bg-red-500/10 border border-red-500/20">
+            <XCircleIcon className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+            <Stack gap="xs">
+              <Text weight="semibold" className="text-red-700 dark:text-red-400">
+                Couldn&apos;t save your results
+              </Text>
+              <Text size="sm" className="text-muted-foreground">
+                {submitError}
+              </Text>
             </Stack>
           </div>
         )}
@@ -390,17 +416,19 @@ function QuizQuestionView({
         
         {/* Action button */}
         {showFeedback ? (
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="w-full gap-2"
             onClick={onContinue}
             disabled={isSubmitting}
           >
-            {isSubmitting 
-              ? "Saving..." 
-              : currentIndex < totalQuestions - 1 
+            {isSubmitting
+              ? "Saving..."
+              : currentIndex < totalQuestions - 1
                 ? <>Continue <ArrowRightIcon className="h-4 w-4" /></>
-                : "See Results"
+                : submitError
+                  ? "Try Again"
+                  : "See Results"
             }
           </Button>
         ) : (

@@ -192,24 +192,31 @@ export async function submitQuizAttempt(
   }
 
   // Calculate score
+  // Dedupe by questionId (last answer wins) so a buggy client can't inflate scores
+  // by submitting the same question twice. Defense-in-depth — score must never exceed maxScore.
+  const answersByQuestion = new Map<string, number>()
+  for (const answer of answers) {
+    answersByQuestion.set(answer.questionId, answer.selectedOption)
+  }
+
   let score = 0
   const correctAnswers: string[] = []
   const explanations: Record<string, string> = {}
 
-  for (const answer of answers) {
-    const question = questions.find((q) => q.id === answer.questionId)
+  for (const [questionId, selectedIndex] of answersByQuestion) {
+    const question = questions.find((q) => q.id === questionId)
     if (!question) continue
 
     const options = question.options as Array<{ text: string; correct: boolean }>
-    const selectedOption = options[answer.selectedOption]
+    const selectedOption = options[selectedIndex]
 
     if (selectedOption?.correct) {
       score++
-      correctAnswers.push(answer.questionId)
+      correctAnswers.push(questionId)
     }
 
     if (question.explanation) {
-      explanations[answer.questionId] = question.explanation
+      explanations[questionId] = question.explanation
     }
   }
 
