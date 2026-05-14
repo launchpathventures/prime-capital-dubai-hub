@@ -637,46 +637,6 @@
   margin-top: 1.5rem;
 }
 
-/* =============================================================================
-   STATS / VALUE PROPS
-   ============================================================================= */
-
-.tahir-stats {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-@media (min-width: 768px) {
-  .tahir-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.tahir-stat {
-  border-top: 1px solid var(--tahir-rule);
-  padding-top: 1rem;
-}
-.tahir-stat__value {
-  display: block;
-  font-family: var(--tahir-font-display);
-  font-size: 2rem;
-  line-height: 1;
-  letter-spacing: 0;
-  color: var(--tahir-ink);
-}
-@media (min-width: 768px) {
-  .tahir-stat__value {
-    font-size: 2.5rem;
-  }
-}
-.tahir-stat__label {
-  display: block;
-  font-size: 0.8125rem;
-  letter-spacing: 0;
-  color: var(--tahir-ink-muted);
-  margin-top: 0.5rem;
-}
-
 .tahir-values {
   display: grid;
   gap: 1.5rem;
