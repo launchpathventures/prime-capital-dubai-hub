@@ -15,6 +15,7 @@ import { z } from "zod"
 import { randomUUID } from "node:crypto"
 import { getWebPropertyBySlug } from "@/lib/content"
 import type { Property } from "@/lib/content-types"
+import { deriveSiteSource } from "@/lib/leads/source"
 
 // =============================================================================
 // RATE LIMITING
@@ -380,7 +381,11 @@ function getFormName(formMode: string, pageUrl: string): string {
 
   const modeName = modeNames[formMode] || formMode
 
-  return `${modeName} - ${pageName}`
+  return `${modeName}-${pageName}`
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
 // =============================================================================
@@ -439,117 +444,148 @@ function buildMessage(data: {
 // VALIDATION SCHEMA
 // =============================================================================
 
-const leadSchema = z.object({
-  // Contact fields (optional for returning leads in property-enquiry mode)
-  firstName: z.string().max(100).optional().default(""),
-  lastName: z.string().max(100).optional().default(""),
-  email: z.string().max(100).optional().default(""),
-  // E.164 format ("+" + country code + national number, 8-15 digits total).
-  // Empty string allowed for returning-lead property-enquiry submissions that
-  // don't re-collect contact details.
-  whatsapp: z
-    .string()
-    .max(20)
-    .regex(/^(\+[1-9]\d{6,14})?$/, "Phone must be in E.164 format")
-    .optional()
-    .default(""),
-  formMode: z.enum([
-    "contact",
-    "landing",
-    "download",
-    "private",
-    "property-enquiry",
-    "newsletter",
-    "event",
-  ]),
-  submittedAt: z.string(),
-  pageUrl: z.string().max(500),
+const leadSchema = z
+  .object({
+    // Contact fields (optional for returning leads in property-enquiry mode)
+    firstName: z.string().max(100).optional().default(""),
+    lastName: z.string().max(100).optional().default(""),
+    email: z
+      .string()
+      .max(100)
+      .refine((value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), {
+        message: "Invalid email format",
+      })
+      .optional()
+      .default(""),
+    // E.164 format ("+" + country code + national number, 8-15 digits total).
+    // Empty string allowed for returning-lead property-enquiry submissions that
+    // don't re-collect contact details.
+    whatsapp: z
+      .string()
+      .max(20)
+      .regex(/^(\+[1-9]\d{6,14})?$/, "Phone must be in E.164 format")
+      .optional()
+      .default(""),
+    formMode: z.enum([
+      "contact",
+      "landing",
+      "download",
+      "private",
+      "property-enquiry",
+      "newsletter",
+      "event",
+    ]),
+    submittedAt: z.string(),
+    pageUrl: z.string().max(500),
 
-  // Optional fields - goals
-  goals: z.array(z.string().max(100)).optional(),
+    // Optional fields - goals
+    goals: z.array(z.string().max(100)).optional(),
 
-  // Optional fields - buyer qualification
-  investTimeline: z.string().max(100).optional(),
-  budget: z.string().max(100).optional(),
-  propertyTypes: z.array(z.string().max(50)).max(9).optional(),
-  locations: z.array(z.string().max(100)).max(5).optional(),
-  bedrooms: z.number().int().min(0).max(20).optional(),
+    // Optional fields - buyer qualification
+    investTimeline: z.string().max(100).optional(),
+    budget: z.string().max(100).optional(),
+    propertyTypes: z.array(z.string().max(50)).max(9).optional(),
+    locations: z.array(z.string().max(100)).max(5).optional(),
+    bedrooms: z.number().int().min(0).max(20).optional(),
 
-  // Optional fields - seller qualification
-  propertyName: z.string().max(500).optional(),
-  propertyLocation: z.string().max(500).optional(),
-  concerns: z.string().max(2000).optional(),
-  propertyType: z.string().max(100).optional(),
-  saleTimeline: z.string().max(100).optional(),
-  targetPrice: z.string().max(100).optional(),
+    // Optional fields - seller qualification
+    propertyName: z.string().max(500).optional(),
+    propertyLocation: z.string().max(500).optional(),
+    concerns: z.string().max(2000).optional(),
+    propertyType: z.string().max(100).optional(),
+    saleTimeline: z.string().max(100).optional(),
+    targetPrice: z.string().max(100).optional(),
 
-  // Optional fields - questions
-  hasQuestions: z.boolean().optional(),
-  questionsText: z.string().max(500).optional(),
+    // Optional fields - questions
+    hasQuestions: z.boolean().optional(),
+    questionsText: z.string().max(500).optional(),
 
-  // Optional fields - private mode
-  privateRole: z.string().max(100).optional(),
-  deploymentRange: z.string().max(100).optional(),
-  preferredContact: z.string().max(100).optional(),
-  privateContext: z.string().max(500).optional(),
+    // Optional fields - private mode
+    privateRole: z.string().max(100).optional(),
+    deploymentRange: z.string().max(100).optional(),
+    preferredContact: z.string().max(100).optional(),
+    privateContext: z.string().max(500).optional(),
 
-  // Property enquiry fields
-  bitrixLeadId: z.string().max(50).optional(),
-  enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
-  propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
-  enquiryNotes: z.string().max(1000).optional(),
+    // Property enquiry fields
+    bitrixLeadId: z.string().max(50).optional(),
+    enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
+    propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
+    enquiryNotes: z.string().max(1000).optional(),
 
-  // Lead magnet + tagging for CRM categorisation
-  leadMagnet: z.string().max(200).optional(),
-  leadTag: z.string().max(100).optional(),
+    // Lead magnet + tagging for CRM categorisation
+    leadMagnet: z.string().max(200).optional(),
+    leadTag: z.string().max(100).optional(),
 
-  // Pipeline router
-  visitorType: z.enum(["investor", "agent", "vendor"]).optional(),
+    // Pipeline router
+    visitorType: z.enum(["investor", "agent", "vendor"]).optional(),
 
-  // Context from referring pages
-  referringProperty: z.string().max(500).optional(),
-  referringTeamMember: z.string().max(100).optional(),
-  referringTeamMemberEmail: z.string().max(100).optional(),
+    // Context from referring pages
+    referringProperty: z.string().max(500).optional(),
+    referringTeamMember: z.string().max(100).optional(),
+    referringTeamMemberEmail: z.string().max(100).optional(),
 
-  // Last-touch URL parameters
-  source: z.string().max(100).optional(),
-  utmSource: z.string().max(100).optional(),
-  utmMedium: z.string().max(100).optional(),
-  utmCampaign: z.string().max(100).optional(),
-  utmContent: z.string().max(100).optional(),
-  utmTerm: z.string().max(100).optional(),
-  manychat: z.string().max(100).optional(),
-  referrer: z.string().max(500).optional(),
+    // Legacy URL source parameter. Accepted for compatibility, but never
+    // forwarded to CRM because CRM expects utmSource explicitly.
+    source: z.string().max(100).optional(),
+    utmSource: z.string().max(100).optional(),
+    utmMedium: z.string().max(100).optional(),
+    utmCampaign: z.string().max(100).optional(),
+    utmContent: z.string().max(100).optional(),
+    utmTerm: z.string().max(100).optional(),
+    manychat: z.string().max(100).optional(),
+    referrer: z.string().max(500).optional(),
 
-  // First-touch attribution (read from 30-day cookie if present)
-  firstTouchUtmSource: z.string().max(100).optional(),
-  firstTouchUtmMedium: z.string().max(100).optional(),
-  firstTouchUtmCampaign: z.string().max(100).optional(),
-  firstTouchUtmContent: z.string().max(100).optional(),
-  firstTouchUtmTerm: z.string().max(100).optional(),
-  firstTouchReferrer: z.string().max(500).optional(),
-  firstTouchLandingPage: z.string().max(500).optional(),
-  firstTouchAt: z.string().max(40).optional(),
+    // First-touch attribution (read from 30-day cookie if present)
+    firstTouchUtmSource: z.string().max(100).optional(),
+    firstTouchUtmMedium: z.string().max(100).optional(),
+    firstTouchUtmCampaign: z.string().max(100).optional(),
+    firstTouchUtmContent: z.string().max(100).optional(),
+    firstTouchUtmTerm: z.string().max(100).optional(),
+    firstTouchReferrer: z.string().max(500).optional(),
+    firstTouchLandingPage: z.string().max(500).optional(),
+    firstTouchAt: z.string().max(40).optional(),
 
-  // Idempotency + journey
-  submissionId: z.string().max(50).optional(),
-  sessionId: z.string().max(50).optional(),
+    // Idempotency + journey
+    submissionId: z.string().max(50).optional(),
+    sessionId: z.string().max(50).optional(),
 
-  // Calendly booking metadata (sent via post-booking follow-up)
-  scheduledMeeting: z.boolean().optional(),
-  meetingStartTime: z.string().max(40).optional(),
-  meetingEndTime: z.string().max(40).optional(),
-  meetingInviteeName: z.string().max(200).optional(),
-  meetingInviteeEmail: z.string().max(200).optional(),
-  meetingEventType: z.string().max(200).optional(),
-  meetingEventUri: z.string().max(500).optional(),
-  meetingInviteeUri: z.string().max(500).optional(),
-  meetingRescheduleUrl: z.string().max(500).optional(),
-  meetingCancelUrl: z.string().max(500).optional(),
+    // Calendly booking metadata (sent via post-booking follow-up)
+    scheduledMeeting: z.boolean().optional(),
+    meetingStartTime: z.string().max(40).optional(),
+    meetingEndTime: z.string().max(40).optional(),
+    meetingInviteeName: z.string().max(200).optional(),
+    meetingInviteeEmail: z.string().max(200).optional(),
+    meetingEventType: z.string().max(200).optional(),
+    meetingEventUri: z.string().max(500).optional(),
+    meetingInviteeUri: z.string().max(500).optional(),
+    meetingRescheduleUrl: z.string().max(500).optional(),
+    meetingCancelUrl: z.string().max(500).optional(),
 
-  // Honeypot field for bot protection
-  website: z.string().max(500).optional(),
-})
+    // Honeypot field for bot protection
+    website: z.string().max(500).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.bitrixLeadId) return
+
+    const hasName = Boolean(data.firstName.trim() || data.lastName.trim())
+    const hasContact = Boolean(data.email.trim() || data.whatsapp.trim())
+
+    if (!hasName) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["firstName"],
+        message: "Name is required",
+      })
+    }
+
+    if (!hasContact) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "Email or phone is required",
+      })
+    }
+  })
 
 type LeadData = z.infer<typeof leadSchema>
 
@@ -621,6 +657,7 @@ function buildAgentCrmPayload(
   property: EnrichedProperty | null,
   submissionId: string,
   resolvedAssigneeEmail: string | null,
+  siteSource: string,
 ) {
   const visitorType = deriveVisitorType(leadData.goals, leadData.visitorType)
   const formName = getFormName(leadData.formMode, leadData.pageUrl)
@@ -648,7 +685,7 @@ function buildAgentCrmPayload(
     submissionId,
     sessionId: leadData.sessionId,
     submittedAt: leadData.submittedAt,
-    _source: "prime-capital-website",
+    _source: siteSource,
 
     // Coalesced free-text
     message: buildMessage(leadData),
@@ -697,7 +734,7 @@ function buildAgentCrmPayload(
       leadData.leadTag ||
       (property?.isDistressed ? "distressed" : undefined),
 
-    // Last-touch attribution
+    // UTM attribution
     utmSource: leadData.utmSource,
     utmMedium: leadData.utmMedium,
     utmCampaign: leadData.utmCampaign,
@@ -847,12 +884,6 @@ export async function POST(request: NextRequest) {
     // Parse request body
     const body = await request.json()
 
-    // Honeypot check - bots will fill in this hidden field
-    if (body.website) {
-      // Bot detected - silently accept to avoid revealing the trap
-      return NextResponse.json({ success: true })
-    }
-
     // Validate with Zod
     const result = leadSchema.safeParse(body)
     if (!result.success) {
@@ -872,6 +903,7 @@ export async function POST(request: NextRequest) {
     const leadData: LeadData = result.data
     // Idempotency: trust the client UUID if present, otherwise mint one.
     const submissionId = leadData.submissionId || randomUUID()
+    const siteSource = deriveSiteSource(leadData)
 
     // Server-side property enrichment + agent email resolution (used by both
     // forwarders so we don't hit the DB twice).
@@ -887,10 +919,13 @@ export async function POST(request: NextRequest) {
       property,
       submissionId,
       resolvedAssigneeEmail,
+      siteSource,
     )
 
+    const leadDataWithoutLegacySource = { ...leadData }
+    delete leadDataWithoutLegacySource.source
     const bitrixPayload = {
-      ...leadData,
+      ...leadDataWithoutLegacySource,
       submissionId,
 
       // Goals - labels and codes
@@ -955,7 +990,7 @@ export async function POST(request: NextRequest) {
       formName: getFormName(leadData.formMode, leadData.pageUrl),
 
       // Metadata for Zapier
-      _source: "prime-capital-website",
+      _source: siteSource,
       _timestamp: new Date().toISOString(),
     }
 

@@ -1,11 +1,14 @@
 /**
  * CATALYST - useAttribution Hook
  *
- * Extends useUTMParams with first-touch attribution + sessionId tracking.
+ * Extends useUTMParams with session-persistent UTM attribution + sessionId
+ * tracking.
  *
- * - Last-touch: read fresh from URL on every page load (existing behaviour).
- * - First-touch: captured ONCE on the visitor's first page load and persisted
- *   in a 30-day cookie (UTMs + referrer + landing page + timestamp).
+ * - UTM attribution: capture utm_* params once, persist them for the session,
+ *   and attach them to every form submission. Existing values are not
+ *   overwritten by later page views.
+ * - First-touch: captured once and persisted in a 30-day cookie for journey
+ *   context (referrer + landing page + timestamp).
  * - Session: a stable UUID stored in a 30-day cookie, used to thread
  *   multi-form journeys ("downloaded the guide → enquired on a property")
  *   even when the same person bounces across sessions/devices on the
@@ -20,6 +23,7 @@
 
 import * as React from "react"
 import { useUTMParams, type UTMParams } from "./use-utm-params"
+import { captureSessionUtm, readUtmFromSearch } from "@/lib/leads/attribution"
 
 const FIRST_TOUCH_COOKIE = "pc_first_touch"
 const SESSION_COOKIE = "pc_session_id"
@@ -89,9 +93,9 @@ function generateUUID(): string {
 }
 
 /**
- * One-shot capture: reads first-touch from cookie if present, otherwise
- * builds it from the current URL/referrer/landing page and writes the
- * cookie for next time. Also ensures a sessionId cookie exists.
+ * One-shot capture: reads stored UTM attribution if present, otherwise stores
+ * the current utm_* params. Also ensures a sessionId cookie exists and keeps
+ * first-touch context for debugging/analytics.
  *
  * Runs once per component mount via useState lazy initialiser. Safe in
  * SSR — returns empty object on the server.
@@ -109,7 +113,7 @@ export function useAttribution(): AttributionPayload {
       writeCookie(SESSION_COOKIE, sessionId, COOKIE_MAX_AGE_DAYS)
     }
 
-    // --- First touch ---
+    // --- First touch context ---
     let firstTouch: FirstTouch | null = null
     const cookieRaw = readCookie(FIRST_TOUCH_COOKIE)
     if (cookieRaw) {
@@ -120,13 +124,9 @@ export function useAttribution(): AttributionPayload {
       }
     }
     if (!firstTouch) {
-      const params = new URLSearchParams(window.location.search)
+      const currentUtm = readUtmFromSearch(window.location.search)
       firstTouch = {
-        utmSource: params.get("utm_source") || undefined,
-        utmMedium: params.get("utm_medium") || undefined,
-        utmCampaign: params.get("utm_campaign") || undefined,
-        utmContent: params.get("utm_content") || undefined,
-        utmTerm: params.get("utm_term") || undefined,
+        ...currentUtm,
         referrer: document.referrer || undefined,
         landingPage: window.location.href,
         at: new Date().toISOString(),
@@ -137,6 +137,9 @@ export function useAttribution(): AttributionPayload {
         /* quota or serialisation error — non-fatal */
       }
     }
+
+    // --- Session UTM attribution ---
+    const storedUtm = captureSessionUtm(window.location.search)
 
     return {
       referrer: document.referrer || undefined,
@@ -149,13 +152,13 @@ export function useAttribution(): AttributionPayload {
       firstTouchLandingPage: firstTouch?.landingPage,
       firstTouchAt: firstTouch?.at,
       sessionId: sessionId || undefined,
+      ...(storedUtm || {}),
     }
   })
 
-  // Merge last-touch (URL params) with the captured snapshot. Last-touch
-  // wins for the utm* fields because the visitor may have arrived via a
-  // different campaign than their first hit.
-  return { ...snapshot, ...lastTouch }
+  // Preserve non-UTM params like `source`/`manychat` from the current URL, but
+  // let session-persisted utm* values win for CRM attribution.
+  return { ...lastTouch, ...snapshot }
 }
 
 /**

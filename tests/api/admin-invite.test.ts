@@ -20,6 +20,7 @@ const mockAdminClient = {
   auth: {
     admin: {
       createUser: vi.fn(),
+      generateLink: vi.fn(),
     },
   },
   from: vi.fn(),
@@ -45,6 +46,10 @@ describe("Admin User Invite API", () => {
       NEXT_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
       SUPABASE_SERVICE_ROLE_KEY: "test-service-role-key",
     }
+    mockAdminClient.auth.admin.generateLink.mockResolvedValue({
+      data: { properties: {} },
+      error: null,
+    })
   })
 
   afterAll(() => {
