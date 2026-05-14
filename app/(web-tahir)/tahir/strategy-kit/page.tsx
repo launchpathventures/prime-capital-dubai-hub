@@ -5,7 +5,6 @@
  * thank-you page, and gains access to the 2026 Investor Strategy Kit.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
@@ -14,12 +13,14 @@ import {
   TahirCtaStrip,
 } from "../../_surface"
 import { brands, TAHIR_STRATEGY_KIT_PREFILL_KEY } from "@/lib/brand"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "2026 Investor Strategy Kit",
   description:
     "Tahir Majithia's 2026 strategy kit for serious Dubai property investors — markets, payment plans, ROI ranges, residency.",
-}
+  path: "/strategy-kit",
+})
 
 const insideTheKit = [
   {

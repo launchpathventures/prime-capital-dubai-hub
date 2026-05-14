@@ -38,7 +38,7 @@ const teamPhotos: { slug: string; file: string }[] = [
   { slug: "shaad-haji",                file: "Shaad Haji .jpeg" },
   { slug: "rohit-saluja",              file: "Rohit-Saluja.jpg" },
   // Associate Directors
-  { slug: "ahmed-ashfaq",              file: "Ahmed Ashfaq .jpg" },
+  { slug: "ahmed-ashfaq",              file: "ahmed-ashfaq.jpg" },
   { slug: "anisha-mehrotra",           file: "Anisha Mehrotra .jpg" },
   { slug: "ghada-mary-benitez",        file: "Ghada Mary Benitez.jpg" },
   // Operations

@@ -5,8 +5,6 @@
  * or cron: data is fetched on demand and cached for an hour.
  */
 
-import type { Metadata } from "next"
-
 import {
   TahirHero,
   TahirSection,
@@ -17,14 +15,16 @@ import {
 import { brands } from "@/lib/brand"
 import { getCachedYouTubeItems } from "@/lib/shared/youtube-channel"
 import type { YouTubeFeedItem } from "@/lib/shared/youtube-feed"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Videos",
   description:
     "Watch Tahir Majithia's latest Dubai property videos, Shorts, market explainers, and investor guidance.",
-}
+  path: "/videos",
+})
 
 async function getInitialVideos(limitPerType = 12): Promise<YouTubeFeedItem[]> {
   const youtube = brands.tahir.youtube

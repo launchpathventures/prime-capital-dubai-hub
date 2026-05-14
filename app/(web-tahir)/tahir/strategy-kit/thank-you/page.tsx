@@ -6,7 +6,6 @@
  * from the guide into a call without repeating their contact details.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
@@ -15,12 +14,14 @@ import {
   TahirLeadForm,
 } from "../../../_surface"
 import { brands, TAHIR_STRATEGY_KIT_PREFILL_KEY } from "@/lib/brand"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Thank you — Strategy Kit",
   description: "Access the 2026 Investor Strategy Kit.",
-  robots: { index: false, follow: false },
-}
+  path: "/strategy-kit/thank-you",
+  noIndex: true,
+})
 
 export default function TahirStrategyKitThankYouPage() {
   return (

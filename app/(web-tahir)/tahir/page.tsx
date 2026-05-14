@@ -23,10 +23,17 @@ import {
 import { brands } from "@/lib/brand"
 import { getCachedYouTubeItems } from "@/lib/shared/youtube-channel"
 import type { YouTubeFeedItem } from "@/lib/shared/youtube-feed"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import home from "@/data/tahir/home.json"
 import profile from "@/data/tahir/profile.json"
 import services from "@/data/tahir/services.json"
 import testimonials from "@/data/tahir/testimonials.json"
+
+export const metadata = tahirPageMetadata({
+  title: brands.tahir.meta.title,
+  description: brands.tahir.meta.description,
+  path: "/",
+})
 
 const featuredTestimonial = testimonials.testimonials.find(
   (t) => t.id === "nikhil-joshi"

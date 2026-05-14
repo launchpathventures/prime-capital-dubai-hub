@@ -6,7 +6,6 @@
  * data/tahir/profile.json so copy stays in one place.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
@@ -15,13 +14,15 @@ import {
   TahirCtaStrip,
   TahirHeroPortrait,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import profile from "@/data/tahir/profile.json"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "About Tahir",
   description:
     "Twenty years of Dubai property expertise, an exclusive network, and a personal commitment to every client.",
-}
+  path: "/about",
+})
 
 export default function TahirAboutPage() {
   return (

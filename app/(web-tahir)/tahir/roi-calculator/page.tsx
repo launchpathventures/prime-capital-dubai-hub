@@ -6,19 +6,20 @@
  * static so the rest of the route stays fast and crawlable.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
   TahirCtaStrip,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import { RoiCalculatorWidget } from "./roi-calculator-widget"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Dubai property ROI calculator",
   description:
     "Estimate annual rental yield, gross return, and a five-year projection for a Dubai property investment.",
-}
+  path: "/roi-calculator",
+})
 
 export default function TahirRoiCalculatorPage() {
   return (

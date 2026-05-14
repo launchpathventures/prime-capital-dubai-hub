@@ -6,7 +6,6 @@
  * "how we work" process.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
@@ -14,13 +13,15 @@ import {
   TahirSteps,
   TahirCtaStrip,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import services from "@/data/tahir/services.json"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Services",
   description:
     "Concierge-level real estate advisory: consultation, curated selection, negotiation, end-to-end support, and post-sale advisory.",
-}
+  path: "/services",
+})
 
 export default function TahirServicesPage() {
   return (

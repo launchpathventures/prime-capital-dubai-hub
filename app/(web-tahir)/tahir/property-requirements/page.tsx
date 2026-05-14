@@ -6,20 +6,21 @@
  * inventory and off-market opportunities.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
   TahirLeadForm,
   TahirCtaStrip,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import services from "@/data/tahir/services.json"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Share property requirements",
   description:
     "Tell Tahir what you're looking for in Dubai — location, type, budget — and get matched with the right opportunities.",
-}
+  path: "/property-requirements",
+})
 
 export default function TahirPropertyRequirementsPage() {
   return (
