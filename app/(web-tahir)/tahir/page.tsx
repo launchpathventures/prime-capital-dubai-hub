@@ -13,7 +13,6 @@ import {
   TahirHero,
   TahirMeet,
   TahirSection,
-  TahirStats,
   TahirServicesGrid,
   TahirValues,
   TahirTestimonialGrid,
@@ -96,10 +95,6 @@ export default async function TahirHomePage() {
         primaryCta={{ label: "Connect with Tahir", href: "/contact" }}
         secondaryCta={{ label: "Invest with Tahir", href: "/consultation" }}
       />
-
-      <TahirSection tone="elevated">
-        <TahirStats stats={home.trustBar.stats} />
-      </TahirSection>
 
       <TahirSection
         tone="elevated"

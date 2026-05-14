@@ -2,14 +2,13 @@
  * CATALYST - Tahir About
  *
  * Founder-led "about" page. Pulls Tahir's hero positioning, story
- * paragraphs, statistics, values, and philosophy from
- * data/tahir/profile.json so copy stays in one place.
+ * paragraphs, values, and philosophy from data/tahir/profile.json so copy
+ * stays in one place.
  */
 
 import {
   TahirHero,
   TahirSection,
-  TahirStats,
   TahirValues,
   TahirCtaStrip,
   TahirHeroPortrait,
@@ -65,10 +64,6 @@ export default function TahirAboutPage() {
             />
           </aside>
         </div>
-      </TahirSection>
-
-      <TahirSection tone="elevated" eyebrow="Track record" headline="By the numbers">
-        <TahirStats stats={profile.stats} />
       </TahirSection>
 
       <TahirSection
