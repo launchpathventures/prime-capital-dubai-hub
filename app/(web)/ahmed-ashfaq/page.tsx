@@ -11,11 +11,10 @@ import Link from "next/link"
 import { Container, Grid, Stack, Text, Title } from "@/components/core"
 import {
   AhmedBookCallForm,
-  AhmedCredentialStrip,
   AhmedCtaBand,
   AhmedHero,
   AhmedSectionHeader,
-  AhmedSignalList,
+  AhmedTrustStrip,
   ahmedProfile,
 } from "./_components/ahmed-funnel"
 import {
@@ -55,12 +54,6 @@ export const metadata: Metadata = {
     images: [ahmedProfile.ogImage],
   },
 }
-
-const heroSignals = [
-  "Strategic Dubai real estate investments",
-  "Luxury property and portfolio advisory",
-  "Clear next steps for local and international buyers",
-]
 
 const stats = [
   { value: "20+", label: "Years of real estate experience" },
@@ -106,18 +99,20 @@ export default function AhmedLandingPage() {
   return (
     <div className="ahmed-page">
       <AhmedHero
-        eyebrow="Ahmed Ashfaq · Prime Capital Dubai"
         headline={
           <>
-            Dubai property advice, led by <em>data</em> and relationship.
+            Dubai property, led by <em>data</em>.
           </>
         }
-        lead="For investors coming from YouTube who want to turn market insight into a practical Dubai property plan."
+        portrait={{
+          src: ahmedProfile.image,
+          alt: ahmedProfile.name,
+          position: "center 18%",
+        }}
         form={<AhmedBookCallForm />}
-      >
-        <AhmedSignalList items={heroSignals} />
-        <AhmedCredentialStrip />
-      </AhmedHero>
+      />
+
+      <AhmedTrustStrip />
 
       <section className="ahmed-section ahmed-section--warm">
         <Container size="lg">

@@ -5,6 +5,7 @@
  */
 
 export { CopyButton, type CopyButtonProps } from "./copy-button"
+export { AttributionInitializer } from "./attribution-initializer"
 export { DevCard, DevCardBadge } from "./dev-card"
 export { HeaderPopoverProvider, useHeaderPopover } from "./header-popover-context"
 export { ImageUpload } from "./image-upload"

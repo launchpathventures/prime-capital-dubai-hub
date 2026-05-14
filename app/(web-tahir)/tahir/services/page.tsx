@@ -1,7 +1,7 @@
 /**
  * CATALYST - Tahir Services
  *
- * Five advisory services plus three property-offering routes
+ * Six advisory services plus three property-offering routes
  * (off-plan / move-in-ready / design & build), followed by the six-step
  * "how we work" process.
  */
@@ -19,7 +19,7 @@ import services from "@/data/tahir/services.json"
 export const metadata = tahirPageMetadata({
   title: "Services",
   description:
-    "Concierge-level real estate advisory: consultation, curated selection, negotiation, end-to-end support, and post-sale advisory.",
+    "Concierge-level real estate advisory: consultation, curated selection, negotiation, acquisition, off-market opportunities, and post-sale advisory.",
   path: "/services",
 })
 
@@ -55,7 +55,7 @@ export default function TahirServicesPage() {
 
       <TahirSection
         eyebrow="Advisory"
-        headline="Five services. One direct line."
+        headline="Six services. One direct line."
         lead="Each engagement begins with a conversation. From there, you choose how deep we go — strategy alone, full acquisition, or ongoing portfolio management."
       >
         <TahirServicesGrid services={services.advisory} columns={3} />

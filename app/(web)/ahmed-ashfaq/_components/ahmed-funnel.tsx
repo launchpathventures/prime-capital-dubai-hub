@@ -27,18 +27,24 @@ export const ahmedProfile = {
 }
 
 interface AhmedHeroProps {
-  eyebrow: string
+  eyebrow?: string
   headline: ReactNode
-  lead: string
+  lead?: string
   imageSrc?: string
   imagePosition?: string
+  /** When provided, renders Ahmed's portrait as the leading column. */
+  portrait?: {
+    src: string
+    alt: string
+    position?: string
+  }
   children?: ReactNode
   form: ReactNode
 }
 
 interface AhmedFormCardProps {
   heading: string
-  intro: string
+  intro?: string
   children: ReactNode
 }
 
@@ -64,9 +70,60 @@ export function AhmedHero({
   lead,
   imageSrc = ahmedProfile.heroImage,
   imagePosition = "center 62%",
+  portrait,
   children,
   form,
 }: AhmedHeroProps) {
+  if (portrait) {
+    return (
+      <section className="ahmed-hero ahmed-hero--portrait">
+        <div className="ahmed-hero__bg" aria-hidden>
+          <Image
+            src={imageSrc}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="ahmed-hero__image"
+            style={{ objectPosition: imagePosition }}
+          />
+          <div className="ahmed-hero__veil" />
+        </div>
+
+        <Container size="xl" className="relative z-10 w-full">
+          <div className="ahmed-hero__portrait-layout">
+            <div className="ahmed-hero__portrait-col">
+              <Image
+                src={portrait.src}
+                alt={portrait.alt}
+                fill
+                priority
+                sizes="(min-width: 1180px) 44vw, (min-width: 768px) 50vw, 100vw"
+                className="ahmed-hero__portrait-img"
+                style={{ objectPosition: portrait.position ?? "center 22%" }}
+              />
+              <div className="ahmed-hero__portrait-glow" aria-hidden />
+            </div>
+
+            <div className="ahmed-hero__main">
+              <div className="ahmed-hero__copy">
+                {eyebrow ? <Text className="ahmed-eyebrow">{eyebrow}</Text> : null}
+                <h1 className="ahmed-display">{headline}</h1>
+                {lead ? <Text className="ahmed-lead">{lead}</Text> : null}
+              </div>
+
+              <aside id="enquiry-form" className="ahmed-hero__form">
+                {form}
+              </aside>
+
+              {children}
+            </div>
+          </div>
+        </Container>
+      </section>
+    )
+  }
+
   return (
     <section className="ahmed-hero">
       <div className="ahmed-hero__bg" aria-hidden>
@@ -126,7 +183,7 @@ export function AhmedFormCard({ heading, intro, children }: AhmedFormCardProps) 
         <Title as="h2" className="ahmed-form-card__title">
           {heading}
         </Title>
-        <Text className="ahmed-form-card__intro">{intro}</Text>
+        {intro ? <Text className="ahmed-form-card__intro">{intro}</Text> : null}
         <div className="ahmed-form-card__rule" />
       </div>
       <div className="ahmed-form-card__body">{children}</div>
@@ -142,10 +199,7 @@ export function AhmedBookCallForm({
   prefillFromStrategyKit?: boolean
 }) {
   return (
-    <AhmedFormCard
-      heading="Book a call with Ahmed"
-      intro="Share a little context, then choose a time. Ahmed will use it to make the call practical."
-    >
+    <AhmedFormCard heading="Book a call with Ahmed">
       <LeadForm
         mode="contact"
         theme="light"
@@ -215,6 +269,40 @@ export function AhmedCredentialStrip() {
         <span>Prime Capital Dubai advisory team</span>
       </div>
     </div>
+  )
+}
+
+export function AhmedTrustStrip() {
+  return (
+    <section className="ahmed-trust-strip" aria-label="Ahmed Ashfaq credentials">
+      <Container size="lg">
+        <div className="ahmed-trust-strip__row">
+          <div className="ahmed-trust-strip__item">
+            <ShieldCheckIcon className="ahmed-trust-strip__icon" />
+            <div>
+              <Text className="ahmed-trust-strip__value">20+ years</Text>
+              <Text className="ahmed-trust-strip__label">Real estate experience</Text>
+            </div>
+          </div>
+          <div className="ahmed-trust-strip__divider" aria-hidden />
+          <div className="ahmed-trust-strip__item">
+            <LanguagesIcon className="ahmed-trust-strip__icon" />
+            <div>
+              <Text className="ahmed-trust-strip__value">Four languages</Text>
+              <Text className="ahmed-trust-strip__label">For investor conversations</Text>
+            </div>
+          </div>
+          <div className="ahmed-trust-strip__divider" aria-hidden />
+          <div className="ahmed-trust-strip__item">
+            <CheckIcon className="ahmed-trust-strip__icon" />
+            <div>
+              <Text className="ahmed-trust-strip__value">Prime Capital Dubai</Text>
+              <Text className="ahmed-trust-strip__label">Advisory team</Text>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
   )
 }
 

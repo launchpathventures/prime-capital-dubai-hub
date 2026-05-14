@@ -4,21 +4,39 @@
  * Tests for lead capture API validation, rate limiting, and honeypot protection.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import type { NextRequest } from "next/server"
+
+vi.mock("@/lib/content", () => ({
+  getWebPropertyBySlug: vi.fn(async () => null),
+}))
 
 // Mock the fetch function for Zapier webhook calls
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
+const ORIGINAL_ENV = { ...process.env }
+
 describe("Lead Form API", () => {
   beforeEach(() => {
+    vi.resetModules()
     vi.clearAllMocks()
-    // Mock successful Zapier response
+    process.env = {
+      ...ORIGINAL_ENV,
+      AGENTCRM_API_KEY: "test-agentcrm-key",
+      AGENTCRM_API_URL: "https://crm.example.test/api/public/enquiry",
+      ZAPIER_LEAD_WEBHOOK_URL: "",
+      ZAPIER_BID_WEBHOOK_URL: "",
+    }
     mockFetch.mockResolvedValue({
       ok: true,
+      status: 200,
       text: () => Promise.resolve("OK"),
     })
+  })
+
+  afterEach(() => {
+    process.env = { ...ORIGINAL_ENV }
   })
 
   // =============================================================================
@@ -153,7 +171,7 @@ describe("Lead Form API", () => {
   // =============================================================================
 
   describe("Honeypot Protection", () => {
-    it("should silently accept bot submissions (honeypot filled)", async () => {
+    it("should forward honeypot submissions so the CRM can silently drop spam", async () => {
       const { POST } = await import("@/app/api/leads/route")
 
       const request = new Request("http://localhost/api/leads", {
@@ -180,8 +198,58 @@ describe("Lead Form API", () => {
       const data = await response.json()
       expect(data.success).toBe(true)
 
-      // Verify Zapier was NOT called (bot detected)
-      expect(mockFetch).not.toHaveBeenCalled()
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+      expect(payload.website).toBe("http://spam-link.com")
+    })
+  })
+
+  // =============================================================================
+  // CRM CONTRACT TESTS
+  // =============================================================================
+
+  describe("CRM Contract", () => {
+    it("forwards a stable site source and explicit UTM fields", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.7",
+        },
+        body: JSON.stringify({
+          firstName: "Jane",
+          lastName: "Doe",
+          email: "jane@example.com",
+          whatsapp: "+971501234567",
+          formMode: "landing",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://tahirmajithia.com/contact?utm_source=youtube&utm_campaign=test123",
+          source: "legacy-source-param",
+          utmSource: "youtube",
+          utmCampaign: "test123",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+
+      const [url, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+
+      expect(url).toBe("https://crm.example.test/api/public/enquiry")
+      expect(requestInit.headers.Authorization).toBe("Bearer test-agentcrm-key")
+      expect(payload._source).toBe("prime-capital-website")
+      expect(payload.formName).toBe("quick-enquiry-contact-page")
+      expect(payload.pageUrl).toBe(
+        "https://tahirmajithia.com/contact?utm_source=youtube&utm_campaign=test123",
+      )
+      expect(payload.utmSource).toBe("youtube")
+      expect(payload.utmCampaign).toBe("test123")
+      expect(payload.source).toBeUndefined()
     })
   })
 

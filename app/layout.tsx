@@ -18,6 +18,7 @@ import "@/design/animate.css"
 import "@/design/helpers.css"
 import "@/design/print.css"
 import "@/design/shared.css"
+import { AttributionInitializer } from "@/components/shared/attribution-initializer"
 import { config } from "@/lib/config"
 import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/json-ld"
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -84,6 +85,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={playfair.variable} suppressHydrationWarning>
       <body className="antialiased">
+        <AttributionInitializer />
         {children}
         <SpeedInsights />
         <JsonLd data={organizationJsonLd()} />
