@@ -47,9 +47,14 @@ export function LeadForm({
   tag,
   propertyContext,
   bitrixLeadId,
+  initialData,
+  persistKey,
+  prefillKey,
+  skipPrefilledContact,
 }: LeadFormProps) {
   const formRef = useRef<HTMLDivElement>(null)
   const previousStepRef = useRef<string | null>(null)
+  const shouldScrollStepRef = useRef(false)
   const [honeypot, setHoneypot] = useState("")
 
   const {
@@ -60,9 +65,25 @@ export function LeadForm({
     nextStep,
     updateData,
     submit,
-  } = useLeadForm({ mode, onSuccess, honeypot, tag, bitrixLeadId })
+  } = useLeadForm({
+    mode,
+    onSuccess,
+    honeypot,
+    tag,
+    bitrixLeadId,
+    leadMagnet: downloadAsset,
+    initialData,
+    persistKey,
+    prefillKey,
+    skipPrefilledContact,
+  })
 
-  // Scroll to top of form when step changes
+  const advanceStep = () => {
+    shouldScrollStepRef.current = true
+    nextStep()
+  }
+
+  // Scroll to top of form only after the visitor advances inside the form.
   useEffect(() => {
     // Skip initial render and Strict Mode effect replays on mount.
     // Only scroll after an actual step transition.
@@ -76,6 +97,12 @@ export function LeadForm({
     }
 
     previousStepRef.current = currentStep
+
+    if (!shouldScrollStepRef.current) {
+      return
+    }
+
+    shouldScrollStepRef.current = false
 
     if (formRef.current) {
       const rect = formRef.current.getBoundingClientRect()
@@ -101,7 +128,7 @@ export function LeadForm({
           <NameStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
             mode={mode}
             autoFocus={autoFocus}
@@ -113,7 +140,7 @@ export function LeadForm({
           <ContactStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
             mode={mode}
             isLastStep={isContactLastStep}
@@ -123,6 +150,7 @@ export function LeadForm({
             showPropertyFields={showPropertyFields}
             showConcerns={showConcerns}
             submitLabel={calendlyUrl ? "Book Call" : undefined}
+            autoFocus={autoFocus}
           />
         )
 
@@ -131,7 +159,7 @@ export function LeadForm({
           <GoalsStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
           />
         )
@@ -141,7 +169,7 @@ export function LeadForm({
           <TimelineBudgetStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
           />
         )
@@ -151,7 +179,7 @@ export function LeadForm({
           <PropertyStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
           />
         )
@@ -181,7 +209,7 @@ export function LeadForm({
           <EnquiryIntentStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             theme={theme}
           />
         )
@@ -191,7 +219,7 @@ export function LeadForm({
           <PropertyAppealStep
             data={data}
             onUpdate={updateData}
-            onNext={nextStep}
+            onNext={advanceStep}
             onSubmit={submit}
             isSubmitting={isSubmitting}
             isLastStep={isReturningLead}

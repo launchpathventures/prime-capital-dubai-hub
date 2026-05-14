@@ -330,12 +330,23 @@ function getFormName(formMode: string, pageUrl: string): string {
   let pageName = "Unknown Page"
   try {
     const url = new URL(pageUrl)
-    const path = url.pathname.replace(/^\/|\/$/g, "") // Remove leading/trailing slashes
+    const rawPath = url.pathname.replace(/^\/|\/$/g, "") // Remove leading/trailing slashes
+    const path = rawPath.startsWith("tahir/")
+      ? rawPath.replace(/^tahir\/?/, "")
+      : rawPath
     
     if (!path || path === "") {
       pageName = "Homepage"
+    } else if (rawPath === "tahir") {
+      pageName = "Tahir Homepage"
     } else if (path === "contact") {
       pageName = "Contact Page"
+    } else if (path === "consultation") {
+      pageName = "Consultation Booking"
+    } else if (path === "property-requirements") {
+      pageName = "Property Requirements"
+    } else if (path === "investment-plan") {
+      pageName = "Investment Plan"
     } else if (path.startsWith("properties/")) {
       pageName = "Property Listing"
     } else if (path === "services") {

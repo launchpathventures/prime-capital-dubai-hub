@@ -1,0 +1,92 @@
+{
+  "hero": {
+    "headline": "Frequently asked questions",
+    "intro": "Twenty years of Dubai property knowledge, distilled into clear answers. If your question isn't here, just ask."
+  },
+  "groups": [
+    {
+      "id": "general",
+      "title": "General questions",
+      "items": [
+        {
+          "q": "Who is Tahir Majithia, and why should I trust him for Dubai property investments?",
+          "a": "Tahir Majithia is a recognised authority in Dubai real estate with over 20 years of experience, specialising in exclusive, concierge-level advisory for investors at all levels."
+        },
+        {
+          "q": "What types of properties does Tahir Majithia specialise in?",
+          "a": "Tahir offers a full range of properties, including luxury penthouses, villas, off-plan investments, move-in-ready homes, and commercial real estate."
+        },
+        {
+          "q": "Is now a good time to invest in Dubai real estate?",
+          "a": "Dubai's real estate market is experiencing strong growth, with high rental yields, tax-free benefits, and increasing foreign investor interest. Tahir provides data-driven insights to guide the best investment timing."
+        },
+        {
+          "q": "How does the buying process work for international investors?",
+          "a": "The process includes selecting a property, signing a Sales and Purchase Agreement (SPA), making a deposit, obtaining approvals, completing payments, and registering with the Dubai Land Department."
+        },
+        {
+          "q": "What are the key benefits of investing in Dubai real estate?",
+          "a": "Benefits include high rental returns, no property taxes, investor-friendly regulations, and residency visa eligibility for property owners."
+        }
+      ]
+    },
+    {
+      "id": "investment",
+      "title": "Investment & financials",
+      "items": [
+        {
+          "q": "What is the minimum investment required to buy property in Dubai?",
+          "a": "The minimum investment varies by property type and location, but off-plan projects start at around $150,000, while luxury properties range from $500,000 to several million dollars."
+        },
+        {
+          "q": "Can I buy property in Dubai with cryptocurrency?",
+          "a": "Yes. Tahir offers expertise in crypto-based real estate transactions, ensuring a secure and compliant process."
+        },
+        {
+          "q": "Are there any financing options for foreign investors?",
+          "a": "Yes. Some banks and financial institutions offer mortgage options for non-residents, typically requiring a 40% down payment."
+        },
+        {
+          "q": "What are the expected returns on investment (ROI) in Dubai?",
+          "a": "Rental yields range from 6–10%, depending on location and property type, making Dubai one of the most lucrative real estate markets globally."
+        },
+        {
+          "q": "Are there additional costs besides the property price?",
+          "a": "Additional costs include a 4% Dubai Land Department fee, a 2% agency fee (only applicable to re-sale / secondary market transactions), and possible service charges for maintenance."
+        }
+      ]
+    },
+    {
+      "id": "selling",
+      "title": "Selling & exit strategy",
+      "items": [
+        {
+          "q": "How easy is it to sell property in Dubai?",
+          "a": "Dubai has a liquid real estate market with high demand from international buyers. Tahir's network ensures smooth and profitable sales."
+        },
+        {
+          "q": "Are there any taxes on selling property in Dubai?",
+          "a": "No capital gains tax or inheritance tax applies, but transaction fees may apply."
+        },
+        {
+          "q": "How long does it take to complete a property sale in Dubai?",
+          "a": "Depending on the property type and buyer financing, sales can take anywhere from a few weeks to a few months."
+        }
+      ]
+    },
+    {
+      "id": "residency",
+      "title": "Residency & legal matters",
+      "items": [
+        {
+          "q": "Can property investment in Dubai help me get a residency visa?",
+          "a": "Yes. Investors purchasing properties worth AED 750,000 or more may qualify for a residency visa, with long-term visas available for higher-value investments."
+        },
+        {
+          "q": "Are there restrictions on foreign ownership in Dubai?",
+          "a": "Foreigners can buy property in designated freehold areas with full ownership rights."
+        }
+      ]
+    }
+  ]
+}

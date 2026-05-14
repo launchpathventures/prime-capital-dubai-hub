@@ -30,6 +30,8 @@ interface ContactStepProps {
   showConcerns?: boolean
   /** Optional: custom label for the submit button when this is the last step */
   submitLabel?: string
+  /** Optional: focus the first input when this step is reached intentionally */
+  autoFocus?: boolean
 }
 
 export function ContactStep({
@@ -44,6 +46,7 @@ export function ContactStep({
   showPropertyFields,
   showConcerns,
   submitLabel,
+  autoFocus = true,
 }: ContactStepProps) {
   const [email, setEmail] = useState(data.email || "")
   const [whatsapp, setWhatsapp] = useState(data.whatsapp || "")
@@ -124,7 +127,7 @@ export function ContactStep({
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? "email-error" : undefined}
             className={cn("lead-form__input", errors.email && "lead-form__input--error")}
-            autoFocus={mode !== "private"}
+            autoFocus={autoFocus && mode !== "private"}
             autoComplete="email"
           />
           {errors.email && (

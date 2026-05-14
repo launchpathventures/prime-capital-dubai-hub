@@ -6,7 +6,6 @@
  */
 
 import { Metadata } from "next"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { config } from "@/lib/config"
 import { getCertificateByPublicId } from "@/lib/lms/certificate-queries"

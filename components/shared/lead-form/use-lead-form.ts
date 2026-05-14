@@ -6,7 +6,7 @@
 
 "use client"
 
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { useAttribution, generateSubmissionId } from "@/lib/hooks/use-attribution"
 import type { LeadFormData, FormMode, StepId, LeadGoal } from "./types"
 
@@ -84,6 +84,11 @@ interface UseLeadFormOptions {
   honeypot?: string
   tag?: string
   bitrixLeadId?: string
+  leadMagnet?: string
+  initialData?: Partial<LeadFormData>
+  persistKey?: string
+  prefillKey?: string
+  skipPrefilledContact?: boolean
 }
 
 interface UseLeadFormReturn {
@@ -118,6 +123,11 @@ export function useLeadForm({
   honeypot,
   tag,
   bitrixLeadId,
+  leadMagnet,
+  initialData,
+  persistKey,
+  prefillKey,
+  skipPrefilledContact,
 }: UseLeadFormOptions): UseLeadFormReturn {
   // Returning lead: has Bitrix Lead ID, skips name/contact/goals/budget
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
@@ -139,34 +149,67 @@ export function useLeadForm({
     }
   }, [])
 
+  const [prefillData] = useState<Partial<LeadFormData>>(() => ({
+    ...initialData,
+  }))
+
   // Form data state — seed with submissionId + sessionId so downstream
   // steps (including the success/Calendly step) can carry them on the
   // post-booking follow-up POST.
-  const [data, setData] = useState<Partial<LeadFormData>>({
-    formMode: mode,
+  const [data, setData] = useState<Partial<LeadFormData>>(() => ({
     goals: [],
+    ...prefillData,
     ...contextParams,
+    formMode: mode,
     ...(bitrixLeadId ? { bitrixLeadId } : {}),
+    ...(leadMagnet ? { leadMagnet } : {}),
+    ...(tag ? { leadTag: tag } : {}),
     submissionId: submissionIdRef.current,
     sessionId: attribution.sessionId,
-  })
+  }))
 
   // Current step index (among available steps)
-  const [stepIndex, setStepIndex] = useState(0)
+  const [stepIndex, setStepIndex] = useState(() => {
+    if (!skipPrefilledContact || !hasContactPrefill(data)) return 0
+
+    const initialSteps = getAvailableStepIds(mode, data, isReturningLead)
+    const contactIndex = initialSteps.indexOf("contact")
+    if (contactIndex === -1) return 0
+
+    const nextIndex = Math.min(contactIndex + 1, initialSteps.length - 1)
+    return initialSteps[nextIndex] === "success" ? 0 : nextIndex
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const didRestorePrefillRef = useRef(false)
+
+  useEffect(() => {
+    if (didRestorePrefillRef.current || !prefillKey) return
+    didRestorePrefillRef.current = true
+
+    const restored = readLeadFormPrefill(prefillKey)
+    if (!Object.keys(restored).length) return
+
+    setData((prev) => {
+      const nextData: Partial<LeadFormData> = {
+        ...prev,
+        ...restored,
+        formMode: mode,
+        ...(leadMagnet ? { leadMagnet } : {}),
+        ...(tag ? { leadTag: tag } : {}),
+      }
+
+      if (skipPrefilledContact && hasContactPrefill(nextData)) {
+        setStepIndex(getStepAfterContactIndex(mode, nextData, isReturningLead))
+      }
+
+      return nextData
+    })
+  }, [isReturningLead, leadMagnet, mode, prefillKey, skipPrefilledContact, tag])
 
   // Calculate available steps based on mode and conditions
   const availableSteps = useMemo(() => {
-    return STEPS.filter((step) => {
-      // Must be available for this mode
-      if (!step.modes.includes(mode)) return false
-      // Returning leads skip most steps
-      if (isReturningLead && RETURNING_LEAD_SKIP_STEPS.includes(step.id)) return false
-      // Must pass condition if present
-      if (step.condition && !step.condition(data)) return false
-      return true
-    }).map((s) => s.id)
+    return getAvailableStepIds(mode, data, isReturningLead)
   }, [mode, data, isReturningLead])
 
   const currentStep = availableSteps[stepIndex] ?? "name"
@@ -250,7 +293,8 @@ export function useLeadForm({
         referringTeamMember: mergedData.referringTeamMember,
         referringTeamMemberEmail: mergedData.referringTeamMemberEmail,
         // Lead tagging for CRM categorisation
-        leadTag: tag,
+        leadMagnet: mergedData.leadMagnet || leadMagnet,
+        leadTag: mergedData.leadTag || tag,
         // Honeypot for bot protection
         website: honeypot,
       }
@@ -266,6 +310,8 @@ export function useLeadForm({
         throw new Error(result.error || "Failed to submit form")
       }
 
+      writeLeadFormPrefill(persistKey, finalData)
+
       // Move to success step
       nextStep()
       onSuccess?.(finalData)
@@ -274,7 +320,18 @@ export function useLeadForm({
     } finally {
       setIsSubmitting(false)
     }
-  }, [data, mode, attribution, honeypot, bitrixLeadId, tag, nextStep, onSuccess])
+  }, [
+    data,
+    mode,
+    attribution,
+    honeypot,
+    bitrixLeadId,
+    leadMagnet,
+    persistKey,
+    tag,
+    nextStep,
+    onSuccess,
+  ])
 
   return {
     currentStep,
@@ -291,5 +348,87 @@ export function useLeadForm({
     submit,
     availableSteps,
     progress,
+  }
+}
+
+function getAvailableStepIds(
+  mode: FormMode,
+  data: Partial<LeadFormData>,
+  isReturningLead: boolean
+) {
+  return STEPS.filter((step) => {
+    if (!step.modes.includes(mode)) return false
+    if (isReturningLead && RETURNING_LEAD_SKIP_STEPS.includes(step.id)) return false
+    if (step.condition && !step.condition(data)) return false
+    return true
+  }).map((s) => s.id)
+}
+
+function getStepAfterContactIndex(
+  mode: FormMode,
+  data: Partial<LeadFormData>,
+  isReturningLead: boolean
+) {
+  const initialSteps = getAvailableStepIds(mode, data, isReturningLead)
+  const contactIndex = initialSteps.indexOf("contact")
+  if (contactIndex === -1) return 0
+
+  const nextIndex = Math.min(contactIndex + 1, initialSteps.length - 1)
+  return initialSteps[nextIndex] === "success" ? 0 : nextIndex
+}
+
+function hasContactPrefill(data: Partial<LeadFormData>) {
+  return Boolean(
+    data.firstName?.trim() &&
+      data.lastName?.trim() &&
+      data.email?.trim() &&
+      data.whatsapp?.trim()
+  )
+}
+
+function getLeadFormPrefillData(data: Partial<LeadFormData>) {
+  const firstName = getPrefillString(data.firstName)
+  const lastName = getPrefillString(data.lastName)
+  const email = getPrefillString(data.email)
+  const whatsapp = getPrefillString(data.whatsapp)
+
+  return {
+    ...(firstName ? { firstName } : {}),
+    ...(lastName ? { lastName } : {}),
+    ...(email ? { email } : {}),
+    ...(whatsapp ? { whatsapp } : {}),
+  } satisfies Partial<LeadFormData>
+}
+
+function getPrefillString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : undefined
+}
+
+function readLeadFormPrefill(key?: string): Partial<LeadFormData> {
+  if (!key || typeof window === "undefined") return {}
+
+  try {
+    const raw = window.sessionStorage.getItem(key)
+    if (!raw) return {}
+
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {}
+
+    return getLeadFormPrefillData(parsed as Partial<LeadFormData>)
+  } catch {
+    return {}
+  }
+}
+
+function writeLeadFormPrefill(key: string | undefined, data: Partial<LeadFormData>) {
+  if (!key || typeof window === "undefined") return
+
+  const prefill = getLeadFormPrefillData(data)
+  if (!Object.keys(prefill).length) return
+
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(prefill))
+  } catch {
+    // Non-fatal: the next form simply falls back to asking for contact details.
   }
 }

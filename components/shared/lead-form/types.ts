@@ -230,6 +230,18 @@ export interface LeadFormProps {
 
   /** Optional: Bitrix Lead ID for returning leads */
   bitrixLeadId?: string
+
+  /** Optional: Seed the form with known values */
+  initialData?: Partial<LeadFormData>
+
+  /** Optional: Persist completed contact fields under this sessionStorage key */
+  persistKey?: string
+
+  /** Optional: Restore contact fields from this sessionStorage key */
+  prefillKey?: string
+
+  /** Optional: Start after name/contact when restored data has those fields */
+  skipPrefilledContact?: boolean
 }
 
 // =============================================================================

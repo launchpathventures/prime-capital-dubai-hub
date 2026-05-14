@@ -14,6 +14,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import type { CookieOptions } from "@supabase/ssr"
+import { getBrand, DEFAULT_BRAND_ID } from "@/lib/brand"
 
 // -----------------------------------------------------------------------------
 // Environment Configuration
@@ -73,8 +74,62 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // ---------------------------------------------------------------------------
+  // Brand Detection — resolve hostname → brand, stamp x-brand header + cookie.
+  // Partner-brand hostnames silently rewrite root paths to the brand's surface
+  // (e.g. tahirmajithia.com/about → /tahir/about). Visitors see clean URLs.
+  // ---------------------------------------------------------------------------
+
+  const hostname = request.headers.get("host") || "localhost"
+  const brand = getBrand(hostname)
+  const isPartnerBrand = brand.id !== DEFAULT_BRAND_ID
+
+  // Strip any inbound x-brand to block client spoofing, then stamp the
+  // server-resolved id so server components can read it via getBrandFromHeaders.
+  const forwardedHeaders = new Headers(request.headers)
+  forwardedHeaders.delete("x-brand")
+  forwardedHeaders.set("x-brand", brand.id)
+
+  const brandCookieOptions = {
+    httpOnly: false,
+    sameSite: "lax" as const,
+    secure: isHttps,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  }
+
+  // Partner brands: rewrite root paths to the brand's internal surface.
+  // Shared paths (auth, admin, learn, catalyst, docs, examples) pass through —
+  // they are reachable on every brand's domain. We also let paths that already
+  // carry the brand prefix through to avoid infinite /tahir/tahir/... rewrites.
+  const brandPrefix = `/${brand.id}`
+  const isSharedPath =
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/learn") ||
+    pathname.startsWith("/catalyst") ||
+    pathname.startsWith("/docs") ||
+    pathname.startsWith("/examples") ||
+    pathname === brandPrefix ||
+    pathname.startsWith(`${brandPrefix}/`)
+
+  if (isPartnerBrand && !isSharedPath) {
+    const rewriteUrl = request.nextUrl.clone()
+    rewriteUrl.pathname = `${brandPrefix}${pathname === "/" ? "" : pathname}`
+    const rewriteResponse = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: forwardedHeaders },
+    })
+    rewriteResponse.headers.set("x-brand", brand.id)
+    rewriteResponse.cookies.set("brand", brand.id, brandCookieOptions)
+    return rewriteResponse
+  }
+
   // Default response (may be replaced by Supabase cookie handling)
-  const response = NextResponse.next({ request: { headers: request.headers } })
+  const response = NextResponse.next({ request: { headers: forwardedHeaders } })
+
+  // Attach brand context to all downstream responses
+  response.headers.set("x-brand", brand.id)
+  response.cookies.set("brand", brand.id, brandCookieOptions)
 
   // ---------------------------------------------------------------------------
   // Auth: Route Protection

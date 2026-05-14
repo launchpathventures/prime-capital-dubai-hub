@@ -65,7 +65,6 @@ function Logo({
         src={logoSrc}
         alt="Prime Capital"
         loading="eager"
-        // eslint-disable-next-line @next/next/no-img-element
         fetchPriority="high"
         style={{ 
           height: `${heights[size]}px`,

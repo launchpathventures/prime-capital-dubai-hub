@@ -58,6 +58,10 @@ export const WEB_CONTENT_TAGS = {
 
 const WEB_CONTENT_REVALIDATE_SECONDS = 60 * 5
 
+function uniqueSlugs(rows: { slug: string | null }[]): string[] {
+  return Array.from(new Set(rows.map((row) => row.slug).filter(Boolean) as string[]))
+}
+
 // =============================================================================
 // SUPABASE ROW TYPES (snake_case from database)
 // =============================================================================
@@ -374,14 +378,16 @@ async function fetchPublicPropertyBySlug(slug: string): Promise<Property | null>
       .from("properties")
       .select("*")
       .eq("slug", slug)
-      .single()
+      .order("display_order")
+      .limit(1)
 
     if (error) {
       trackSupabaseError(error, "properties", "select", { function: "fetchPublicPropertyBySlug", slug })
       return null
     }
 
-    return mapProperty(data as PropertyRow)
+    const row = ((data ?? []) as PropertyRow[])[0]
+    return row ? mapProperty(row) : null
   } catch (err) {
     trackSupabaseError(err, "properties", "select", { function: "fetchPublicPropertyBySlug", slug })
     return null
@@ -423,14 +429,16 @@ async function fetchPublicTeamMemberBySlug(slug: string): Promise<TeamMember | n
       .eq("published", true)
       .not("photo", "is", null)
       .neq("photo", "")
-      .single()
+      .order("display_order")
+      .limit(1)
 
     if (error) {
       trackSupabaseError(error, "team_members", "select", { function: "fetchPublicTeamMemberBySlug", slug })
       return null
     }
 
-    return mapTeamMember(data as TeamMemberRow)
+    const row = ((data ?? []) as TeamMemberRow[])[0]
+    return row ? mapTeamMember(row) : null
   } catch (err) {
     trackSupabaseError(err, "team_members", "select", { function: "fetchPublicTeamMemberBySlug", slug })
     return null
@@ -525,7 +533,6 @@ async function fetchPublicDistressedProperties(): Promise<Property[]> {
     const { data, error } = await supabase
       .from("properties")
       .select("*")
-      .contains("tags", ["distressed"])
       .order("display_order")
 
     if (error) {
@@ -533,7 +540,9 @@ async function fetchPublicDistressedProperties(): Promise<Property[]> {
       return []
     }
 
-    return (data as PropertyRow[]).map(mapProperty)
+    return ((data ?? []) as PropertyRow[])
+      .map(mapProperty)
+      .filter((property) => property.tags.includes("distressed"))
   } catch (err) {
     trackSupabaseError(err, "properties", "select", { function: "fetchPublicDistressedProperties" })
     return []
@@ -774,14 +783,16 @@ export async function getPropertyBySlug(slug: string): Promise<Property | null> 
       .from("properties")
       .select("*")
       .eq("slug", slug)
-      .single()
+      .order("display_order")
+      .limit(1)
 
     if (error) {
       trackSupabaseError(error, "properties", "select", { function: "getPropertyBySlug", slug })
       return null
     }
 
-    return mapProperty(data as PropertyRow)
+    const row = ((data ?? []) as PropertyRow[])[0]
+    return row ? mapProperty(row) : null
   } catch (err) {
     trackSupabaseError(err, "properties", "select", { function: "getPropertyBySlug", slug })
     return null
@@ -848,14 +859,16 @@ export async function getTeamMemberBySlug(slug: string): Promise<TeamMember | nu
       .select("*")
       .eq("slug", slug)
       .eq("published", true)
-      .single()
+      .order("display_order")
+      .limit(1)
 
     if (error) {
       trackSupabaseError(error, "team_members", "select", { function: "getTeamMemberBySlug", slug })
       return null
     }
 
-    return mapTeamMember(data as TeamMemberRow)
+    const row = ((data ?? []) as TeamMemberRow[])[0]
+    return row ? mapTeamMember(row) : null
   } catch (err) {
     trackSupabaseError(err, "team_members", "select", { function: "getTeamMemberBySlug", slug })
     return null
@@ -975,7 +988,7 @@ export async function getPropertySlugs(): Promise<string[]> {
       return []
     }
 
-    return (data as { slug: string }[]).map((row) => row.slug)
+    return uniqueSlugs((data ?? []) as { slug: string }[])
   } catch (err) {
     trackSupabaseError(err, "properties", "select", { function: "getPropertySlugs" })
     return []
@@ -993,13 +1006,15 @@ export async function getTeamMemberSlugs(): Promise<string[]> {
       .from("team_members")
       .select("slug")
       .eq("published", true)
+      .not("photo", "is", null)
+      .neq("photo", "")
 
     if (error) {
       trackSupabaseError(error, "team_members", "select", { function: "getTeamMemberSlugs" })
       return []
     }
 
-    return (data as { slug: string }[]).map((row) => row.slug)
+    return uniqueSlugs((data ?? []) as { slug: string }[])
   } catch (err) {
     trackSupabaseError(err, "team_members", "select", { function: "getTeamMemberSlugs" })
     return []
@@ -1022,7 +1037,7 @@ export async function getServiceSlugs(): Promise<string[]> {
       return []
     }
 
-    return (data as { slug: string }[]).map((row) => row.slug)
+    return uniqueSlugs((data ?? []) as { slug: string }[])
   } catch (err) {
     trackSupabaseError(err, "services", "select", { function: "getServiceSlugs" })
     return []

@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "eyebrow": "Founder, Prime Capital Dubai",
+    "headline": "Dubai property, advised personally.",
+    "subheadline": "Twenty years of market expertise, exclusive off-market access, and concierge-level service — from first conversation to keys in hand.",
+    "primaryCta": {
+      "label": "Book a 30-minute call",
+      "href": "/consultation"
+    },
+    "secondaryCta": {
+      "label": "Read the 2026 Strategy Kit",
+      "href": "/strategy-kit"
+    },
+    "tertiaryCta": {
+      "label": "Watch on YouTube",
+      "href": "https://www.youtube.com/@TahirMajithia"
+    }
+  },
+  "trustBar": {
+    "intro": "Trusted by investors and homeowners across the UK, GCC, and beyond.",
+    "stats": [
+      { "label": "Years of expertise", "value": "20+" },
+      { "label": "Average rental yield", "value": "6–10%" },
+      { "label": "DLD transfer fee", "value": "4%" },
+      { "label": "Capital gains tax", "value": "0%" }
+    ]
+  },
+  "approach": {
+    "eyebrow": "How I work",
+    "headline": "A trusted partner from first call to final handshake",
+    "paragraphs": [
+      "Tahir offers exclusive access to Dubai's finest properties, blending deep market expertise with cutting-edge investment strategies.",
+      "Whether you seek high-yield opportunities or a luxury residence, you'll get concierge-level service tailored to your goals — and a direct line to Tahir himself, not a junior account manager."
+    ],
+    "cta": {
+      "label": "Read about my approach",
+      "href": "/about"
+    }
+  },
+  "servicesPreview": {
+    "eyebrow": "Services",
+    "headline": "Investing with Tahir Majithia",
+    "intro": "Expert guidance across off-plan, move-in-ready, and bespoke design-and-build opportunities."
+  },
+  "testimonialsPreview": {
+    "eyebrow": "Client voices",
+    "headline": "Two decades of trusted relationships"
+  },
+  "contactCta": {
+    "eyebrow": "Get in touch",
+    "headline": "Ready to make your next move in Dubai?",
+    "body": "Book a 30-minute discovery call, or send a few details and Tahir will be in touch within one business day.",
+    "primaryCta": {
+      "label": "Book a 30-minute call",
+      "href": "/consultation"
+    },
+    "secondaryCta": {
+      "label": "Send a message",
+      "href": "/contact"
+    }
+  }
+}

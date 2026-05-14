@@ -10,15 +10,9 @@ import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { rewriteMagicLink } from "@/lib/auth/magic-link"
 
-// Default password from environment (server-only, never expose to client)
-const DEFAULT_PASSWORD = process.env.AUTH_DEFAULT_PASSWORD
-
-// Validate that default password is configured
-if (!DEFAULT_PASSWORD) {
-  console.warn("⚠️ AUTH_DEFAULT_PASSWORD is not configured - user creation will fail")
-}
-
 export async function POST(request: Request) {
+  const defaultPassword = process.env.AUTH_DEFAULT_PASSWORD
+
   // First check if current user is admin
   const serverClient = await createServerClient()
   const { data: { user } } = await serverClient.auth.getUser()
@@ -44,7 +38,7 @@ export async function POST(request: Request) {
   }
 
   // Ensure default password is configured
-  if (!DEFAULT_PASSWORD) {
+  if (!defaultPassword) {
     console.error("AUTH_DEFAULT_PASSWORD environment variable is not set")
     return NextResponse.json({ error: "Server configuration error: default password not configured" }, { status: 500 })
   }
@@ -67,7 +61,7 @@ export async function POST(request: Request) {
   // Create user with default password
   const { data, error } = await adminClient.auth.admin.createUser({
     email,
-    password: DEFAULT_PASSWORD,
+    password: defaultPassword,
     email_confirm: true, // Auto-confirm email so they can login immediately
     user_metadata: {
       full_name: fullName,

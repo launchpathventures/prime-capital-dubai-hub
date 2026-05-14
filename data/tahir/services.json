@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "headline": "Real Estate Services",
+    "intro": "With over 20 years of market expertise, Tahir Majithia is the go-to authority for real estate investments in Dubai."
+  },
+  "advisory": [
+    {
+      "id": "consultation",
+      "title": "Consultation & strategy",
+      "description": "Understand your goals and craft a personalised investment plan."
+    },
+    {
+      "id": "curated-selection",
+      "title": "Curated property selection",
+      "description": "Get access to top-tier, vetted opportunities."
+    },
+    {
+      "id": "negotiation",
+      "title": "Negotiation & acquisition",
+      "description": "Secure the best deals with expert guidance."
+    },
+    {
+      "id": "end-to-end",
+      "title": "End-to-end support",
+      "description": "From legal paperwork to closing, we handle everything."
+    },
+    {
+      "id": "post-sale",
+      "title": "Post-sale advisory",
+      "description": "Maximise your investment with continued support."
+    }
+  ],
+  "propertyOfferings": [
+    {
+      "id": "off-plan",
+      "title": "Off-plan",
+      "description": "Early access to high-growth developments with flexible payments."
+    },
+    {
+      "id": "move-in-ready",
+      "title": "Move-in-ready",
+      "description": "Handpicked luxury homes, including exclusive off-market listings."
+    },
+    {
+      "id": "design-build",
+      "title": "Design & build",
+      "description": "Bespoke dream homes crafted with top architects and developers."
+    }
+  ],
+  "propertyTypes": [
+    "Off-plan investments",
+    "Move-in-ready homes",
+    "Design & build properties",
+    "Luxury penthouses",
+    "Villas",
+    "Commercial real estate"
+  ],
+  "process": {
+    "headline": "How we work together",
+    "intro": "A clear, six-step path from first conversation to keys in hand.",
+    "steps": [
+      {
+        "step": 1,
+        "title": "Selecting a property",
+        "description": "Define your goals, then match you with vetted opportunities that fit your strategy and risk profile."
+      },
+      {
+        "step": 2,
+        "title": "Sales & Purchase Agreement",
+        "description": "Negotiate terms, review the SPA, and ensure every clause works in your favour before signing."
+      },
+      {
+        "step": 3,
+        "title": "Initial deposit",
+        "description": "Coordinate the secure transfer of funds in line with developer or seller schedules."
+      },
+      {
+        "step": 4,
+        "title": "Obtaining approvals",
+        "description": "Manage NOCs, mortgage approvals (where applicable), and any developer or authority sign-offs."
+      },
+      {
+        "step": 5,
+        "title": "Completing payments",
+        "description": "Track instalments, oversee escrow releases, and keep every milestone on schedule."
+      },
+      {
+        "step": 6,
+        "title": "Dubai Land Department registration",
+        "description": "Finalise the title transfer with the DLD and hand over your new property and ownership documents."
+      }
+    ]
+  }
+}
