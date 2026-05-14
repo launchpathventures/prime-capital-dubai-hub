@@ -1,0 +1,70 @@
+{
+  "hero": {
+    "headline": "Client testimonials",
+    "intro": "Two decades of trusted relationships, in our clients' own words."
+  },
+  "testimonials": [
+    {
+      "id": "sanjeevan",
+      "quote": "Professional, knowledgeable, and relatable — Tahir has all the qualities needed for a seamless real estate experience.",
+      "author": "Sanjeevan"
+    },
+    {
+      "id": "so",
+      "quote": "Tahir provided an outstanding service, making the entire process smooth and stress-free. Highly recommended!",
+      "author": "S.O."
+    },
+    {
+      "id": "basheer",
+      "quote": "His advice was tailored and prompt, ensuring I had the right guidance at every step.",
+      "author": "Basheer Mohammad"
+    },
+    {
+      "id": "kazi",
+      "quote": "Tahir is one of the most trusted and knowledgeable professionals I've worked with. His insights and dedication set him apart.",
+      "author": "Kazi"
+    },
+    {
+      "id": "nikhil-joshi",
+      "quote": "Extremely professional and thorough, Tahir understands your needs and provides the right advice every time.",
+      "author": "Nikhil Joshi",
+      "date": "February 2025"
+    },
+    {
+      "id": "meghna",
+      "quote": "A highly competent and market-savvy advisor with exceptional work ethics. I can recommend him 200%!",
+      "author": "Meghna Ahluwalia",
+      "date": "February 2025"
+    },
+    {
+      "id": "bhavna",
+      "quote": "Tahir's deep market knowledge and ethical approach make him a trusted guide in real estate.",
+      "author": "Bhavna"
+    },
+    {
+      "id": "amreen",
+      "quote": "He was amazing to work with! His professionalism and dedication made the process effortless.",
+      "author": "Amreen"
+    },
+    {
+      "id": "sahil",
+      "quote": "Tahir ensured everything was smooth and stress-free. His expertise and attention to detail were outstanding!",
+      "author": "Sahil"
+    },
+    {
+      "id": "deepak",
+      "quote": "Go to him with confidence! He treats clients like family while offering expert real estate advice.",
+      "author": "Deepak Joshi"
+    },
+    {
+      "id": "gaurav",
+      "quote": "Tahir finds solutions where others can't. His passion and work ethic make him truly top-class!",
+      "author": "Gaurav Sethi"
+    },
+    {
+      "id": "milan",
+      "quote": "With Tahir's guidance, I've purchased seven properties, all with excellent returns. His expertise is invaluable.",
+      "author": "Milan M."
+    }
+  ]
+}

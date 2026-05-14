@@ -1,0 +1,68 @@
+{
+  "name": "Tahir Majithia",
+  "title": "Founder, Prime Capital Dubai",
+  "location": "Dubai, United Arab Emirates",
+  "yearsExperience": 20,
+  "tagline": "Dubai property, advised personally.",
+  "hero": {
+    "headline": "Work with a trusted property partner",
+    "eyebrow": "Founder-led Dubai property advisory",
+    "paragraphs": [
+      "Tahir offers exclusive access to Dubai's finest properties, blending deep market expertise with cutting-edge investment strategies.",
+      "Whether you seek high-yield opportunities or a luxury residence, experience a concierge-level service tailored to your goals.",
+      "From your first conversation to the final handshake, Tahir provides the insight and support you need to achieve your property goals."
+    ]
+  },
+  "story": {
+    "headline": "Twenty years in Dubai property, applied personally",
+    "subheadline": "Clear advice, private access, and a buying process that stays close to the decision-maker.",
+    "paragraphs": [
+      "Tahir Majithia isn't just a real estate agent — he's a market authority with over 20 years of expertise in Dubai's evolving property landscape.",
+      "His in-depth analysis, exclusive market insights, and investment strategies have helped clients make smarter, high-value real estate decisions."
+    ]
+  },
+  "philosophy": {
+    "headline": "Your success is our success",
+    "paragraphs": [
+      "In a fast-moving and competitive market like Dubai, you need more than just a real estate agent — you need a trusted advisor with deep market insight, exclusive access, and a proven track record.",
+      "With over 20 years of experience, Tahir Majithia delivers a concierge-level service that blends elite expertise with cutting-edge investment strategies.",
+      "Whether you're looking for a luxury home, a high-yield investment, or seamless international transactions, Tahir ensures every move you make is backed by insight, integrity, and innovation."
+    ]
+  },
+  "values": [
+    {
+      "label": "20+ years of expertise",
+      "description": "Market mastery that ensures you make the right move."
+    },
+    {
+      "label": "Exclusive access",
+      "description": "Private off-market opportunities & luxury listings."
+    },
+    {
+      "label": "Seamless transactions",
+      "description": "Stress-free property acquisition, locally & internationally."
+    },
+    {
+      "label": "Strategic investments",
+      "description": "Data-backed insights to maximise your returns."
+    },
+    {
+      "label": "Innovative solutions",
+      "description": "Crypto transactions, AI-driven market analytics & more."
+    }
+  ],
+  "stats": [
+    {
+      "label": "Years of expertise",
+      "value": "20+"
+    },
+    {
+      "label": "Properties advised on",
+      "value": "500+"
+    },
+    {
+      "label": "Average rental yield",
+      "value": "6–10%"
+    }
+  ]
+}

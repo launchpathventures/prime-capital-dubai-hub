@@ -166,7 +166,10 @@ function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
   // re-renders. Reading from the ref inside the handler always sees the
   // current value without re-binding the listener every render.
   const dataRef = useRef(data)
-  dataRef.current = data
+
+  useEffect(() => {
+    dataRef.current = data
+  }, [data])
 
   useEffect(() => {
     function isCalendlyEvent(event: MessageEvent): boolean {

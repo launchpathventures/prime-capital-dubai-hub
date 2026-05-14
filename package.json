@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3010",
-    "build": "next build",
+    "build": "node scripts/next-build.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
@@ -38,6 +38,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "gray-matter": "^4.0.3",
+    "import-in-the-middle": "2.0.6",
     "lucide-react": "^0.561.0",
     "mapbox-gl": "^3.18.1",
     "maplibre-gl": "^5.15.0",
@@ -50,6 +51,7 @@
     "react-phone-number-input": "^3.4.16",
     "recharts": "^2.15.4",
     "remark-gfm": "^4.0.1",
+    "require-in-the-middle": "8.0.1",
     "server-only": "^0.0.1",
     "shadcn": "^3.6.2",
     "sharp": "^0.34.5",
@@ -67,6 +69,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",
+    "baseline-browser-mapping": "2.10.29",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
@@ -74,5 +77,10 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.17"
+  },
+  "pnpm": {
+    "overrides": {
+      "baseline-browser-mapping": "2.10.29"
+    }
   }
 }

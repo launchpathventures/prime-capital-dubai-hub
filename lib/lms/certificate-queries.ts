@@ -6,7 +6,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server"
-import type { CertificateWithProfile, CompletionCertificate } from "@/lib/learning-types"
+import type { CertificateWithProfile } from "@/lib/learning-types"
 
 // =============================================================================
 // Public Queries

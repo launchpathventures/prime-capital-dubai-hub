@@ -4,6 +4,10 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js"
 
+type CrudPayload<T extends Record<string, unknown>> =
+  | Partial<T>
+  | Partial<T>[]
+
 export type CrudTableConfig = {
   table: string
   schema?: string
@@ -73,7 +77,9 @@ export function createCrudClient<T extends Record<string, unknown>>(
 
     async create(payload: Partial<T> | Partial<T>[], options: CrudMutationOptions = {}) {
       const select = options.select || defaultSelect
-      const query = getTableQuery(client, config).insert(payload as any).select(select)
+      const query = getTableQuery(client, config)
+        .insert(payload as CrudPayload<T>)
+        .select(select)
       const finalQuery = options.query ? options.query(query) : query
       return await finalQuery
     },
@@ -85,7 +91,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
-        .update(values as any)
+        .update(values)
         .eq(primaryKey, id)
         .select(select)
         .maybeSingle()
@@ -110,7 +116,7 @@ export function createCrudClient<T extends Record<string, unknown>>(
     ) {
       const select = options.select || defaultSelect
       const query = getTableQuery(client, config)
-        .upsert(payload as any, {
+        .upsert(payload as CrudPayload<T>, {
           onConflict: options.onConflict,
           ignoreDuplicates: options.ignoreDuplicates,
         })

@@ -24,9 +24,13 @@ export function PrivateBanner() {
   const shouldShow = pathname === "/" || pathname === ""
 
   useEffect(() => {
-    setMounted(true)
-    const stored = localStorage.getItem(STORAGE_KEY)
-    setDismissed(stored === "true")
+    const timeout = window.setTimeout(() => {
+      setMounted(true)
+      const stored = localStorage.getItem(STORAGE_KEY)
+      setDismissed(stored === "true")
+    }, 0)
+
+    return () => window.clearTimeout(timeout)
   }, [])
 
   const handleDismiss = () => {

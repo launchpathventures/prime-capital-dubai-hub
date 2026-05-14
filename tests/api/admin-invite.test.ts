@@ -163,7 +163,7 @@ describe("Admin User Invite API", () => {
         body: formData,
       })
 
-      const response = await POST(request)
+      await POST(request)
 
       // Verify createUser was called with default role
       expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(

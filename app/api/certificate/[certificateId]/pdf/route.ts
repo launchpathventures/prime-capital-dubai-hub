@@ -32,7 +32,6 @@ import { config } from "@/lib/config"
 const SPRUCE = "#576C75"
 const ASH = "#3F4142"
 const SERENITY = "#A6B5B0"
-const OFF_WHITE = "#F2EFEA"
 
 const styles = StyleSheet.create({
   page: {

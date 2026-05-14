@@ -37,7 +37,6 @@ export function PrivateContextStep({
   data,
   onSubmit,
   isSubmitting,
-  theme: _theme, // Received for interface consistency; styling via CSS parent classes
 }: PrivateContextStepProps) {
   const [privateRole, setPrivateRole] = useState<PrivateRole | undefined>(data.privateRole)
   const [deploymentRange, setDeploymentRange] = useState<DeploymentRange | undefined>(data.deploymentRange)

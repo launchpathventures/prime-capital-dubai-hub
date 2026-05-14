@@ -32,7 +32,6 @@ import {
   TargetIcon,
   CheckIcon,
   ArrowRightIcon,
-  ChevronDownIcon,
   ImageIcon,
   LayoutTemplateIcon,
   FileTextIcon,
@@ -52,10 +51,8 @@ import {
   MapPinIcon,
   LinkedinIcon,
   ListChecksIcon,
-  SearchIcon,
   YoutubeIcon,
   GraduationCapIcon,
-  NewspaperIcon,
   PlayIcon,
 } from "lucide-react"
 

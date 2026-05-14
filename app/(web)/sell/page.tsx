@@ -23,7 +23,6 @@ import {
   HandshakeIcon,
   ScaleIcon,
   ClockIcon,
-  StarIcon,
   MessageCircleIcon,
   AwardIcon,
   BuildingIcon,

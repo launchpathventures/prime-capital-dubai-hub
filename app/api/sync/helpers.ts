@@ -7,6 +7,7 @@
 
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { timingSafeEqual } from "crypto"
 
 /**
@@ -42,9 +43,8 @@ function safeCompare(a: string, b: string): boolean {
  * Create a Supabase admin client (service role) for sync queries.
  * Returns the client or an error response if not configured.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createSyncClient():
-  | { client: ReturnType<typeof createClient<any>>; error?: never }
+  | { client: SupabaseClient; error?: never }
   | { client?: never; error: NextResponse } {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY

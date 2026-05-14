@@ -39,7 +39,6 @@ import {
   LinkIcon,
   DollarSignIcon,
   ImageIcon,
-  CopyIcon,
   CheckIcon,
   SparklesIcon,
 } from "lucide-react"
