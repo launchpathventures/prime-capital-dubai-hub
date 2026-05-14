@@ -41,6 +41,10 @@ export type Brand = {
     logo: string
     logoLight?: string
     favicon: string
+    faviconPng?: string
+    appleIcon?: string
+    socialImage?: string
+    socialImageAlt?: string
   }
   /** Contact details surfaced in the brand's UI */
   contact: {
@@ -142,6 +146,11 @@ export const brands: Record<string, Brand> = {
       logo: "/images/tahir/brand/tahir-logo-nav.png",
       logoLight: "/images/tahir/brand/tahir-logo.webp",
       favicon: "/images/tahir/brand/tahir-favicon.webp",
+      faviconPng: "/images/tahir/brand/tahir-favicon-32.png",
+      appleIcon: "/images/tahir/brand/tahir-apple-touch-icon.png",
+      socialImage: "/images/tahir/brand/tahir-social-share.jpg",
+      socialImageAlt:
+        "Tahir Majithia, founder of Prime Capital Dubai",
     },
     contact: {
       phone: "+971502967861",

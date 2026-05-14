@@ -5,7 +5,6 @@
  * then embeds Calendly inline so the meeting is booked in one place.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
@@ -13,12 +12,14 @@ import {
   TahirLeadForm,
 } from "../../_surface"
 import { brands } from "@/lib/brand"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Book a consultation",
   description:
     "Book a 30-minute discovery call with Tahir Majithia — clear, candid, and tailored to your goals.",
-}
+  path: "/consultation",
+})
 
 export default function TahirConsultationPage() {
   return (

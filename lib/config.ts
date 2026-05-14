@@ -115,8 +115,25 @@ export const config = {
     strategyKit: "https://gamma.app/docs/The-Prime-Capital-2026-Investor-Strategy-Kit-nra1olekeesasny",
     /** Calendly scheduling link (30-minute consultation) */
     calendly: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/tahirmajithia/30min",
+    /**
+     * Ahmed Ashfaq Calendly scheduling link.
+     * TODO: Replace placeholder fallbacks with Ahmed's own Calendly URL.
+     * Set NEXT_PUBLIC_AHMED_CALENDLY_URL to override.
+     */
+    ahmedCalendly:
+      process.env.NEXT_PUBLIC_AHMED_CALENDLY_URL ||
+      process.env.NEXT_PUBLIC_CALENDLY_URL ||
+      "https://calendly.com/tahirmajithia/30min",
     /** Calendly scheduling link (15-minute seller consultation) */
     calendlySeller: "https://calendly.com/tahirmajithia/15min",
+    /**
+     * Ahmed Ashfaq strategy kit link.
+     * TODO: Replace placeholder with Ahmed-specific strategy kit URL.
+     * Set NEXT_PUBLIC_AHMED_STRATEGY_KIT_URL to override.
+     */
+    ahmedStrategyKit:
+      process.env.NEXT_PUBLIC_AHMED_STRATEGY_KIT_URL ||
+      "https://gamma.app/docs/The-Prime-Capital-2026-Investor-Strategy-Kit-nra1olekeesasny",
   },
 
   /**

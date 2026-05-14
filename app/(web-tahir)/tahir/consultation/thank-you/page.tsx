@@ -4,18 +4,19 @@
  * Post-booking confirmation page.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
   TahirCtaStrip,
 } from "../../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Thank you — Consultation booked",
   description: "Your call with Tahir Majithia is confirmed.",
-  robots: { index: false, follow: false },
-}
+  path: "/consultation/thank-you",
+  noIndex: true,
+})
 
 export default function TahirConsultationThankYouPage() {
   return (

@@ -66,7 +66,7 @@ export function SuccessStep({
     const embedUrl = buildCalendlyUrl(calendlyUrl, data)
     return (
       <>
-        <CalendlyBookingListener data={data} />
+        <CalendlyBookingListener data={data} redirectUrl={redirectUrl} />
         <div
           className="calendly-inline-widget"
           data-url={embedUrl}
@@ -158,7 +158,13 @@ export function SuccessStep({
  *
  * @see https://help.calendly.com/hc/en-us/articles/360020052833
  */
-function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
+function CalendlyBookingListener({
+  data,
+  redirectUrl,
+}: {
+  data: Partial<LeadFormData>
+  redirectUrl?: string
+}) {
   // Guard against double-firing if Calendly emits the same event twice
   // for any reason (e.g. iframe reload).
   const firedRef = useRef(false)
@@ -240,11 +246,17 @@ function CalendlyBookingListener({ data }: { data: Partial<LeadFormData> }) {
       }).catch((err) => {
         console.warn("[CalendlyBookingListener] follow-up POST failed", err)
       })
+
+      if (redirectUrl) {
+        window.setTimeout(() => {
+          window.location.href = redirectUrl
+        }, 600)
+      }
     }
 
     window.addEventListener("message", handler)
     return () => window.removeEventListener("message", handler)
-  }, [])
+  }, [redirectUrl])
 
   return null
 }

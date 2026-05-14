@@ -12,40 +12,11 @@
 import "./tahir.css"
 import type { Metadata } from "next"
 import { TahirShell } from "./_surface/tahir-shell"
-import { brands } from "@/lib/brand"
+import { tahirRootMetadata } from "@/lib/tahir/metadata"
 
 export const revalidate = 300
 
-export const metadata: Metadata = {
-  title: {
-    default: brands.tahir.meta.title,
-    template: `%s · ${brands.tahir.meta.title}`,
-  },
-  description: brands.tahir.meta.description,
-  icons: {
-    icon: [
-      {
-        url: brands.tahir.assets.favicon,
-        type: "image/webp",
-        sizes: "100x100",
-      },
-    ],
-    shortcut: [
-      {
-        url: brands.tahir.assets.favicon,
-        type: "image/webp",
-        sizes: "100x100",
-      },
-    ],
-    apple: [
-      {
-        url: brands.tahir.assets.favicon,
-        type: "image/webp",
-        sizes: "100x100",
-      },
-    ],
-  },
-}
+export const metadata: Metadata = tahirRootMetadata()
 
 export default function TahirGroupLayout({
   children,

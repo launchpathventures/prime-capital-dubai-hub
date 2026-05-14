@@ -6,7 +6,6 @@
  * so AgentCRM can attribute the brand.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
@@ -16,12 +15,14 @@ import {
   TahirLink,
   TahirSocialLinks,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Contact",
   description:
     "Reach Tahir directly — phone, email, or book a 30-minute discovery call.",
-}
+  path: "/contact",
+})
 
 export default function TahirContactPage() {
   return (

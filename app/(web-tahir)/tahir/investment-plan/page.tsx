@@ -4,19 +4,20 @@
  * Lead capture for visitors who want a personalised investment plan.
  */
 
-import type { Metadata } from "next"
 import {
   TahirActionHero,
   TahirSection,
   TahirLeadForm,
   TahirCtaStrip,
 } from "../../_surface"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Get an investment plan",
   description:
     "Request a personalised Dubai property investment plan — sized to your budget, timeline, and target returns.",
-}
+  path: "/investment-plan",
+})
 
 const planIncludes = [
   {

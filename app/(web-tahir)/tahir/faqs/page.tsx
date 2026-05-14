@@ -6,7 +6,6 @@
  * everything else stays on the server.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
@@ -15,13 +14,15 @@ import {
   TahirCtaStrip,
 } from "../../_surface"
 import { brands } from "@/lib/brand"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import faqs from "@/data/tahir/faqs.json"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "FAQs",
   description:
     "Common questions about investing in Dubai real estate — buying process, ROI, residency, taxes, and more.",
-}
+  path: "/faqs",
+})
 
 export default function TahirFaqsPage() {
   const faqJsonLd = {

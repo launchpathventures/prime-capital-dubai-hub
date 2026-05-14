@@ -4,7 +4,6 @@
  * Full client testimonial wall.
  */
 
-import type { Metadata } from "next"
 import {
   TahirHero,
   TahirSection,
@@ -13,12 +12,14 @@ import {
   TahirCtaStrip,
 } from "../../_surface"
 import { brands } from "@/lib/brand"
+import { tahirPageMetadata } from "@/lib/tahir/metadata"
 import testimonials from "@/data/tahir/testimonials.json"
 
-export const metadata: Metadata = {
+export const metadata = tahirPageMetadata({
   title: "Testimonials",
   description: "Two decades of trusted relationships — in our clients' own words.",
-}
+  path: "/testimonials",
+})
 
 export default function TahirTestimonialsPage() {
   const featured = testimonials.testimonials[0]
