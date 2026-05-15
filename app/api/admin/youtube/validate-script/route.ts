@@ -14,13 +14,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import Anthropic from "@anthropic-ai/sdk"
-import { BRAND_GUIDE } from "@/lib/youtube/brand-guide"
+import { getBrandGuide } from "@/lib/youtube/brand-guide"
 import {
   getSystemPrompt,
   toFormat,
   FORMAT_META,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ScriptProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -36,12 +37,14 @@ interface ValidateRequest {
   scriptId: string
   scriptBody: string
   format?: string
+  profileSlug?: string
   packaging?: string
   hookV1?: string
   hookV2?: string
 }
 
-const VALIDATION_PROMPT = `You are a senior content quality analyst for Prime Capital Dubai. Your job is to validate YouTube scripts against the brand's strict quality standards AND the script's specific format spec.
+function getValidationPrompt(profile: ScriptProfile): string {
+  return `You are a senior content quality analyst for ${profile.brandFullName}. Your job is to validate YouTube scripts against the brand's strict quality standards AND the script's specific format spec.
 
 You will be given:
 1. The script to validate (in <script_to_validate> tags)
@@ -70,11 +73,11 @@ BANNED: luxury, amazing, incredible, breathtaking, stunning, don't miss out, act
 Also check: no ALL CAPS, no excessive exclamation marks, no emoji, no ellipsis for suspense, **UK English** (colour, analyse, centre — not American spellings)
 
 ### 3. VOICE & BRAND
-- Does it sound like Tahir — measured, evidence-based, confident, restrained, grounded, direct, warm, assured?
+- Does it sound like ${profile.firstName} — measured, evidence-based, confident, restrained, grounded, direct, warm, assured?
 - Is it the "private banker" voice, not a salesperson?
 - Does it demonstrate authority through specificity, not claims?
-- Is the credibility anchor (AED 3 billion+, 20+ years, multiple market cycles) referenced in the opening minute?
-- Is the sign-off line exact: "I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."?
+- Is the credibility anchor (${profile.capitalLabel}, ${profile.yearsLabel}, ${profile.cyclesPhrase}) referenced in the opening minute?
+- Is the sign-off line exact: "${profile.signOff}"?
 
 ### 4. DATA & EVIDENCE
 - Are there at least 3 specific data points (DLD AED figures, % YoY, occupancy, named regulatory dates, RERA stats)?
@@ -137,6 +140,7 @@ Return a JSON object:
 }
 
 Return ONLY the JSON object, no other text.`
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -151,13 +155,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
     const body: ValidateRequest = await request.json()
-    const { scriptId, scriptBody, format: rawFormat, packaging, hookV1, hookV2 } = body
+    const { scriptId, scriptBody, format: rawFormat, profileSlug: rawProfileSlug, packaging, hookV1, hookV2 } = body
 
     if (!scriptBody?.trim()) {
       return NextResponse.json(
@@ -179,12 +183,26 @@ export async function POST(request: NextRequest) {
     const cappedHookV1 = hookV1?.slice(0, MAX_SECTION)
     const cappedHookV2 = hookV2?.slice(0, MAX_SECTION)
 
+    // Resolve the profile from the request body, falling back to the script's
+    // stored profile_slug when the caller didn't pass one. getProfile() coerces
+    // unknown values to the default profile, so this is always safe.
+    let profileSlug = rawProfileSlug
+    if (!profileSlug && scriptId) {
+      const { data: scriptRow } = await supabase
+        .from("youtube_scripts")
+        .select("profile_slug")
+        .eq("id", scriptId)
+        .maybeSingle()
+      profileSlug = scriptRow?.profile_slug
+    }
+    const profile = getProfile(profileSlug)
+
     // Resolve format and load the matching format spec for the validator's
     // structural reference. Falls back to authority_analysis for legacy
     // scripts that pre-date format-tagging.
     const format: Format = toFormat(rawFormat)
     const meta = FORMAT_META[format]
-    const formatSpec = getSystemPrompt(format)
+    const formatSpec = getSystemPrompt(format, profile)
 
     const fullScript = [
       cappedPackaging && `PACKAGING:\n${cappedPackaging}`,
@@ -195,7 +213,7 @@ export async function POST(request: NextRequest) {
       .filter(Boolean)
       .join("\n\n---\n\n")
 
-    const systemPrompt = `${VALIDATION_PROMPT}
+    const systemPrompt = `${getValidationPrompt(profile)}
 
 ---
 
@@ -217,7 +235,7 @@ ${formatSpec}
 ## Brand Guide Reference
 
 <brand_guide>
-${BRAND_GUIDE}
+${getBrandGuide(profile)}
 </brand_guide>`
 
     const response = await anthropic.messages.create(
@@ -229,7 +247,7 @@ ${BRAND_GUIDE}
         messages: [
           {
             role: "user",
-            content: `Validate this YouTube script for Prime Capital Dubai. The script was generated in the **${meta.label}** format — apply that format's structural rules.
+            content: `Validate this YouTube script for ${profile.brandFullName}. The script was generated in the **${meta.label}** format — apply that format's structural rules.
 
 <script_to_validate>
 ${fullScript}

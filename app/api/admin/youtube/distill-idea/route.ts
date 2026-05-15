@@ -23,6 +23,7 @@ import {
   toFormat,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ScriptProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -37,6 +38,7 @@ const anthropic = new Anthropic({
 interface DistillRequest {
   context: string
   format: string
+  profileSlug?: string
 }
 
 interface DistilledAngle {
@@ -48,7 +50,7 @@ interface DistilledAngle {
   target_length: "quick_take" | "standard" | "deep_dive"
 }
 
-function systemPromptFor(format: Format): string {
+function systemPromptFor(format: Format, profile: ScriptProfile): string {
   const meta = FORMAT_META[format]
 
   const formatGuardrails: Record<Format, string> = {
@@ -66,7 +68,7 @@ function systemPromptFor(format: Format): string {
       "Each angle frames a tight cluster of 4–7 viewer questions on one theme. If the context implies real viewer questions, use them; otherwise flag a composite framing in why_this_angle.",
   }
 
-  return `You are the creative director for Prime Capital Dubai's YouTube channel. Your job is to take user-provided context and distil it into THREE distinct, defensible angles within the ${meta.label} format.
+  return `You are the creative director for ${profile.brandFullName}'s YouTube channel. Your job is to take user-provided context and distil it into THREE distinct, defensible angles within the ${meta.label} format.
 
 ## Format being targeted
 ${meta.label} — ${meta.hint}
@@ -78,13 +80,13 @@ CTAs: ${meta.ctaCount}
 ${formatGuardrails[format]}
 
 ## Who you're writing for
-Tahir Majithia, founder of Prime Capital — a strategic investment advisor (not a real estate agent) who has deployed over AED 3 billion for clients across multiple market cycles. Audience: international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, and GCC.
+${profile.speakerLine} — a strategic investment advisor (not a real estate agent) who has deployed ${profile.capitalLabelInline} for clients across ${profile.cyclesPhrase}. Audience: international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, and GCC.
 
 ## What "distillation" means here
 The user has given you context — possibly messy, possibly verbose. Do NOT brainstorm tangential ideas. Your job is to find the THREE strongest angles that are *actually inside* this context, expressed as ${meta.label}-shaped scripts. Each angle should be a different cut of the same material — not three minor variations of the same thesis.
 
 ## Voice guidelines for titles and topics
-- Position Tahir as the "private banker" of Dubai real estate — the antidote to the Dubai hustle
+- Position ${profile.firstName} as the "private banker" of Dubai real estate — the antidote to the Dubai hustle
 - Contrarian, data-driven angles that challenge common assumptions
 - UK English (colour, analyse, centre)
 - Never use: luxury, amazing, incredible, don't miss out, act now, passive income, no-brainer, trust me, guaranteed, hottest, booming
@@ -122,13 +124,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
     const body: DistillRequest = await request.json()
-    const { context, format: rawFormat } = body
+    const { context, format: rawFormat, profileSlug } = body
 
     if (!context?.trim()) {
       return NextResponse.json({ error: "Context is required" }, { status: 400 })
@@ -139,6 +141,7 @@ export async function POST(request: NextRequest) {
 
     const format: Format = toFormat(rawFormat)
     const meta = FORMAT_META[format]
+    const profile = getProfile(profileSlug)
 
     const cappedContext = context.slice(0, 12_000)
 
@@ -147,7 +150,7 @@ export async function POST(request: NextRequest) {
         model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 2048,
         temperature: 0.7,
-        system: systemPromptFor(format),
+        system: systemPromptFor(format, profile),
         messages: [
           {
             role: "user",

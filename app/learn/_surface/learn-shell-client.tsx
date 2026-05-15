@@ -54,7 +54,7 @@ type ActiveSection = "overview" | "progress" | "course" | "scenarios" | "prompts
 interface LearnShellClientProps {
   children: React.ReactNode
   competencies?: Competency[]
-  userRole?: "learner" | "marketing" | "admin"
+  userRole?: "learner" | "marketing" | "youtube_editor" | "admin"
   user?: UserMenuUser
 }
 

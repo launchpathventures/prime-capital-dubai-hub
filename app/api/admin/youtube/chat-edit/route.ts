@@ -22,13 +22,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import Anthropic from "@anthropic-ai/sdk"
-import { BRAND_GUIDE } from "@/lib/youtube/brand-guide"
+import { getBrandGuide } from "@/lib/youtube/brand-guide"
 import {
   getSystemPrompt,
   toFormat,
   FORMAT_META,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ProfileSlug } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -53,6 +54,7 @@ interface ScriptRow {
   title: string
   topic: string | null
   format: Format | null
+  profile_slug: ProfileSlug | null
   script_body: string | null
   packaging: string | null
   hook_v1: string | null
@@ -211,8 +213,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
@@ -239,7 +241,7 @@ export async function POST(request: NextRequest) {
     const { data: script, error: scriptErr } = await supabase
       .from("youtube_scripts")
       .select(
-        "id, title, topic, format, script_body, packaging, hook_v1, hook_v2, validation_score, validation_notes, word_count"
+        "id, title, topic, format, profile_slug, script_body, packaging, hook_v1, hook_v2, validation_score, validation_notes, word_count"
       )
       .eq("id", scriptId)
       .maybeSingle<ScriptRow>()
@@ -268,7 +270,8 @@ export async function POST(request: NextRequest) {
 
     const format: Format = toFormat(script.format)
     const meta = FORMAT_META[format]
-    const formatSpec = getSystemPrompt(format)
+    const profile = getProfile(script.profile_slug)
+    const formatSpec = getSystemPrompt(format, profile)
 
     const scriptBlock = script.script_body
       ? `\n\nCURRENT SCRIPT BODY:\n\n${script.script_body}`
@@ -282,7 +285,7 @@ export async function POST(request: NextRequest) {
         )}`
       : ""
 
-    const systemPrompt = `You are a script editor working alongside Tahir Majithia's team at Prime Capital Dubai. You refine YouTube scripts through conversation.
+    const systemPrompt = `You are a script editor working alongside ${profile.fullName}'s team at ${profile.brandFullName}. You refine YouTube scripts through conversation.
 
 You have three tools available:
   - replace_section: surgical edit to one \`## Heading\` block (preferred for small changes)
@@ -295,7 +298,7 @@ Rules of engagement:
 - If a section heading is ambiguous, ask before you edit.
 - Every tool call MUST include a short \`explanation\` (or \`rationale\` for request_regen) shown to the user.
 - Preserve format conventions for ${meta.label}: hook formula ${meta.hookFormula} (${meta.hookName}), ${meta.ctaCount} CTA${meta.ctaCount === 1 ? "" : "s"}, target ${meta.minutesLabel} / ${meta.wordsLabel}.
-- Preserve Tahir's voice (measured, evidence-based, restrained, warm, direct), the credibility anchor (AED 3 billion+, 20+ years, multiple cycles), and the exact sign-off "I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."
+- Preserve ${profile.firstName}'s voice (measured, evidence-based, restrained, warm, direct), the credibility anchor (${profile.capitalLabel}, ${profile.yearsLabel}, ${profile.cyclesPhraseShort}), and the exact sign-off "${profile.signOff}"
 - Use UK English. No banned words. No invented CTAs. No emoji.
 - Be concise in your chat replies (1-3 short paragraphs); the heavy work goes into the tool call payload, not the chat prose.
 
@@ -312,7 +315,7 @@ ${scriptBlock}${validationBlock}
 
 BRAND GUIDE (reference):
 
-${BRAND_GUIDE}
+${getBrandGuide(profile)}
 
 ---
 

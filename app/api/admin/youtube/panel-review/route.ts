@@ -26,13 +26,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import Anthropic from "@anthropic-ai/sdk"
-import { BRAND_GUIDE } from "@/lib/youtube/brand-guide"
+import { getBrandGuide } from "@/lib/youtube/brand-guide"
 import {
   getSystemPrompt,
   toFormat,
   FORMAT_META,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ProfileSlug, type ScriptProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -64,6 +65,7 @@ interface ScriptRow {
   title: string
   topic: string | null
   format: Format | null
+  profile_slug: ProfileSlug | null
   script_body: string | null
   packaging: string | null
   hook_v1: string | null
@@ -87,10 +89,10 @@ const REVIEWER_JSON_SHAPE = `Return ONLY a single JSON object, no prose, no mark
   "ok_signals": ["<concrete thing the script does well from this lens>", "..."]
 }`
 
-function structureAuditorPrompt(format: Format): string {
+function structureAuditorPrompt(format: Format, profile: ScriptProfile): string {
   const meta = FORMAT_META[format]
-  const formatSpec = getSystemPrompt(format)
-  return `You are the Structure Auditor on a multi-agent review panel for Prime Capital Dubai's YouTube scripts. Your single lens is FORMAT-SPEC COMPLIANCE.
+  const formatSpec = getSystemPrompt(format, profile)
+  return `You are the Structure Auditor on a multi-agent review panel for ${profile.brandFullName}'s YouTube scripts. Your single lens is FORMAT-SPEC COMPLIANCE.
 
 Format being audited: ${meta.label}
 Hook formula: ${meta.hookFormula} — ${meta.hookName}
@@ -102,7 +104,7 @@ You check ONLY:
 - Does the hook follow formula ${meta.hookFormula} (${meta.hookName})?
 - Is the CTA count exactly ${meta.ctaCount}? Are they the locked CTAs from the format's CTA inventory (no inventions)?
 - Is the non-negotiable trust line "and if it doesn't make sense, we'll tell you that too" present where CTA #2 calls for it?
-- Is the sign-off line exact: "I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."?
+- Is the sign-off line exact: "${profile.signOff}"?
 - For formats that require it: news peg date-stamped (Reaction), anonymisation declared (Case Study), question count 4-7 (Q&A), number-led title (Listicle).
 
 You do NOT comment on voice, banned words, evidence, hook strength, or retention pacing — other reviewers handle those.
@@ -122,12 +124,12 @@ FORMAT SPEC (source of truth for structure):
 ${formatSpec}`
 }
 
-function brandVoiceCriticPrompt(): string {
-  return `You are the Brand Voice Critic on a multi-agent review panel for Prime Capital Dubai's YouTube scripts. Your single lens is VOICE and LANGUAGE.
+function brandVoiceCriticPrompt(profile: ScriptProfile): string {
+  return `You are the Brand Voice Critic on a multi-agent review panel for ${profile.brandFullName}'s YouTube scripts. Your single lens is VOICE and LANGUAGE.
 
 You check ONLY:
-- Does the script sound like Tahir Majithia: measured, evidence-based, restrained, warm, direct, "private banker" voice?
-- Is the credibility anchor referenced in the opening minute (AED 3 billion+, 20+ years, multiple market cycles)?
+- Does the script sound like ${profile.fullName}: measured, evidence-based, restrained, warm, direct, "private banker" voice?
+- Is the credibility anchor referenced in the opening minute (${profile.capitalLabel}, ${profile.yearsLabel}, ${profile.cyclesPhrase})?
 - Banned words/phrases — list every occurrence: luxury, amazing, incredible, breathtaking, stunning, don't miss out, act now, hurry, limited time, best deal, steal, bargain, trust us, trust me, exclusive, once in a lifetime, passive income, no-brainer, game-changer, unlock, dream home, hottest market, booming, skyrocketing, cash cow, guaranteed returns, risk-free.
 - UK English spelling throughout (colour, analyse, centre, behaviour, organisation — flag American spellings).
 - No ALL-CAPS shouting, no exclamation-mark stacks, no emoji, no ellipsis for suspense.
@@ -146,11 +148,11 @@ ${REVIEWER_JSON_SHAPE}
 
 BRAND GUIDE (voice reference):
 
-${BRAND_GUIDE}`
+${getBrandGuide(profile)}`
 }
 
-function evidenceOfficerPrompt(): string {
-  return `You are the Evidence Officer on a multi-agent review panel for Prime Capital Dubai's YouTube scripts. Your single lens is EVIDENCE QUALITY and SOURCING.
+function evidenceOfficerPrompt(profile: ScriptProfile): string {
+  return `You are the Evidence Officer on a multi-agent review panel for ${profile.brandFullName}'s YouTube scripts. Your single lens is EVIDENCE QUALITY and SOURCING.
 
 You check ONLY:
 - Does the script carry at least three specific, verifiable data points? Acceptable forms: AED figures from DLD, % YoY changes with a year-stamp, occupancy percentages, named regulatory dates, RERA-issued statistics.
@@ -180,10 +182,10 @@ EVIDENCE RULES REFERENCE (extract from brand guide):
 - Dubai-native metrics only: AED figures, occupancy %, completion dates, payment-plan structures. No US imports.`
 }
 
-function retentionAnalystPrompt(format: Format): string {
+function retentionAnalystPrompt(format: Format, profile: ScriptProfile): string {
   const meta = FORMAT_META[format]
-  const formatSpec = getSystemPrompt(format)
-  return `You are the Retention Analyst on a multi-agent review panel for Prime Capital Dubai's YouTube scripts. Your single lens is HOOK STRENGTH, SIGNATURE PATTERNS, and CTA PSYCHOLOGY.
+  const formatSpec = getSystemPrompt(format, profile)
+  return `You are the Retention Analyst on a multi-agent review panel for ${profile.brandFullName}'s YouTube scripts. Your single lens is HOOK STRENGTH, SIGNATURE PATTERNS, and CTA PSYCHOLOGY.
 
 You check ONLY:
 - Does the hook create an open loop in the first two sentences — a tension the viewer needs the rest of the video to resolve? Or does it sag into context-setting?
@@ -338,8 +340,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
@@ -359,7 +361,7 @@ export async function POST(request: NextRequest) {
     const { data: script, error: scriptErr } = await supabase
       .from("youtube_scripts")
       .select(
-        "id, title, topic, format, script_body, packaging, hook_v1, hook_v2, word_count"
+        "id, title, topic, format, profile_slug, script_body, packaging, hook_v1, hook_v2, word_count"
       )
       .eq("id", scriptId)
       .maybeSingle<ScriptRow>()
@@ -381,6 +383,7 @@ export async function POST(request: NextRequest) {
     }
 
     const format: Format = toFormat(script.format)
+    const profile = getProfile(script.profile_slug)
     const scriptPayload = buildScriptPayload(script)
 
     // -------------------------------------------------------------------------
@@ -389,25 +392,25 @@ export async function POST(request: NextRequest) {
 
     const [structure, voice, evidence, retention] = await Promise.all([
       runReviewer(
-        structureAuditorPrompt(format),
+        structureAuditorPrompt(format, profile),
         scriptPayload,
         "Structure Auditor",
         request.signal
       ),
       runReviewer(
-        brandVoiceCriticPrompt(),
+        brandVoiceCriticPrompt(profile),
         scriptPayload,
         "Brand Voice Critic",
         request.signal
       ),
       runReviewer(
-        evidenceOfficerPrompt(),
+        evidenceOfficerPrompt(profile),
         scriptPayload,
         "Evidence Officer",
         request.signal
       ),
       runReviewer(
-        retentionAnalystPrompt(format),
+        retentionAnalystPrompt(format, profile),
         scriptPayload,
         "Retention Analyst",
         request.signal

@@ -57,7 +57,7 @@ interface LearnSidebarProps {
   /** Current module slug */
   currentModule?: string
   /** User role for admin visibility */
-  userRole?: "learner" | "marketing" | "admin"
+  userRole?: "learner" | "marketing" | "youtube_editor" | "admin"
   /** Callback for mobile drawer close */
   onNavigate?: () => void
 }

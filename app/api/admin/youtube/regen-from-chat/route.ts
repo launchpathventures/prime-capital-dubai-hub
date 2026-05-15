@@ -24,6 +24,7 @@ import {
   FORMAT_META,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ProfileSlug } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -49,6 +50,7 @@ interface ScriptRow {
   title: string
   topic: string | null
   format: Format | null
+  profile_slug: ProfileSlug | null
   script_body: string | null
   packaging: string | null
   hook_v1: string | null
@@ -77,8 +79,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
@@ -99,7 +101,7 @@ export async function POST(request: NextRequest) {
     const { data: script, error: scriptErr } = await supabase
       .from("youtube_scripts")
       .select(
-        "id, title, topic, format, script_body, packaging, hook_v1, hook_v2, word_count, validation_score, validation_notes, panel_review, panel_review_score"
+        "id, title, topic, format, profile_slug, script_body, packaging, hook_v1, hook_v2, word_count, validation_score, validation_notes, panel_review, panel_review_score"
       )
       .eq("id", scriptId)
       .maybeSingle<ScriptRow>()
@@ -158,6 +160,7 @@ export async function POST(request: NextRequest) {
           panel_review: script.panel_review,
           panel_review_score: script.panel_review_score,
           chat_summary: chatSummary,
+          profile_slug: script.profile_slug,
         })
       versionErr = result.error
       if (!versionErr) break
@@ -208,12 +211,13 @@ export async function POST(request: NextRequest) {
 
     const format: Format = toFormat(script.format)
     const meta = FORMAT_META[format]
-    const systemPrompt = getSystemPrompt(format)
+    const profile = getProfile(script.profile_slug)
+    const systemPrompt = getSystemPrompt(format, profile)
 
     const cappedRationale = rationale.slice(0, MAX_RATIONALE)
     const cappedPrevScript = script.script_body.slice(0, MAX_PREV_SCRIPT)
 
-    const userMessage = `REGENERATE this YouTube script for Prime Capital Dubai. Keep the same topic, angle, and **format** (${meta.label}), but apply the rewrite brief below — which was agreed in chat with the user.
+    const userMessage = `REGENERATE this YouTube script for ${profile.brandFullName}. Keep the same topic, angle, and **format** (${meta.label}), but apply the rewrite brief below — which was agreed in chat with the user.
 
 Title / Working Title: ${script.title}
 Concept: ${script.topic ?? script.title}

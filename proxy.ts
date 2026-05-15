@@ -224,9 +224,22 @@ export async function proxy(request: NextRequest) {
         .single()
 
       const adminRole = adminProfile?.role
-      if (adminRole !== "admin" && adminRole !== "marketing") {
+      if (
+        adminRole !== "admin" &&
+        adminRole !== "marketing" &&
+        adminRole !== "youtube_editor"
+      ) {
         // Non-admin/marketing users redirected to learn home
         return redirectWithCookies(new URL("/learn", request.url))
+      }
+
+      // youtube_editor is scoped to the YouTube generator only. Every other
+      // /admin path bounces back to it.
+      if (
+        adminRole === "youtube_editor" &&
+        !pathname.startsWith("/admin/youtube")
+      ) {
+        return redirectWithCookies(new URL("/admin/youtube", request.url))
       }
 
       // Marketing users cannot access user management or learning admin pages

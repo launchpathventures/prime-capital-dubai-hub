@@ -56,6 +56,7 @@ import {
 } from "@/lib/actions/youtube"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import { ProfileChip } from "./_components/profile-selector"
 
 // =============================================================================
 // CONSTANTS
@@ -355,6 +356,7 @@ function ScriptCardContent({
           )}
 
           <Row gap="xs" wrap align="center">
+            <ProfileChip slug={script.profile_slug} />
             {script.target_length && (
               <Badge variant="outline" size="sm">
                 {script.target_length.replace(/_/g, " ")}

@@ -123,7 +123,9 @@ export async function getUserWithProfile() {
  * <LearnShell userRole={userRole} />
  * ```
  */
-export async function getUserRole(): Promise<"admin" | "marketing" | "learner"> {
+export async function getUserRole(): Promise<
+  "admin" | "marketing" | "youtube_editor" | "learner"
+> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -140,7 +142,8 @@ export async function getUserRole(): Promise<"admin" | "marketing" | "learner"> 
     .single()
 
   const role = profile?.role
-  if (role === "admin" || role === "marketing") return role
+  if (role === "admin" || role === "marketing" || role === "youtube_editor")
+    return role
   return "learner"
 }
 
@@ -168,7 +171,7 @@ export async function getUserForMenu(): Promise<{
     .eq("id", user.id)
     .single()
 
-  const roleLabels: Record<string, string> = { admin: "Admin", marketing: "Marketing", learner: "Learner" }
+  const roleLabels: Record<string, string> = { admin: "Admin", marketing: "Marketing", youtube_editor: "YouTube Editor", learner: "Learner" }
   return {
     name: profile?.full_name || user.email?.split("@")[0] || "User",
     email: user.email || "",

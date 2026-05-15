@@ -24,6 +24,7 @@ import {
   isFormat,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ScriptProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -42,6 +43,8 @@ interface GenerateIdeasRequest {
   formats?: string[]
   /** Existing idea titles to avoid duplicating when "generate more variations" is clicked. */
   existingTitles?: string[]
+  /** Script Profile the ideas are being generated for. Defaults to Tahir. */
+  profileSlug?: string
 }
 
 interface GeneratedIdea {
@@ -65,10 +68,11 @@ const FORMAT_CATALOGUE = FORMATS_IN_DISPLAY_ORDER.map((slug) => {
   return `- **${meta.label}** (\`${meta.slug}\`): ${meta.hint} (${meta.minutesLabel}, ${meta.wordsLabel}, ${meta.ctaCount} CTA${meta.ctaCount === 1 ? "" : "s"})${flagText}`
 }).join("\n")
 
-const SYSTEM_PROMPT = `You are the creative director for Prime Capital Dubai's YouTube channel. Your job is to generate distinct, format-tagged script ideas based on user input.
+function getSystemPrompt(profile: ScriptProfile): string {
+  return `You are the creative director for ${profile.brandFullName}'s YouTube channel. Your job is to generate distinct, format-tagged script ideas based on user input.
 
 ## Who you're writing for
-Tahir Majithia, founder of Prime Capital — a strategic investment advisor (not a real estate agent) who has deployed over AED 3 billion for clients across multiple market cycles. His audience: international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, and GCC.
+${profile.speakerLine} — a strategic investment advisor (not a real estate agent) who has deployed ${profile.capitalLabelInline} for clients across ${profile.cyclesPhrase}. The audience: international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, and GCC.
 
 ## The six portfolio formats
 Every idea must be tagged with one of these formats. Use the slug (the value in backticks) as the \`format\` field.
@@ -108,7 +112,7 @@ Return a JSON array. Each idea has these fields:
 \`\`\`
 
 ## Voice guidelines for titles and topics
-- Position Tahir as the "private banker" of Dubai real estate — the antidote to the Dubai hustle
+- Position ${profile.firstName} as the "private banker" of Dubai real estate — the antidote to the Dubai hustle
 - Contrarian, data-driven angles that challenge common assumptions
 - UK English (colour, analyse, centre)
 - Never use: luxury, amazing, incredible, don't miss out, act now, passive income, no-brainer, trust me, guaranteed, hottest, booming
@@ -122,6 +126,7 @@ If the caller passes \`existingTitles\`, do not duplicate or near-duplicate any 
 
 ## Output format
 Return ONLY a JSON array. No prose, no markdown, no commentary. Just the array.`
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -136,17 +141,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
     const body: GenerateIdeasRequest = await request.json()
-    const { input, formats: rawFormats, existingTitles } = body
+    const { input, formats: rawFormats, existingTitles, profileSlug } = body
 
     if (!input?.trim()) {
       return NextResponse.json({ error: "Input is required" }, { status: 400 })
     }
+
+    const profile = getProfile(profileSlug)
 
     // Cap count to a reasonable range — guards against accidental large
     // generations and runaway AI cost.
@@ -167,7 +174,7 @@ export async function POST(request: NextRequest) {
         model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
         max_tokens: 4096,
         temperature: 0.9,
-        system: SYSTEM_PROMPT,
+        system: getSystemPrompt(profile),
         messages: [
           {
             role: "user",

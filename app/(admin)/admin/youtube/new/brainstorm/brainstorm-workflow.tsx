@@ -46,6 +46,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
+import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileSelector } from "../../_components/profile-selector"
 
 // =============================================================================
 // TYPES
@@ -151,6 +153,9 @@ export function BrainstormWorkflow() {
   const [selectedIdeas, setSelectedIdeas] = React.useState<Set<string>>(new Set())
   const [isGenerating, setIsGenerating] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
+
+  // Profile — who every idea in this batch is written for (step 1)
+  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
 
   // Format pre-selection (step 1)
   const [selectedFormats, setSelectedFormats] = React.useState<Set<Format>>(new Set())
@@ -301,6 +306,7 @@ export function BrainstormWorkflow() {
         body: JSON.stringify({
           focus: input.trim() || undefined,
           formats: Array.from(selectedFormats),
+          profileSlug,
         }),
       })
       if (!res.ok) {
@@ -372,6 +378,7 @@ export function BrainstormWorkflow() {
           input: input.trim(),
           count: 5,
           formats: Array.from(selectedFormats),
+          profileSlug,
         }),
       })
       if (!res.ok) throw new Error("Failed to generate ideas")
@@ -403,6 +410,7 @@ export function BrainstormWorkflow() {
           count: 5,
           formats: Array.from(variationFormats),
           existingTitles: ideas.map((i) => i.title),
+          profileSlug,
         }),
       })
       if (!res.ok) throw new Error("Failed to generate more ideas")
@@ -433,6 +441,7 @@ export function BrainstormWorkflow() {
       topic: idea.topic,
       target_length: idea.target_length,
       format: idea.format,
+      profile_slug: profileSlug,
       input_text: input.trim() || undefined,
     }))
     const result = await createYouTubeScripts(inputs)
@@ -526,6 +535,9 @@ export function BrainstormWorkflow() {
 
       {step === "input" && (
         <Stack gap="lg">
+          {/* Profile — every idea in this batch is written for this person */}
+          <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+
           {/* 1. Format pre-selection — leads the page so it informs the market scan and idea generation */}
           <Stack gap="sm">
             <Stack gap="xs">

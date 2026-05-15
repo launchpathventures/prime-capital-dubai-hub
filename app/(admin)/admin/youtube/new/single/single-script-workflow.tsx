@@ -47,6 +47,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
+import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileSelector } from "../../_components/profile-selector"
 
 // =============================================================================
 // TYPES
@@ -133,6 +135,7 @@ export function SingleScriptWorkflow() {
   const router = useRouter()
   const [step, setStep] = React.useState<Step>("input")
   const [context, setContext] = React.useState("")
+  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
   const [format, setFormat] = React.useState<Format | null>(null)
   const [angles, setAngles] = React.useState<DistilledAngle[]>([])
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
@@ -154,7 +157,7 @@ export function SingleScriptWorkflow() {
       const res = await fetch("/api/admin/youtube/distill-idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context: context.trim(), format }),
+        body: JSON.stringify({ context: context.trim(), format, profileSlug }),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -211,6 +214,7 @@ export function SingleScriptWorkflow() {
         topic: selectedAngle.topic,
         target_length: selectedAngle.target_length,
         format,
+        profile_slug: profileSlug,
         status: "idea",
         input_text: context.trim() || undefined,
       })
@@ -281,6 +285,9 @@ export function SingleScriptWorkflow() {
 
       {step === "input" && (
         <Stack gap="lg">
+          {/* Profile picker — who the script is written for */}
+          <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+
           {/* Format picker — required, sits at top */}
           <Stack gap="sm">
             <Stack gap="xs">

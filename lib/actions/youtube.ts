@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server"
 import { trackActionError } from "@/lib/error-tracking"
 import type { ActionResult } from "./cms"
 import type { Format } from "@/lib/youtube/prompts"
+import type { ProfileSlug } from "@/lib/youtube/profiles"
 
 // =============================================================================
 // TYPES
@@ -25,6 +26,7 @@ export type YouTubeScript = {
   input_text: string | null
   status: ScriptStatus
   format: Format | null
+  profile_slug: ProfileSlug
   hook_v1: string | null
   hook_v2: string | null
   packaging: string | null
@@ -91,6 +93,7 @@ export type YouTubeScriptInput = {
   input_text?: string
   status?: ScriptStatus
   format?: Format
+  profile_slug?: ProfileSlug
   hook_v1?: string
   hook_v2?: string
   packaging?: string
@@ -130,6 +133,7 @@ export type YouTubeScriptVersion = {
   panel_review: Record<string, unknown> | null
   panel_review_score: number | null
   chat_summary: string | null
+  profile_slug: ProfileSlug | null
   created_at: string
 }
 

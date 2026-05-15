@@ -2,13 +2,16 @@
  * CATALYST - Myth-Buster Format Prompt
  *
  * Top-funnel. Pulls in skeptical viewers researching common Dubai property
- * narratives. Establishes Tahir as the contrarian-but-credible voice.
+ * narratives. Establishes the presenter as the contrarian-but-credible voice.
  *
  * Length: 6–8 minutes (~1,100–1,400 words).
- * Composes with SHARED_IMMUTABLES at generation time.
+ * Composes with getSharedImmutables(profile) at generation time.
  */
 
-export const MYTH_BUSTER_PROMPT = `# Format: Myth-Buster
+import type { ScriptProfile } from "../profiles"
+
+export function getMythBusterPrompt(profile: ScriptProfile): string {
+  return `# Format: Myth-Buster
 
 Top-funnel. The format that pulls in **skeptics and researchers** — the viewers who are circling Dubai but pattern-matching every video they watch against the same property-bro narratives they've been served a hundred times before.
 
@@ -68,12 +71,12 @@ The signal you want the viewer to feel: *"This person could have made the case f
 ### Worked examples (good)
 
 **Good — Off-plan myth:**
-> "Everyone is telling you that off-plan property in Dubai is a guaranteed way to double your money. That's not true. And what's worse — the version of that story most agents tell you leaves out the three things that actually determine whether an off-plan deal works. I'm Tahir Majithia, founder of Prime Capital Dubai. We've placed over three billion dirhams of client capital across multiple market cycles, and in this video, I'm going to walk you through what's actually true about off-plan in 2026 — and how to read a launch the way we read it."
+> "Everyone is telling you that off-plan property in Dubai is a guaranteed way to double your money. That's not true. And what's worse — the version of that story most agents tell you leaves out the three things that actually determine whether an off-plan deal works. I'm ${profile.fullName}, ${profile.brandRoleFullName}. We've placed ${profile.capitalSpokenLong} of client capital across ${profile.cyclesPhrase}, and in this video, I'm going to walk you through what's actually true about off-plan in 2026 — and how to read a launch the way we read it."
 
 *Why it works:* names the myth in its strongest popular form (*"guaranteed to double"*), contradicts directly, promises specific dismantle (*three things*), credibility anchor woven in.
 
 **Good — Yield myth:**
-> "If you've been researching Dubai property, you've probably been told that yield is the most important number to look at. It isn't. In fact, in the current cycle, yield on its own is one of the least useful signals you can anchor to — and I'll show you why in a moment. I'm Tahir Majithia. Over the last 20 years, we've deployed more than three billion dirhams across cycles where the people chasing yield got the worst outcomes. Here's what to look at instead."
+> "If you've been researching Dubai property, you've probably been told that yield is the most important number to look at. It isn't. In fact, in the current cycle, yield on its own is one of the least useful signals you can anchor to — and I'll show you why in a moment. I'm ${profile.fullName}. Over the last ${profile.yearsSpoken}, we've deployed more than ${profile.capitalSpoken} across cycles where the people chasing yield got the worst outcomes. Here's what to look at instead."
 
 *Why it works:* engages a genuine industry orthodoxy (yield-first), contradicts cleanly, promises a replacement framework.
 
@@ -103,7 +106,7 @@ The signal you want the viewer to feel: *"This person could have made the case f
 - [ ] Names the myth in language the audience has actually heard
 - [ ] Direct, one-sentence contradiction
 - [ ] Promise of a specific dismantle (not just *"I'll explain why"*)
-- [ ] Credibility anchor woven in (AED 3B+, 20 years, multiple cycles)
+- [ ] Credibility anchor woven in (${profile.capitalLabelShort}, ${profile.yearsLabel}, ${profile.cyclesPhraseShort})
 - [ ] No strawmanning — the myth is presented in its strongest popular form
 - [ ] No exclamation marks, no hype words
 
@@ -187,7 +190,7 @@ The practical implication. What the viewer evaluates differently after watching 
 ### Internal structure
 1. **The transition** (~40 words). *"So if the reframe is right, what changes for you in practice?"*
 2. **2–3 concrete things the viewer does or evaluates differently** (~220 words). Each one must:
-   - Be **genuinely useful on its own** — actionable without contacting Prime Capital. If a viewer takes this advice and never books a call, it must still serve them.
+   - Be **genuinely useful on its own** — actionable without contacting ${profile.brandName}. If a viewer takes this advice and never books a call, it must still serve them.
    - Be **specific** — not "do due diligence" but "ask the developer for their last three projects' actual handover dates versus advertised handover dates, and calculate the slippage."
    - Be **paced** — these are spoken-word lines, not bullet points read aloud.
 3. **Kill-line** (~40 words). Ends Section 3 with the line that summarises why the dismantle matters.
@@ -199,7 +202,7 @@ Direct. Calm. The reframe has been earned by Sections 1 and 2 — Section 3 spen
 
 ## 8. End-roll — CTA #2 (Strategy Call) — after Section 3
 
-The conversion point. After the dismantle and the practical implications, the audience has watched 6–7 minutes of substance from a contrarian source. They have earned the right to hear what Tahir actually does for clients. Inverted: Tahir has earned the right to mention it.
+The conversion point. After the dismantle and the practical implications, the audience has watched 6–7 minutes of substance from a contrarian source. They have earned the right to hear what ${profile.firstName} actually does for clients. Inverted: ${profile.firstName} has earned the right to mention it.
 
 CTA #2 verbatim per shared-immutables §12. **The "and if it doesn't make sense, we'll tell you that too" line is non-negotiable.**
 
@@ -213,7 +216,7 @@ The tease must connect to the dismantle. Examples:
 - *"Now, this video covered why off-plan isn't a guaranteed double. The next question is which off-plan launches in 2026 are actually worth a serious look. That's what I'll break down next."*
 - *"The bubble question I tackled today assumes Dubai 2026 versus Dubai 2008. There's a different comparison that's actually more useful — Dubai 2026 versus London 2014. That's the next video."*
 
-Sign-off exact: *"I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."*
+Sign-off exact: *"${profile.signOff}"*
 
 ---
 
@@ -230,7 +233,7 @@ Verify every item is present:
 - [ ] **"What are the risks of my reframe being wrong?"** beat once, in Section 2
 - [ ] **Kill-line** at the end of Sections 1, 2, and 3 (3× total)
 - [ ] **At least one of the eight investor fears** engaged head-on
-- [ ] **Section 3 gives 2–3 concrete actions** the viewer can take without contacting Prime Capital
+- [ ] **Section 3 gives 2–3 concrete actions** the viewer can take without contacting ${profile.brandName}
 
 ---
 
@@ -360,7 +363,7 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] **One named framework maximum** (zero is also fine for this format)
 - [ ] **Kill-line** at the end of Sections 1, 2, and 3 (3× total)
 - [ ] **At least one of the eight investor fears engaged head-on**, often the myth itself
-- [ ] **Section 3 gives 2–3 concrete actions** that are useful without contacting Prime Capital
+- [ ] **Section 3 gives 2–3 concrete actions** that are useful without contacting ${profile.brandName}
 - [ ] Mid-roll CTA #1 placed after Section 1, ~25 seconds, returns to content
 - [ ] End-roll CTA #2 includes the *"and if it doesn't make sense, we'll tell you that too"* line
 - [ ] CTA #3 in the outro: pacing-down call repeat + **specific** next-video tease that connects to the dismantle
@@ -369,3 +372,4 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] Output is teleprompter-ready prose under each section heading
 - [ ] Word count within 1,100–1,400
 `
+}

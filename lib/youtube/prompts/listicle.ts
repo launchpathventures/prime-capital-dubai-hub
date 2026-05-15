@@ -11,18 +11,21 @@
  * NON-NEGOTIABLE: Title and thumbnail must lead with the number.
  */
 
-export const LISTICLE_PROMPT = `# Format: Listicle / Ranking
+import type { ScriptProfile } from "../profiles"
+
+export function getListiclePrompt(profile: ScriptProfile): string {
+  return `# Format: Listicle / Ranking
 
 Top-funnel. The **CTR engine** of the channel. Listicles pull in cold viewers from search and discovery surfaces; the format is built for click-through and shareability without sliding into clickbait.
 
-A Prime Capital Listicle is not "Top 10 Apartments In Dubai." It is *"Five Dubai Corridors I'd Actively Avoid In 2026,"* or *"Three Mistakes I See Every Quarter From New Investors,"* or *"Four Questions That Eliminate 80% Of Off-Plan Launches."* The format earns the click; the content earns the trust.
+A ${profile.brandName} Listicle is not "Top 10 Apartments In Dubai." It is *"Five Dubai Corridors I'd Actively Avoid In 2026,"* or *"Three Mistakes I See Every Quarter From New Investors,"* or *"Four Questions That Eliminate 80% Of Off-Plan Launches."* The format earns the click; the content earns the trust.
 
 ---
 
 ## 1. Job & audience
 
 ### What this format does
-Convert a high-intent search query (*"best Dubai areas to invest"*) into a watch session that exposes the viewer to Tahir's voice, frameworks, and trustworthiness — at a depth that no other Dubai channel offers in the same format. The list itself is a hook; the analysis under each item is what holds attention.
+Convert a high-intent search query (*"best Dubai areas to invest"*) into a watch session that exposes the viewer to ${profile.firstName}'s voice, frameworks, and trustworthiness — at a depth that no other Dubai channel offers in the same format. The list itself is a hook; the analysis under each item is what holds attention.
 
 ### Who's watching this specifically
 - **Stage:** Cold. Often arriving via search or YouTube recommendations. They may not yet know the brand.
@@ -65,23 +68,23 @@ The viewer should be able to apply the criteria to a different list and produce 
 1. **The number, named explicitly** (one sentence)
 2. **The teaser of the most surprising entry** — without naming it (creates the open loop)
 3. **Why the audience should stay** — what the criteria let them do
-4. **Credibility anchor** (AED 3B+, 20 years)
+4. **Credibility anchor** (${profile.capitalLabelShort}, ${profile.yearsLabel})
 5. **Promise of analytical depth** (not a generic list — specific data and reasoning under each)
 
 ### Worked examples (good)
 
 **Good — Corridors to avoid:**
-> "There are five Dubai corridors I'd actively avoid in 2026. Number three is going to surprise you, because it's where most investors are buying right now — and the case for buying there is, at first glance, completely reasonable. I'm Tahir Majithia, founder of Prime Capital Dubai. We've placed over three billion dirhams of client capital across multiple market cycles, and the corridors I'm flagging today are flagged because of specific structural reasons — not personal opinion. Each one comes with the data, the criterion, and what to look at instead. By the end of this video, you'll have a screen you can apply to any corridor I haven't covered."
+> "There are five Dubai corridors I'd actively avoid in 2026. Number three is going to surprise you, because it's where most investors are buying right now — and the case for buying there is, at first glance, completely reasonable. I'm ${profile.fullName}, ${profile.brandRoleFullName}. We've placed ${profile.capitalSpokenLong} of client capital across ${profile.cyclesPhrase}, and the corridors I'm flagging today are flagged because of specific structural reasons — not personal opinion. Each one comes with the data, the criterion, and what to look at instead. By the end of this video, you'll have a screen you can apply to any corridor I haven't covered."
 
 *Why it works:* number leads, surprise teaser (number 3 is contrarian), credibility anchor, promise of structural reasoning over opinion, takeaway promise (a screen for any corridor).
 
 **Good — Mistakes:**
-> "Three mistakes I see every quarter from investors who come to us after they've already bought. Mistake number two costs more on average than the first and the third combined — and almost nobody flags it before signing. I'm Tahir Majithia. 20 years in this market, three billion dirhams of client capital placed. These aren't theoretical mistakes. They're patterns that show up in deals every quarter, and each one comes with a specific way to catch it before you sign."
+> "Three mistakes I see every quarter from investors who come to us after they've already bought. Mistake number two costs more on average than the first and the third combined — and almost nobody flags it before signing. I'm ${profile.fullName}. ${profile.yearsSpoken} in this market, ${profile.capitalSpoken} of client capital placed. These aren't theoretical mistakes. They're patterns that show up in deals every quarter, and each one comes with a specific way to catch it before you sign."
 
 *Why it works:* number leads (three), specific cost teaser (number two is the expensive one), pattern claim grounded in volume (every quarter), promise of preventative criteria.
 
 **Good — Off-plan questions:**
-> "There are four questions that eliminate roughly 80% of the off-plan launches we look at. The launches that survive these four questions go on to a much deeper analysis — but if a launch can't pass these four, we don't bother. Question two is the one that catches most investors out, because the data you need to answer it isn't in the brochure. I'm Tahir Majithia, Prime Capital Dubai. Across 20 years and three billion dirhams placed, this filter is the single most useful screening tool I've used."
+> "There are four questions that eliminate roughly 80% of the off-plan launches we look at. The launches that survive these four questions go on to a much deeper analysis — but if a launch can't pass these four, we don't bother. Question two is the one that catches most investors out, because the data you need to answer it isn't in the brochure. I'm ${profile.fullName}, ${profile.brandFullName}. Across ${profile.yearsSpoken} and ${profile.capitalSpoken} placed, this filter is the single most useful screening tool I've used."
 
 *Why it works:* number leads, specific filter rate (80%), surprise teaser (question 2), tool-focused (audience leaves with something they can use).
 
@@ -106,7 +109,7 @@ The viewer should be able to apply the criteria to a different list and produce 
 - [ ] Number named in the first sentence
 - [ ] Surprise teaser for one specific entry (without naming it)
 - [ ] Reason to watch the whole video (the criteria, not just the list)
-- [ ] Credibility anchor (AED 3B+, 20 years)
+- [ ] Credibility anchor (${profile.capitalLabelShort}, ${profile.yearsLabel})
 - [ ] No exclamation marks, no hype words, no ALL CAPS
 
 ---
@@ -158,7 +161,7 @@ The entry stated cleanly. *"Number five: [Corridor / Mistake / Question / Develo
 **Required: one specific data point per item.** DLD figures, % YoY, occupancy, named regulatory date, completion-vs-advertised slippage, secondary-market velocity. Specificity is the format's whole value.
 
 #### Beat 3 — The practitioner observation (~80 words)
-**Required: one practitioner observation per item** — what Tahir has actually seen across deals, not what's pulled from a market report. This is what separates a Prime Capital Listicle from a research-firm summary.
+**Required: one practitioner observation per item** — what ${profile.firstName} has actually seen across deals, not what's pulled from a market report. This is what separates a ${profile.brandName} Listicle from a research-firm summary.
 
 > *"Across the deals we've reviewed in this corridor over the last 18 months, the pattern that's become unmistakable is [specific pattern]. Three of those deals came back to us after the client bought elsewhere — they wanted us to help unwind a position the original recommendation hadn't stress-tested for [specific risk]."*
 
@@ -205,7 +208,7 @@ The practical wrap. How does the viewer apply the criteria from Section 1 and th
 
 ## 7. End-roll — CTA #2 (Strategy Call) — after Section 3
 
-Standard placement. After the criteria, the list, and the application guidance. The viewer has spent 7–9 minutes with Tahir's analytical voice — the CTA earns itself.
+Standard placement. After the criteria, the list, and the application guidance. The viewer has spent 7–9 minutes with ${profile.firstName}'s analytical voice — the CTA earns itself.
 
 CTA #2 verbatim per shared-immutables §12. **The "and if it doesn't make sense, we'll tell you that too" line is non-negotiable.**
 
@@ -219,7 +222,7 @@ The tease should connect to a Listicle-adjacent topic — often a deeper dive in
 - *"The corridors I covered today were specifically the ones to avoid. The next video flips it: the four corridors I'd actively look at in 2026, and the criteria that put them on that list. Make sure you're subscribed."*
 - *"This list focused on the questions that eliminate launches. The next video covers the questions that elevate them — once a launch survives the first filter, what do you look at next?"*
 
-Sign-off exact: *"I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."*
+Sign-off exact: *"${profile.signOff}"*
 
 ---
 
@@ -233,7 +236,7 @@ Verify every item is present:
 - [ ] **Section 1 states the criteria explicitly** and reusably
 - [ ] **Section 2 = the list**, ordered to build to the most counterintuitive entry
 - [ ] **Each list item has one specific data point** (DLD, RERA, % YoY, occupancy, regulatory date, etc.)
-- [ ] **Each list item has one practitioner observation** — what Tahir has seen, not what's in a research report
+- [ ] **Each list item has one practitioner observation** — what ${profile.firstName} has seen, not what's in a research report
 - [ ] **Each list item has an actionable takeaway** — a check, a question, an evaluation
 - [ ] **Mid-roll CTA #1 placed mid-list** (after item 3 of 5, or proportional)
 - [ ] **At least one historical reference** somewhere in the list (2008 or 2014, or a specific Dubai-cycle precedent)
@@ -367,7 +370,7 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] **Section 1 states the criteria explicitly** — reusable beyond this list
 - [ ] **List ordered to build to the most counterintuitive entry** (Number 1)
 - [ ] **Each item has one specific data point** — no generic "good fundamentals"
-- [ ] **Each item has one practitioner observation** — what Tahir has seen across deals
+- [ ] **Each item has one practitioner observation** — what ${profile.firstName} has seen across deals
 - [ ] **Each item has an actionable takeaway** — a check, a question, an evaluation
 - [ ] **Mid-roll CTA #1 placed mid-list** (after item 3 of 5, or proportional)
 - [ ] **At least one historical reference** in the list (2008 or 2014, or specific Dubai-cycle precedent)
@@ -382,3 +385,4 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] Output is teleprompter-ready prose under each section heading
 - [ ] Word count within 1,300–1,500
 `
+}

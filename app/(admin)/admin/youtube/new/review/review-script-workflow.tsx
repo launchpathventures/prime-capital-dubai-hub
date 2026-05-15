@@ -3,10 +3,12 @@
  *
  * Single-step flow:
  *   - User pastes an existing script (text or .md / .txt upload)
- *   - User picks the format the script is intended to be (required)
+ *   - Format is auto-detected by an agent — the manual picker is an
+ *     optional override to force a specific spec
  *   - Optional working title — derived from the first heading if omitted
- *   - Submit creates a youtube_scripts row with script_body filled and
- *     status = script_drafted, then redirects to the detail page with
+ *   - Submit classifies the format (unless overridden), creates a
+ *     youtube_scripts row with script_body filled and status =
+ *     script_drafted, then redirects to the detail page with
  *     ?autoValidate=1 so the user immediately sees the validator verdict
  *
  * The actual rewrite loop reuses the existing /generate-script regen path
@@ -27,6 +29,7 @@ import {
   ArrowRightIcon,
   Loader2Icon,
   ShieldCheckIcon,
+  SparklesIcon,
   UploadIcon,
   BarChart3Icon,
   AxeIcon,
@@ -43,6 +46,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
+import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileSelector } from "../../_components/profile-selector"
 
 // =============================================================================
 // HELPERS
@@ -123,10 +128,13 @@ function wordCount(body: string): number {
 export function ReviewScriptWorkflow() {
   const router = useRouter()
   const [scriptBody, setScriptBody] = React.useState("")
+  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
   const [format, setFormat] = React.useState<Format | null>(null)
   const [title, setTitle] = React.useState("")
   const [titleDirty, setTitleDirty] = React.useState(false)
-  const [isSaving, setIsSaving] = React.useState(false)
+  const [phase, setPhase] = React.useState<"idle" | "classifying" | "saving">(
+    "idle",
+  )
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Auto-fill title from the script body until the user types over it.
@@ -158,14 +166,40 @@ export function ReviewScriptWorkflow() {
   // ---------------------------------------------------------------------------
 
   async function handleSubmit() {
-    if (!scriptBody.trim() || !format) return
+    if (!scriptBody.trim()) return
     const resolvedTitle = title.trim() || deriveTitle(scriptBody) || "Untitled draft"
-    setIsSaving(true)
     try {
+      // Format is auto-detected unless the user picked one as an override.
+      let resolvedFormat = format
+      if (!resolvedFormat) {
+        setPhase("classifying")
+        const res = await fetch("/api/admin/youtube/classify-format", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scriptBody }),
+        })
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as {
+            error?: string
+          }
+          throw new Error(data.error || "Failed to detect format")
+        }
+        const data = (await res.json()) as {
+          format: Format
+          rationale: string
+        }
+        resolvedFormat = data.format
+        toast(`Detected format: ${FORMAT_META[resolvedFormat].label}`, {
+          type: "success",
+        })
+      }
+
+      setPhase("saving")
       const result = await createYouTubeScript({
         title: resolvedTitle,
         topic: undefined,
-        format,
+        format: resolvedFormat,
+        profile_slug: profileSlug,
         status: "script_drafted",
         script_body: scriptBody,
         word_count: wordCount(scriptBody),
@@ -177,12 +211,13 @@ export function ReviewScriptWorkflow() {
     } catch (err) {
       console.error("Save error:", err)
       toast(err instanceof Error ? err.message : "Failed to save", { type: "error" })
-      setIsSaving(false)
+      setPhase("idle")
     }
   }
 
   const wc = wordCount(scriptBody)
-  const canSubmit = !!scriptBody.trim() && !!format && !isSaving
+  const busy = phase !== "idle"
+  const canSubmit = !!scriptBody.trim() && !busy
 
   return (
     <Stack gap="lg">
@@ -200,24 +235,46 @@ export function ReviewScriptWorkflow() {
         </Stack>
       </Row>
 
-      {/* Format picker — required */}
+      {/* Profile picker — whose voice this script is measured against */}
+      <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+
+      {/* Format — auto-detected; manual pick is an optional override */}
       <Stack gap="sm">
         <Stack gap="xs">
           <Text className="font-medium">
-            Which format is this script written in? <span className="text-destructive">*</span>
+            Format{" "}
+            <span className="text-muted-foreground font-normal">
+              (auto-detected — pick one only to override)
+            </span>
           </Text>
           <Text variant="muted" size="sm">
-            The validator scores structure, hooks, and CTAs against this format's
-            spec. Pick the format you want the script measured against.
+            We read the pasted script and map it to the best-fit format, then the
+            validator scores it against that spec. Choose a format only if you
+            want to force a specific one.
           </Text>
         </Stack>
         <Row gap="xs" wrap>
+          <button
+            type="button"
+            onClick={() => setFormat(null)}
+            title="Let an agent classify the pasted script"
+            className={cn(
+              "rounded-full border px-3.5 py-1.5 text-sm transition-all flex items-center gap-1.5",
+              "hover:border-primary/60",
+              format === null
+                ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                : "border-border bg-background text-foreground"
+            )}
+          >
+            <SparklesIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
+            <span className="font-medium">Auto-detect</span>
+          </button>
           {FORMATS_IN_DISPLAY_ORDER.map((f) => (
             <FormatPill
               key={f}
               format={f}
               selected={format === f}
-              onSelect={() => setFormat(f)}
+              onSelect={() => setFormat(format === f ? null : f)}
             />
           ))}
         </Row>
@@ -286,11 +343,17 @@ export function ReviewScriptWorkflow() {
       {/* Action bar */}
       <Row className="justify-between pt-4 border-t" wrap gap="sm">
         <Text variant="muted" size="sm" className="self-center">
-          On submit, we'll save your script as a draft, validate it, then drop you
-          on the detail page where you can rewrite or chat.
+          On submit, we'll detect the format, save your script as a draft,
+          validate it, then drop you on the detail page where you can rewrite or
+          chat.
         </Text>
         <Button onClick={handleSubmit} disabled={!canSubmit} size="lg">
-          {isSaving ? (
+          {phase === "classifying" ? (
+            <>
+              <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
+              Analysing format...
+            </>
+          ) : phase === "saving" ? (
             <>
               <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
               Saving and validating...

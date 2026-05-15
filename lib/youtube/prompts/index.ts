@@ -3,9 +3,12 @@
  *
  * Single entry point for the six format-specific prompts. Composes the
  * shared brand-level immutables with the per-format prompt at generation
- * time:
+ * time, both parameterised by a ScriptProfile:
  *
- *   const systemPrompt = getSystemPrompt('myth_buster')
+ *   const systemPrompt = getSystemPrompt('myth_buster', profile)
+ *
+ * The profile defaults to TAHIR_PROFILE so existing call sites that pre-date
+ * the profile rollout continue to produce byte-identical output.
  *
  * Used by:
  *   - app/api/admin/youtube/generate-script/route.ts
@@ -13,13 +16,15 @@
  *   - UI: Step 1 format pills, Step 2 format badges, detail page
  */
 
-import { SHARED_IMMUTABLES } from "./shared-immutables"
-import { AUTHORITY_ANALYSIS_PROMPT } from "./authority-analysis"
-import { MYTH_BUSTER_PROMPT } from "./myth-buster"
-import { REACTION_PROMPT } from "./reaction"
-import { CASE_STUDY_PROMPT } from "./case-study"
-import { LISTICLE_PROMPT } from "./listicle"
-import { QA_MAILBAG_PROMPT } from "./qa-mailbag"
+import type { ScriptProfile } from "../profiles"
+import { TAHIR_PROFILE } from "../profiles/tahir"
+import { getSharedImmutables } from "./shared-immutables"
+import { getAuthorityAnalysisPrompt } from "./authority-analysis"
+import { getMythBusterPrompt } from "./myth-buster"
+import { getReactionPrompt } from "./reaction"
+import { getCaseStudyPrompt } from "./case-study"
+import { getListiclePrompt } from "./listicle"
+import { getQaMailbagPrompt } from "./qa-mailbag"
 
 // =============================================================================
 // TYPES
@@ -108,7 +113,7 @@ export const FORMAT_META: Record<Format, FormatMeta> = {
     minutesLabel: "4–6 min",
     wordsLabel: "~750–1,000 words",
     hookFormula: "C",
-    hookName: "News Headline + Tahir's Read",
+    hookName: "News Headline + Presenter's Read",
     ctaCount: 1,
     newsPegRequired: true,
     clientSituationRequired: false,
@@ -162,16 +167,16 @@ export const FORMAT_META: Record<Format, FormatMeta> = {
 }
 
 // =============================================================================
-// PROMPT MAP
+// PROMPT BUILDERS
 // =============================================================================
 
-const FORMAT_PROMPTS: Record<Format, string> = {
-  authority_analysis: AUTHORITY_ANALYSIS_PROMPT,
-  myth_buster: MYTH_BUSTER_PROMPT,
-  reaction: REACTION_PROMPT,
-  case_study: CASE_STUDY_PROMPT,
-  listicle: LISTICLE_PROMPT,
-  qa_mailbag: QA_MAILBAG_PROMPT,
+const FORMAT_PROMPT_BUILDERS: Record<Format, (profile: ScriptProfile) => string> = {
+  authority_analysis: getAuthorityAnalysisPrompt,
+  myth_buster: getMythBusterPrompt,
+  reaction: getReactionPrompt,
+  case_study: getCaseStudyPrompt,
+  listicle: getListiclePrompt,
+  qa_mailbag: getQaMailbagPrompt,
 }
 
 // =============================================================================
@@ -180,10 +185,14 @@ const FORMAT_PROMPTS: Record<Format, string> = {
 
 /**
  * Compose the full system prompt for a generation request: shared brand-level
- * immutables + the format-specific prompt.
+ * immutables + the format-specific prompt, both rendered for the supplied
+ * profile. Defaults to Tahir so legacy callers stay byte-identical.
  */
-export function getSystemPrompt(format: Format): string {
-  return `${SHARED_IMMUTABLES}\n\n---\n\n${FORMAT_PROMPTS[format]}`
+export function getSystemPrompt(
+  format: Format,
+  profile: ScriptProfile = TAHIR_PROFILE,
+): string {
+  return `${getSharedImmutables(profile)}\n\n---\n\n${FORMAT_PROMPT_BUILDERS[format](profile)}`
 }
 
 /**
@@ -211,7 +220,7 @@ export const DEFAULT_FORMAT: Format = "authority_analysis"
  * Returns false for unknown values; callers should fall back to DEFAULT_FORMAT.
  */
 export function isFormat(value: unknown): value is Format {
-  return typeof value === "string" && value in FORMAT_PROMPTS
+  return typeof value === "string" && value in FORMAT_PROMPT_BUILDERS
 }
 
 /**

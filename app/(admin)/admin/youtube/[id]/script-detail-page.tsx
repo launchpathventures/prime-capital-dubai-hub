@@ -69,6 +69,7 @@ import { FORMAT_META, DEFAULT_FORMAT } from "@/lib/youtube/prompts"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { ScriptChatPanel } from "./script-chat-panel"
+import { ProfileChip } from "../_components/profile-selector"
 
 // =============================================================================
 // CONSTANTS
@@ -279,6 +280,7 @@ export function ScriptDetailPage({
           title: script.title,
           topic: script.topic || script.title,
           format: script.format || DEFAULT_FORMAT,
+          profileSlug: script.profile_slug,
           scriptId: script.id,
           previousScript: hasScript ? script.script_body : undefined,
           validationFeedback,
@@ -485,6 +487,7 @@ export function ScriptDetailPage({
         body: JSON.stringify({
           scriptId: src.id,
           scriptBody: body,
+          profileSlug: src.profile_slug,
           format: src.format || DEFAULT_FORMAT,
           packaging: src.packaging,
           hookV1: src.hook_v1,
@@ -622,16 +625,19 @@ export function ScriptDetailPage({
               {script.topic}
             </Text>
           )}
-          {script.format && (
-            <Row gap="xs" align="center">
-              <Badge variant="outline" size="sm">
-                {FORMAT_META[script.format].label}
-              </Badge>
-              <Text variant="muted" size="sm">
-                {FORMAT_META[script.format].minutesLabel} · {FORMAT_META[script.format].wordsLabel}
-              </Text>
-            </Row>
-          )}
+          <Row gap="xs" align="center" wrap>
+            <ProfileChip slug={script.profile_slug} />
+            {script.format && (
+              <>
+                <Badge variant="outline" size="sm">
+                  {FORMAT_META[script.format].label}
+                </Badge>
+                <Text variant="muted" size="sm">
+                  {FORMAT_META[script.format].minutesLabel} · {FORMAT_META[script.format].wordsLabel}
+                </Text>
+              </>
+            )}
+          </Row>
         </Stack>
       </Row>
 
