@@ -17,6 +17,7 @@ import {
   isFormat,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile, type ScriptProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -25,15 +26,16 @@ import {
 
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY
 
-const SYSTEM_PROMPT = `You are the creative director for Prime Capital Dubai's YouTube channel. Your role is to scan what's happening in the Dubai real estate market RIGHT NOW and propose topic prompts that will make for high-engagement investor-focused videos.
+function getSystemPrompt(profile: ScriptProfile): string {
+  return `You are the creative director for ${profile.brandFullName}'s YouTube channel. Your role is to scan what's happening in the Dubai real estate market RIGHT NOW and propose topic prompts that will make for high-engagement investor-focused videos.
 
 ## Who the Channel Is For
-Tahir Majithia, founder of Prime Capital Dubai — strategic investment advisor (not agent). The audience is international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, GCC. They are analytical, skeptical of hype, research-driven.
+${profile.speakerLine} — strategic investment advisor (not agent). The audience is international HNW investors ($2M+ net worth), business owners, C-suite, senior professionals from UK, Europe, North America, GCC. They are analytical, skeptical of hype, research-driven.
 
 ## The Brand Voice
 - Contrarian, data-driven, measured
 - Position as the "private banker" of Dubai real estate
-- 20+ years experience, AED 3B+ deployed across cycles
+- ${profile.yearsLabel} experience, ${profile.capitalLabel} deployed across cycles
 - Never salesy. Substance over shine.
 
 ## Your Task
@@ -59,6 +61,7 @@ Return a JSON array of 5 topic prompts. Each:
 }
 
 Return ONLY the JSON array. No prose before or after.`
+}
 
 interface PerplexityMessage {
   role: string
@@ -114,8 +117,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
@@ -131,6 +134,8 @@ export async function POST(request: NextRequest) {
     // narratives; etc).
     const rawFormats = Array.isArray(body?.formats) ? body.formats : []
     const formats: Format[] = rawFormats.filter(isFormat) as Format[]
+
+    const profile = getProfile(body?.profileSlug)
 
     const formatGuidance = formats.length > 0
       ? `\n\n## Format constraint\nThe operator has pre-selected the following script format(s) for any video generated from these topics: ${formats.map((f) => FORMAT_META[f].label).join(", ")}. Bias the topic suggestions toward developments that work well for these formats:\n${formats.map((f) => `- **${FORMAT_META[f].label}**: ${formatTopicGuidance(f)}`).join("\n")}\n\nDistribute the 5 suggestions across the selected formats. If a selected format is **Live Reaction**, every suggestion under that format MUST cite a specific news event from the last 14 days with a named source from this allowed list: DLD, RERA, Central Bank UAE, Fitch, Moody's, S&P. Do not propose Live Reaction topics without a concrete news peg.`
@@ -152,7 +157,7 @@ export async function POST(request: NextRequest) {
         model: "sonar-pro",
         temperature: 0.7,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: getSystemPrompt(profile) },
           { role: "user", content: userPrompt },
         ],
       }),

@@ -17,6 +17,7 @@ import {
   FORMAT_META,
   type Format,
 } from "@/lib/youtube/prompts"
+import { getProfile } from "@/lib/youtube/profiles"
 import {
   checkRateLimit,
   getClientIP,
@@ -32,6 +33,7 @@ interface GenerateScriptRequest {
   title: string
   topic: string
   format?: string
+  profileSlug?: string
   scriptId?: string
   previousScript?: string
   validationFeedback?: string
@@ -50,13 +52,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: isAdmin } = await supabase.rpc("is_admin")
-    if (!isAdmin) {
+    const { data: canAccess } = await supabase.rpc("can_access_youtube")
+    if (!canAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 })
     }
 
     const body: GenerateScriptRequest = await request.json()
-    const { title, topic, format: rawFormat, previousScript, validationFeedback } = body
+    const { title, topic, format: rawFormat, profileSlug, previousScript, validationFeedback } = body
 
     if (!title?.trim() || !topic?.trim()) {
       return NextResponse.json(
@@ -67,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     const format: Format = toFormat(rawFormat)
     const meta = FORMAT_META[format]
+    const profile = getProfile(profileSlug)
 
     // Cap regeneration inputs to prevent runaway prompts
     const cappedPreviousScript = previousScript?.slice(0, 6000)
@@ -75,10 +78,10 @@ export async function POST(request: NextRequest) {
     // System prompt = SHARED_IMMUTABLES + format-specific prompt.
     // Each format prompt enforces its own length, structure, hook formula,
     // CTA placement, and signature patterns.
-    const systemPrompt = getSystemPrompt(format)
+    const systemPrompt = getSystemPrompt(format, profile)
 
     const userMessage = cappedPreviousScript && cappedValidationFeedback
-      ? `REGENERATE this YouTube script for Prime Capital Dubai. The previous version failed validation. Fix ALL issues listed below while keeping the same topic, angle, and **format** (${meta.label}).
+      ? `REGENERATE this YouTube script for ${profile.brandFullName}. The previous version failed validation. Fix ALL issues listed below while keeping the same topic, angle, and **format** (${meta.label}).
 
 Title / Working Title: ${title}
 Concept: ${topic}
@@ -91,7 +94,7 @@ PREVIOUS SCRIPT (rewrite and improve — do not copy verbatim):
 ${cappedPreviousScript}
 
 Generate the improved script now, addressing every piece of feedback above. Follow the format spec exactly.`
-      : `Write a complete YouTube script for Prime Capital Dubai.
+      : `Write a complete YouTube script for ${profile.brandFullName}.
 
 Title / Working Title: ${title}
 Concept: ${topic}

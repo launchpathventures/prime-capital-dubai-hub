@@ -43,7 +43,10 @@ interface AdminSidebarProps {
 export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname()
   const isAdmin = userRole === "admin"
-  
+  // youtube_editor is scoped to the YouTube generator only — every other
+  // section is hidden so the sidebar matches what proxy.ts actually allows.
+  const isYoutubeEditor = userRole === "youtube_editor"
+
   const isActive = (href: string) => {
     if (href === "/admin/dashboard") {
       return pathname === "/admin" || pathname === "/admin/dashboard"
@@ -57,7 +60,9 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
   
   return (
     <aside className="admin-sidebar">
-      {/* Overview Section */}
+      {/* Overview + Website Content — hidden for youtube_editor */}
+      {!isYoutubeEditor && (
+      <>
       <div className="admin-sidebar__section">
         <div className="admin-sidebar__heading">Overview</div>
         <nav className="admin-sidebar__nav-list">
@@ -119,6 +124,8 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
           </Link>
         </nav>
       </div>
+      </>
+      )}
 
       {/* Content Section */}
       <div className="admin-sidebar__section">
@@ -154,7 +161,9 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
         </div>
       )}
 
-      {/* Learning Surface Link */}
+      {/* Learning link + Settings — hidden for youtube_editor */}
+      {!isYoutubeEditor && (
+      <>
       <div className="admin-sidebar__section admin-sidebar__section--highlight">
         <div className="admin-sidebar__heading">Go to Learning</div>
         <nav className="admin-sidebar__nav-list">
@@ -194,6 +203,8 @@ export function AdminSidebar({ userRole, onNavigate }: AdminSidebarProps) {
           </Link>
         </nav>
       </div>
+      </>
+      )}
     </aside>
   )
 }

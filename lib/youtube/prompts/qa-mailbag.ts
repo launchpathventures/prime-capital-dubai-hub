@@ -2,7 +2,7 @@
  * CATALYST - Q&A / Mailbag Format Prompt
  *
  * Bottom-funnel community-builder. Rewards repeat viewers and signals that
- * Tahir engages directly with the audience.
+ * the presenter engages directly with the audience.
  *
  * REQUIRES: 4–7 strong viewer questions (real or composite — composite must
  * be declared). Fewer than 4 under-delivers; more than 7 rushes the answers.
@@ -11,26 +11,29 @@
  * Composes with SHARED_IMMUTABLES at generation time.
  */
 
-export const QA_MAILBAG_PROMPT = `# Format: Q&A / Mailbag
+import type { ScriptProfile } from "../profiles"
 
-Bottom-funnel. The community-builder. The format that rewards repeat viewers and signals that Tahir reads, hears, and engages with the audience directly.
+export function getQaMailbagPrompt(profile: ScriptProfile): string {
+  return `# Format: Q&A / Mailbag
 
-A Prime Capital Q&A is not "answering generic FAQs about Dubai property." It is a curated set of real (or transparently composite) questions from viewers, prospects, and clients — answered with the same depth and honesty as a strategy call. The format earns repeat viewership; the depth earns the trust that converts.
+Bottom-funnel. The community-builder. The format that rewards repeat viewers and signals that ${profile.firstName} reads, hears, and engages with the audience directly.
+
+A ${profile.brandName} Q&A is not "answering generic FAQs about Dubai property." It is a curated set of real (or transparently composite) questions from viewers, prospects, and clients — answered with the same depth and honesty as a strategy call. The format earns repeat viewership; the depth earns the trust that converts.
 
 ---
 
 ## 1. Job & audience
 
 ### What this format does
-Demonstrate that Tahir is the kind of advisor who answers questions directly and at depth — including the messy ones, the contrarian ones, and the ones that don't have a clean answer. The format is a community signal as much as it is a content format.
+Demonstrate that ${profile.firstName} is the kind of advisor who answers questions directly and at depth — including the messy ones, the contrarian ones, and the ones that don't have a clean answer. The format is a community signal as much as it is a content format.
 
 ### Who's watching this specifically
-- **Stage:** Warm to hot. They've watched 3+ of Tahir's videos. Many have left comments or sent questions. The format directly rewards that engagement.
+- **Stage:** Warm to hot. They've watched 3+ of ${profile.firstName}'s videos. Many have left comments or sent questions. The format directly rewards that engagement.
 - **Mindset:** Looking for direct, bullet-point-quality answers to questions they've actually been wrestling with. Tolerance for setup is lower than other formats — they want the answer, then the reasoning.
 - **Decision criteria:** Does this person actually engage with the question — or pivot to a generic talking point? Does the answer come fast — or get buried under qualifications?
 
 ### The non-negotiable: never bury the lede
-The format breaks if Tahir takes 90 seconds to "set up" before answering. The structure is:
+The format breaks if ${profile.firstName} takes 90 seconds to "set up" before answering. The structure is:
 
 1. Question stated
 2. **Direct one-sentence answer**
@@ -42,7 +45,7 @@ In that order. Always. The audience came for an answer; give it to them in the s
 ### Real questions vs composites
 Questions can be:
 - **Real** — pulled directly from comments, DMs, strategy calls. Always anonymise the asker. Light editing for clarity is fine.
-- **Composite** — synthesised from a frequently-asked pattern. Tahir notes one common question pattern and answers a representative version.
+- **Composite** — synthesised from a frequently-asked pattern. ${profile.firstName} notes one common question pattern and answers a representative version.
 
 If composite, **declare it once at the top of the video**. *"Some of these are direct viewer questions; a couple are composites of questions I've been asked variations of repeatedly. Where it's a composite, I'll flag it."* Or simpler: declare in production notes and mark each composite question on screen.
 
@@ -81,17 +84,17 @@ The audience is fine with composites — they're not fine with composites preten
 1. **Audience acknowledgement** — *"You've been sending in questions…"* / *"This week I want to answer some of the questions I've been getting…"*
 2. **Question preview** — name 1–2 of the most-anticipated questions specifically (without giving the answer)
 3. **The promise** — direct answers, real reasoning, including the questions that don't have clean answers
-4. **Credibility anchor** (AED 3B+, 20 years) — briefer than other formats
+4. **Credibility anchor** (${profile.capitalLabelShort}, ${profile.yearsLabel}) — briefer than other formats
 
 ### Worked examples (good)
 
 **Good — Off-plan timing:**
-> "You've been sending in questions, and this week I'm going to answer five of them — including the one I get more than any other right now: should I be buying off-plan in 2026 or waiting for 2027? I'm Tahir Majithia, founder of Prime Capital Dubai. 20 years in this market, three billion dirhams of client capital placed. Direct answers, real reasoning, and where I'm honestly not sure I'll tell you that too. Some of these are real viewer questions; one or two are composites of questions I've been asked variations of repeatedly. Let's get into it."
+> "You've been sending in questions, and this week I'm going to answer five of them — including the one I get more than any other right now: should I be buying off-plan in 2026 or waiting for 2027? I'm ${profile.fullName}, ${profile.brandRoleFullName}. ${profile.yearsSpoken} in this market, ${profile.capitalSpoken} of client capital placed. Direct answers, real reasoning, and where I'm honestly not sure I'll tell you that too. Some of these are real viewer questions; one or two are composites of questions I've been asked variations of repeatedly. Let's get into it."
 
 *Why it works:* audience acknowledged, headline question previewed (creates the open loop), credibility anchor briefer than usual, honesty about composites, promise of "where I'm not sure I'll tell you" trust signal.
 
 **Good — Region stability + financing:**
-> "Five questions today, and two of them are connected: the first is whether the regional situation has materially changed the case for Dubai property right now, and the third is what happens to off-plan completers if Central Bank UAE moves on LTVs. I'm going to answer both — and the questions in between — directly. I'm Tahir Majithia. 20 years, three billion dirhams placed across cycles. Where the answer is clean, I'll give it cleanly. Where it isn't, you'll hear that too."
+> "Five questions today, and two of them are connected: the first is whether the regional situation has materially changed the case for Dubai property right now, and the third is what happens to off-plan completers if Central Bank UAE moves on LTVs. I'm going to answer both — and the questions in between — directly. I'm ${profile.fullName}. ${profile.yearsSpoken}, ${profile.capitalSpoken} placed across cycles. Where the answer is clean, I'll give it cleanly. Where it isn't, you'll hear that too."
 
 *Why it works:* preview of two specific questions, names the connection between them (creates anticipation), credibility anchor, honest framing about answer-quality variation.
 
@@ -105,7 +108,7 @@ The audience is fine with composites — they're not fine with composites preten
 **No audience acknowledgement:**
 > ❌ "There are five questions I want to address in this video about Dubai property in 2026."
 
-*Violation:* the format's whole signal is *"Tahir engages with the audience"* — drop the audience acknowledgement and the format collapses into a regular video.
+*Violation:* the format's whole signal is *"${profile.firstName} engages with the audience"* — drop the audience acknowledgement and the format collapses into a regular video.
 
 **Buried promise:**
 > ❌ "Today's video is a Q&A. I've got some great questions to get to. Before we start, let me quickly remind you to subscribe…"
@@ -207,7 +210,7 @@ The tease for a Q&A often invites more questions:
 - *"If you've got a question you'd like answered in the next mailbag, drop it in the comments — I read every one. The next video is going to be a deeper look at [specific topic that came up across multiple questions today]. Make sure you're subscribed."*
 - *"The questions today made one thing clear: a lot of you are wrestling with [specific theme]. The next video tackles that head-on. Make sure you're subscribed."*
 
-Sign-off exact: *"I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."*
+Sign-off exact: *"${profile.signOff}"*
 
 ---
 
@@ -370,3 +373,4 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] Output is teleprompter-ready prose under each section heading
 - [ ] Word count within 1,400–1,800
 `
+}

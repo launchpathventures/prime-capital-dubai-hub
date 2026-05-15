@@ -108,6 +108,8 @@ export function AddUserForm() {
                 className="admin-users-modal__select"
               >
                 <option value="learner">Learner</option>
+                <option value="marketing">Marketing</option>
+                <option value="youtube_editor">YouTube Editor</option>
                 <option value="admin">Admin</option>
               </select>
             </div>

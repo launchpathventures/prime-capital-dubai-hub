@@ -1,11 +1,34 @@
 /**
- * CATALYST - Prime Capital Brand & Copywriting Guide v1.0
+ * CATALYST - Brand & Copywriting Guide builder
  *
- * Exported as a string constant so it bundles correctly in serverless deployments.
+ * Renders the Prime Capital brand-and-copywriting guide for a given
+ * ScriptProfile. Defaults to Tahir so legacy callers stay byte-identical.
+ *
+ * Consumed by chat-edit, panel-review, and validate-script API routes.
  */
 
-export const BRAND_GUIDE = `
-# Prime Capital Dubai — Brand & Copywriting Guide
+import type { ScriptProfile } from "./profiles"
+import { TAHIR_PROFILE } from "./profiles/tahir"
+
+export function getBrandGuide(profile: ScriptProfile = TAHIR_PROFILE): string {
+  // Title-case "billion" for headline / formula examples that mix into prose.
+  // For Tahir: "AED 3 billion" → "AED 3 Billion" (byte-identical with the
+  // pre-profile fixed string).
+  const capitalLabelTitleInline = profile.capitalLabelInline.replace(
+    /billion/i,
+    "Billion",
+  )
+
+  // Tahir is the founder and states the firm's deployment in the first person.
+  // Team profiles (e.g. Ahmed) speak the same record as the firm's, so the
+  // example title drops the personal "I've". Tahir stays byte-identical.
+  const deployedCredentialHeadline =
+    profile.slug === "tahir"
+      ? `I've Deployed ${capitalLabelTitleInline} in Dubai — Here's What I'd Buy Today`
+      : `${capitalLabelTitleInline} Deployed in Dubai — Here's What I'd Buy Today`
+
+  return `
+# ${profile.brandFullName} — Brand & Copywriting Guide
 
 **Version 1.0 | April 2026**
 **Purpose:** Structured reference for AI-assisted copy production across all channels. Parse as rule sets, not narrative.
@@ -16,13 +39,13 @@ export const BRAND_GUIDE = `
 
 | Field | Value |
 |-------|-------|
-| **Entity** | Prime Capital Dubai |
+| **Entity** | ${profile.brandFullName} |
 | **Type** | Boutique real estate advisory |
 | **Positioning** | The "private banker" of Dubai real estate |
-| **Founder / Voice** | Tahir Majithia |
-| **Promise** | "We move complexity out of sight." |
-| **Motto** | "With a plan, not a pitch." |
-| **Track Record** | AED 3 billion+ deployed across multiple market cycles. 20+ years market experience. |
+| **${profile.brandGuideRoleLabel} / Voice** | ${profile.fullName} |
+| **Promise** | ${profile.brandPromise} |
+| **Motto** | ${profile.motto} |
+| **Track Record** | ${profile.capitalLabel} deployed across ${profile.cyclesPhrase}. ${profile.yearsLabel} market experience. |
 | **Target Client** | International HNW investors, $2M+ net worth — business owners, C-suite, senior professionals |
 | **Geography** | Primarily UK, Europe, North America, GCC |
 | **Anti-Position** | Not a volume agency. Not flashy. Not transactional. Not part of the "Dubai hustle." |
@@ -48,7 +71,7 @@ export const BRAND_GUIDE = `
 
 ### Core Voice Definition
 
-Prime Capital sounds like a **thoughtful senior advisor explaining something important to a peer** — measured, clear, grounded in evidence, and occasionally direct. Never performing. Never selling.
+${profile.brandName} sounds like a **thoughtful senior advisor explaining something important to a peer** — measured, clear, grounded in evidence, and occasionally direct. Never performing. Never selling.
 
 ### Voice Parameters
 
@@ -57,7 +80,7 @@ Prime Capital sounds like a **thoughtful senior advisor explaining something imp
 | **Register** | Professional but human. Not academic, not casual. | Avoid both jargon-heavy prose and slang/colloquialisms |
 | **Sentence length** | Medium. Target 12–22 words average. | Break any sentence over 30 words into two |
 | **Paragraph length** | 2–4 sentences for client-facing copy. Max 5 for long-form. | Hard limit: no paragraph over 5 sentences |
-| **Pronoun usage** | "We" for Prime Capital. "You" / "Your" for the client. Never "I" unless Tahir is the attributed speaker. | Exception: YouTube scripts and LinkedIn posts from Tahir's personal account use "I" |
+| **Pronoun usage** | "We" for ${profile.brandName}. "You" / "Your" for the client. Never "I" unless ${profile.firstName} is the attributed speaker. | Exception: YouTube scripts and LinkedIn posts from ${profile.firstName}'s personal account use "I" |
 | **Contractions** | Yes — use them. "We're" not "We are." "It's" not "It is." | Contractions make copy sound human. Formal ≠ stiff. |
 | **Authority signals** | Reference patterns observed, cycles lived through, anonymized client scenarios, specific data points | Never claim authority ("We're the best"). Demonstrate it through specificity. |
 | **Warmth signals** | Collaborative language, acknowledgment of the client's intelligence, respect for their time | Never over-familiar, never sycophantic, never performatively friendly |
@@ -67,10 +90,10 @@ Prime Capital sounds like a **thoughtful senior advisor explaining something imp
 
 | Context | Correct | Incorrect |
 |---------|---------|-----------|
-| Describing Prime Capital's work | "We analyse..." | "Our team analyses..." (too corporate) |
+| Describing ${profile.brandName}'s work | "We analyse..." | "Our team analyses..." (too corporate) |
 | Addressing the client | "Your portfolio..." | "The client's portfolio..." (too distant) |
-| Tahir speaking (video, LinkedIn personal) | "I've seen this pattern..." | "We at Prime Capital have seen..." (too formal for personal channel) |
-| Tahir speaking about the team | "My team and I..." | "Prime Capital's dedicated professionals..." (too corporate) |
+| ${profile.firstName} speaking (video, LinkedIn personal) | "I've seen this pattern..." | "We at ${profile.brandName} have seen..." (too formal for personal channel) |
+| ${profile.firstName} speaking about the team | "My team and I..." | "${profile.brandName}'s dedicated professionals..." (too corporate) |
 | General market commentary | "What we're seeing..." | "What the market is showing us..." (acceptable alternative) |
 
 ### Rhythm and Cadence
@@ -110,7 +133,7 @@ Tone operates on four dials. Each piece of copy should be calibrated before writ
 | **LinkedIn** | Market commentary | 8 | 5 | 3 | 7 |
 | **LinkedIn** | Thought leadership | 9 | 4 | 2 | 6 |
 | **LinkedIn** | Company update | 5 | 7 | 2 | 4 |
-| **LinkedIn** | Personal (Tahir) | 8 | 7 | 2 | 6 |
+| **LinkedIn** | Personal (${profile.firstName}) | 8 | 7 | 2 | 6 |
 | **YouTube** | Script — market analysis | 9 | 6 | 3 | 9 |
 | **YouTube** | Script — area guide | 7 | 6 | 2 | 8 |
 | **YouTube** | Script — process explainer | 6 | 7 | 2 | 8 |
@@ -127,7 +150,7 @@ Tone operates on four dials. Each piece of copy should be calibrated before writ
 
 ### 4.1 Banned Words and Phrases
 
-These are **hard bans**. Never use in any Prime Capital copy regardless of channel.
+These are **hard bans**. Never use in any ${profile.brandName} copy regardless of channel.
 
 | Banned Word / Phrase | Reason |
 |----------------------|--------|
@@ -179,7 +202,7 @@ When the instinct is to reach for a banned word, use these instead:
 | Don't miss out | Worth examining closely / Worth considering for your portfolio |
 | Buy now | When you're ready to move forward / When the timing aligns |
 | Passive income | Rental yield / Income-generating asset |
-| We're the best | Our approach differs... / What we've found over 20 years is... |
+| We're the best | Our approach differs... / What we've found over ${profile.yearsSpoken} is... |
 | Exclusive access | Priority access / Early-stage access |
 | Stunning views | Unobstructed views / Panoramic sightlines |
 | Dream investment | Strategic investment / Well-positioned asset |
@@ -279,7 +302,7 @@ When copy addresses a specific client concern, use the corresponding framing. Ne
 
 ### 6.1 LinkedIn
 
-#### LinkedIn — Tahir's Personal Account
+#### LinkedIn — ${profile.firstName}'s Personal Account
 
 | Parameter | Value |
 |-----------|-------|
@@ -293,7 +316,7 @@ When copy addresses a specific client concern, use the corresponding framing. Ne
 | Emoji | Maximum 1–2 per post. Never in the opening line. Never as bullet replacements. Optional, not required. |
 | Posting cadence context | Content categories: market insights, investment principles, client lessons (anonymized), contrarian takes, process transparency |
 
-**LinkedIn Hook Formulas (Tahir Personal):**
+**LinkedIn Hook Formulas (${profile.firstName} Personal):**
 
 \`\`\`
 [Specific data point] + [Counterintuitive implication]
@@ -319,7 +342,7 @@ When copy addresses a specific client concern, use the corresponding framing. Ne
 | Voice | Third person or "we" |
 | Length | 100–200 words. Shorter than personal. |
 | Structure | Observation or insight → Brief supporting point → CTA to resource or website |
-| Tone | More formal than Tahir's personal. Still warm, not corporate. |
+| Tone | More formal than ${profile.firstName}'s personal. Still warm, not corporate. |
 | Content types | Market updates, new listings (positioned as opportunities, not ads), team/company milestones, resource promotions |
 
 ### 6.2 Email
@@ -328,7 +351,7 @@ When copy addresses a specific client concern, use the corresponding framing. Ne
 
 | Parameter | Value |
 |-----------|-------|
-| Voice | "We" for Prime Capital. "I" when Tahir sends personally. |
+| Voice | "We" for ${profile.brandName}. "I" when ${profile.firstName} sends personally. |
 | Subject line length | 4–8 words. Specific, never clickbait. |
 | Opening | Never "I hope this email finds you well." Get to the point or reference the last interaction. |
 | Length | 150–300 words for transactional. Up to 500 for market updates. |
@@ -389,7 +412,7 @@ Refer to the full Script Generator v2.0 for detailed script architecture. Key co
 
 | Parameter | Value |
 |-----------|-------|
-| Voice | First person — Tahir speaking directly to camera |
+| Voice | First person — ${profile.firstName} speaking directly to camera |
 | Script format | Plain text, teleprompter-ready. No markdown, no bold, no stage directions. |
 | Paragraph length | 2–4 sentences max |
 | Standard length | 1,500–2,000 words (8–12 min) |
@@ -405,7 +428,7 @@ Refer to the full Script Generator v2.0 for detailed script architecture. Key co
 "The Real Risk of Buying Off-Plan in Dubai (What Agents Won't Tell You)"
 
 [Credential Signal] + [Actionable Promise]
-"I've Deployed AED 3 Billion in Dubai — Here's What I'd Buy Today"
+"${deployedCredentialHeadline}"
 
 [Area/Topic] + [Investor Frame]
 "Dubai Property in 2026: Where the Smart Money Is Actually Going"
@@ -434,7 +457,7 @@ Refer to the full Script Generator v2.0 for detailed script architecture. Key co
 [CTA to resource]
 
 Example:
-"Dubai rental yields compressed 140bps in 18 months — but capital values tell a different story. 
+"Dubai rental yields compressed 140bps in 18 months — but capital values tell a different story.
 Our 2026 Strategy Kit breaks down where yields are heading and which corridors are mispriced.
 Download free →"
 \`\`\`
@@ -446,7 +469,7 @@ Download free →"
 [CTA to deeper resource]
 
 Example:
-"Worried about buying at the top of a Dubai cycle? 
+"Worried about buying at the top of a Dubai cycle?
 The data suggests we're in a different phase than most people think.
 See the full market analysis →"
 \`\`\`
@@ -474,7 +497,7 @@ Book a strategy call →"
 
 | Parameter | Value |
 |-----------|-------|
-| Voice | "We" throughout. Tahir's personal voice on About/Team pages. |
+| Voice | "We" throughout. ${profile.firstName}'s personal voice on About/Team pages. |
 | Headline style | Palatino, statement-driven. Calm and authoritative. Not clever — clear. |
 | Body style | Lato Light. Short paragraphs. Generous whitespace. |
 | Page length | Vary by purpose. Homepage: concise. Service pages: thorough. |
@@ -520,16 +543,16 @@ Book a strategy call →"
 **Example:**
 
 \`\`\`
-Positioned in the Burj Khalifa District, this 1,200 sq ft two-bedroom apartment 
-occupies a mid-floor unit in [Development Name] by [Developer] — a developer with 
+Positioned in the Burj Khalifa District, this 1,200 sq ft two-bedroom apartment
+occupies a mid-floor unit in [Development Name] by [Developer] — a developer with
 a 94% on-time completion record across 12 projects.
 
-The unit offers an open-plan layout with floor-to-ceiling glazing facing the Canal. 
+The unit offers an open-plan layout with floor-to-ceiling glazing facing the Canal.
 Handover-ready with a DLD-registered title deed.
 
-This corridor has seen 11.2% capital appreciation over the last 12 months, with 
-average rental yields for comparable units at 6.1% net. Tenant demand in the 
-district is driven by proximity to DIFC and a limited supply of completed two-bedroom 
+This corridor has seen 11.2% capital appreciation over the last 12 months, with
+average rental yields for comparable units at 6.1% net. Tenant demand in the
+district is driven by proximity to DIFC and a limited supply of completed two-bedroom
 stock.
 
 Price: AED 2,850,000
@@ -566,7 +589,7 @@ Developer: [Name]
 | Headline style | Statement-driven, not question-driven. Each headline should convey a complete thought. |
 | Data presentation | Clean, minimal charts. No decorative elements. Let the numbers speak. |
 | CTA slide | Final slide. One clear next step. Contact details. No pressure language. |
-| Visual style | Prime Capital brand palette (Spruce, Ash, Off White, Serenity). Palatino headlines, Lato body. Generous whitespace. No stock photography. |
+| Visual style | ${profile.brandName} brand palette (Spruce, Ash, Off White, Serenity). Palatino headlines, Lato body. Generous whitespace. No stock photography. |
 
 ---
 
@@ -582,7 +605,7 @@ Developer: [Name]
 | **Contrarian** | [Challenge common belief] | "The Worst Time to Buy in Dubai Is When Everyone Says It's the Best" |
 | **Investor Question** | [Question the audience is already asking] | "Where Does Dubai Sit in the Market Cycle Right Now?" |
 | **Process Transparency** | [Reveal what usually stays hidden] | "The Full Cost of Buying Property in Dubai — Every Line Item" |
-| **Credential + Insight** | [Authority signal] + [Valuable claim] | "After AED 3 Billion Deployed: The Three Mistakes I See Every Quarter" |
+| **Credential + Insight** | [Authority signal] + [Valuable claim] | "After ${capitalLabelTitleInline} Deployed: The Three Mistakes I See Every Quarter" |
 | **Correction Frame** | [Common approach] + [Better alternative] | "Stop Comparing Headline Prices. Start Comparing These Five Metrics." |
 
 ### 7.2 CTA Patterns
@@ -624,7 +647,7 @@ Developer: [Name]
 #### LinkedIn Post
 
 **Off-brand:**
-> 🔥 Exciting news! Dubai's property market is BOOMING and there's never been a better time to invest! Our amazing team at Prime Capital just closed another incredible deal. Don't miss out on the opportunity of a lifetime! DM us now to get started! 🏠💰 #Dubai #RealEstate #Luxury #Investment #DontMissOut
+> 🔥 Exciting news! Dubai's property market is BOOMING and there's never been a better time to invest! Our amazing team at ${profile.brandName} just closed another incredible deal. Don't miss out on the opportunity of a lifetime! DM us now to get started! 🏠💰 #Dubai #RealEstate #Luxury #Investment #DontMissOut
 
 **Violations:** Banned words (booming, amazing, incredible, don't miss out, opportunity of a lifetime, luxury). Exclamation marks. ALL CAPS. Emoji overuse. Urgency tactics. Self-congratulatory. No substance. Could be any agency.
 
@@ -707,7 +730,7 @@ Developer: [Name]
 
 *Issues: Vague ("notable growth metrics"), hedged to the point of saying nothing, no specificity, reads like a report not a person*
 
-**Correct — the Prime Capital voice:**
+**Correct — the ${profile.brandName} voice:**
 > "Here's what the data is actually showing us. Over the last 18 months, we've seen rental yields in key corridors compress from 7.2% to around 5.8%. Now, that sounds like bad news — but it's not. What it tells us is that capital values are catching up to rental demand. And that's a very different signal than what most people think it means."
 
 *Why this works: Specific data (7.2% → 5.8%). Acknowledges the counterargument. Explains the mechanic. Takes a clear position. Conversational but authoritative.*
@@ -732,7 +755,7 @@ Run this checklist against every piece of copy before delivery. Every item is bi
 - [ ] Correct pronoun usage for channel and speaker (Section 2)
 - [ ] Tone dials match the channel × context setting (Section 3)
 - [ ] Reads naturally aloud — not stiff, not slangy
-- [ ] Could not be attributed to a generic competitor — voice is distinctly Prime Capital
+- [ ] Could not be attributed to a generic competitor — voice is distinctly ${profile.brandName}
 - [ ] Authority is demonstrated through specificity, not claimed through assertion
 
 ### 9.3 Audience Compliance
@@ -757,7 +780,7 @@ Run this checklist against every piece of copy before delivery. Every item is bi
 - [ ] Is this substance over shine?
 - [ ] Does it address real concerns — or just hype benefits?
 - [ ] Would we be comfortable if a skeptical prospect read this?
-- [ ] If you removed the brand name, would this still be recognisable as Prime Capital?
+- [ ] If you removed the brand name, would this still be recognisable as ${profile.brandName}?
 
 **If any item fails — revise before delivering.**
 
@@ -788,7 +811,7 @@ IF addressing a client concern:
   → Respond with evidence, not reassurance
   → Never dismiss ("Don't worry about that")
 
-IF writing for Tahir's personal voice:
+IF writing for ${profile.firstName}'s personal voice:
   → Use "I" and "my team"
   → Reference personal experience and pattern recognition
   → More conversational than company copy, same substance level
@@ -805,5 +828,6 @@ IF the copy is longer than needed:
 
 ---
 
-*Prime Capital Dubai — Brand & Copywriting Guide v1.0*
-*"With a plan, not a pitch."*`
+*${profile.brandFullName} — Brand & Copywriting Guide v1.0*
+*${profile.motto}*`
+}

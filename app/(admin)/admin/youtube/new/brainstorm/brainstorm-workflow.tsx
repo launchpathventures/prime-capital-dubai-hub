@@ -1,5 +1,5 @@
 /**
- * CATALYST - New Script Workflow
+ * CATALYST - Brainstorm Ideas Workflow
  *
  * Full-page multi-step workflow:
  * Step 1: Input — text or voice recording, with optional format pre-selection
@@ -46,6 +46,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
+import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileSelector } from "../../_components/profile-selector"
 
 // =============================================================================
 // TYPES
@@ -140,14 +142,20 @@ function FormatPill({
 // MAIN COMPONENT
 // =============================================================================
 
-export function NewScriptWorkflow() {
+export function BrainstormWorkflow() {
   const router = useRouter()
   const [step, setStep] = React.useState<Step>("input")
   const [input, setInput] = React.useState("")
   const [ideas, setIdeas] = React.useState<ScriptIdea[]>([])
-  const [selectedIdeas, setSelectedIdeas] = React.useState<Set<number>>(new Set())
+  // Keyed by idea.title so selection survives reorders or in-place mutations
+  // of the ideas array (e.g. the "Generate more variations" path) — index
+  // keying breaks the moment the array shape changes.
+  const [selectedIdeas, setSelectedIdeas] = React.useState<Set<string>>(new Set())
   const [isGenerating, setIsGenerating] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
+
+  // Profile — who every idea in this batch is written for (step 1)
+  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
 
   // Format pre-selection (step 1)
   const [selectedFormats, setSelectedFormats] = React.useState<Set<Format>>(new Set())
@@ -173,6 +181,13 @@ export function NewScriptWorkflow() {
   React.useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      // If the user navigates away mid-recording, MediaRecorder keeps running
+      // and the onstop handler fires its transcription request against an
+      // unmounted component. Stop it explicitly so onstop tears the stream
+      // down and we don't queue a doomed transcribe.
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop()
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
@@ -291,6 +306,7 @@ export function NewScriptWorkflow() {
         body: JSON.stringify({
           focus: input.trim() || undefined,
           formats: Array.from(selectedFormats),
+          profileSlug,
         }),
       })
       if (!res.ok) {
@@ -362,6 +378,7 @@ export function NewScriptWorkflow() {
           input: input.trim(),
           count: 5,
           formats: Array.from(selectedFormats),
+          profileSlug,
         }),
       })
       if (!res.ok) throw new Error("Failed to generate ideas")
@@ -393,6 +410,7 @@ export function NewScriptWorkflow() {
           count: 5,
           formats: Array.from(variationFormats),
           existingTitles: ideas.map((i) => i.title),
+          profileSlug,
         }),
       })
       if (!res.ok) throw new Error("Failed to generate more ideas")
@@ -416,13 +434,14 @@ export function NewScriptWorkflow() {
   // ---------------------------------------------------------------------------
 
   async function saveSelectedIdeas() {
-    const selected = ideas.filter((_, i) => selectedIdeas.has(i))
+    const selected = ideas.filter((idea) => selectedIdeas.has(idea.title))
     if (selected.length === 0) return null
     const inputs = selected.map((idea) => ({
       title: idea.title,
       topic: idea.topic,
       target_length: idea.target_length,
       format: idea.format,
+      profile_slug: profileSlug,
       input_text: input.trim() || undefined,
     }))
     const result = await createYouTubeScripts(inputs)
@@ -451,7 +470,10 @@ export function NewScriptWorkflow() {
       const saved = await saveSelectedIdeas()
       if (saved && saved.length > 0) {
         toast(`${saved.length} ideas saved — opening first for script generation`)
-        router.push(`/admin/youtube/${saved[0].id}`)
+        // autoGenerate=1 tells the detail page to immediately kick off Opus;
+        // this is the Mode-B handoff that distinguishes "Save & Generate"
+        // from the plain "Save to Pipeline" path above.
+        router.push(`/admin/youtube/${saved[0].id}?autoGenerate=1`)
       }
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to save ideas", { type: "error" })
@@ -460,17 +482,15 @@ export function NewScriptWorkflow() {
     }
   }
 
-  function toggleIdea(index: number) {
-    const idea = ideas[index]
-    if (!idea) return
+  function toggleIdea(idea: ScriptIdea) {
     if (idea.needs_news_peg) {
       toast("This idea needs a current news peg before it can be saved", { type: "error" })
       return
     }
     setSelectedIdeas((prev) => {
       const next = new Set(prev)
-      if (next.has(index)) next.delete(index)
-      else next.add(index)
+      if (next.has(idea.title)) next.delete(idea.title)
+      else next.add(idea.title)
       return next
     })
   }
@@ -485,11 +505,11 @@ export function NewScriptWorkflow() {
     <Stack gap="lg">
       {/* Header */}
       <Row align="center" gap="sm">
-        <Button variant="ghost" size="sm" render={<Link href="/admin/youtube" />}>
+        <Button variant="ghost" size="sm" render={<Link href="/admin/youtube/new" />}>
           <ArrowLeftIcon className="h-4 w-4" />
         </Button>
         <Stack gap="xs" className="flex-1">
-          <Title size="h3">New Script</Title>
+          <Title size="h3">Brainstorm Ideas</Title>
           <Text variant="muted" size="sm">
             {step === "input"
               ? "Step 1 — Describe your video idea"
@@ -515,6 +535,9 @@ export function NewScriptWorkflow() {
 
       {step === "input" && (
         <Stack gap="lg">
+          {/* Profile — every idea in this batch is written for this person */}
+          <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+
           {/* 1. Format pre-selection — leads the page so it informs the market scan and idea generation */}
           <Stack gap="sm">
             <Stack gap="xs">
@@ -727,7 +750,7 @@ export function NewScriptWorkflow() {
           <Stack gap="sm">
             {ideas.map((idea, i) => {
               const meta = FORMAT_META[idea.format]
-              const isSelected = selectedIdeas.has(i)
+              const isSelected = selectedIdeas.has(idea.title)
               const isDisabled = idea.needs_news_peg
               return (
                 <Collapsible key={i}>
@@ -748,7 +771,7 @@ export function NewScriptWorkflow() {
                           <Row align="center" gap="sm">
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); toggleIdea(i) }}
+                              onClick={(e) => { e.stopPropagation(); toggleIdea(idea) }}
                               disabled={isDisabled}
                               className={cn(
                                 "h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors",

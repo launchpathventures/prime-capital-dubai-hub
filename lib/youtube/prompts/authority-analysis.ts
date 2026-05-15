@@ -5,12 +5,15 @@
  * warm viewers into prospects who book a strategy call.
  *
  * Length: 8–10 minutes (~1,500–1,700 words).
- * Composes with SHARED_IMMUTABLES at generation time.
+ * Composes with getSharedImmutables(profile) at generation time.
  */
 
-export const AUTHORITY_ANALYSIS_PROMPT = `# Format: Authority Analysis (the anchor format)
+import type { ScriptProfile } from "../profiles"
 
-Mid-funnel. The richest, most data-dense format on the channel. Built to convert warm viewers — the ones who already half-trust Tahir — into prospects who think *"I want this person on retainer."*
+export function getAuthorityAnalysisPrompt(profile: ScriptProfile): string {
+  return `# Format: Authority Analysis (the anchor format)
+
+Mid-funnel. The richest, most data-dense format on the channel. Built to convert warm viewers — the ones who already half-trust ${profile.firstName} — into prospects who think *"I want this person on retainer."*
 
 When a topic is a macro thesis, supply analysis, cycle commentary, or market-structure piece, this is the format. It is the spine of the channel; everything else builds toward or away from it.
 
@@ -22,8 +25,8 @@ When a topic is a macro thesis, supply analysis, cycle commentary, or market-str
 Demonstrate depth that no other Dubai property channel can match. The viewer walks away thinking, *"I haven't seen this read anywhere else, and the person delivering it has clearly lived through enough cycles to know."*
 
 ### Who's watching this specifically
-- **Stage:** Warm. They've watched 2–4 of Tahir's videos. They're researching seriously, not casually.
-- **Mindset:** Looking for **a thesis**, not tips. They have the capital. They're trying to decide whether Dubai fits their plan and whether Prime Capital fits their style.
+- **Stage:** Warm. They've watched 2–4 of ${profile.firstName}'s videos. They're researching seriously, not casually.
+- **Mindset:** Looking for **a thesis**, not tips. They have the capital. They're trying to decide whether Dubai fits their plan and whether ${profile.brandName} fits their style.
 - **Decision criteria:** Does this person see what I can't see? Can they reason about cycles, regulation, and structural drivers — not just chase deals?
 
 ### The viewer's internal monologue (write to all three)
@@ -71,14 +74,14 @@ The viewer can't help engaging with a concrete scenario or a contested question.
 Names the prevailing narrative explicitly, then signals it's about to be dismantled.
 
 **Worked example (good):**
-> "Do not buy property in Dubai in 2026 without understanding this one thing. Because what's happening right now in the market is something we've seen before — and the last time it happened, a lot of investors got hurt. My name is Tahir. At Prime Capital Dubai, we've deployed over three billion dirhams across multiple market cycles, and in this video, I'm going to break down exactly what's shifted, why it matters, and what to do about it."
+> "Do not buy property in Dubai in 2026 without understanding this one thing. Because what's happening right now in the market is something we've seen before — and the last time it happened, a lot of investors got hurt. My name is ${profile.firstName}. At ${profile.brandFullName}, we've deployed ${profile.capitalSpokenLong} across ${profile.cyclesPhrase}, and in this video, I'm going to break down exactly what's shifted, why it matters, and what to do about it."
 
-**Why it works:** Direct challenge, credibility anchor woven in (3B dirhams, multiple cycles), specific promise (what shifted, why it matters, what to do).
+**Why it works:** Direct challenge, credibility anchor woven in (${profile.capitalLabelShort.replace("AED ", "").replace("+", "")} dirhams, ${profile.cyclesPhraseShort}), specific promise (what shifted, why it matters, what to do).
 
 ### The standard intro (appears after either hook)
 After the hook lands and the open loop is set, transition to the credibility anchor. Verbatim:
 
-> *"My name is Tahir. At Prime Capital Dubai, we help global investors place serious capital into Dubai property — with a plan, not a pitch. Over the last 20 years and across multiple cycles, we've deployed more than three billion dirhams for clients. So in this video, I'm going to [show you / break down / walk you through]…"*
+> *"${profile.standardIntro}"*
 
 ### Hook anti-patterns (do not write)
 
@@ -100,7 +103,7 @@ After the hook lands and the open loop is set, transition to the credibility anc
 ### Hook quality checklist
 - [ ] Does it create an open loop the viewer needs to close?
 - [ ] Specific (number, area, scenario, contested question)?
-- [ ] Establishes Tahir's credibility within the first 30 seconds?
+- [ ] Establishes ${profile.firstName}'s credibility within the first 30 seconds?
 - [ ] Would a CEO find the opening sentence worth their time?
 - [ ] Two distinct versions (V1 hypothetical + V2 contrarian)?
 - [ ] Standard intro present after the hook?
@@ -173,7 +176,7 @@ The kill-line is the line a viewer screenshots. Write it deliberately.
 ### What goes in each section
 
 #### Section 1: Primary thesis + Framework #1 (~400 words)
-- The contrarian thesis of the video. The single most important read Tahir offers.
+- The contrarian thesis of the video. The single most important read ${profile.firstName} offers.
 - Apply the first **named numbered framework** (e.g., "The Off-Plan Filter," "Three-Tier Budget Framework," "The Six-Question Developer Test").
 - A framework is named, numbered, and reusable across scripts. Do not invent decorative jargon — frameworks must do real work in the analysis.
 - Engage at least one of the eight investor fears (see shared immutables §9).
@@ -187,10 +190,10 @@ The kill-line is the line a viewer screenshots. Write it deliberately.
 #### Section 3: Positioning / what to do + Framework #2 (~400 words)
 - What this all means in practice. What the viewer evaluates differently after this video.
 - Apply the second **named numbered framework** — typically a screening or selection framework that operationalises the thesis.
-- The actionable advice must be **genuinely useful on its own** — not a thinly veiled CTA setup. If a viewer acted on this advice without ever contacting Prime Capital, it should still serve them well. That's how trust compounds.
+- The actionable advice must be **genuinely useful on its own** — not a thinly veiled CTA setup. If a viewer acted on this advice without ever contacting ${profile.brandName}, it should still serve them well. That's how trust compounds.
 
 ### "What are the risks of being wrong?" beats (3× total)
-**Required:** one in each section. This is the line that separates Prime Capital from the YouTube property-bro genre. Examples:
+**Required:** one in each section. This is the line that separates ${profile.brandName} from the YouTube property-bro genre. Examples:
 - *"Now, what are the risks of this read being wrong? If the Central Bank moves on LTVs faster than expected, this thesis softens — and I'd want to revisit it."*
 - *"What could break this? A second escalation in the region. The data we're working with assumes a stable Q3 — that's an assumption, not a guarantee."*
 - *"I want to be honest about where I could be wrong on Section 3. The handover schedule data is six months old. If completions accelerate meaningfully, the supply picture changes."*
@@ -208,7 +211,7 @@ Placed when value and credibility are established. Brief (30–45 seconds). Fram
 - Return immediately to the content after the CTA.
 
 ### End-roll — CTA #2 (Strategy Call) — after Section 3
-Primary conversion point. Tahir has spent 8+ minutes demonstrating expertise — now he earns the right to offer his services.
+Primary conversion point. ${profile.firstName} has spent 8+ minutes demonstrating expertise — now he earns the right to offer his services.
 
 **Rules:**
 - The CTA must feel earned, not forced.
@@ -221,7 +224,7 @@ Pacing-down repeat referencing the same Calendly link, followed by a **specific*
 **Rules:**
 - The tease must be specific, not generic. *"In the next video"* is fine; *"in future videos"* is too vague.
 - Never end with "thanks for watching" alone — always point forward.
-- Sign-off is exact: *"I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."*
+- Sign-off is exact: *"${profile.signOff}"*
 
 ---
 
@@ -395,7 +398,7 @@ Output the script in this exact Markdown structure:
 In addition to the universal QC checklist (shared-immutables §15), verify every item below before delivering:
 
 - [ ] Two hook versions present (V1 hypothetical + V2 contrarian), each ~120 words, each opens a loop in the first sentence
-- [ ] Standard intro after the hook, with the credibility anchor (AED 3B+, 20 years, multiple cycles)
+- [ ] Standard intro after the hook, with the credibility anchor (${profile.capitalLabelShort}, ${profile.yearsSpoken}, ${profile.cyclesPhraseShort})
 - [ ] Context Loop with all three beats (Authority → Trap → Consequence)
 - [ ] Three body sections, each ~400 words, each following the four-step beat structure
 - [ ] Each section opens with "Most investors think…" / "Here's what most people miss…" / equivalent UK-English misconception phrasing
@@ -415,3 +418,4 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] Output is teleprompter-ready prose under each section heading (no bullet points in spoken sections, no stage directions)
 - [ ] Word count within 1,500–1,700
 `
+}

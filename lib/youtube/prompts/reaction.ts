@@ -13,10 +13,13 @@
  * concrete news peg as not-yet-saveable.
  *
  * Length: 4–6 minutes (~750–1,000 words).
- * Composes with SHARED_IMMUTABLES at generation time.
+ * Composes with getSharedImmutables(profile) at generation time.
  */
 
-export const REACTION_PROMPT = `# Format: Live Reaction / Hot-Take
+import type { ScriptProfile } from "../profiles"
+
+export function getReactionPrompt(profile: ScriptProfile): string {
+  return `# Format: Live Reaction / Hot-Take
 
 Top-funnel. The format that captures **search traffic in the 48-hour window** after a real news event — DLD data drops, Fitch / Moody's / S&P reports, Central Bank UAE regulatory moves, RERA announcements, geopolitical shifts affecting the region.
 
@@ -55,33 +58,33 @@ Show up first, with a calmer and more useful read than every other channel react
 
 ---
 
-## 3. Hook formula C — News Headline + Tahir's Read
+## 3. Hook formula C — News Headline + ${profile.firstName}'s Read
 
-**Single hook only** (no V1/V2 split). Open with the news in one sentence. Deliver Tahir's one-line read in the second sentence. Promise the dismantle in the third.
+**Single hook only** (no V1/V2 split). Open with the news in one sentence. Deliver ${profile.firstName}'s one-line read in the second sentence. Promise the dismantle in the third.
 
 ### Required: date-stamp the video in the hook
 Every Reaction's hook must include *"As of [date]…"* or *"Today is [date], and…"* near the opening. The freshness signal is part of why a viewer chooses this video over a six-month-old upload that ranks for the same query.
 
 ### Structure
 1. **The news in one sentence** (named source, specific data point)
-2. **Tahir's one-line read** (the practitioner's interpretation)
+2. **${profile.firstName}'s one-line read** (the practitioner's interpretation)
 3. **The promise** (what the rest of the video covers)
-4. **Credibility anchor** (AED 3B+, 20 years, multiple cycles)
+4. **Credibility anchor** (${profile.capitalLabelShort}, ${profile.yearsLabel}, ${profile.cyclesPhraseShort})
 
 ### Worked examples (good)
 
 **Good — Fitch report:**
-> "Today is the 14th of April, 2026. Fitch Ratings has just upgraded the UAE's sovereign outlook to stable, citing the regulatory infrastructure and fiscal buffers built over the last eight years. Here's the practitioner's read: this is bigger for institutional capital flows into Dubai property than it sounds, and most of the channel coverage I've seen this morning has missed why. I'm Tahir Majithia, founder of Prime Capital Dubai. We've placed over three billion dirhams of client capital across multiple cycles. In the next four minutes, I'll show you what this rating change actually moves, and what I'm telling clients this week."
+> "Today is the 14th of April, 2026. Fitch Ratings has just upgraded the UAE's sovereign outlook to stable, citing the regulatory infrastructure and fiscal buffers built over the last eight years. Here's the practitioner's read: this is bigger for institutional capital flows into Dubai property than it sounds, and most of the channel coverage I've seen this morning has missed why. I'm ${profile.fullName}, ${profile.brandRoleFullName}. We've placed ${profile.capitalSpokenLong} of client capital across ${profile.cyclesPhraseShort}. In the next four minutes, I'll show you what this rating change actually moves, and what I'm telling clients this week."
 
 *Why it works:* date-stamped, named source (Fitch), specific data point (sovereign outlook → stable, 8-year regulatory frame), one-line read, contrarian flag (others have missed it), credibility anchor, runtime promise.
 
 **Good — DLD data drop:**
-> "As of yesterday, the Dubai Land Department has released Q1 2026 transaction data. Total transaction value is up 18.4% year-on-year. Headline reading: the cycle is still hot. Here's the practitioner's read: the headline number masks a 7-percentage-point divergence between off-plan and ready-market activity, and that divergence is the actual signal. I'm Tahir Majithia. We've deployed over three billion dirhams across multiple Dubai cycles. I'm going to spend the next four minutes on what this print actually changes — and what it doesn't."
+> "As of yesterday, the Dubai Land Department has released Q1 2026 transaction data. Total transaction value is up 18.4% year-on-year. Headline reading: the cycle is still hot. Here's the practitioner's read: the headline number masks a 7-percentage-point divergence between off-plan and ready-market activity, and that divergence is the actual signal. I'm ${profile.fullName}. We've deployed ${profile.capitalSpokenLong} across ${profile.cyclesDubaiPhrase}. I'm going to spend the next four minutes on what this print actually changes — and what it doesn't."
 
 *Why it works:* date-stamped (yesterday), named source (DLD), specific figure (18.4% YoY), reframes the headline against a sub-pattern (the divergence), promises a measured read.
 
 **Good — Central Bank UAE LTV move:**
-> "Today the Central Bank of the UAE announced a 5-percentage-point change to LTV caps on second-home mortgages for non-residents. The market is reading this as a tightening. I think the read is more nuanced than that — and the difference matters for anyone holding off-plan that completes in the next 18 months. I'm Tahir Majithia. Over 20 years and three billion dirhams placed, I've watched LTV moves cascade through this market three times. In the next five minutes, I'll show you what cascades and what doesn't."
+> "Today the Central Bank of the UAE announced a 5-percentage-point change to LTV caps on second-home mortgages for non-residents. The market is reading this as a tightening. I think the read is more nuanced than that — and the difference matters for anyone holding off-plan that completes in the next 18 months. I'm ${profile.fullName}. Over ${profile.yearsSpoken} and ${profile.capitalSpoken} placed, I've watched LTV moves cascade through this market three times. In the next five minutes, I'll show you what cascades and what doesn't."
 
 *Why it works:* explicit date framing, named source (Central Bank UAE), specific change (5pp on second-home mortgages for non-residents), engages a fear (financing implications for off-plan completers), credibility anchor with cycle reference.
 
@@ -100,14 +103,14 @@ Every Reaction's hook must include *"As of [date]…"* or *"Today is [date], and
 **Burying the read:**
 > ❌ "The Dubai Land Department released their Q1 transaction data today. Stay tuned to find out what it means."
 
-*Violation:* Tahir's read must arrive in the second sentence. Reaction viewers are sampling — give them the take immediately or they bounce.
+*Violation:* ${profile.firstName}'s read must arrive in the second sentence. Reaction viewers are sampling — give them the take immediately or they bounce.
 
 ### Hook quality checklist
 - [ ] Date-stamped (specific day or week marker)
 - [ ] Named source (Fitch / Moody's / DLD / Central Bank UAE / RERA / S&P)
 - [ ] Specific data point (figure, percentage, named regulatory change)
 - [ ] One-line practitioner read in the second sentence — never buried
-- [ ] Credibility anchor (AED 3B+, 20 years)
+- [ ] Credibility anchor (${profile.capitalLabelShort}, ${profile.yearsLabel})
 - [ ] Runtime promise (4–5 minutes, not vague)
 - [ ] No exclamation marks, no hype words
 
@@ -123,7 +126,7 @@ Facts only. Sourced. No framework. No interpretation yet.
 3. **The boundary of what's known** (~50 words). What hasn't been disclosed. What requires inference. What the data doesn't tell us.
 
 ### Tone
-News reporter. Calm, factual, sourced. Tahir is establishing that he understands the news at a level deeper than the headline.
+News reporter. Calm, factual, sourced. ${profile.firstName} is establishing that he understands the news at a level deeper than the headline.
 
 ### Required
 - **At least one named allowed source** in this section.
@@ -131,7 +134,7 @@ News reporter. Calm, factual, sourced. Tahir is establishing that he understands
 - **No frameworks.** Frameworks belong in Authority Analysis. A Reaction reads as opportunistic if it tries to introduce a numbered framework alongside breaking news.
 
 ### Forbidden in Section 1
-- Tahir's interpretation. Save it for Section 2.
+- ${profile.firstName}'s interpretation. Save it for Section 2.
 - Speculation. Mark inferences as inferences.
 - Comparison to other markets that aren't already in the news. Reactions stay tight to the news.
 
@@ -158,7 +161,7 @@ Use historical pattern recognition: *"Last time we saw a Central Bank UAE move l
 - At least two specific data points layered into the explanation.
 
 #### Beat 3 — The "what's the risk of my read being wrong?" beat (~80 words)
-**Required, exactly once across the script, placed at the end of Beat 2 or opening Beat 4.** This is what separates Tahir's read from every other hot-take channel.
+**Required, exactly once across the script, placed at the end of Beat 2 or opening Beat 4.** This is what separates ${profile.firstName}'s read from every other hot-take channel.
 > *"Now, what's the risk of my read being wrong? If [specific external condition] develops differently than I'm assuming, the cascade I'm describing softens — or breaks entirely. The honest answer is the read holds if [X] stays roughly stable. If it doesn't, I'd want to revisit this on next week's print."*
 
 #### Beat 4 — Kill-line (~40 words)
@@ -190,7 +193,7 @@ The most concrete section. *"Here's what I said in client calls this week. Here'
 3. **Kill-line / sign-off transition** (~30 words). The bridge to the CTA.
 
 ### Tone
-Direct, conversational, time-bound. Tahir is letting the viewer overhear what he's saying to clients. That intimacy is the format's distinctive value.
+Direct, conversational, time-bound. ${profile.firstName} is letting the viewer overhear what he's saying to clients. That intimacy is the format's distinctive value.
 
 ---
 
@@ -205,14 +208,14 @@ Direct, conversational, time-bound. Tahir is letting the viewer overhear what he
 ### CTA #2 wording
 Verbatim per shared-immutables §12 — slightly compressed pacing for the shorter format:
 
-> *"Look — if you're sitting on capital and trying to figure out what this news actually means for your specific situation, that's exactly what we do at Prime Capital. Book a strategy call with my team. We'll look at your objectives, your capital, and your timeline — and we'll tell you honestly whether Dubai makes sense for you right now. And if it doesn't, we'll tell you that too. Link is in the description."*
+> *"Look — if you're sitting on capital and trying to figure out what this news actually means for your specific situation, that's exactly what we do at ${profile.brandName}. Book a strategy call with my team. We'll look at your objectives, your capital, and your timeline — and we'll tell you honestly whether Dubai makes sense for you right now. And if it doesn't, we'll tell you that too. Link is in the description."*
 
 The *"and if it doesn't make sense, we'll tell you that too"* line is **non-negotiable**.
 
 ### Sign-off
 Immediately follows the CTA. No additional content between CTA and sign-off.
 
-> *"I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch."*
+> *"${profile.signOff}"*
 
 ### What about a watch-next tease?
 **Reactions do not include a watch-next tease.** The next news event is unpredictable; promising "next video on X" sets a content debt that may not match the next news cycle. End with the CTA + sign-off, nothing else.
@@ -230,7 +233,7 @@ Verify every item is present:
 - [ ] **"What's the risk of my read being wrong?"** beat once, in Section 2
 - [ ] **No named numbered frameworks** anywhere in the script
 - [ ] **One kill-line** at the end of Section 2
-- [ ] **Section 3 gives 2–3 concrete, time-bounded actions** — what Tahir is telling clients this week
+- [ ] **Section 3 gives 2–3 concrete, time-bounded actions** — what ${profile.firstName} is telling clients this week
 - [ ] **At least one of the eight investor fears** engaged head-on
 - [ ] **Single CTA only** (CTA #2 — Strategy Call) — no mid-roll, no CTA #1, no CTA #3
 - [ ] **No watch-next tease** in the outro
@@ -315,7 +318,7 @@ If the brief lacks a concrete news peg, **flag and refuse — do not generate**.
 
 ---
 
-## Hook — News Headline + Tahir's Read
+## Hook — News Headline + ${profile.firstName}'s Read
 
 [Spoken text, ~80 words — date-stamped, named source, specific figure, one-line read, credibility anchor]
 
@@ -347,7 +350,7 @@ If the brief lacks a concrete news peg, **flag and refuse — do not generate**.
 
 ## Sign-off
 
-I'm Tahir Majithia. Prime Capital Dubai. With a plan, not a pitch.
+${profile.signOff}
 
 ---
 
@@ -365,8 +368,8 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] **News peg is concrete, named, date-stamped, sourced from the allowed list** (DLD / RERA / Central Bank UAE / Fitch / Moody's / S&P)
 - [ ] **Hook is date-stamped** ("As of [date]…" or "Today is [date]…")
 - [ ] **Named source in the hook** with specific data point
-- [ ] **Tahir's one-line read in the second sentence of the hook** — never buried
-- [ ] **Credibility anchor in the hook** (AED 3B+, 20 years)
+- [ ] **${profile.firstName}'s one-line read in the second sentence of the hook** — never buried
+- [ ] **Credibility anchor in the hook** (${profile.capitalLabelShort}, ${profile.yearsLabel})
 - [ ] **Section 1 is facts only**, sourced, no interpretation
 - [ ] **At least one named allowed source** in Section 1
 - [ ] **At least two specific numbers** in Section 1 with units and timeframes
@@ -385,3 +388,4 @@ In addition to the universal QC checklist (shared-immutables §15), verify every
 - [ ] Output is teleprompter-ready prose under each section heading
 - [ ] Word count within 750–1,000
 `
+}

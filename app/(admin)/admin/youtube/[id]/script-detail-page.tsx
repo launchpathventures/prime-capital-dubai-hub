@@ -12,7 +12,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -46,17 +46,30 @@ import {
   FileTextIcon,
   ShieldCheckIcon,
   DownloadIcon,
+  MessageSquareTextIcon,
+  HistoryIcon,
+  UsersIcon,
+  AlertTriangleIcon,
+  CircleDotIcon,
 } from "lucide-react"
 import {
   type YouTubeScript,
   type ScriptStatus,
+  type YouTubeScriptMessage,
+  type YouTubeScriptVersion,
+  type PanelReview,
+  type ReviewerOutput,
   updateYouTubeScript,
   updateScriptStatus,
   deleteYouTubeScript,
+  getYouTubeScriptMessages,
+  getYouTubeScriptVersions,
 } from "@/lib/actions/youtube"
 import { FORMAT_META, DEFAULT_FORMAT } from "@/lib/youtube/prompts"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import { ScriptChatPanel } from "./script-chat-panel"
+import { ProfileChip } from "../_components/profile-selector"
 
 // =============================================================================
 // CONSTANTS
@@ -137,15 +150,50 @@ function buildValidationFeedback(notes: Record<string, unknown>): string {
 // COMPONENT
 // =============================================================================
 
-export function ScriptDetailPage({ script: initial }: { script: YouTubeScript }) {
+export function ScriptDetailPage({
+  script: initial,
+  initialMessages = [],
+  initialVersions = [],
+}: {
+  script: YouTubeScript
+  initialMessages?: YouTubeScriptMessage[]
+  initialVersions?: YouTubeScriptVersion[]
+}) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [script, setScript] = React.useState(initial)
   const [isGenerating, setIsGenerating] = React.useState(false)
   const [isValidating, setIsValidating] = React.useState(false)
+  const [isPanelReviewing, setIsPanelReviewing] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [showDelete, setShowDelete] = React.useState(false)
   const [streamedContent, setStreamedContent] = React.useState("")
+  const [chatOpen, setChatOpen] = React.useState(false)
+  const [chatRefreshKey, setChatRefreshKey] = React.useState(0)
+  const [versions, setVersions] = React.useState<YouTubeScriptVersion[]>(initialVersions)
   const abortRef = React.useRef<AbortController | null>(null)
+  // One-shot guard so React 18 StrictMode double-renders don't fire two
+  // generation/validation requests when the user arrives with ?autoGenerate=1.
+  const autoActionFiredRef = React.useRef(false)
+
+  const loadMessages = React.useCallback(async () => {
+    const result = await getYouTubeScriptMessages(initial.id)
+    return result.success ? result.data : []
+  }, [initial.id])
+
+  // Refresh the version history when a regen completes (signalled by the
+  // refresh key the chat panel watches).
+  React.useEffect(() => {
+    if (chatRefreshKey === 0) return
+    let cancelled = false
+    void getYouTubeScriptVersions(initial.id).then((result) => {
+      if (cancelled || !result.success) return
+      setVersions(result.data)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [chatRefreshKey, initial.id])
 
   const hasScript = !!script.script_body
   const hasValidation = script.validation_score !== null
@@ -156,6 +204,28 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
     return () => {
       abortRef.current?.abort()
     }
+  }, [])
+
+  // Auto-trigger generation or validation when navigated here from a workflow.
+  //   ?autoGenerate=1 → Mode B / brainstorm-and-generate path lands here with
+  //                     an idea row but no script yet, ready for Opus.
+  //   ?autoValidate=1 → Mode A lands here with a pasted script already in
+  //                     script_body; we kick the validator immediately.
+  // The query params are then stripped from the URL so a refresh doesn't
+  // re-fire the action.
+  React.useEffect(() => {
+    if (autoActionFiredRef.current) return
+    const autoGenerate = searchParams.get("autoGenerate") === "1"
+    const autoValidate = searchParams.get("autoValidate") === "1"
+    if (!autoGenerate && !autoValidate) return
+    autoActionFiredRef.current = true
+    router.replace(`/admin/youtube/${initial.id}`, { scroll: false })
+    if (autoGenerate && !initial.script_body) {
+      void handleGenerateScript()
+    } else if (autoValidate && initial.script_body) {
+      void runValidation(initial.script_body, initial)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ---------------------------------------------------------------------------
@@ -190,12 +260,15 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
       ? buildValidationFeedback(script.validation_notes as Record<string, unknown>)
       : undefined
 
-    // Clear stale validation UI so we don't show old red cards while new content streams
+    // Clear stale validation + panel UI so we don't show old red cards while new content streams
     setScript((prev) => ({
       ...prev,
       validation_score: null,
       validation_notes: null,
       validated_at: null,
+      panel_review: null,
+      panel_review_score: null,
+      panel_reviewed_at: null,
     }))
 
     try {
@@ -207,6 +280,7 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
           title: script.title,
           topic: script.topic || script.title,
           format: script.format || DEFAULT_FORMAT,
+          profileSlug: script.profile_slug,
           scriptId: script.id,
           previousScript: hasScript ? script.script_body : undefined,
           validationFeedback,
@@ -255,6 +329,9 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
 
       const wordCount = fullText.split(/\s+/).filter(Boolean).length
       const sections = parseScriptSections(fullText)
+      // Atomic with the new body: clear validation/panel rows that referenced
+      // the old body. Server-side regen routes intentionally don't touch these
+      // so this is the single point of truth.
       const result = await updateYouTubeScript(script.id, {
         script_body: fullText,
         word_count: wordCount,
@@ -262,6 +339,12 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         packaging: sections.packaging || undefined,
         hook_v1: sections.hook_v1 || undefined,
         hook_v2: sections.hook_v2 || undefined,
+        validation_score: null,
+        validation_notes: null,
+        validated_at: null,
+        panel_review: null,
+        panel_review_score: null,
+        panel_reviewed_at: null,
       })
       if (!result.success) {
         throw new Error(result.error || "Failed to save script")
@@ -286,6 +369,109 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
   }
 
   // ---------------------------------------------------------------------------
+  // Regen from chat — snapshot, clear chat, stream the rewrite
+  // ---------------------------------------------------------------------------
+
+  async function handleRegenFromChat(rationale: string) {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    setIsGenerating(true)
+    setStreamedContent("")
+    setScript((prev) => ({
+      ...prev,
+      validation_score: null,
+      validation_notes: null,
+      validated_at: null,
+      panel_review: null,
+      panel_review_score: null,
+      panel_reviewed_at: null,
+    }))
+
+    try {
+      const res = await fetch("/api/admin/youtube/regen-from-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ scriptId: script.id, rationale }),
+      })
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "")
+        console.error("Regen-from-chat failed:", res.status, errText)
+        throw new Error(`Failed to regenerate (${res.status})`)
+      }
+
+      const reader = res.body?.getReader()
+      const decoder = new TextDecoder()
+      let fullText = ""
+      let streamComplete = false
+      let streamAborted = false
+
+      if (reader) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) { streamComplete = true; break }
+            fullText += decoder.decode(value, { stream: true })
+            setStreamedContent(fullText)
+          }
+        } catch (err) {
+          if (err instanceof DOMException && err.name === "AbortError") {
+            streamAborted = true
+          } else {
+            console.error("Regen stream read error:", err)
+            toast("Stream interrupted — rewrite was not saved", { type: "error" })
+          }
+        }
+      }
+
+      if (streamAborted) return
+      if (!fullText.trim() || !streamComplete) {
+        setStreamedContent("")
+        throw new Error("Regen failed before completing — please try again")
+      }
+
+      const wc = fullText.split(/\s+/).filter(Boolean).length
+      const sections = parseScriptSections(fullText)
+      // Atomic with the new body: clear validation/panel rows that referenced
+      // the prior draft. regen-from-chat intentionally leaves these alone on
+      // the server so a mid-stream failure preserves still-valid scores; the
+      // null sweep lives here, alongside the successful body write.
+      const result = await updateYouTubeScript(script.id, {
+        script_body: fullText,
+        word_count: wc,
+        status: "script_drafted",
+        packaging: sections.packaging || undefined,
+        hook_v1: sections.hook_v1 || undefined,
+        hook_v2: sections.hook_v2 || undefined,
+        validation_score: null,
+        validation_notes: null,
+        validated_at: null,
+        panel_review: null,
+        panel_review_score: null,
+        panel_reviewed_at: null,
+      })
+      if (!result.success) {
+        throw new Error(result.error || "Failed to save regenerated script")
+      }
+      setScript(result.data)
+      // The chat thread was server-cleared at snapshot time; bump the refresh
+      // key so the chat panel pulls a fresh (empty) thread.
+      setChatRefreshKey((k) => k + 1)
+      toast("Regenerated — running validation...")
+      setIsGenerating(false)
+      await runValidation(fullText, result.data)
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return
+      console.error("Regen-from-chat error:", err)
+      toast(err instanceof Error ? err.message : "Failed to regenerate", { type: "error" })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Validate
   // ---------------------------------------------------------------------------
 
@@ -301,6 +487,7 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         body: JSON.stringify({
           scriptId: src.id,
           scriptBody: body,
+          profileSlug: src.profile_slug,
           format: src.format || DEFAULT_FORMAT,
           packaging: src.packaging,
           hookV1: src.hook_v1,
@@ -335,6 +522,59 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
       toast(msg, { type: "error" })
     } finally {
       setIsValidating(false)
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Panel review — 4 specialist agents + Haiku synthesiser
+  // ---------------------------------------------------------------------------
+
+  async function runPanelReview() {
+    if (!script.script_body) return
+    setIsPanelReviewing(true)
+    try {
+      const res = await fetch("/api/admin/youtube/panel-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scriptId: script.id }),
+      })
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "")
+        console.error("Panel review failed:", res.status, errText)
+        throw new Error(`Panel review failed (${res.status})`)
+      }
+      const data = await res.json()
+      if (!data.panelReview) {
+        throw new Error("Invalid panel review response")
+      }
+      const panel = data.panelReview as PanelReview
+      setScript((prev) => ({
+        ...prev,
+        panel_review: panel,
+        panel_review_score: panel.overall_score,
+        panel_reviewed_at: panel.reviewed_at,
+      }))
+      // Server computed the panel but the DB write failed — UI shows the
+      // result, but it won't survive a refresh. Surface that so the user
+      // can re-run rather than thinking it stuck.
+      if (data.persisted === false) {
+        toast("Panel review wasn't saved — re-run to persist it", { type: "error" })
+      } else if (panel.ready_to_record) {
+        toast(`Panel says ready to record — ${panel.overall_score}/100`)
+      } else {
+        toast(
+          `Panel flagged ${panel.blocking_issues.length} blocking issue${
+            panel.blocking_issues.length === 1 ? "" : "s"
+          } — ${panel.overall_score}/100`,
+          { type: "error" }
+        )
+      }
+    } catch (err) {
+      console.error("Panel review error:", err)
+      const msg = err instanceof Error ? err.message : "Panel review failed"
+      toast(msg, { type: "error" })
+    } finally {
+      setIsPanelReviewing(false)
     }
   }
 
@@ -385,16 +625,19 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
               {script.topic}
             </Text>
           )}
-          {script.format && (
-            <Row gap="xs" align="center">
-              <Badge variant="outline" size="sm">
-                {FORMAT_META[script.format].label}
-              </Badge>
-              <Text variant="muted" size="sm">
-                {FORMAT_META[script.format].minutesLabel} · {FORMAT_META[script.format].wordsLabel}
-              </Text>
-            </Row>
-          )}
+          <Row gap="xs" align="center" wrap>
+            <ProfileChip slug={script.profile_slug} />
+            {script.format && (
+              <>
+                <Badge variant="outline" size="sm">
+                  {FORMAT_META[script.format].label}
+                </Badge>
+                <Text variant="muted" size="sm">
+                  {FORMAT_META[script.format].minutesLabel} · {FORMAT_META[script.format].wordsLabel}
+                </Text>
+              </>
+            )}
+          </Row>
         </Stack>
       </Row>
 
@@ -445,6 +688,31 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
             PDF
           </Button>
         )}
+        {hasScript && (
+          <Button
+            size="sm"
+            variant={chatOpen ? "default" : "outline"}
+            onClick={() => setChatOpen((open) => !open)}
+          >
+            <MessageSquareTextIcon className="h-4 w-4 mr-1.5" />
+            Chat
+          </Button>
+        )}
+        {hasScript && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={runPanelReview}
+            disabled={isPanelReviewing || isGenerating}
+          >
+            {isPanelReviewing ? (
+              <Loader2Icon className="h-4 w-4 mr-1.5 animate-spin" />
+            ) : (
+              <UsersIcon className="h-4 w-4 mr-1.5" />
+            )}
+            Panel review
+          </Button>
+        )}
 
         {isGenerating && (
           <Badge variant="secondary">
@@ -458,6 +726,12 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
             Validating...
           </Badge>
         )}
+        {isPanelReviewing && (
+          <Badge variant="secondary">
+            <Loader2Icon className="h-3 w-3 animate-spin mr-1.5" />
+            Panel reviewing...
+          </Badge>
+        )}
 
         {/* Validation score — prominent display */}
         {hasValidation && !isValidating && (
@@ -469,6 +743,19 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
           )}>
             <ShieldCheckIcon className="h-4 w-4" />
             Validation: {script.validation_score}/100
+          </div>
+        )}
+
+        {/* Panel score — prominent display */}
+        {script.panel_review && !isPanelReviewing && (
+          <div className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium",
+            script.panel_review.ready_to_record
+              ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+              : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+          )}>
+            <UsersIcon className="h-4 w-4" />
+            Panel: {script.panel_review.overall_score}/100
           </div>
         )}
 
@@ -554,6 +841,11 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         </Stack>
       )}
 
+      {/* Panel review results */}
+      {script.panel_review && (
+        <PanelReviewResults panel={script.panel_review} />
+      )}
+
       {/* Script content */}
       {displayContent ? (
         <Stack gap="sm">
@@ -634,6 +926,76 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
         </Stack>
       )}
 
+      {/* Version history — populated as the user accumulates regen snapshots */}
+      {versions.length > 0 && (
+        <Stack gap="sm" className="rounded-lg border p-5">
+          <Row align="center" gap="sm">
+            <HistoryIcon className="h-5 w-5 text-primary" />
+            <Title size="h5">Version history</Title>
+            <Badge variant="outline" size="sm">{versions.length}</Badge>
+          </Row>
+          <Text variant="muted" size="sm">
+            Snapshots taken whenever a chat-driven regen ran. Each row preserves
+            the pre-regen draft and the rewrite brief that motivated the change.
+          </Text>
+          <Stack gap="xs">
+            {versions.map((v) => (
+              <div key={v.id} className="rounded-md border bg-muted/20 p-3">
+                <Row align="center" gap="sm" className="justify-between">
+                  <Row align="center" gap="xs">
+                    <Badge variant="secondary" size="sm">v{v.version_number}</Badge>
+                    {v.validation_score !== null && (
+                      <Badge
+                        variant={v.validation_score >= 70 ? "default" : "destructive"}
+                        size="sm"
+                      >
+                        <ShieldCheckIcon className="h-3 w-3 mr-1" />
+                        {v.validation_score}/100
+                      </Badge>
+                    )}
+                    {v.panel_review_score !== null && (
+                      <Badge
+                        variant={v.panel_review_score >= 70 ? "default" : "destructive"}
+                        size="sm"
+                      >
+                        <UsersIcon className="h-3 w-3 mr-1" />
+                        {v.panel_review_score}/100
+                      </Badge>
+                    )}
+                    {v.word_count !== null && (
+                      <Text variant="muted" size="sm">
+                        {v.word_count.toLocaleString()} words
+                      </Text>
+                    )}
+                  </Row>
+                  <Text variant="muted" size="sm">
+                    {new Date(v.created_at).toLocaleString()}
+                  </Text>
+                </Row>
+                {v.chat_summary && (
+                  <Text size="sm" className="mt-2 whitespace-pre-wrap text-foreground/80">
+                    {v.chat_summary}
+                  </Text>
+                )}
+              </div>
+            ))}
+          </Stack>
+        </Stack>
+      )}
+
+      {/* Chat panel */}
+      <ScriptChatPanel
+        scriptId={script.id}
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        initialMessages={initialMessages}
+        onScriptUpdate={(next) => setScript((prev) => ({ ...prev, ...next }))}
+        onConfirmRegen={handleRegenFromChat}
+        isRegenerating={isGenerating}
+        refreshKey={chatRefreshKey}
+        loadMessages={loadMessages}
+      />
+
       {/* Delete confirmation */}
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent>
@@ -661,6 +1023,178 @@ export function ScriptDetailPage({ script: initial }: { script: YouTubeScript })
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </Stack>
+  )
+}
+
+// =============================================================================
+// PANEL REVIEW RESULTS
+// =============================================================================
+
+const REVIEWER_LABELS: Record<keyof PanelReview["reviewers"], string> = {
+  structure: "Structure Auditor",
+  voice: "Brand Voice Critic",
+  evidence: "Evidence Officer",
+  retention: "Retention Analyst",
+}
+
+const REVIEWER_HINTS: Record<keyof PanelReview["reviewers"], string> = {
+  structure: "Format-spec compliance — sections, CTAs, sign-off",
+  voice: "Tahir voice, banned words, UK English",
+  evidence: "Data points, named sources, anonymisation",
+  retention: "Hook strength, signature patterns, pacing",
+}
+
+function scoreToneClasses(score: number): string {
+  if (score >= 80) return "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+  if (score >= 60) return "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+  return "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+}
+
+function PanelReviewResults({ panel }: { panel: PanelReview }) {
+  return (
+    <Stack gap="md" className="rounded-lg border p-5">
+      {/* Synthesiser verdict */}
+      <Row align="center" gap="sm" wrap>
+        <UsersIcon className="h-5 w-5 text-primary" />
+        <Title size="h5">Panel review</Title>
+        <div
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-medium",
+            scoreToneClasses(panel.overall_score)
+          )}
+        >
+          {panel.overall_score}/100
+        </div>
+        {panel.ready_to_record ? (
+          <Badge variant="default" size="sm">
+            <CheckCircleIcon className="h-3 w-3 mr-1" />
+            Ready to record
+          </Badge>
+        ) : (
+          <Badge variant="destructive" size="sm">
+            <AlertTriangleIcon className="h-3 w-3 mr-1" />
+            Not ready — see blockers
+          </Badge>
+        )}
+        <Text variant="muted" size="sm" className="ml-auto">
+          {new Date(panel.reviewed_at).toLocaleString()}
+        </Text>
+      </Row>
+
+      <Text size="sm">{panel.verdict}</Text>
+
+      {panel.blocking_issues.length > 0 && (
+        <Stack gap="xs" className="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/40">
+          <Row gap="xs" align="center">
+            <AlertTriangleIcon className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <Text size="sm" className="font-medium text-red-900 dark:text-red-200">
+              Blocking issues ({panel.blocking_issues.length})
+            </Text>
+          </Row>
+          <ul className="list-disc list-inside space-y-1">
+            {panel.blocking_issues.map((item, i) => (
+              <li key={i}>
+                <Text as="span" size="sm" className="text-red-900/90 dark:text-red-100/90">
+                  {item}
+                </Text>
+              </li>
+            ))}
+          </ul>
+        </Stack>
+      )}
+
+      {panel.polish_recommendations.length > 0 && (
+        <Stack gap="xs" className="rounded-md border bg-muted/30 p-4">
+          <Row gap="xs" align="center">
+            <CircleDotIcon className="h-4 w-4 text-muted-foreground" />
+            <Text size="sm" className="font-medium">
+              Polish ({panel.polish_recommendations.length})
+            </Text>
+          </Row>
+          <ul className="list-disc list-inside space-y-1">
+            {panel.polish_recommendations.map((item, i) => (
+              <li key={i}>
+                <Text as="span" variant="muted" size="sm">
+                  {item}
+                </Text>
+              </li>
+            ))}
+          </ul>
+        </Stack>
+      )}
+
+      {/* Reviewer cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {(Object.keys(REVIEWER_LABELS) as (keyof PanelReview["reviewers"])[]).map(
+          (key) => (
+            <ReviewerCard
+              key={key}
+              label={REVIEWER_LABELS[key]}
+              hint={REVIEWER_HINTS[key]}
+              output={panel.reviewers[key]}
+            />
+          )
+        )}
+      </div>
+    </Stack>
+  )
+}
+
+function ReviewerCard({
+  label,
+  hint,
+  output,
+}: {
+  label: string
+  hint: string
+  output: ReviewerOutput
+}) {
+  return (
+    <Stack gap="sm" className="rounded-md border bg-muted/10 p-4">
+      <Row align="center" gap="sm" className="justify-between">
+        <Stack gap="xs">
+          <Text size="sm" className="font-semibold">{label}</Text>
+          <Text variant="muted" size="sm" className="text-xs">{hint}</Text>
+        </Stack>
+        <div
+          className={cn(
+            "px-2.5 py-1 rounded-md text-sm font-medium shrink-0",
+            scoreToneClasses(output.score)
+          )}
+        >
+          {output.score}/100
+        </div>
+      </Row>
+      <Text size="sm" className="text-foreground/90">{output.verdict}</Text>
+      {output.top_issues.length > 0 && (
+        <Stack gap="xs">
+          <Text size="sm" className="font-medium text-foreground/80">
+            Issues
+          </Text>
+          <ul className="list-disc list-inside space-y-0.5">
+            {output.top_issues.map((item, i) => (
+              <li key={i}>
+                <Text as="span" variant="muted" size="sm">{item}</Text>
+              </li>
+            ))}
+          </ul>
+        </Stack>
+      )}
+      {output.ok_signals.length > 0 && (
+        <Stack gap="xs">
+          <Text size="sm" className="font-medium text-foreground/80">
+            Working
+          </Text>
+          <ul className="list-disc list-inside space-y-0.5">
+            {output.ok_signals.map((item, i) => (
+              <li key={i}>
+                <Text as="span" variant="muted" size="sm">{item}</Text>
+              </li>
+            ))}
+          </ul>
+        </Stack>
+      )}
     </Stack>
   )
 }
