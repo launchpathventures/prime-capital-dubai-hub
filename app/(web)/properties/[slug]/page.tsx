@@ -39,6 +39,9 @@ import {
   CreditCardIcon,
   ImagesIcon,
   FileTextIcon,
+  LayersIcon,
+  UtensilsIcon,
+  SofaIcon,
 } from "lucide-react"
 
 export const revalidate = 300 // Match the CRM Cache-Control max-age
@@ -74,7 +77,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   const heroImage = property.images[0]
-  const description = property.description?.slice(0, 160) ?? ""
+  const description = (property.overview ?? property.description)?.slice(0, 160) ?? ""
 
   return {
     title: property.title,
@@ -111,7 +114,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
       <JsonLd
         data={propertyJsonLd({
           title: property.title,
-          description: property.description,
+          description: property.overview ?? property.description,
           slug: property.slug,
           cover_image: heroImage ?? null,
           created_at: property.createdAt,
@@ -289,9 +292,27 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </SectionCard>
               )}
 
-              {property.description && (
+              {(property.overview ?? property.description) && (
                 <SectionCard title="About This Property" icon={BuildingIcon}>
-                  <PropertyProse content={property.description} />
+                  <PropertyProse content={(property.overview ?? property.description)!} />
+                </SectionCard>
+              )}
+
+              {property.finishingAndMaterials && (
+                <SectionCard title="Finishing & Materials" icon={LayersIcon}>
+                  <PropertyProse content={property.finishingAndMaterials} />
+                </SectionCard>
+              )}
+
+              {property.kitchenAndAppliances && (
+                <SectionCard title="Kitchen & Appliances" icon={UtensilsIcon}>
+                  <PropertyProse content={property.kitchenAndAppliances} />
+                </SectionCard>
+              )}
+
+              {property.furnishings && (
+                <SectionCard title="Furnishings" icon={SofaIcon}>
+                  <PropertyProse content={property.furnishings} />
                 </SectionCard>
               )}
 

@@ -131,12 +131,22 @@ export interface CrmPropertyDetail extends CrmPropertyListItem {
   factsheet_url: string | null
 
   reasons_to_invest: string | null
+  /** Curator-authored "About this property" body. Falls back on the CRM side
+   *  to the Reelly-parsed paste (project facts) so it's always populated for
+   *  Reelly-sourced listings. Prefer `overview ?? description` in renders —
+   *  the raw description blob may contain H5 headings duplicated by the
+   *  paste cards below. */
+  overview: string | null
   location_and_views: string | null
   about_developer: string | null
   payment_plan_details: string | null
   units_markdown: string | null
   units_pricing_markdown: string | null
   amenities_markdown: string | null
+  // Unit fit-out cards — Reelly paste with curator override.
+  finishing_and_materials: string | null
+  kitchen_and_appliances: string | null
+  furnishings: string | null
 
   notes: CrmNote[]
 
@@ -213,12 +223,19 @@ export interface CrmPropertyFull extends CrmProperty {
   factsheetUrl: string | null
 
   reasonsToInvest: string | null
+  /** Cleaned "About this property" body. Prefer `overview ?? description` in
+   *  renders — `description` is the raw source blob (may contain H5 headings
+   *  duplicated by the paste cards). */
+  overview: string | null
   locationAndViews: string | null
   aboutDeveloper: string | null
   paymentPlanDetails: string | null
   unitsMarkdown: string | null
   unitsPricingMarkdown: string | null
   amenitiesMarkdown: string | null
+  finishingAndMaterials: string | null
+  kitchenAndAppliances: string | null
+  furnishings: string | null
 
   notes: CrmNote[]
 }

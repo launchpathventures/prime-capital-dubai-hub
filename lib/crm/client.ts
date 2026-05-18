@@ -158,12 +158,16 @@ function mapDetail(row: CrmPropertyDetail): CrmPropertyFull {
     factsheetUrl: row.factsheet_url,
 
     reasonsToInvest: row.reasons_to_invest,
+    overview: row.overview,
     locationAndViews: row.location_and_views,
     aboutDeveloper: row.about_developer,
     paymentPlanDetails: row.payment_plan_details,
     unitsMarkdown: row.units_markdown,
     unitsPricingMarkdown: row.units_pricing_markdown,
     amenitiesMarkdown: row.amenities_markdown,
+    finishingAndMaterials: row.finishing_and_materials,
+    kitchenAndAppliances: row.kitchen_and_appliances,
+    furnishings: row.furnishings,
 
     notes: row.notes ?? [],
   }
