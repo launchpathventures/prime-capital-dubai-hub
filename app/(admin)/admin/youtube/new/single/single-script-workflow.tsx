@@ -47,8 +47,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
-import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
-import { ProfileSelector } from "../../_components/profile-selector"
+import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileChip } from "../../_components/profile-selector"
 
 // =============================================================================
 // TYPES
@@ -131,11 +131,11 @@ function FormatPill({
 // MAIN COMPONENT
 // =============================================================================
 
-export function SingleScriptWorkflow() {
+export function SingleScriptWorkflow({ lockedProfile }: { lockedProfile: ProfileSlug }) {
   const router = useRouter()
   const [step, setStep] = React.useState<Step>("input")
   const [context, setContext] = React.useState("")
-  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
+  const profileSlug = lockedProfile
   const [format, setFormat] = React.useState<Format | null>(null)
   const [angles, setAngles] = React.useState<DistilledAngle[]>([])
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
@@ -285,8 +285,14 @@ export function SingleScriptWorkflow() {
 
       {step === "input" && (
         <Stack gap="lg">
-          {/* Profile picker — who the script is written for */}
-          <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+          {/* Locked profile indicator — set by the picker upstream */}
+          <Row align="center" gap="sm">
+            <Text variant="muted" size="sm">Writing for</Text>
+            <ProfileChip slug={profileSlug} />
+            <Text variant="muted" size="sm">
+              · {PROFILES[profileSlug].displayRole}
+            </Text>
+          </Row>
 
           {/* Format picker — required, sits at top */}
           <Stack gap="sm">

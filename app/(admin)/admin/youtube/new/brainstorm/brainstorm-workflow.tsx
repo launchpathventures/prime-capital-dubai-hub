@@ -46,8 +46,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
-import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
-import { ProfileSelector } from "../../_components/profile-selector"
+import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileChip } from "../../_components/profile-selector"
 
 // =============================================================================
 // TYPES
@@ -142,7 +142,7 @@ function FormatPill({
 // MAIN COMPONENT
 // =============================================================================
 
-export function BrainstormWorkflow() {
+export function BrainstormWorkflow({ lockedProfile }: { lockedProfile: ProfileSlug }) {
   const router = useRouter()
   const [step, setStep] = React.useState<Step>("input")
   const [input, setInput] = React.useState("")
@@ -154,8 +154,9 @@ export function BrainstormWorkflow() {
   const [isGenerating, setIsGenerating] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
 
-  // Profile — who every idea in this batch is written for (step 1)
-  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
+  // Profile — every idea in this batch is written for this person.
+  // Locked upstream by the picker so it can't change mid-flow.
+  const profileSlug = lockedProfile
 
   // Format pre-selection (step 1)
   const [selectedFormats, setSelectedFormats] = React.useState<Set<Format>>(new Set())
@@ -455,7 +456,7 @@ export function BrainstormWorkflow() {
       const saved = await saveSelectedIdeas()
       if (saved) {
         toast(`${saved.length} idea${saved.length === 1 ? "" : "s"} added to pipeline`)
-        router.push("/admin/youtube")
+        router.push(`/admin/youtube?profile=${profileSlug}`)
       }
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to save ideas", { type: "error" })
@@ -535,8 +536,14 @@ export function BrainstormWorkflow() {
 
       {step === "input" && (
         <Stack gap="lg">
-          {/* Profile — every idea in this batch is written for this person */}
-          <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+          {/* Locked profile indicator — set by the picker upstream */}
+          <Row align="center" gap="sm">
+            <Text variant="muted" size="sm">Writing for</Text>
+            <ProfileChip slug={profileSlug} />
+            <Text variant="muted" size="sm">
+              · {PROFILES[profileSlug].displayRole}
+            </Text>
+          </Row>
 
           {/* 1. Format pre-selection — leads the page so it informs the market scan and idea generation */}
           <Stack gap="sm">

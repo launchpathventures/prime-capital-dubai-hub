@@ -4,9 +4,14 @@
  * Landing page for `/admin/youtube/new`. The user picks one of three
  * explicit entry modes — Brainstorm, Write One Script, or Review & Rewrite.
  * Each mode owns its own sub-route and workflow.
+ *
+ * Profile context: this route requires ?profile=tahir|ahmed. Without it we
+ * bounce the user back to the picker so a presenter is always chosen before
+ * a script is created.
  */
 
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { Container, Stack, Row, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,6 +22,8 @@ import {
   PenLineIcon,
   ShieldCheckIcon,
 } from "lucide-react"
+import { PROFILES, isProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileChip } from "../_components/profile-selector"
 
 export const metadata = {
   title: "New Script | YouTube | Admin",
@@ -77,13 +84,29 @@ const MODES: Mode[] = [
   },
 ]
 
-export default function NewScriptModeChooserPage() {
+type SearchParams = Promise<{ profile?: string }>
+
+export default async function NewScriptModeChooserPage({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
+  const params = await searchParams
+  if (!isProfileSlug(params.profile)) redirect("/admin/youtube")
+  const profile = params.profile
+  const profileMeta = PROFILES[profile]
+  const profileQuery = `?profile=${profile}`
+
   return (
     <Container size="lg" className="py-6">
       <Stack gap="lg">
         {/* Header */}
         <Row align="center" gap="sm">
-          <Button variant="ghost" size="sm" render={<Link href="/admin/youtube" />}>
+          <Button
+            variant="ghost"
+            size="sm"
+            render={<Link href={`/admin/youtube${profileQuery}`} />}
+          >
             <ArrowLeftIcon className="h-4 w-4" />
           </Button>
           <Stack gap="xs" className="flex-1">
@@ -92,7 +115,13 @@ export default function NewScriptModeChooserPage() {
               Pick how you want to start — each mode is purpose-built and explicit.
             </Text>
           </Stack>
+          <ProfileChip slug={profile} />
         </Row>
+
+        <Text variant="muted" size="sm">
+          Writing for <span className="font-medium text-foreground">{profileMeta.displayName}</span>.
+          To switch presenter, go back to the board.
+        </Text>
 
         {/* Mode cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
@@ -104,7 +133,7 @@ export default function NewScriptModeChooserPage() {
                 className="group relative flex flex-col transition-all hover:border-primary/60 hover:shadow-md"
               >
                 <Link
-                  href={mode.href}
+                  href={`${mode.href}${profileQuery}`}
                   className="absolute inset-0 rounded-lg"
                   aria-label={mode.title}
                 />

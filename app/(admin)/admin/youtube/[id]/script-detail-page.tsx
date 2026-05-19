@@ -587,7 +587,7 @@ export function ScriptDetailPage({
     const result = await deleteYouTubeScript(script.id)
     if (result.success) {
       toast("Script deleted")
-      router.push("/admin/youtube")
+      router.push(`/admin/youtube?profile=${script.profile_slug}`)
     } else {
       toast("Failed to delete", { type: "error" })
       setIsDeleting(false)
@@ -615,7 +615,7 @@ export function ScriptDetailPage({
     <Stack gap="lg">
       {/* Header + back nav */}
       <Row align="start" gap="sm">
-        <Button variant="ghost" size="sm" className="mt-1" render={<Link href="/admin/youtube" />}>
+        <Button variant="ghost" size="sm" className="mt-1" render={<Link href={`/admin/youtube?profile=${script.profile_slug}`} />}>
           <ArrowLeftIcon className="h-4 w-4" />
         </Button>
         <Stack gap="xs" className="flex-1 min-w-0">

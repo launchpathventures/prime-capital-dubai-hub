@@ -141,13 +141,21 @@ export type YouTubeScriptVersion = {
 // READ
 // =============================================================================
 
-export async function getYouTubeScripts(): Promise<ActionResult<YouTubeScript[]>> {
+export async function getYouTubeScripts(
+  options: { profileSlug?: ProfileSlug } = {}
+): Promise<ActionResult<YouTubeScript[]>> {
   try {
     const supabase = await createClient()
-    const { data, error } = await supabase
+    let query = supabase
       .from("youtube_scripts")
       .select("*")
       .order("created_at", { ascending: false })
+
+    if (options.profileSlug) {
+      query = query.eq("profile_slug", options.profileSlug)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
     return { success: true, data: data as YouTubeScript[] }
