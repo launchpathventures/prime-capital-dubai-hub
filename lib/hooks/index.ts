@@ -7,3 +7,4 @@
 export { useHashState, useSimpleHashState } from "./use-hash-state"
 export { useLearningProgress } from "./use-learning-progress"
 export { useUTMParams, getUTMParams, type UTMParams } from "./use-utm-params"
+export { useVoiceNote, type VoiceNoteState } from "./use-voice-note"

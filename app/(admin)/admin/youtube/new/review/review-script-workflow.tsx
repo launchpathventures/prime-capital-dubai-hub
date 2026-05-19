@@ -48,6 +48,8 @@ import {
 } from "@/lib/youtube/prompts"
 import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
 import { ProfileChip } from "../../_components/profile-selector"
+import { useVoiceNote } from "@/lib/hooks"
+import { VoiceNoteButton } from "@/components/shared"
 
 // =============================================================================
 // HELPERS
@@ -130,6 +132,13 @@ export function ReviewScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
   const [scriptBody, setScriptBody] = React.useState("")
   const profileSlug = lockedProfile
   const [format, setFormat] = React.useState<Format | null>(null)
+
+  // Voice note — transcript is appended to the pasted script body.
+  const { voiceState, recordingDuration, startRecording, stopRecording } =
+    useVoiceNote({
+      onTranscript: (text) =>
+        setScriptBody((prev) => (prev ? prev + " " + text : text)),
+    })
   const [title, setTitle] = React.useState("")
   const [titleDirty, setTitleDirty] = React.useState(false)
   const [phase, setPhase] = React.useState<"idle" | "classifying" | "saving">(
@@ -217,7 +226,7 @@ export function ReviewScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
 
   const wc = wordCount(scriptBody)
   const busy = phase !== "idle"
-  const canSubmit = !!scriptBody.trim() && !busy
+  const canSubmit = !!scriptBody.trim() && !busy && voiceState === "idle"
 
   return (
     <Stack gap="lg">
@@ -340,10 +349,19 @@ export function ReviewScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
           value={scriptBody}
           onChange={(e) => setScriptBody(e.target.value)}
           className="min-h-[420px] resize-y font-mono text-sm leading-relaxed"
+          disabled={voiceState === "transcribing"}
         />
-        <Text variant="muted" size="sm">
-          {wc > 0 ? `${wc.toLocaleString()} words` : "Empty"}
-        </Text>
+        <Row align="center" gap="sm">
+          <VoiceNoteButton
+            voiceState={voiceState}
+            recordingDuration={recordingDuration}
+            onStart={startRecording}
+            onStop={stopRecording}
+          />
+          <Text variant="muted" size="sm">
+            {wc > 0 ? `${wc.toLocaleString()} words` : "Empty"}
+          </Text>
+        </Row>
       </Stack>
 
       {/* Action bar */}
