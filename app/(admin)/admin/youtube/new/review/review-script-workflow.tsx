@@ -46,8 +46,8 @@ import {
   FORMATS_IN_DISPLAY_ORDER,
   type Format,
 } from "@/lib/youtube/prompts"
-import { DEFAULT_PROFILE_SLUG, type ProfileSlug } from "@/lib/youtube/profiles"
-import { ProfileSelector } from "../../_components/profile-selector"
+import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
+import { ProfileChip } from "../../_components/profile-selector"
 
 // =============================================================================
 // HELPERS
@@ -125,10 +125,10 @@ function wordCount(body: string): number {
 // MAIN COMPONENT
 // =============================================================================
 
-export function ReviewScriptWorkflow() {
+export function ReviewScriptWorkflow({ lockedProfile }: { lockedProfile: ProfileSlug }) {
   const router = useRouter()
   const [scriptBody, setScriptBody] = React.useState("")
-  const [profileSlug, setProfileSlug] = React.useState<ProfileSlug>(DEFAULT_PROFILE_SLUG)
+  const profileSlug = lockedProfile
   const [format, setFormat] = React.useState<Format | null>(null)
   const [title, setTitle] = React.useState("")
   const [titleDirty, setTitleDirty] = React.useState(false)
@@ -235,8 +235,14 @@ export function ReviewScriptWorkflow() {
         </Stack>
       </Row>
 
-      {/* Profile picker — whose voice this script is measured against */}
-      <ProfileSelector value={profileSlug} onChange={setProfileSlug} />
+      {/* Locked profile indicator — set by the picker upstream */}
+      <Row align="center" gap="sm">
+        <Text variant="muted" size="sm">Reviewing against</Text>
+        <ProfileChip slug={profileSlug} />
+        <Text variant="muted" size="sm">
+          · {PROFILES[profileSlug].displayRole}
+        </Text>
+      </Row>
 
       {/* Format — auto-detected; manual pick is an optional override */}
       <Stack gap="sm">

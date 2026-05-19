@@ -47,6 +47,7 @@ import {
   LightbulbIcon,
   PenLineIcon,
   SparklesIcon,
+  ArrowLeftIcon,
 } from "lucide-react"
 import {
   type YouTubeScript,
@@ -57,6 +58,7 @@ import {
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { ProfileChip } from "./_components/profile-selector"
+import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
 
 // =============================================================================
 // CONSTANTS
@@ -79,11 +81,18 @@ const COLUMNS: {
 // MAIN COMPONENT
 // =============================================================================
 
-export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScript[] }) {
+export function YouTubeClient({
+  initialScripts,
+  profile,
+}: {
+  initialScripts: YouTubeScript[]
+  profile: ProfileSlug
+}) {
   const [scripts, setScripts] = React.useState(initialScripts)
   const [deleteTarget, setDeleteTarget] = React.useState<YouTubeScript | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [activeDragId, setActiveDragId] = React.useState<string | null>(null)
+  const profileMeta = PROFILES[profile]
 
   // 8px activation distance so clicks on the card (navigation) still work.
   const sensors = useSensors(
@@ -157,15 +166,23 @@ export function YouTubeClient({ initialScripts }: { initialScripts: YouTubeScrip
 
   return (
     <Stack gap="lg">
+      {/* Back to picker */}
+      <Row align="center" gap="xs">
+        <Button variant="ghost" size="sm" render={<Link href="/admin/youtube" />}>
+          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          Change person
+        </Button>
+      </Row>
+
       {/* Header */}
       <Row align="center" className="justify-between">
         <Stack gap="xs">
-          <Title size="h3">YouTube Scripts</Title>
+          <Title size="h3">{profileMeta.displayName}&rsquo;s Scripts</Title>
           <Text variant="muted" size="sm">
-            Generate, validate, and track your video script pipeline
+            Generate, validate, and track {profileMeta.displayName}&rsquo;s video script pipeline
           </Text>
         </Stack>
-        <Button render={<Link href="/admin/youtube/new" />}>
+        <Button render={<Link href={`/admin/youtube/new?profile=${profile}`} />}>
           <PlusIcon className="h-4 w-4 mr-2" />
           New Script
         </Button>
