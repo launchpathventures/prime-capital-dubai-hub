@@ -1,13 +1,17 @@
 /**
  * CATALYST - Post-Login Redirect Page
  *
- * Routes users to the appropriate surface after authentication:
- * - Admin/marketing users: Redirects to /admin/dashboard
- * - All other users: Redirects to /learn
+ * Routes users to the right place after authentication:
+ * - Multi-surface roles (admin, marketing) → /launch picker
+ * - Single-surface roles (youtube_editor → YouTube Generator, learner → LMS)
+ *   land directly on their surface
+ *
+ * Surface eligibility lives in lib/auth/surfaces.ts.
  */
 
 import { redirect } from "next/navigation"
 import { getUserWithProfile } from "@/lib/auth/require-auth"
+import { getAccessibleSurfaces, type AppRole } from "@/lib/auth/surfaces"
 import { config } from "@/lib/config"
 
 export const metadata = {
@@ -18,11 +22,12 @@ export default async function RedirectPage() {
   // getUserWithProfile redirects to /auth/login if not authenticated
   const { profile } = await getUserWithProfile()
 
-  // Admin/marketing: straight to admin dashboard
-  if (profile?.role === "admin" || profile?.role === "marketing") {
-    redirect("/admin/dashboard")
+  const role = (profile?.role as AppRole | undefined) ?? "learner"
+  const surfaces = getAccessibleSurfaces(role)
+
+  if (surfaces.length > 1) {
+    redirect("/launch")
   }
 
-  // Everyone else: learning portal
-  redirect("/learn")
+  redirect(surfaces[0]?.href ?? "/learn")
 }

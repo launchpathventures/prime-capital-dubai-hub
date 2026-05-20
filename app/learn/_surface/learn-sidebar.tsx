@@ -9,10 +9,10 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { 
-  ChevronDownIcon, 
+import {
+  ChevronDownIcon,
   ChevronRightIcon,
-  CheckCircleIcon, 
+  CheckCircleIcon,
   CircleIcon,
   LockIcon,
   BookOpenIcon,
@@ -26,6 +26,7 @@ import {
   GraduationCapIcon,
   MessageSquarePlusIcon,
   ShieldIcon,
+  VideoIcon,
 } from "lucide-react"
 import { TourSidebarLink } from "./academy-tour"
 
@@ -298,11 +299,19 @@ export function LearnSidebar({
         </nav>
       </div>
       
-      {/* Admin Section - admins see all links, marketing sees dashboard link only */}
+      {/* Admin Section - admins see all links, marketing sees dashboard + YouTube only */}
       {(userRole === "admin" || userRole === "marketing") && (
         <div className="learn-sidebar__section learn-sidebar__section--admin">
           <div className="learn-sidebar__heading">Admin</div>
           <nav className="learn-sidebar__nav-list">
+            <Link
+              href="/admin/youtube"
+              className="learn-sidebar__nav-item"
+              onClick={onNavigate}
+            >
+              <VideoIcon className="learn-sidebar__nav-icon" />
+              <span>YouTube Generator</span>
+            </Link>
             <Link
               href="/admin/dashboard"
               className="learn-sidebar__nav-item"
