@@ -49,6 +49,8 @@ import {
 } from "@/lib/youtube/prompts"
 import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
 import { ProfileChip } from "../../_components/profile-selector"
+import { useVoiceNote } from "@/lib/hooks"
+import { VoiceNoteButton } from "@/components/shared"
 
 // =============================================================================
 // TYPES
@@ -143,6 +145,13 @@ export function SingleScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
   const [isSaving, setIsSaving] = React.useState(false)
   const [editingTitle, setEditingTitle] = React.useState(false)
   const [editingTopic, setEditingTopic] = React.useState(false)
+
+  // Voice note — transcript is appended to the pasted context.
+  const { voiceState, recordingDuration, startRecording, stopRecording } =
+    useVoiceNote({
+      onTranscript: (text) =>
+        setContext((prev) => (prev ? prev + " " + text : text)),
+    })
 
   const selectedAngle = selectedIndex !== null ? angles[selectedIndex] : null
 
@@ -326,8 +335,8 @@ export function SingleScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
               </Text>
               <Text variant="muted" size="sm">
                 Paste notes, a brief, a competitor video transcript, a half-formed
-                thought. The more concrete the context, the sharper the distilled
-                angles.
+                thought — or record a voice note. The more concrete the context,
+                the sharper the distilled angles.
               </Text>
             </Stack>
             <Textarea
@@ -335,16 +344,25 @@ export function SingleScriptWorkflow({ lockedProfile }: { lockedProfile: Profile
               value={context}
               onChange={(e) => setContext(e.target.value)}
               className="min-h-56 resize-y text-base leading-relaxed"
+              disabled={voiceState === "transcribing"}
             />
             <Row align="center" className="justify-between">
-              <Text variant="muted" size="sm">
-                {context.length > 0
-                  ? `${context.length.toLocaleString()} characters`
-                  : "Empty"}
-              </Text>
+              <Row gap="sm" align="center">
+                <VoiceNoteButton
+                  voiceState={voiceState}
+                  recordingDuration={recordingDuration}
+                  onStart={startRecording}
+                  onStop={stopRecording}
+                />
+                <Text variant="muted" size="sm">
+                  {context.length > 0
+                    ? `${context.length.toLocaleString()} characters`
+                    : "Empty"}
+                </Text>
+              </Row>
               <Button
                 onClick={handleDistill}
-                disabled={!context.trim() || !format || isDistilling}
+                disabled={!context.trim() || !format || isDistilling || voiceState !== "idle"}
                 size="lg"
               >
                 {isDistilling ? (

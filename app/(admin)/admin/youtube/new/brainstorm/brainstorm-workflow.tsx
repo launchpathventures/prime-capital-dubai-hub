@@ -24,8 +24,6 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   PlusIcon,
-  MicIcon,
-  SquareIcon,
   ArrowRightIcon,
   ChevronDownIcon,
   RadarIcon,
@@ -48,6 +46,8 @@ import {
 } from "@/lib/youtube/prompts"
 import { PROFILES, type ProfileSlug } from "@/lib/youtube/profiles"
 import { ProfileChip } from "../../_components/profile-selector"
+import { useVoiceNote } from "@/lib/hooks"
+import { VoiceNoteButton } from "@/components/shared"
 
 // =============================================================================
 // TYPES
@@ -171,123 +171,18 @@ export function BrainstormWorkflow({ lockedProfile }: { lockedProfile: ProfileSl
   const scanAbortRef = React.useRef<AbortController | null>(null)
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-  // Voice recording
-  const [voiceState, setVoiceState] = React.useState<"idle" | "recording" | "transcribing">("idle")
-  const [recordingDuration, setRecordingDuration] = React.useState(0)
-  const mediaRecorderRef = React.useRef<MediaRecorder | null>(null)
-  const chunksRef = React.useRef<Blob[]>([])
-  const streamRef = React.useRef<MediaStream | null>(null)
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null)
+  // Voice recording — shared hook appends the transcript to the idea input.
+  const { voiceState, recordingDuration, startRecording, stopRecording } =
+    useVoiceNote({
+      onTranscript: (text) =>
+        setInput((prev) => (prev ? prev + " " + text : text)),
+    })
 
   React.useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-      // If the user navigates away mid-recording, MediaRecorder keeps running
-      // and the onstop handler fires its transcription request against an
-      // unmounted component. Stop it explicitly so onstop tears the stream
-      // down and we don't queue a doomed transcribe.
-      if (mediaRecorderRef.current?.state === "recording") {
-        mediaRecorderRef.current.stop()
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop())
-      }
       scanAbortRef.current?.abort()
     }
   }, [])
-
-  // ---------------------------------------------------------------------------
-  // Voice Recording
-  // ---------------------------------------------------------------------------
-
-  async function startRecording() {
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        const protocol = window.location.protocol
-        const host = window.location.host
-        toast(`Microphone unavailable on ${protocol}//${host} — use localhost or HTTPS`, { type: "error" })
-        return
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true },
-      })
-      streamRef.current = stream
-
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4",
-      })
-      mediaRecorderRef.current = mediaRecorder
-      chunksRef.current = []
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
-      }
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop())
-        if (chunksRef.current.length > 0) {
-          setVoiceState("transcribing")
-          const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType || "audio/webm" })
-          await transcribeAudio(blob)
-        } else {
-          setVoiceState("idle")
-        }
-      }
-
-      mediaRecorder.start(100)
-      setVoiceState("recording")
-      setRecordingDuration(0)
-      timerRef.current = setInterval(() => {
-        setRecordingDuration((d) => {
-          if (d + 1 >= 120) stopRecording()
-          return d + 1
-        })
-      }, 1000)
-    } catch (err) {
-      console.error("Microphone access error:", err)
-      let msg = "Could not access microphone"
-      if (err instanceof Error) {
-        if (err.name === "NotAllowedError") msg = "Microphone permission denied — check browser settings"
-        else if (err.name === "NotFoundError") msg = "No microphone found"
-        else if (err.name === "NotReadableError") msg = "Microphone is in use by another app"
-        else msg = `Microphone error: ${err.name} — ${err.message}`
-      }
-      toast(msg, { type: "error" })
-      setVoiceState("idle")
-    }
-  }
-
-  function stopRecording() {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-    if (mediaRecorderRef.current && voiceState === "recording") mediaRecorderRef.current.stop()
-  }
-
-  async function transcribeAudio(blob: Blob) {
-    try {
-      const formData = new FormData()
-      formData.append("audio", blob)
-      const res = await fetch("/api/speech-to-text", { method: "POST", body: formData })
-      if (!res.ok) throw new Error("Transcription failed")
-      const { transcript } = await res.json()
-      if (transcript?.trim()) {
-        setInput((prev) => (prev ? prev + " " + transcript : transcript))
-      } else {
-        toast("No speech detected", { type: "error" })
-      }
-    } catch {
-      toast("Failed to transcribe audio", { type: "error" })
-    } finally {
-      setVoiceState("idle")
-      setRecordingDuration(0)
-    }
-  }
-
-  function formatDuration(seconds: number): string {
-    const m = Math.floor(seconds / 60)
-    const s = seconds % 60
-    return `${m}:${s.toString().padStart(2, "0")}`
-  }
 
   // ---------------------------------------------------------------------------
   // Market scan (Perplexity)
@@ -603,26 +498,12 @@ export function BrainstormWorkflow({ lockedProfile }: { lockedProfile: ProfileSl
 
           {/* Voice + Generate — sit between input and the market-scan fallback */}
           <Row gap="sm" align="center" className="justify-between">
-            <Row gap="sm" align="center">
-              {voiceState === "idle" && (
-                <Button variant="outline" onClick={startRecording} className="gap-2">
-                  <MicIcon className="h-4 w-4" />
-                  Record Voice Note
-                </Button>
-              )}
-              {voiceState === "recording" && (
-                <Button variant="destructive" onClick={stopRecording} className="gap-2 animate-pulse">
-                  <SquareIcon className="h-3 w-3 fill-current" />
-                  Stop Recording — {formatDuration(recordingDuration)}
-                </Button>
-              )}
-              {voiceState === "transcribing" && (
-                <Badge variant="secondary" className="h-9 px-3 gap-1.5">
-                  <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
-                  Transcribing...
-                </Badge>
-              )}
-            </Row>
+            <VoiceNoteButton
+              voiceState={voiceState}
+              recordingDuration={recordingDuration}
+              onStart={startRecording}
+              onStop={stopRecording}
+            />
 
             <Button
               onClick={handleGenerate}
