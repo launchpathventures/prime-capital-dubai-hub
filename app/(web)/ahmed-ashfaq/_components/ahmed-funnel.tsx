@@ -22,6 +22,7 @@ export const ahmedProfile = {
   ogImage: "/images/team/ahmed-ashfaq-og.jpg",
   heroImage: "/images/hero/prime-capital-hero.jpg",
   kitImage: "/images/hero/contact.jpg",
+  kitCoverImage: "/images/ahmed/strategy-kit-cover.png",
   bio:
     "Arab American and now Dubai-based, Ahmed Ashfaq has over 20 years of experience helping local and international investors navigate one of the world's fastest-growing property markets.",
 }

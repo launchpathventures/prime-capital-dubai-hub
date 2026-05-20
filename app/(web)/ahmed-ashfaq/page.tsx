@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
 import { Container, Grid, Stack, Text, Title } from "@/components/core"
 import {
@@ -229,10 +230,14 @@ export default function AhmedLandingPage() {
               </Text>
             </Stack>
             <div className="ahmed-kit-panel">
-              <div className="ahmed-kit-panel__book">
-                <span>Dubai</span>
-                <strong>Investor Strategy Kit</strong>
-                <small>2026 Edition</small>
+              <div className="ahmed-kit-panel__cover">
+                <Image
+                  src={ahmedProfile.kitCoverImage}
+                  alt="The 2026 Investor Strategy Kit — Dubai Real Estate: Your Global Safe Haven"
+                  fill
+                  sizes="(min-width: 1024px) 28rem, (min-width: 768px) 45vw, calc(100vw - 3rem)"
+                  className="object-cover"
+                />
               </div>
               <div className="ahmed-kit-panel__copy">
                 <Text className="ahmed-kit-panel__eyebrow">Prime Capital Dubai</Text>
