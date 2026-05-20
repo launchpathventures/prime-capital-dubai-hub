@@ -2223,42 +2223,22 @@
 }
 
 .ahmed-kit-panel {
-  display: grid;
-  grid-template-columns: 9rem 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  align-items: center;
   padding: 1.5rem;
   background: white;
   border: 1px solid rgba(166, 181, 176, 0.16);
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.06);
 }
 
-.ahmed-kit-panel__book {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  aspect-ratio: 3 / 4;
-  padding: 1rem;
-  background:
-    linear-gradient(145deg, rgba(63, 65, 66, 0.96), rgba(87, 108, 117, 0.95)),
-    var(--web-ash);
-  color: var(--web-off-white);
-  box-shadow: 0.5rem 0.5rem 0 rgba(87, 108, 117, 0.12);
-}
-
-.ahmed-kit-panel__book span,
-.ahmed-kit-panel__book small {
-  color: var(--web-serenity);
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.ahmed-kit-panel__book strong {
-  font-family: var(--font-headline, inherit);
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.2;
+.ahmed-kit-panel__cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1334 / 666;
+  overflow: hidden;
+  border: 1px solid rgba(166, 181, 176, 0.18);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
 .ahmed-kit-panel__eyebrow {
@@ -2498,14 +2478,8 @@
   }
 
   .ahmed-kit-panel {
-    grid-template-columns: 1fr;
     padding: 1.25rem;
     gap: 1.25rem;
-  }
-
-  .ahmed-kit-panel__book {
-    width: min(100%, 11rem);
-    margin-inline: auto;
   }
 
   .ahmed-btn {

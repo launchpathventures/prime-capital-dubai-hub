@@ -42,10 +42,10 @@ export const metadata: Metadata = {
     url: "/ahmed-ashfaq/strategy-kit",
     images: [
       {
-        url: ahmedProfile.kitImage,
-        width: 1200,
-        height: 630,
-        alt: "Dubai Investor Strategy Kit",
+        url: ahmedProfile.kitCoverImage,
+        width: 1334,
+        height: 666,
+        alt: "The 2026 Investor Strategy Kit — Dubai Real Estate: Your Global Safe Haven",
       },
     ],
   },
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "Ahmed Ashfaq Dubai Investor Strategy Kit",
     description:
       "A practical investor briefing for Dubai property strategy, ROI context, and Golden Visa considerations.",
-    images: [ahmedProfile.kitImage],
+    images: [ahmedProfile.kitCoverImage],
   },
 }
 
