@@ -613,12 +613,36 @@ export function ScriptDetailPage({
 
   return (
     <Stack gap="lg">
-      {/* Header + back nav */}
+      {/* Header + back nav. When the script belongs to a run (Mode B "Write
+          One Script"), the back arrow returns to the run workspace so the user
+          can pick a different angle without losing context. */}
       <Row align="start" gap="sm">
-        <Button variant="ghost" size="sm" className="mt-1" render={<Link href={`/admin/youtube?profile=${script.profile_slug}`} />}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1"
+          render={
+            <Link
+              href={
+                script.run_id
+                  ? `/admin/youtube/runs/${script.run_id}`
+                  : `/admin/youtube?profile=${script.profile_slug}`
+              }
+            />
+          }
+        >
           <ArrowLeftIcon className="h-4 w-4" />
         </Button>
         <Stack gap="xs" className="flex-1 min-w-0">
+          {script.run_id && (
+            <Link
+              href={`/admin/youtube/runs/${script.run_id}`}
+              className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 w-fit"
+            >
+              <ArrowLeftIcon className="h-3 w-3" />
+              Back to angles
+            </Link>
+          )}
           <Title size="h3" className="line-clamp-2">{script.title}</Title>
           {script.topic && (
             <Text variant="muted" size="sm" className="line-clamp-2">
