@@ -444,6 +444,8 @@ function buildMessage(data: {
 // VALIDATION SCHEMA
 // =============================================================================
 
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
 const leadSchema = z
   .object({
     // Contact fields (optional for returning leads in property-enquiry mode)
@@ -475,11 +477,11 @@ const leadSchema = z
       "newsletter",
       "event",
     ]),
-    submittedAt: z.string(),
+    submittedAt: z.string().max(40),
     pageUrl: z.string().max(500),
 
     // Optional fields - goals
-    goals: z.array(z.string().max(100)).optional(),
+    goals: z.array(z.string().max(100)).max(10).optional(),
 
     // Optional fields - buyer qualification
     investTimeline: z.string().max(100).optional(),
@@ -547,7 +549,11 @@ const leadSchema = z
 
     // Idempotency + journey
     submissionId: z.string().max(50).optional(),
-    sessionId: z.string().max(50).optional(),
+    sessionId: z
+      .string()
+      .max(50)
+      .regex(UUID_V4_REGEX, "sessionId must be a UUIDv4")
+      .optional(),
 
     // Calendly booking metadata (sent via post-booking follow-up)
     scheduledMeeting: z.boolean().optional(),
@@ -636,6 +642,7 @@ async function enrichProperty(slug: string | undefined): Promise<EnrichedPropert
 
 const AGENTCRM_API_URL = process.env.AGENTCRM_API_URL || "https://crm.primecapitaldubai.com/api/public/enquiry"
 const AGENTCRM_API_KEY = process.env.AGENTCRM_API_KEY
+const AGENTCRM_MAX_BODY_BYTES = 64 * 1024
 
 interface ForwardResult {
   ok: boolean
@@ -794,6 +801,15 @@ async function forwardToAgentCrm(
     )
     return { ok: false, status: 0, destination: "agentcrm" }
   }
+  const body = JSON.stringify(payload)
+  const bodyBytes = Buffer.byteLength(body, "utf8")
+  if (bodyBytes > AGENTCRM_MAX_BODY_BYTES) {
+    console.error(
+      `[Leads API][AgentCRM][VALIDATION] payload too large mode=${formMode} sub=${submissionId} bytes=${bodyBytes} max=${AGENTCRM_MAX_BODY_BYTES}`,
+    )
+    return { ok: false, status: 413, destination: "agentcrm" }
+  }
+
   try {
     const res = await fetch(AGENTCRM_API_URL, {
       method: "POST",
@@ -801,7 +817,7 @@ async function forwardToAgentCrm(
         "Content-Type": "application/json",
         Authorization: `Bearer ${AGENTCRM_API_KEY}`,
       },
-      body: JSON.stringify(payload),
+      body,
     })
     if (!res.ok) {
       const bodyText = await res.text().catch(() => "")

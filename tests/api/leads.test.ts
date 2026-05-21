@@ -164,6 +164,58 @@ describe("Lead Form API", () => {
       const response = await POST(request as unknown as NextRequest)
       expect(response.status).toBe(400)
     })
+
+    it("should reject unbounded multi-select payloads before forwarding", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.51",
+        },
+        body: JSON.stringify({
+          firstName: "John",
+          lastName: "Doe",
+          email: "john@example.com",
+          whatsapp: "+971501234567",
+          formMode: "contact",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://example.com/",
+          goals: Array.from({ length: 11 }, (_, i) => `goal-${i}`),
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(400)
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it("should reject non-UUIDv4 session IDs before forwarding", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.52",
+        },
+        body: JSON.stringify({
+          firstName: "John",
+          lastName: "Doe",
+          email: "john@example.com",
+          whatsapp: "+971501234567",
+          formMode: "landing",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://example.com/",
+          sessionId: "website-session",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(400)
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
   })
 
   // =============================================================================
@@ -230,6 +282,7 @@ describe("Lead Form API", () => {
           source: "legacy-source-param",
           utmSource: "youtube",
           utmCampaign: "test123",
+          sessionId: "6f3fdfb4-8697-4c0a-9f68-3b2c83f8f5c5",
         }),
       })
 
@@ -249,7 +302,90 @@ describe("Lead Form API", () => {
       )
       expect(payload.utmSource).toBe("youtube")
       expect(payload.utmCampaign).toBe("test123")
+      expect(payload.sessionId).toBe("6f3fdfb4-8697-4c0a-9f68-3b2c83f8f5c5")
       expect(payload.source).toBeUndefined()
+    })
+
+    it("keeps accepted AgentCRM enquiry payloads below the 64KB body cap", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.71",
+        },
+        body: JSON.stringify({
+          firstName: "A".repeat(100),
+          lastName: "B".repeat(100),
+          email: "max@example.com",
+          whatsapp: "+971501234567",
+          formMode: "contact",
+          submittedAt: new Date().toISOString(),
+          pageUrl: `https://example.com/${"p".repeat(480)}`,
+          goals: Array.from({ length: 10 }, (_, i) => `goal-${i}`),
+          investTimeline: "12_24_months",
+          budget: "10m-20m",
+          propertyTypes: Array.from({ length: 9 }, (_, i) => `type-${i}`),
+          locations: Array.from({ length: 5 }, (_, i) => `Location ${i} ${"x".repeat(85)}`),
+          bedrooms: 20,
+          propertyLocation: "L".repeat(500),
+          concerns: "C".repeat(2000),
+          propertyType: "apartment",
+          saleTimeline: "flexible",
+          targetPrice: "50m-plus",
+          hasQuestions: true,
+          questionsText: "Q".repeat(500),
+          privateRole: "investor",
+          deploymentRange: "50m-plus",
+          preferredContact: "whatsapp",
+          privateContext: "P".repeat(500),
+          enquiryIntent: Array.from({ length: 10 }, (_, i) => `intent-${i}`),
+          propertyAppeals: Array.from({ length: 10 }, (_, i) => `appeal-${i}`),
+          enquiryNotes: "N".repeat(1000),
+          leadMagnet: "M".repeat(200),
+          leadTag: "T".repeat(100),
+          visitorType: "investor",
+          referringProperty: "R".repeat(500),
+          referringTeamMember: "agent-slug",
+          referringTeamMemberEmail: "agent@primecapitaldubai.com",
+          utmSource: "S".repeat(100),
+          utmMedium: "M".repeat(100),
+          utmCampaign: "C".repeat(100),
+          utmContent: "O".repeat(100),
+          utmTerm: "T".repeat(100),
+          manychat: "Y".repeat(100),
+          referrer: `https://referrer.example/${"r".repeat(475)}`,
+          firstTouchUtmSource: "F".repeat(100),
+          firstTouchUtmMedium: "F".repeat(100),
+          firstTouchUtmCampaign: "F".repeat(100),
+          firstTouchUtmContent: "F".repeat(100),
+          firstTouchUtmTerm: "F".repeat(100),
+          firstTouchReferrer: `https://first.example/${"f".repeat(478)}`,
+          firstTouchLandingPage: `https://landing.example/${"l".repeat(476)}`,
+          firstTouchAt: new Date().toISOString(),
+          submissionId: "29c7c5ac-308d-4d81-95d6-00f5e8316b36",
+          sessionId: "6f3fdfb4-8697-4c0a-9f68-3b2c83f8f5c5",
+          meetingStartTime: new Date().toISOString(),
+          meetingEndTime: new Date().toISOString(),
+          meetingInviteeName: "I".repeat(200),
+          meetingInviteeEmail: "invitee@example.com",
+          meetingEventType: "E".repeat(200),
+          meetingEventUri: `https://calendly.example/${"e".repeat(475)}`,
+          meetingInviteeUri: `https://calendly.example/${"i".repeat(475)}`,
+          meetingRescheduleUrl: `https://calendly.example/${"s".repeat(475)}`,
+          meetingCancelUrl: `https://calendly.example/${"c".repeat(475)}`,
+          website: "",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const body = String(requestInit.body)
+      expect(Buffer.byteLength(body, "utf8")).toBeLessThanOrEqual(64 * 1024)
     })
   })
 

@@ -28,6 +28,7 @@ import type {
 } from "./types"
 
 const REVALIDATE_SECONDS = 300 // CRM advertises Cache-Control max-age=300
+const CRM_PARAM_MAX_LENGTH = 200
 
 interface FetchOptions {
   /** Skip the in-memory ISR cache for this request (e.g., previews). */
@@ -35,7 +36,11 @@ interface FetchOptions {
 }
 
 function isCrmConfigured(): boolean {
-  return Boolean(config.crm.baseUrl && config.crm.agencyUuid)
+  return Boolean(
+    config.crm.baseUrl &&
+      config.crm.agencyUuid &&
+      config.crm.agencyUuid.length <= CRM_PARAM_MAX_LENGTH,
+  )
 }
 
 function buildListUrl(filters: CrmListFilters | undefined): string {
@@ -230,6 +235,8 @@ export async function getCrmPropertyBySlug(
   opts?: FetchOptions
 ): Promise<CrmPropertyFull | null> {
   if (!isCrmConfigured()) return null
+  if (!slugOrId || slugOrId.length > CRM_PARAM_MAX_LENGTH) return null
+
   const response = await crmFetch<CrmDetailResponse>(buildDetailUrl(slugOrId), opts)
   if (!response) return null
   const row = "data" in response ? response.data : response
