@@ -15,6 +15,13 @@ import { CheckIcon, LanguagesIcon, ShieldCheckIcon } from "lucide-react"
 
 export const AHMED_STRATEGY_KIT_PREFILL_KEY = "ahmed:strategy-kit:lead-prefill"
 
+/**
+ * Slug used to route Ahmed's leads to ahmed@primecapitaldubai.com in the CRM.
+ * Matches the entry in `KNOWN_AGENT_EMAILS` (app/api/leads/route.ts). Without
+ * this slug on the payload, leads from the Ahmed funnel land unassigned.
+ */
+export const AHMED_TEAM_MEMBER_SLUG = "ahmed-ashfaq"
+
 export const ahmedProfile = {
   name: "Ahmed Ashfaq",
   role: "Dubai-based real estate broker",
@@ -208,6 +215,7 @@ export function AhmedBookCallForm({
         tag={tag}
         calendlyUrl={config.links.ahmedBooking}
         redirectUrl="/ahmed-ashfaq/thank-you"
+        initialData={{ referringTeamMember: AHMED_TEAM_MEMBER_SLUG }}
         prefillKey={
           prefillFromStrategyKit ? AHMED_STRATEGY_KIT_PREFILL_KEY : undefined
         }
@@ -232,6 +240,7 @@ export function AhmedStrategyKitForm() {
         redirectUrl="/ahmed-ashfaq/strategy-kit/thank-you"
         redirectDelay={1000}
         tag="youtube-ahmed-strategy-kit"
+        initialData={{ referringTeamMember: AHMED_TEAM_MEMBER_SLUG }}
         persistKey={AHMED_STRATEGY_KIT_PREFILL_KEY}
         successMessage="Thank you — opening your access page now."
       />

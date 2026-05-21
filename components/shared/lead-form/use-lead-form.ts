@@ -153,14 +153,20 @@ export function useLeadForm({
   const submissionIdRef = useRef<string>("")
   if (!submissionIdRef.current) submissionIdRef.current = generateSubmissionId()
 
-  // Read context params from URL (property, team member)
+  // Read context params from URL (property, team member). Omit keys when the
+  // URL doesn't carry them so a missing param can't clobber an initialData
+  // default — e.g. the Ahmed funnel seeds `referringTeamMember: "ahmed-ashfaq"`
+  // via initialData and would otherwise be wiped to undefined here.
   const contextParams = useMemo(() => {
     if (typeof window === "undefined") return {}
     const params = new URLSearchParams(window.location.search)
+    const property = params.get("property") || undefined
+    const teamMember = params.get("teamMember") || undefined
+    const teamMemberEmail = params.get("teamMemberEmail") || undefined
     return {
-      referringProperty: params.get("property") || undefined,
-      referringTeamMember: params.get("teamMember") || undefined,
-      referringTeamMemberEmail: params.get("teamMemberEmail") || undefined,
+      ...(property ? { referringProperty: property } : {}),
+      ...(teamMember ? { referringTeamMember: teamMember } : {}),
+      ...(teamMemberEmail ? { referringTeamMemberEmail: teamMemberEmail } : {}),
     }
   }, [])
 
