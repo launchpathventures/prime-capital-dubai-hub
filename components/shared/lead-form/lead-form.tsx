@@ -21,6 +21,8 @@ import {
   ContactStep,
   GoalsStep,
   TimelineBudgetStep,
+  PreferencesStep,
+  LocationsStep,
   PropertyStep,
   QuestionsStep,
   PrivateContextStep,
@@ -63,6 +65,8 @@ export function LeadForm({
     isSubmitting,
     error,
     nextStep,
+    prevStep,
+    canGoBack,
     updateData,
     submit,
   } = useLeadForm({
@@ -83,10 +87,10 @@ export function LeadForm({
     nextStep()
   }
 
-  // Scroll to top of form only after the visitor advances inside the form.
+  // Recover the form into view only when the visitor has scrolled past it.
+  // We deliberately do NOT scroll when the form is already visible — that
+  // yanks the page on every step transition, which is jarring inside a hero.
   useEffect(() => {
-    // Skip initial render and Strict Mode effect replays on mount.
-    // Only scroll after an actual step transition.
     if (previousStepRef.current === null) {
       previousStepRef.current = currentStep
       return
@@ -104,14 +108,15 @@ export function LeadForm({
 
     shouldScrollStepRef.current = false
 
-    if (formRef.current) {
-      const rect = formRef.current.getBoundingClientRect()
-      const headerOffset = 112 // 5rem header + 2rem breathing room
-      
-      // Scroll if form is cut off at top or too far down the viewport
-      if (rect.top < headerOffset || rect.top > window.innerHeight * 0.4) {
-        formRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
-      }
+    if (!formRef.current) return
+
+    const rect = formRef.current.getBoundingClientRect()
+    const headerOffset = 112 // 5rem sticky header + 2rem breathing room
+    const isAboveViewport = rect.top < headerOffset
+    const isBelowViewport = rect.top > window.innerHeight
+
+    if (isAboveViewport || isBelowViewport) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
     }
   }, [currentStep])
 
@@ -151,6 +156,8 @@ export function LeadForm({
             showConcerns={showConcerns}
             submitLabel={calendlyUrl ? "Book Call" : undefined}
             autoFocus={autoFocus}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -161,6 +168,8 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={advanceStep}
             theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -171,6 +180,32 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={advanceStep}
             theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
+          />
+        )
+
+      case "preferences":
+        return (
+          <PreferencesStep
+            data={data}
+            onUpdate={updateData}
+            onNext={advanceStep}
+            theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
+          />
+        )
+
+      case "locations":
+        return (
+          <LocationsStep
+            data={data}
+            onUpdate={updateData}
+            onNext={advanceStep}
+            theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -181,6 +216,8 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={advanceStep}
             theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -191,6 +228,10 @@ export function LeadForm({
             onSubmit={submit}
             isSubmitting={isSubmitting}
             theme={theme}
+            submitLabel={calendlyUrl ? "Continue to booking" : undefined}
+            submitLeadsToBooking={!!calendlyUrl}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -201,6 +242,8 @@ export function LeadForm({
             onSubmit={submit}
             isSubmitting={isSubmitting}
             theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -211,6 +254,8 @@ export function LeadForm({
             onUpdate={updateData}
             onNext={advanceStep}
             theme={theme}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         )
 
@@ -225,6 +270,8 @@ export function LeadForm({
             isLastStep={isReturningLead}
             theme={theme}
             propertyContext={propertyContext}
+            onBack={prevStep}
+            canGoBack={canGoBack}
           />
         ) : null
 

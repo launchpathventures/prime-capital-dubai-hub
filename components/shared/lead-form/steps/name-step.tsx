@@ -7,7 +7,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { ArrowRightIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
@@ -26,6 +26,16 @@ export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: Nam
   const [firstName, setFirstName] = useState(data.firstName || "")
   const [lastName, setLastName] = useState(data.lastName || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const firstNameRef = useRef<HTMLInputElement>(null)
+
+  // Programmatic focus with preventScroll keeps the page anchor steady. The
+  // declarative autoFocus attribute would scroll the input into view, yanking
+  // the form (and the hero around it) on every step transition.
+  useEffect(() => {
+    if (autoFocus && mode !== "private") {
+      firstNameRef.current?.focus({ preventScroll: true })
+    }
+  }, [autoFocus, mode])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,6 +78,7 @@ export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: Nam
         <div className="lead-form__field-row">
           <div className="lead-form__field">
             <input
+              ref={firstNameRef}
               id="firstName"
               type="text"
               value={firstName}
@@ -78,7 +89,6 @@ export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: Nam
               aria-invalid={!!errors.firstName}
               aria-describedby={errors.firstName ? "firstName-error" : undefined}
               className={cn("lead-form__input", errors.firstName && "lead-form__input--error")}
-              autoFocus={autoFocus && mode !== "private"}
               autoComplete="given-name"
             />
             {errors.firstName && (

@@ -253,6 +253,8 @@ export type StepId =
   | "contact"
   | "goals"
   | "timeline-budget"
+  | "preferences"
+  | "locations"
   | "property"
   | "questions"
   | "private-context"

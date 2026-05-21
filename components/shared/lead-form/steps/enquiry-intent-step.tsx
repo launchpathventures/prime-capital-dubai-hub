@@ -11,15 +11,18 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme } from "../types"
 import { ENQUIRY_INTENT_OPTIONS } from "../types"
+import { LeadFormBackButton } from "./back-button"
 
 interface EnquiryIntentStepProps {
   data: Partial<LeadFormData>
   onUpdate: (data: Partial<LeadFormData>) => void
   onNext: () => void
   theme: FormTheme
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
-export function EnquiryIntentStep({ data, onUpdate, onNext }: EnquiryIntentStepProps) {
+export function EnquiryIntentStep({ data, onUpdate, onNext, onBack, canGoBack }: EnquiryIntentStepProps) {
   const [selected, setSelected] = useState<string[]>(data.enquiryIntent || [])
 
   const toggle = (value: string) => {
@@ -77,6 +80,7 @@ export function EnquiryIntentStep({ data, onUpdate, onNext }: EnquiryIntentStepP
           Continue
           <ArrowRightIcon className="lead-form__submit-icon" />
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

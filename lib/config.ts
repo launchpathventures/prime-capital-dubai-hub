@@ -116,19 +116,21 @@ export const config = {
     /** Calendly scheduling link (30-minute consultation) */
     calendly: process.env.NEXT_PUBLIC_CALENDLY_URL || "https://calendly.com/tahirmajithia/30min",
     /**
-     * Ahmed Ashfaq Calendly scheduling link.
-     * TODO: Replace placeholder fallbacks with Ahmed's own Calendly URL.
-     * Set NEXT_PUBLIC_AHMED_CALENDLY_URL to override.
+     * Ahmed Ashfaq booking link. Google Calendar appointment scheduling.
+     * Must be the resolved long URL (calendar.google.com/...), not the short
+     * calendar.app.google share form — the short URL's 302 redirect serves
+     * `x-frame-options: SAMEORIGIN`, which blocks iframe embedding even
+     * though the final destination is permissive.
+     * Set NEXT_PUBLIC_AHMED_BOOKING_URL to override.
      */
-    ahmedCalendly:
-      process.env.NEXT_PUBLIC_AHMED_CALENDLY_URL ||
-      process.env.NEXT_PUBLIC_CALENDLY_URL ||
-      "https://calendly.com/tahirmajithia/30min",
+    ahmedBooking:
+      process.env.NEXT_PUBLIC_AHMED_BOOKING_URL ||
+      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ3wD-uT_GoWbEW82SGuRGEi7UNl4oZZTR_FXfHsgwKmny033KkjDLNcSmobJy2onjr5DDJBPcl_",
     /** Calendly scheduling link (15-minute seller consultation) */
     calendlySeller: "https://calendly.com/tahirmajithia/15min",
     /**
-     * Ahmed Ashfaq strategy kit link.
-     * TODO: Replace placeholder with Ahmed-specific strategy kit URL.
+     * Ahmed Ashfaq strategy kit link — shares the Prime Capital firm-wide kit
+     * since Ahmed's funnel is Prime Capital scoped, not personally branded.
      * Set NEXT_PUBLIC_AHMED_STRATEGY_KIT_URL to override.
      */
     ahmedStrategyKit:

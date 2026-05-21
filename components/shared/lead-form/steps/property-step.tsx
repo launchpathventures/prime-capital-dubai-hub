@@ -17,15 +17,18 @@ import type {
   PriceRange,
 } from "../types"
 import { PROPERTY_TYPE_OPTIONS, TIMELINE_OPTIONS, BUDGET_OPTIONS } from "../types"
+import { LeadFormBackButton } from "./back-button"
 
 interface PropertyStepProps {
   data: Partial<LeadFormData>
   onUpdate: (data: Partial<LeadFormData>) => void
   onNext: () => void
   theme: FormTheme
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
-export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
+export function PropertyStep({ data, onUpdate, onNext, onBack, canGoBack }: PropertyStepProps) {
   const [location, setLocation] = useState(data.propertyLocation || "")
   const [propertyType, setPropertyType] = useState<PropertyType | undefined>(
     data.propertyType
@@ -197,6 +200,7 @@ export function PropertyStep({ data, onUpdate, onNext }: PropertyStepProps) {
           Continue
           <ArrowRightIcon className="lead-form__submit-icon" />
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

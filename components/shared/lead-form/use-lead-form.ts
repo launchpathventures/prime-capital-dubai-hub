@@ -30,6 +30,21 @@ const ALL_MODES: FormMode[] = [
   "event",
 ]
 
+// Buyer-side goals (everything except "sell" and "advice-only") gate the
+// timeline + budget, preferences, and locations steps. Property-enquiry mode
+// always sees the buyer chain since the visitor came from a property page.
+const BUYER_GOALS: LeadGoal[] = [
+  "invest-offplan",
+  "buy-ready",
+  "build-wealth",
+  "golden-visa",
+]
+
+function isBuyerStep(data: Partial<LeadFormData>) {
+  if (data.formMode === "property-enquiry") return true
+  return data.goals?.some((g) => BUYER_GOALS.includes(g)) ?? false
+}
+
 const STEPS: StepDef[] = [
   { id: "name", modes: ALL_MODES },
   { id: "contact", modes: ALL_MODES },
@@ -39,19 +54,17 @@ const STEPS: StepDef[] = [
   {
     id: "timeline-budget",
     modes: ["contact", "property-enquiry"],
-    condition: (data) => {
-      // In property-enquiry mode, always show (no goals gating)
-      if (data.formMode === "property-enquiry") return true
-      // Buyer-side goals (everything except "sell" and "advice-only") gate
-      // the timeline + budget step.
-      const buyerGoals: LeadGoal[] = [
-        "invest-offplan",
-        "buy-ready",
-        "build-wealth",
-        "golden-visa",
-      ]
-      return data.goals?.some((g) => buyerGoals.includes(g)) ?? false
-    },
+    condition: isBuyerStep,
+  },
+  {
+    id: "preferences",
+    modes: ["contact", "property-enquiry"],
+    condition: isBuyerStep,
+  },
+  {
+    id: "locations",
+    modes: ["contact", "property-enquiry"],
+    condition: isBuyerStep,
   },
   {
     id: "property",
@@ -70,6 +83,8 @@ const RETURNING_LEAD_SKIP_STEPS: StepId[] = [
   "contact",
   "goals",
   "timeline-budget",
+  "preferences",
+  "locations",
   "property",
   "questions",
 ]

@@ -206,7 +206,7 @@ export function AhmedBookCallForm({
         theme="light"
         autoFocus={false}
         tag={tag}
-        calendlyUrl={config.links.ahmedCalendly}
+        calendlyUrl={config.links.ahmedBooking}
         redirectUrl="/ahmed-ashfaq/thank-you"
         prefillKey={
           prefillFromStrategyKit ? AHMED_STRATEGY_KIT_PREFILL_KEY : undefined
