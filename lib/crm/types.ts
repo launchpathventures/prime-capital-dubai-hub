@@ -246,6 +246,8 @@ export interface CrmPropertyFull extends CrmProperty {
 
 export type CrmSort = "price_asc" | "price_desc" | "newest" | "oldest"
 
+export type CrmPromotionStatus = "top_property" | "shadow_picks" | "discount" | (string & {})
+
 export interface CrmListFilters {
   listingType?: CrmListingType
   area?: string
@@ -255,6 +257,7 @@ export interface CrmListFilters {
   priceMin?: number
   priceMax?: number
   status?: CrmPropertyStatus
+  promotionStatus?: CrmPromotionStatus
   sort?: CrmSort
   cursor?: string
   /** Default 20, max 50. */

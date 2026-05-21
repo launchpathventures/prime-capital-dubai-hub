@@ -91,7 +91,7 @@ export default async function HomePage() {
   }
 
   const [propertiesResult, testimonials, stats] = await Promise.all([
-    getCrmProperties({ limit: 12 }),
+    getCrmProperties({ limit: 12, promotionStatus: "top_property" }),
     getWebTestimonials(),
     getWebStats(),
   ])

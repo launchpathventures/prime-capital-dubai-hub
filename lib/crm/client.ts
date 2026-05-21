@@ -4,7 +4,9 @@
  * Reads property data from the public CRM API. The CRM is the source of
  * truth for listings, pricing, payment plans, and the inline enquiry widget.
  *
- * - List endpoint is hard-gated to promotion_status=top_property (curated picks).
+ * - List callers should pass promotionStatus="top_property" to surface only
+ *   curated picks (matches the "Selected Properties" framing on the site).
+ *   Without it, the CRM returns the agency's full catalogue (~1.4k rows).
  * - Detail endpoint returns any property regardless of status — UI must show
  *   sold / under-offer / off-market badges from the status field.
  * - All endpoints are public-read with permissive CORS; no auth required.
@@ -48,6 +50,8 @@ function buildListUrl(filters: CrmListFilters | undefined): string {
   if (filters?.priceMin != null) url.searchParams.set("price_min", String(filters.priceMin))
   if (filters?.priceMax != null) url.searchParams.set("price_max", String(filters.priceMax))
   if (filters?.status) url.searchParams.set("status", filters.status)
+  if (filters?.promotionStatus)
+    url.searchParams.set("promotion_status", filters.promotionStatus)
   if (filters?.sort) url.searchParams.set("sort", filters.sort)
   if (filters?.cursor) url.searchParams.set("cursor", filters.cursor)
   if (filters?.limit != null) url.searchParams.set("limit", String(Math.min(filters.limit, 50)))
