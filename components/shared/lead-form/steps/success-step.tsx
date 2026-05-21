@@ -2,8 +2,9 @@
  * CATALYST - Success Step
  *
  * For download mode: shows success then redirects after a brief delay.
- * For calendly mode: uses Calendly's official inline widget embed
- * with Next.js Script component for proper loading.
+ * For Calendly URLs: embeds Calendly's official widget with prefill + booking
+ * postMessage hook. For Google Calendar appointment URLs: embeds the booking
+ * page in an iframe with name/email/phone prefilled via query params.
  */
 
 "use client"
@@ -61,8 +62,27 @@ export function SuccessStep({
     }
   }, [shouldRedirect, redirectUrl, redirectDelay])
 
-  // Calendly mode
+  // Booking embed (Calendly or Google Calendar appointment scheduling).
   if (calendlyUrl) {
+    const vendor = detectBookingVendor(calendlyUrl)
+
+    if (vendor === "google") {
+      const embedUrl = buildGoogleCalendarUrl(calendlyUrl, data)
+      return (
+        <iframe
+          src={embedUrl}
+          title="Book your call"
+          className="lead-form__booking-iframe"
+          style={{
+            width: "100%",
+            minWidth: "320px",
+            height: "780px",
+            border: 0,
+          }}
+        />
+      )
+    }
+
     const embedUrl = buildCalendlyUrl(calendlyUrl, data)
     return (
       <>
@@ -259,6 +279,43 @@ function CalendlyBookingListener({
   }, [redirectUrl])
 
   return null
+}
+
+function detectBookingVendor(url: string): "calendly" | "google" | "unknown" {
+  // Parse the host explicitly — the previous string regex required a literal
+  // dot before the hostname, which never matched the canonical
+  // `https://calendar.google.com/...` URL (slash, not dot, precedes the host).
+  try {
+    const host = new URL(url).hostname.toLowerCase()
+    if (/(^|\.)calendly\.com$/.test(host)) return "calendly"
+    if (/(^|\.)calendar\.(app\.)?google\.com$/.test(host)) return "google"
+  } catch {
+    // Malformed URL falls through to unknown
+  }
+  return "unknown"
+}
+
+/**
+ * Build Google Calendar appointment URL with prefill params.
+ * Google decodes %20 for spaces in name; we keep it explicit to match Calendly's
+ * pattern and avoid the `+` ambiguity that URLSearchParams introduces.
+ */
+function buildGoogleCalendarUrl(
+  baseUrl: string,
+  data: Partial<LeadFormData>,
+): string {
+  const parts: string[] = ["gv=true"]
+  const add = (key: string, value: string) => {
+    parts.push(`${key}=${encodeURIComponent(value)}`)
+  }
+
+  const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ")
+  if (fullName) add("name", fullName)
+  if (data.email) add("email", data.email)
+  if (data.whatsapp) add("phone", data.whatsapp)
+
+  const separator = baseUrl.includes("?") ? "&" : "?"
+  return `${baseUrl}${separator}${parts.join("&")}`
 }
 
 /**

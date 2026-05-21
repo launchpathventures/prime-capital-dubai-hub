@@ -12,6 +12,7 @@ import { CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme, PropertyContext } from "../types"
 import { PROPERTY_APPEAL_OPTIONS, CONDITIONAL_APPEAL_OPTIONS } from "../types"
+import { LeadFormBackButton } from "./back-button"
 
 interface PropertyAppealStepProps {
   data: Partial<LeadFormData>
@@ -22,6 +23,8 @@ interface PropertyAppealStepProps {
   isLastStep: boolean
   theme: FormTheme
   propertyContext: PropertyContext
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
 export function PropertyAppealStep({
@@ -32,6 +35,8 @@ export function PropertyAppealStep({
   isSubmitting,
   isLastStep,
   propertyContext,
+  onBack,
+  canGoBack,
 }: PropertyAppealStepProps) {
   const [selected, setSelected] = useState<string[]>(data.propertyAppeals || [])
   const [notes, setNotes] = useState(data.enquiryNotes || "")
@@ -121,6 +126,7 @@ export function PropertyAppealStep({
             </span>
           ) : isLastStep ? "Submit" : "Continue"}
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

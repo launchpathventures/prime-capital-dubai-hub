@@ -7,25 +7,40 @@
 
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { CheckIcon } from "lucide-react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme } from "../types"
+import { LeadFormBackButton } from "./back-button"
 
 interface QuestionsStepProps {
   data: Partial<LeadFormData>
   onSubmit: (data: Partial<LeadFormData>) => void
   isSubmitting: boolean
   theme: FormTheme
+  /** When the next screen is a booking embed, signal it on the CTA. */
+  submitLabel?: string
+  submitLeadsToBooking?: boolean
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function QuestionsStep({ data, onSubmit, isSubmitting, theme }: QuestionsStepProps) {
+export function QuestionsStep({ data, onSubmit, isSubmitting, theme, submitLabel, submitLeadsToBooking, onBack, canGoBack }: QuestionsStepProps) {
   const [hasQuestions, setHasQuestions] = useState<boolean | undefined>(
     data.hasQuestions
   )
   const [questionsText, setQuestionsText] = useState(data.questionsText || "")
   const [error, setError] = useState<string | null>(null)
+  const questionsTextRef = useRef<HTMLTextAreaElement>(null)
+
+  // Focus the textarea after the user opts into "Yes". preventScroll keeps the
+  // page anchor steady — the default autoFocus would scroll the hero.
+  useEffect(() => {
+    if (hasQuestions) {
+      questionsTextRef.current?.focus({ preventScroll: true })
+    }
+  }, [hasQuestions])
 
   const selectOption = useCallback((value: boolean) => {
     setHasQuestions(value)
@@ -125,6 +140,7 @@ export function QuestionsStep({ data, onSubmit, isSubmitting, theme }: Questions
         <div className="lead-form__field" style={{ animationName: "lf-enter" }}>
           <label htmlFor="questionsText" className="lead-form__label">Your questions</label>
           <textarea
+            ref={questionsTextRef}
             id="questionsText"
             value={questionsText}
             onChange={(e) => {
@@ -137,7 +153,6 @@ export function QuestionsStep({ data, onSubmit, isSubmitting, theme }: Questions
             aria-invalid={!!(error && !questionsText.trim())}
             aria-describedby={error && !questionsText.trim() ? "questionsText-error" : undefined}
             className="lead-form__textarea"
-            autoFocus
           />
         </div>
       )}
@@ -153,11 +168,16 @@ export function QuestionsStep({ data, onSubmit, isSubmitting, theme }: Questions
             </span>
           ) : (
             <>
-              Submit
-              <CheckIcon className="lead-form__submit-icon" style={{ marginRight: 4 }} />
+              {submitLabel ?? "Submit"}
+              {submitLeadsToBooking ? (
+                <ArrowRightIcon className="lead-form__submit-icon" />
+              ) : (
+                <CheckIcon className="lead-form__submit-icon" style={{ marginRight: 4 }} />
+              )}
             </>
           )}
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

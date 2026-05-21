@@ -2386,21 +2386,22 @@
   .ahmed-hero--portrait .ahmed-hero__portrait-layout {
     grid-template-columns: minmax(20rem, 28rem) minmax(0, 1fr);
     gap: clamp(3rem, 5vw, 5.5rem);
-    align-items: stretch;
-    min-height: min(82vh, 50rem);
+    align-items: start;
   }
 
   .ahmed-hero--portrait .ahmed-hero__portrait-col {
-    aspect-ratio: auto;
+    aspect-ratio: 4 / 5;
     height: auto;
-    min-height: 36rem;
-    align-self: stretch;
+    align-self: start;
+    position: sticky;
+    top: clamp(5rem, 9vh, 6.5rem);
+    max-height: calc(100vh - 8rem);
   }
 
   .ahmed-hero--portrait .ahmed-hero__main {
-    justify-content: center;
-    align-self: stretch;
+    align-self: center;
     gap: 0;
+    padding-block: clamp(0.5rem, 2vh, 1.5rem);
   }
 
   .ahmed-hero--portrait .ahmed-hero__form {
@@ -2413,25 +2414,25 @@
   }
 }
 
-/* Tablet: portrait beside main column, anchored to a shared height. */
+/* Tablet: portrait beside main column with natural aspect ratio. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .ahmed-hero--portrait .ahmed-hero__portrait-layout {
     grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
     column-gap: 2.25rem;
     row-gap: 2rem;
-    align-items: stretch;
-    min-height: 36rem;
+    align-items: start;
   }
 
   .ahmed-hero--portrait .ahmed-hero__portrait-col {
-    aspect-ratio: auto;
-    align-self: stretch;
-    min-height: 32rem;
+    aspect-ratio: 4 / 5;
+    align-self: start;
+    position: sticky;
+    top: clamp(5rem, 9vh, 6.5rem);
+    max-height: calc(100vh - 8rem);
   }
 
   .ahmed-hero--portrait .ahmed-hero__main {
-    justify-content: center;
-    align-self: stretch;
+    align-self: start;
     gap: 0;
   }
 }

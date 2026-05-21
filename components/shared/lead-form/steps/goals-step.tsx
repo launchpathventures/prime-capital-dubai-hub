@@ -12,15 +12,18 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LeadFormData, FormTheme, LeadGoal } from "../types"
 import { GOAL_OPTIONS } from "../types"
+import { LeadFormBackButton } from "./back-button"
 
 interface GoalsStepProps {
   data: Partial<LeadFormData>
   onUpdate: (data: Partial<LeadFormData>) => void
   onNext: () => void
   theme: FormTheme
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
-export function GoalsStep({ data, onUpdate, onNext }: GoalsStepProps) {
+export function GoalsStep({ data, onUpdate, onNext, onBack, canGoBack }: GoalsStepProps) {
   const [selectedGoals, setSelectedGoals] = useState<LeadGoal[]>(data.goals || [])
   const [error, setError] = useState<string | null>(null)
 
@@ -114,6 +117,7 @@ export function GoalsStep({ data, onUpdate, onNext }: GoalsStepProps) {
           Continue
           <ArrowRightIcon className="lead-form__submit-icon" />
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

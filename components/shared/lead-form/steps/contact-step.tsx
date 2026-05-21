@@ -6,12 +6,13 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PhoneInput } from "@/components/ui/phone-input/phone-input"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
 import { contactStepSchema } from "../schema"
+import { LeadFormBackButton } from "./back-button"
 
 interface ContactStepProps {
   data: Partial<LeadFormData>
@@ -32,6 +33,8 @@ interface ContactStepProps {
   submitLabel?: string
   /** Optional: focus the first input when this step is reached intentionally */
   autoFocus?: boolean
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
 export function ContactStep({
@@ -47,6 +50,8 @@ export function ContactStep({
   showConcerns,
   submitLabel,
   autoFocus = true,
+  onBack,
+  canGoBack,
 }: ContactStepProps) {
   const [email, setEmail] = useState(data.email || "")
   const [whatsapp, setWhatsapp] = useState(data.whatsapp || "")
@@ -54,6 +59,16 @@ export function ContactStep({
   const [propertyLocation, setPropertyLocation] = useState(data.propertyLocation || "")
   const [concerns, setConcerns] = useState(data.concerns || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const emailRef = useRef<HTMLInputElement>(null)
+
+  // Programmatic focus with preventScroll keeps the page anchor steady. The
+  // declarative autoFocus attribute scrolls the input into view, which yanks
+  // the hero on every step transition.
+  useEffect(() => {
+    if (autoFocus && mode !== "private") {
+      emailRef.current?.focus({ preventScroll: true })
+    }
+  }, [autoFocus, mode])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,6 +133,7 @@ export function ContactStep({
         <div className="lead-form__field">
           <label htmlFor="email" className="lead-form__label">Email</label>
           <input
+            ref={emailRef}
             id="email"
             type="email"
             value={email}
@@ -127,7 +143,6 @@ export function ContactStep({
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? "email-error" : undefined}
             className={cn("lead-form__input", errors.email && "lead-form__input--error")}
-            autoFocus={autoFocus && mode !== "private"}
             autoComplete="email"
           />
           {errors.email && (
@@ -230,6 +245,7 @@ export function ContactStep({
             </>
           )}
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )

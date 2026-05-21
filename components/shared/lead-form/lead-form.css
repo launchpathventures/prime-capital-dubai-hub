@@ -378,13 +378,37 @@
 }
 
 .lead-form__options--grid .lead-form__option {
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 1rem;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
 }
 
 .lead-form__options--grid .lead-form__option-key {
   display: none;
+}
+
+/* Compact tiles for short labels (bedrooms, etc.). Sized like chips so they
+   sit naturally alongside the larger budget/timeline cards without screaming
+   for attention. auto-fit lets them flow on narrow widths. */
+.lead-form__options--compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
+  gap: 0.5rem;
+}
+
+.lead-form__options--compact .lead-form__option {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 0.75rem;
+}
+
+.lead-form__options--compact .lead-form__option-key {
+  display: none;
+}
+
+.lead-form__options--compact .lead-form__option-label {
+  text-align: center;
 }
 
 /* =============================================================================
@@ -401,9 +425,10 @@
 
 .lead-form__back {
   display: inline-flex;
+  align-self: center;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
   font-size: var(--lf-font-small);
   font-weight: 400;
   color: var(--lf-text-subtle);
@@ -761,4 +786,117 @@
   .lead-form__select-group--row {
     flex-direction: column;
   }
+}
+
+/* =============================================================================
+   COMBOBOX (Locations Step)
+   Searchable multi-select with chips. Built to match the rest of the form
+   rather than the chunkier ui/combobox primitive, which lives in Tailwind.
+   ============================================================================= */
+
+.lead-form__combo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lead-form__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lead-form__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.375rem 0.25rem 0.625rem;
+  font-size: var(--lf-font-small);
+  color: var(--lf-text);
+  background: var(--lf-option-bg-active);
+  border: 1px solid var(--lf-border-active);
+  border-radius: 2px;
+}
+
+.lead-form__chip-label {
+  line-height: 1.2;
+}
+
+.lead-form__chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 2px;
+  color: var(--lf-text-muted);
+  cursor: pointer;
+  transition: color var(--lf-transition-fast), background var(--lf-transition-fast);
+}
+
+.lead-form__chip-remove:hover {
+  color: var(--lf-text);
+  background: var(--lf-option-bg-hover);
+}
+
+.lead-form__combo-field {
+  position: relative;
+}
+
+.lead-form__combo-input[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lead-form__combo-list {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 14rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--lf-input-bg);
+  border: 1px solid var(--lf-border);
+  border-radius: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+}
+
+.lead-form--dark .lead-form__combo-list {
+  /* The form's --lf-input-bg is a translucent overlay on dark themes, which
+     reads as a glass strip mid-air. Anchor to the page background so the
+     dropdown looks solid. */
+  background: rgba(20, 28, 32, 0.97);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.lead-form__combo-option {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--lf-font-body);
+  color: var(--lf-text);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background var(--lf-transition-fast), color var(--lf-transition-fast);
+}
+
+.lead-form__combo-option--active {
+  background: var(--lf-option-bg-active);
+}
+
+.lead-form__combo-option--custom {
+  color: var(--lf-text-muted);
+  font-style: italic;
+}
+
+.lead-form__combo-option--custom.lead-form__combo-option--active {
+  color: var(--lf-text);
 }

@@ -25,18 +25,23 @@ import {
   PREFERRED_CONTACT_OPTIONS,
 } from "../types"
 import { privateContextStepSchema } from "../schema"
+import { LeadFormBackButton } from "./back-button"
 
 interface PrivateContextStepProps {
   data: Partial<LeadFormData>
   onSubmit: (data: Partial<LeadFormData>) => void
   isSubmitting: boolean
   theme: FormTheme
+  onBack?: () => void
+  canGoBack?: boolean
 }
 
 export function PrivateContextStep({
   data,
   onSubmit,
   isSubmitting,
+  onBack,
+  canGoBack,
 }: PrivateContextStepProps) {
   const [privateRole, setPrivateRole] = useState<PrivateRole | undefined>(data.privateRole)
   const [deploymentRange, setDeploymentRange] = useState<DeploymentRange | undefined>(data.deploymentRange)
@@ -188,6 +193,7 @@ export function PrivateContextStep({
             </>
           )}
         </button>
+        <LeadFormBackButton onBack={onBack} canGoBack={canGoBack} />
       </div>
     </form>
   )
