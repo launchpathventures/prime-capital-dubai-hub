@@ -137,35 +137,27 @@ async function getAllCompetencies(): Promise<Competency[]> {
 }
 
 /**
- * Get quizzes for a competency to find one related to this module.
+ * Find the quiz tied to a specific module. Match strictly on related_module —
+ * never fall back to "first quiz for this competency", because that silently
+ * serves the wrong quiz when data is misconfigured (see Referral Generation
+ * incident: a quiz with the wrong competency_slug was excluded from the
+ * primary filter and the fallback handed users a different module's quiz,
+ * which they then "completed" repeatedly without affecting their progress).
  */
 async function getRelatedQuiz(
-  competencySlug: string,
+  _competencySlug: string,
   moduleSlug: string
 ): Promise<{ slug: string; title: string } | null> {
   const supabase = await createClient()
-  
-  // Try to find quiz that references this module
-  const { data: exactMatch } = await supabase
+
+  const { data } = await supabase
     .from("quizzes")
     .select("slug, title")
-    .eq("competency_slug", competencySlug)
-    .ilike("related_module", `%${moduleSlug}%`)
+    .eq("related_module", moduleSlug)
     .limit(1)
-    .single()
-  
-  if (exactMatch) return exactMatch
-  
-  // Fallback: get first quiz for this competency
-  const { data: anyQuiz } = await supabase
-    .from("quizzes")
-    .select("slug, title")
-    .eq("competency_slug", competencySlug)
-    .order("slug")
-    .limit(1)
-    .single()
-  
-  return anyQuiz
+    .maybeSingle()
+
+  return data
 }
 
 /**
