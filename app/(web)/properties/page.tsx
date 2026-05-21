@@ -1,8 +1,10 @@
 /**
  * CATALYST - Properties Listing Page
  *
- * Curated portfolio sourced from the AgentCRM public API. The list endpoint
- * is hard-gated to promotion_status=top_property — featured picks only.
+ * Curated portfolio sourced from the AgentCRM public API. We hard-gate to
+ * promotion_status=top_property so this page only ever shows the curated
+ * picks — the CRM's full catalogue is ~1.4k rows and would silently
+ * truncate at 50 otherwise.
  */
 
 import Link from "next/link"
@@ -85,6 +87,7 @@ function parseFilters(
     bedroomsMax: numericParam(params.bedrooms_max),
     priceMin: numericParam(params.price_min),
     priceMax: numericParam(params.price_max),
+    promotionStatus: "top_property",
     sort,
     limit: 50,
   }

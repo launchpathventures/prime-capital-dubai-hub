@@ -30,7 +30,10 @@ async function primeCapitalSitemap(baseUrl: string): Promise<MetadataRoute.Sitem
   const propertyPages: MetadataRoute.Sitemap = []
   if (config.features.properties) {
     try {
-      const { properties } = await getCrmProperties({ limit: 50 })
+      const { properties } = await getCrmProperties({
+        limit: 50,
+        promotionStatus: "top_property",
+      })
       properties.forEach((property) => {
         propertyPages.push({
           url: `${baseUrl}/properties/${property.slug}`,
