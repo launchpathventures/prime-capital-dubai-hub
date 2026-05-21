@@ -28,6 +28,7 @@ import { captureSessionUtm, readUtmFromSearch } from "@/lib/leads/attribution"
 const FIRST_TOUCH_COOKIE = "pc_first_touch"
 const SESSION_COOKIE = "pc_session_id"
 const COOKIE_MAX_AGE_DAYS = 30
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 interface FirstTouch {
   utmSource?: string
@@ -92,6 +93,10 @@ function generateUUID(): string {
   })
 }
 
+function isUUIDv4(value: string | null): value is string {
+  return Boolean(value && UUID_V4_REGEX.test(value))
+}
+
 /**
  * One-shot capture: reads stored UTM attribution if present, otherwise stores
  * the current utm_* params. Also ensures a sessionId cookie exists and keeps
@@ -108,7 +113,7 @@ export function useAttribution(): AttributionPayload {
 
     // --- Session ---
     let sessionId = readCookie(SESSION_COOKIE)
-    if (!sessionId) {
+    if (!isUUIDv4(sessionId)) {
       sessionId = generateUUID()
       writeCookie(SESSION_COOKIE, sessionId, COOKIE_MAX_AGE_DAYS)
     }

@@ -79,6 +79,9 @@ export const nameStepSchema = z.object({
 // E.164: starts with +, country code 1-9, then 7-14 digits.
 // Must include country code so AgentCRM can dedup against existing contacts.
 const e164Regex = /^\+[1-9]\d{6,14}$/
+const shortTextSchema = z.string().max(100)
+const urlTextSchema = z.string().max(500)
+const submittedAtSchema = z.string().max(40)
 
 export const contactStepSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -153,15 +156,15 @@ const baseSchema = z.object({
   email: z.string().email(),
   whatsapp: z.string().regex(e164Regex),
   formMode: formModeSchema,
-  submittedAt: z.string(),
-  pageUrl: z.string(),
+  submittedAt: submittedAtSchema,
+  pageUrl: urlTextSchema,
   
   // UTM params (optional)
-  utmSource: z.string().optional(),
-  utmMedium: z.string().optional(),
-  utmCampaign: z.string().optional(),
-  utmContent: z.string().optional(),
-  utmTerm: z.string().optional(),
+  utmSource: shortTextSchema.optional(),
+  utmMedium: shortTextSchema.optional(),
+  utmCampaign: shortTextSchema.optional(),
+  utmContent: shortTextSchema.optional(),
+  utmTerm: shortTextSchema.optional(),
 })
 
 // Download mode: Just name + contact
@@ -192,7 +195,7 @@ export const contactFormSchema = baseSchema.extend({
 
   // Questions
   hasQuestions: z.boolean().optional(),
-  questionsText: z.string().optional(),
+  questionsText: z.string().max(500).optional(),
 })
 
 // Private mode: Discreet UHNW capture
@@ -222,7 +225,7 @@ export const propertyEnquiryFormSchema = baseSchema.extend({
 
   // Questions
   hasQuestions: z.boolean().optional(),
-  questionsText: z.string().optional(),
+  questionsText: z.string().max(500).optional(),
 
   // Property interest fields
   bitrixLeadId: z.string().max(50).optional(),
@@ -234,18 +237,18 @@ export const propertyEnquiryFormSchema = baseSchema.extend({
 // Returning lead: minimal schema (no name/contact required)
 export const returningLeadFormSchema = z.object({
   formMode: formModeSchema,
-  submittedAt: z.string(),
-  pageUrl: z.string(),
+  submittedAt: submittedAtSchema,
+  pageUrl: urlTextSchema,
   bitrixLeadId: z.string().max(50),
   enquiryIntent: z.array(z.string().max(100)).max(10).optional(),
   propertyAppeals: z.array(z.string().max(100)).max(10).optional(),
   enquiryNotes: z.string().max(1000).optional(),
   referringProperty: z.string().max(500).optional(),
-  utmSource: z.string().optional(),
-  utmMedium: z.string().optional(),
-  utmCampaign: z.string().optional(),
-  utmContent: z.string().optional(),
-  utmTerm: z.string().optional(),
+  utmSource: shortTextSchema.optional(),
+  utmMedium: shortTextSchema.optional(),
+  utmCampaign: shortTextSchema.optional(),
+  utmContent: shortTextSchema.optional(),
+  utmTerm: shortTextSchema.optional(),
 })
 
 // =============================================================================
