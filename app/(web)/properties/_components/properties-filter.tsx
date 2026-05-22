@@ -1,8 +1,9 @@
 /**
- * CATALYST - Properties Filter
+ * CATALYST - Properties Grid
  *
- * Server-rendered filter UI driven by URL query params using CRM canonical
- * field names (property_type, area, bedrooms_min/max, price_min/max).
+ * Pure presentation: renders the property card grid. All filtering lives
+ * in the URL and is applied at the CRM list call; this component only
+ * paints what the server returned.
  */
 
 import Link from "next/link"
@@ -15,103 +16,35 @@ import { ArrowRightIcon, MapPinIcon } from "lucide-react"
 import { propertyTypeImages } from "../../_surface/property-images"
 import { formatCrmBedrooms, formatCrmPriceRange, getStatusBadge, type CrmProperty } from "@/lib/crm"
 
-interface PropertiesFilterProps {
+interface PropertiesGridProps {
   properties: CrmProperty[]
-  /** Currently active CRM property_type filter, or "all". */
-  activeType: string
-  /** Currently active area filter (case-insensitive substring match for tabs). */
-  areaFilter: string
 }
 
-export function PropertiesFilter({ properties, activeType, areaFilter }: PropertiesFilterProps) {
-  const normalisedType = (activeType || "all").toLowerCase()
-  const normalisedArea = areaFilter.trim().toLowerCase()
-
-  const types = Array.from(new Set(properties.map((p) => p.propertyType.toLowerCase())))
-  const typeCounts = types.reduce<Record<string, number>>((acc, type) => {
-    acc[type] = properties.filter((p) => p.propertyType.toLowerCase() === type).length
-    return acc
-  }, {})
-
-  let filtered = properties
-  if (normalisedType !== "all") {
-    filtered = filtered.filter((p) => p.propertyType.toLowerCase() === normalisedType)
-  }
-  if (normalisedArea) {
-    filtered = filtered.filter((p) => p.area.toLowerCase().includes(normalisedArea))
-  }
-
-  const filterHref = (type: string) => {
-    const params = new URLSearchParams()
-    if (type !== "all") params.set("property_type", type)
-    if (areaFilter) params.set("area", areaFilter)
-    const qs = params.toString()
-    return `/properties${qs ? `?${qs}` : ""}`
-  }
-
+export function PropertiesGrid({ properties }: PropertiesGridProps) {
   return (
-    <>
-      <section className="bg-[var(--web-off-white)] py-8 border-b border-[var(--web-serenity)]/20">
-        <Container size="xl">
-          <div className="flex flex-wrap justify-center gap-3">
-            <FilterTab href={filterHref("all")} active={normalisedType === "all"}>
-              All Properties ({properties.length})
-            </FilterTab>
-            {types.map((type) => (
-              <FilterTab key={type} href={filterHref(type)} active={normalisedType === type} capitalize>
-                {type} ({typeCounts[type]})
-              </FilterTab>
+    <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
+      <Container size="xl">
+        {properties.length === 0 ? (
+          <Stack gap="md" align="center" className="text-center py-12">
+            <Title
+              as="h2"
+              className="font-headline text-[var(--web-ash)] text-2xl font-normal"
+            >
+              No properties match those filters
+            </Title>
+            <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-md">
+              Loosen your criteria or contact us for off-market opportunities.
+            </Text>
+          </Stack>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
             ))}
           </div>
-        </Container>
-      </section>
-
-      <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
-        <Container size="xl">
-          {filtered.length === 0 ? (
-            <Stack gap="md" align="center" className="text-center py-12">
-              <Text className="text-[var(--web-spruce)] text-[15px] font-light">
-                No properties match those filters. Contact us for off-market opportunities.
-              </Text>
-            </Stack>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          )}
-        </Container>
-      </section>
-    </>
-  )
-}
-
-function FilterTab({
-  href,
-  active,
-  capitalize,
-  children,
-}: {
-  href: string
-  active: boolean
-  capitalize?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <Link
-      href={href}
-      scroll={false}
-      className={`px-5 py-2 rounded-[2px] text-[13px] uppercase tracking-wider transition-colors ${
-        capitalize ? "capitalize" : ""
-      } ${
-        active
-          ? "bg-[var(--web-ash)] text-[var(--web-off-white)]"
-          : "bg-transparent text-[var(--web-spruce)] border border-[var(--web-spruce)]/30 hover:bg-[var(--web-spruce)] hover:text-[var(--web-off-white)]"
-      }`}
-    >
-      {children}
-    </Link>
+        )}
+      </Container>
+    </section>
   )
 }
 

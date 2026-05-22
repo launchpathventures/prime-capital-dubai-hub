@@ -5,6 +5,11 @@
  * promotion_status=top_property so this page only ever shows the curated
  * picks — the CRM's full catalogue is ~1.4k rows and would silently
  * truncate at 50 otherwise.
+ *
+ * Filter values and counts are sourced from the CRM facets endpoint
+ * (`/api/public/properties/facets`) — see lib/crm/facets.ts. No hardcoded
+ * enums for areas, property types, listing types, or bedrooms live in this
+ * surface.
  */
 
 import Link from "next/link"
@@ -12,12 +17,21 @@ import Image from "next/image"
 
 import { config } from "@/lib/config"
 import { getCrmProperties } from "@/lib/crm/client"
-import type { CrmListFilters, CrmPropertyType, CrmSort } from "@/lib/crm"
+import { fetchPropertyFacets } from "@/lib/crm/facets"
+import type {
+  CrmListFilters,
+  CrmListingType,
+  CrmPromotionStatus,
+  CrmPropertyStatus,
+  CrmPropertyType,
+  CrmSort,
+} from "@/lib/crm"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
 
-import { PropertiesFilter } from "./_components/properties-filter"
+import { PropertiesGrid } from "./_components/properties-filter"
+import { PropertiesFilterBar } from "./_components/properties-filter-bar"
 import propertiesImage from "@/public/images/hero/properties.jpg"
 
 export const revalidate = 300 // Match CRM Cache-Control max-age
@@ -49,12 +63,17 @@ export const metadata = {
 
 interface PropertiesPageProps {
   searchParams: Promise<{
+    q?: string | string[]
     property_type?: string | string[]
     area?: string | string[]
+    listing_type?: string | string[]
     bedrooms_min?: string | string[]
     bedrooms_max?: string | string[]
     price_min?: string | string[]
     price_max?: string | string[]
+    status?: string | string[]
+    promotion_status?: string | string[]
+    tag?: string | string[]
     sort?: string | string[]
   }>
 }
@@ -73,21 +92,57 @@ function numericParam(value: string | string[] | undefined): number | undefined 
   return Number.isFinite(parsed) ? parsed : undefined
 }
 
+function textParam(value: string | string[] | undefined): string | undefined {
+  const raw = singleParam(value)?.trim()
+  return raw ? raw : undefined
+}
+
+const USER_FILTER_KEYS = [
+  "q",
+  "property_type",
+  "area",
+  "listing_type",
+  "bedrooms_min",
+  "bedrooms_max",
+  "price_min",
+  "price_max",
+  "status",
+  "promotion_status",
+  "tag",
+  "sort",
+] as const
+
+function hasAnyUserFilter(params: Awaited<PropertiesPageProps["searchParams"]>): boolean {
+  return USER_FILTER_KEYS.some((k) => {
+    const v = params[k]
+    return v != null && v !== ""
+  })
+}
+
 function parseFilters(
-  params: Awaited<PropertiesPageProps["searchParams"]>
+  params: Awaited<PropertiesPageProps["searchParams"]>,
 ): CrmListFilters {
   const sortRaw = singleParam(params.sort)
   const sort = ALLOWED_SORTS.includes(sortRaw as CrmSort) ? (sortRaw as CrmSort) : undefined
   const propertyType = singleParam(params.property_type) as CrmPropertyType | undefined
 
+  // The CRM silently drops invalid filter values, so we forward strings as-is
+  // (cast to the canonical union type for downstream signatures). No
+  // site-side allowlist — keeps the CRM as the single source of truth for
+  // which values exist.
   return {
+    q: textParam(params.q),
     propertyType: propertyType && propertyType !== "all" ? propertyType : undefined,
-    area: singleParam(params.area),
+    area: textParam(params.area),
+    listingType: singleParam(params.listing_type) as CrmListingType | undefined,
     bedroomsMin: numericParam(params.bedrooms_min),
     bedroomsMax: numericParam(params.bedrooms_max),
     priceMin: numericParam(params.price_min),
     priceMax: numericParam(params.price_max),
-    promotionStatus: "top_property",
+    status: singleParam(params.status) as CrmPropertyStatus | undefined,
+    promotionStatus:
+      (singleParam(params.promotion_status) as CrmPromotionStatus | undefined) ?? "top_property",
+    tag: textParam(params.tag),
     sort,
     limit: 50,
   }
@@ -101,18 +156,21 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   }
 
   const filters = parseFilters(params)
-  const { properties, total } = await getCrmProperties(filters)
+  const [{ properties, total }, facets] = await Promise.all([
+    getCrmProperties(filters),
+    fetchPropertyFacets(filters),
+  ])
 
-  if (properties.length === 0) {
+  // Show the friendly "coming soon" state only when there's genuinely nothing
+  // to filter — i.e., no user filters AND no inventory.
+  const hasUserFilters = hasAnyUserFilter(params)
+  if (!hasUserFilters && properties.length === 0) {
     return <EmptyState />
   }
 
-  const propertyCount = total || properties.length
+  const propertyCount = total // pagination.total under the active filter set
   const categoryCount = new Set(properties.map((p) => p.propertyType.toLowerCase())).size
   const areaCount = new Set(properties.map((p) => p.area.toLowerCase())).size
-
-  const activeType = singleParam(params.property_type) ?? "all"
-  const areaFilter = singleParam(params.area) ?? ""
 
   return (
     <div className="web-properties">
@@ -122,11 +180,13 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         areaCount={areaCount}
       />
 
-      <PropertiesFilter
-        properties={properties}
-        activeType={activeType}
-        areaFilter={areaFilter}
-      />
+      <section className="bg-[var(--web-off-white)] py-8 border-b border-[var(--web-serenity)]/20">
+        <Container size="xl">
+          <PropertiesFilterBar facets={facets} resultCount={propertyCount} />
+        </Container>
+      </section>
+
+      <PropertiesGrid properties={properties} />
 
       <CTASection />
     </div>
@@ -214,34 +274,6 @@ function HeroStat({ value, label }: { value: number; label: string }) {
 // EMPTY / DISABLED STATES
 // =============================================================================
 
-function FeatureDisabledState() {
-  return (
-    <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
-      <Container size="lg">
-        <Stack gap="md" align="center" className="text-center py-20">
-          <Title
-            as="h1"
-            className="font-headline text-[var(--web-ash)] text-[clamp(28px,4vw,40px)]"
-          >
-            Properties Coming Soon
-          </Title>
-          <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-md">
-            Our curated portfolio is being prepared. Contact us directly to discuss available
-            opportunities.
-          </Text>
-          <Button
-            className="mt-4 h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-            render={<Link href="/contact" />}
-          >
-            Contact Us
-            <ArrowRightIcon className="ml-2 h-4 w-4" />
-          </Button>
-        </Stack>
-      </Container>
-    </section>
-  )
-}
-
 function EmptyState() {
   return (
     <div className="web-properties">
@@ -294,6 +326,34 @@ function EmptyState() {
       </section>
       <CTASection />
     </div>
+  )
+}
+
+function FeatureDisabledState() {
+  return (
+    <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
+      <Container size="lg">
+        <Stack gap="md" align="center" className="text-center py-20">
+          <Title
+            as="h1"
+            className="font-headline text-[var(--web-ash)] text-[clamp(28px,4vw,40px)]"
+          >
+            Properties Coming Soon
+          </Title>
+          <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-md">
+            Our curated portfolio is being prepared. Contact us directly to discuss available
+            opportunities.
+          </Text>
+          <Button
+            className="mt-4 h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+            render={<Link href="/contact" />}
+          >
+            Contact Us
+            <ArrowRightIcon className="ml-2 h-4 w-4" />
+          </Button>
+        </Stack>
+      </Container>
+    </section>
   )
 }
 

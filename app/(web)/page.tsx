@@ -58,6 +58,7 @@ import {
   type Testimonial,
 } from "@/lib/content"
 import { getCrmProperties } from "@/lib/crm/client"
+import { fetchPropertyFacets } from "@/lib/crm/facets"
 import {
   formatCrmBedrooms,
   formatCrmPriceRange,
@@ -90,17 +91,19 @@ export default async function HomePage() {
     redirect(config.features.rootRedirect)
   }
 
-  const [propertiesResult, testimonials, stats] = await Promise.all([
+  const [propertiesResult, testimonials, stats, facets] = await Promise.all([
     getCrmProperties({ limit: 12, promotionStatus: "top_property" }),
     getWebTestimonials(),
     getWebStats(),
+    fetchPropertyFacets({ promotionStatus: "top_property" }),
   ])
   const properties = propertiesResult.properties
   const featuredProperties = properties.slice(0, 3)
 
-  // Extract unique values from actual property data for search bar
-  const propertyTypes = [...new Set(properties.map((p) => p.propertyType))].sort()
-  const propertyLocations = [...new Set(properties.map((p) => p.area))].sort()
+  // Hero search dropdowns are populated from the canonical CRM facets, not
+  // inferred from the loaded property list.
+  const propertyTypes = facets.propertyTypes.map((option) => option.value)
+  const propertyLocations = facets.areas.map((option) => option.value)
 
   // Fallback stats when database is empty (must match data/stats.json)
   const fallbackStats = [

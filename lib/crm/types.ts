@@ -37,6 +37,19 @@ export type CrmPropertyType =
 
 export type CrmFurnished = "unfurnished" | "furnished" | "semi-furnished" | (string & {})
 
+/**
+ * Canonical payment-plan shorthand from the CRM. `other` is the bulk bucket
+ * for non-standard plans (~57% of off-plan rows) — render it last and label
+ * it explicitly ("Other / Non-standard").
+ */
+export type CrmPaymentPlanPreset =
+  | "60_40"
+  | "50_50"
+  | "40_60"
+  | "20_80"
+  | "10_90"
+  | "other"
+
 export interface CrmPaymentInstallment {
   milestone: string
   percentage: number
@@ -106,6 +119,8 @@ export interface CrmPropertyListItem {
   completion_date: string | null
   construction_progress: number | null
   amenities: string[]
+
+  payment_plan_preset: CrmPaymentPlanPreset | null
 
   images: string[]
 
@@ -201,6 +216,8 @@ export interface CrmProperty {
   constructionProgress: number | null
   amenities: string[]
 
+  paymentPlanPreset: CrmPaymentPlanPreset | null
+
   images: string[]
 
   createdAt: string
@@ -246,9 +263,17 @@ export interface CrmPropertyFull extends CrmProperty {
 
 export type CrmSort = "price_asc" | "price_desc" | "newest" | "oldest"
 
-export type CrmPromotionStatus = "top_property" | "shadow_picks" | "discount" | (string & {})
+export type CrmPromotionStatus =
+  | "top_property"
+  | "inventory"
+  | "deal_only"
+  | "archive"
+  | "shadow_picks"
+  | "discount"
+  | (string & {})
 
 export interface CrmListFilters {
+  q?: string
   listingType?: CrmListingType
   area?: string
   propertyType?: CrmPropertyType
@@ -258,10 +283,33 @@ export interface CrmListFilters {
   priceMax?: number
   status?: CrmPropertyStatus
   promotionStatus?: CrmPromotionStatus
+  /** Canonical payment-plan shorthand. Only meaningful for off-plan rows. */
+  paymentPlanPreset?: CrmPaymentPlanPreset
+  completionYearMin?: number
+  completionYearMax?: number
+  /** Only honoured by the API when completionYearMin === completionYearMax. */
+  completionMonth?: number
+  tag?: string
   sort?: CrmSort
   cursor?: string
   /** Default 20, max 50. */
   limit?: number
+}
+
+/**
+ * Live filter facets for an agency. Counts are scoped by the current query
+ * params so picking one facet updates all other option counts.
+ */
+export interface PublicPropertyFacetOption {
+  value: string
+  count: number
+}
+
+export interface PublicPropertyFacets {
+  areas: PublicPropertyFacetOption[]
+  propertyTypes: PublicPropertyFacetOption[]
+  listingTypes: PublicPropertyFacetOption[]
+  bedrooms: PublicPropertyFacetOption[]
 }
 
 // =============================================================================

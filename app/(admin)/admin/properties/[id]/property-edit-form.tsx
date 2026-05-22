@@ -66,7 +66,7 @@ type PropertyEditFormProps = {
   property: PropertyRow | null
 }
 
-const PROPERTY_TYPES = [
+const PROPERTY_TYPE_OPTIONS = [
   { value: "villa", label: "Villa" },
   { value: "apartment", label: "Apartment" },
   { value: "penthouse", label: "Penthouse" },
@@ -332,12 +332,12 @@ export function PropertyEditForm({ property }: PropertyEditFormProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="type">Type <span className="text-destructive">*</span></Label>
-                      <Select name="type" defaultValue={property?.type || "apartment"} items={PROPERTY_TYPES}>
+                      <Select name="type" defaultValue={property?.type || "apartment"} items={PROPERTY_TYPE_OPTIONS}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {PROPERTY_TYPES.map(type => (
+                          {PROPERTY_TYPE_OPTIONS.map(type => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>

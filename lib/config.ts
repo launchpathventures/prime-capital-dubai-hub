@@ -164,6 +164,7 @@ export const config = {
    */
   crm: {
     baseUrl: process.env.NEXT_PUBLIC_CRM_BASE_URL || "https://crm.primecapitaldubai.com",
+    agencySlug: process.env.NEXT_PUBLIC_CRM_AGENCY_SLUG || "prime-capital",
     agencyUuid: process.env.NEXT_PUBLIC_CRM_AGENCY_UUID || "",
   },
 

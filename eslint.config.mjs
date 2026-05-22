@@ -16,6 +16,9 @@ const eslintConfig = defineConfig([
     "scripts/**",
     // Legacy folder - deprecated code, not actively maintained
     "legacy/**",
+    // Conductor workspace scratch files - local agent artifacts, not source
+    ".context/**",
+    ".playwright-mcp/**",
     // Docs folder - internal documentation, not user-facing code
     "app/(docs)/**",
     // Examples folder - reference implementations
