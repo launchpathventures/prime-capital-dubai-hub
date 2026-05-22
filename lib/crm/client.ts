@@ -38,15 +38,16 @@ interface FetchOptions {
 function isCrmConfigured(): boolean {
   return Boolean(
     config.crm.baseUrl &&
-      config.crm.agencyUuid &&
-      config.crm.agencyUuid.length <= CRM_PARAM_MAX_LENGTH,
+      config.crm.agencySlug &&
+      config.crm.agencySlug.length <= CRM_PARAM_MAX_LENGTH,
   )
 }
 
 function buildListUrl(filters: CrmListFilters | undefined): string {
   const url = new URL("/api/public/properties", config.crm.baseUrl)
-  url.searchParams.set("agency", config.crm.agencyUuid)
+  url.searchParams.set("agency", config.crm.agencySlug)
 
+  if (filters?.q) url.searchParams.set("q", filters.q)
   if (filters?.listingType) url.searchParams.set("listing_type", filters.listingType)
   if (filters?.area) url.searchParams.set("area", filters.area)
   if (filters?.propertyType) url.searchParams.set("property_type", filters.propertyType)
@@ -57,6 +58,15 @@ function buildListUrl(filters: CrmListFilters | undefined): string {
   if (filters?.status) url.searchParams.set("status", filters.status)
   if (filters?.promotionStatus)
     url.searchParams.set("promotion_status", filters.promotionStatus)
+  if (filters?.paymentPlanPreset)
+    url.searchParams.set("payment_plan_preset", filters.paymentPlanPreset)
+  if (filters?.completionYearMin != null)
+    url.searchParams.set("completion_year_min", String(filters.completionYearMin))
+  if (filters?.completionYearMax != null)
+    url.searchParams.set("completion_year_max", String(filters.completionYearMax))
+  if (filters?.completionMonth != null)
+    url.searchParams.set("completion_month", String(filters.completionMonth))
+  if (filters?.tag) url.searchParams.set("tag", filters.tag)
   if (filters?.sort) url.searchParams.set("sort", filters.sort)
   if (filters?.cursor) url.searchParams.set("cursor", filters.cursor)
   if (filters?.limit != null) url.searchParams.set("limit", String(Math.min(filters.limit, 50)))
@@ -66,7 +76,7 @@ function buildListUrl(filters: CrmListFilters | undefined): string {
 
 function buildDetailUrl(slugOrId: string): string {
   const url = new URL(`/api/public/properties/${encodeURIComponent(slugOrId)}`, config.crm.baseUrl)
-  url.searchParams.set("agency", config.crm.agencyUuid)
+  url.searchParams.set("agency", config.crm.agencySlug)
   return url.toString()
 }
 
@@ -141,6 +151,8 @@ function mapListItem(row: CrmPropertyListItem): CrmProperty {
     completionDate: row.completion_date,
     constructionProgress: row.construction_progress,
     amenities: row.amenities ?? [],
+
+    paymentPlanPreset: row.payment_plan_preset ?? null,
 
     images: row.images ?? [],
 

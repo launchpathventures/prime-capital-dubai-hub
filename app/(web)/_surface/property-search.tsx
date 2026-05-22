@@ -1,17 +1,17 @@
 /**
  * CATALYST - Property Search Bar
  *
- * Data-driven floating search bar for the homepage hero.
- * Off-plan only — Prime Capital focuses exclusively on off-plan sales.
- * Dropdowns populated from actual property data via props.
+ * Floating search bar for the homepage hero. Dropdown options come from the
+ * CRM facets payload (lib/crm/facets.ts) — never from inventory inference
+ * or hardcoded arrays. Submits to /properties as a GET form.
  */
 import { ArrowRightIcon, ChevronDownIcon } from "lucide-react"
 
 interface PropertySearchProps {
-  /** Unique property types from the database (e.g. ["villa", "penthouse"]) */
-  types: string[]
-  /** Unique locations from the database (e.g. ["Palm Jumeirah, Dubai", "Downtown Dubai"]) */
+  /** Canonical area list from facets.areas[]. */
   locations: string[]
+  /** Canonical property type list from facets.property_types[]. */
+  types: string[]
 }
 
 export function PropertySearch({ types, locations }: PropertySearchProps) {
@@ -22,8 +22,8 @@ export function PropertySearch({ types, locations }: PropertySearchProps) {
 
   return (
     <form action="/properties" method="GET" className="property-search">
-      {/* Off-Plan indicator — subtle inline label */}
-      <span className="property-search__tag">Off-Plan</span>
+      {/* Brand tag — visual anchor on the bar */}
+      <span className="property-search__tag">Search</span>
 
       {/* Property Type */}
       <div className="property-search__field">

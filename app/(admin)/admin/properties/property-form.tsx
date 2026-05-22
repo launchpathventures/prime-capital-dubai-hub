@@ -40,7 +40,7 @@ type PropertyFormProps = {
   onOpenChange: (open: boolean) => void
 }
 
-const PROPERTY_TYPES = [
+const PROPERTY_TYPE_OPTIONS = [
   { value: "villa", label: "Villa" },
   { value: "apartment", label: "Apartment" },
   { value: "penthouse", label: "Penthouse" },
@@ -172,7 +172,7 @@ export function PropertyForm({ property, open, onOpenChange }: PropertyFormProps
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {PROPERTY_TYPES.map(type => (
+                      {PROPERTY_TYPE_OPTIONS.map(type => (
                         <SelectItem key={type.value} value={type.value}>
                           {type.label}
                         </SelectItem>
