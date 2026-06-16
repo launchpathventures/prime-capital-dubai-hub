@@ -107,7 +107,7 @@ Generate the full script now, following the format spec exactly. Output Markdown
     // Stream the response — pass request.signal so disconnect cancels upstream call
     const stream = await anthropic.messages.stream(
       {
-        model: process.env.YOUTUBE_SCRIPT_MODEL || "claude-opus-4-20250514",
+        model: process.env.YOUTUBE_SCRIPT_MODEL || "claude-opus-4-5-20251101",
         max_tokens: 16384,
         temperature: 0.7,
         system: systemPrompt,

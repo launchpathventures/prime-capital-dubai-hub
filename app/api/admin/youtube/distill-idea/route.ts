@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
     const response = await anthropic.messages.create(
       {
-        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
+        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5-20250929",
         max_tokens: 2048,
         temperature: 0.7,
         system: systemPromptFor(format, profile),

@@ -50,7 +50,7 @@ const anthropic = new Anthropic({
 })
 
 const REVIEWER_MODEL =
-  process.env.YOUTUBE_PANEL_REVIEWER_MODEL || "claude-sonnet-4-20250514"
+  process.env.YOUTUBE_PANEL_REVIEWER_MODEL || "claude-sonnet-4-5-20250929"
 const SYNTHESISER_MODEL =
   process.env.YOUTUBE_PANEL_SYNTHESISER_MODEL || "claude-haiku-4-5-20251001"
 

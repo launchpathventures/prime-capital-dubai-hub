@@ -337,7 +337,7 @@ ${formatSpec}`
 
     const response = await anthropic.messages.create(
       {
-        model: process.env.YOUTUBE_CHAT_MODEL || "claude-sonnet-4-20250514",
+        model: process.env.YOUTUBE_CHAT_MODEL || "claude-sonnet-4-5-20250929",
         max_tokens: 4096,
         temperature: 0.5,
         system: systemPrompt,

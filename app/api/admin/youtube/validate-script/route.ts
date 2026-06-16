@@ -240,7 +240,7 @@ ${getBrandGuide(profile)}
 
     const response = await anthropic.messages.create(
       {
-        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514",
+        model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5-20250929",
         max_tokens: 4096,
         temperature: 0.3,
         system: systemPrompt,
