@@ -233,7 +233,7 @@ Generate the improved script now, addressing every point of the rewrite brief ab
 
     const stream = await anthropic.messages.stream(
       {
-        model: process.env.YOUTUBE_SCRIPT_MODEL || "claude-opus-4-20250514",
+        model: process.env.YOUTUBE_SCRIPT_MODEL || "claude-opus-4-5-20251101",
         max_tokens: 16_384,
         temperature: 0.7,
         system: systemPrompt,
