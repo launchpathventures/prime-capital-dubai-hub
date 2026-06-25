@@ -400,9 +400,10 @@ function getFormName(formMode: string, pageUrl: string): string {
  *   - vendor:   ONLY when a form sets visitorType "vendor" explicitly (e.g. an
  *               introducer / partner / service-provider application).
  *   - agent:    someone applying to be an introducer/agent (set explicitly).
- *   - seller:   a consumer selling their OWN property (goals include "sell").
- *               Routed to Leads, not Partners. "sell" stays in `goals`.
- *   - investor: default, everything else.
+ *   - seller:   a consumer selling their OWN property with no buy/investment
+ *               intent. Routed to Leads, not Partners. "sell" stays in `goals`.
+ *   - investor: default — including a "sell" goal combined with any
+ *               buy/investment intent (matches the event-kiosk logic).
  *
  * Event leads use deriveVisitorTypeForCrm() below (seller/investor only).
  */
@@ -413,8 +414,9 @@ function deriveVisitorType(
   if (explicit === "agent" || explicit === "vendor" || explicit === "investor") {
     return explicit
   }
-  if (goals?.includes("sell")) return "seller"
-  return "investor"
+  // Same seller/investor split as event leads — keeps the website and kiosk
+  // aligned so no property seller is ever filed as a Partner.
+  return deriveEventVisitorType(goals)
 }
 
 /**

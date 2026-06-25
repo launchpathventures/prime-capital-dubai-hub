@@ -457,7 +457,7 @@ describe("Lead Form API", () => {
       expect(payload.goals).toContain("sell")
     })
 
-    it("routes a mixed buy + sell form to a non-vendor type and keeps 'sell' in goals", async () => {
+    it("routes a mixed buy + sell form to 'investor' and keeps 'sell' in goals", async () => {
       const payload = await postAndReadPayload(
         {
           firstName: "Max",
@@ -471,6 +471,7 @@ describe("Lead Form API", () => {
         "192.168.2.3",
       )
 
+      expect(payload.visitorType).toBe("investor")
       expect(payload.visitorType).not.toBe("vendor")
       expect(payload.goals).toContain("sell")
     })
