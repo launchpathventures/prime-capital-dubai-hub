@@ -186,6 +186,9 @@ function HeroSection() {
                     mode="landing"
                     theme="light"
                     tag="seller"
+                    // Seller intent — routes the lead to AgentCRM as
+                    // visitorType "seller" (Leads pipeline), not "vendor".
+                    initialData={{ goals: ["sell"] }}
                     showPropertyFields
                     showConcerns
                     calendlyUrl={config.links.calendlySeller}

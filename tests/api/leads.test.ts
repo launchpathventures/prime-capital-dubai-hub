@@ -390,6 +390,112 @@ describe("Lead Form API", () => {
   })
 
   // =============================================================================
+  // VISITOR TYPE ROUTING (Leads vs Partners)
+  // =============================================================================
+  //
+  // AgentCRM reserves "vendor" for partners / service-providers. A consumer
+  // selling their own property must route to "seller" (Leads), never "vendor".
+
+  describe("visitorType routing", () => {
+    async function postAndReadPayload(
+      body: Record<string, unknown>,
+      ip: string,
+    ): Promise<Record<string, unknown>> {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": ip,
+        },
+        body: JSON.stringify({
+          submittedAt: new Date().toISOString(),
+          ...body,
+        }),
+      })
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      const [, requestInit] = mockFetch.mock.calls[0]
+      return JSON.parse(String(requestInit.body))
+    }
+
+    it("routes a sell-only form to 'seller' and keeps 'sell' in goals", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Sam",
+          lastName: "Seller",
+          email: "sam@example.com",
+          whatsapp: "+971501112222",
+          formMode: "contact",
+          pageUrl: "https://primecapitaldubai.com/contact",
+          goals: ["sell"],
+        },
+        "192.168.2.1",
+      )
+
+      expect(payload.visitorType).toBe("seller")
+      expect(payload.goals).toContain("sell")
+    })
+
+    it("routes the /sell landing flow (goals: ['sell']) to 'seller'", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Tara",
+          email: "tara@example.com",
+          whatsapp: "+971502223333",
+          formMode: "landing",
+          pageUrl: "https://primecapitaldubai.com/sell",
+          leadTag: "seller",
+          // What the /sell page now seeds via initialData
+          goals: ["sell"],
+        },
+        "192.168.2.2",
+      )
+
+      expect(payload.visitorType).toBe("seller")
+      expect(payload.goals).toContain("sell")
+    })
+
+    it("routes a mixed buy + sell form to 'investor' and keeps 'sell' in goals", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Max",
+          lastName: "Mixed",
+          email: "max@example.com",
+          whatsapp: "+971503334444",
+          formMode: "contact",
+          pageUrl: "https://primecapitaldubai.com/contact",
+          goals: ["buy-ready", "sell"],
+        },
+        "192.168.2.3",
+      )
+
+      expect(payload.visitorType).toBe("investor")
+      expect(payload.visitorType).not.toBe("vendor")
+      expect(payload.goals).toContain("sell")
+    })
+
+    it("keeps an explicit partner/service-provider application as 'vendor'", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Pat",
+          lastName: "Partner",
+          email: "pat@partner.example",
+          whatsapp: "+971504445555",
+          formMode: "contact",
+          pageUrl: "https://primecapitaldubai.com/partners",
+          // A real partner/service-provider application sets this explicitly
+          visitorType: "vendor",
+        },
+        "192.168.2.4",
+      )
+
+      expect(payload.visitorType).toBe("vendor")
+    })
+  })
+
+  // =============================================================================
   // HTTP METHOD TESTS
   // =============================================================================
 

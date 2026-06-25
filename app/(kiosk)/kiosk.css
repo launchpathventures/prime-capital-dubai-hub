@@ -1,0 +1,459 @@
+/**
+ * CATALYST - Kiosk Surface Styles
+ *
+ * Full-screen, chrome-free styles for the event registration kiosk.
+ * Designed to fill an iPad screen with no page scroll — the form fits
+ * in one view so a guest at a stand can register in seconds.
+ *
+ * Uses the web brand tokens (spruce / ash / serenity / off-white) so the
+ * kiosk feels like Prime Capital even though it has no site chrome.
+ */
+
+.kiosk {
+  /* Brand tokens (mirrors app/(web)/web.css so the kiosk is self-contained) */
+  --web-spruce: #576c75;
+  --web-ash: #3f4142;
+  --web-off-white: #f2efea;
+  --web-serenity: #a6b5b0;
+
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  /* Branded backdrop: a website hero darkened with the spruce/ash gradient so
+     the white card floats and any text on the image stays legible. */
+  background-color: var(--web-ash);
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(63, 65, 66, 0.86) 0%,
+      rgba(87, 108, 117, 0.74) 45%,
+      rgba(63, 65, 66, 0.88) 100%
+    ),
+    url("/images/hero/prime-capital-hero.jpg");
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.kiosk__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1080px;
+  max-height: 100%;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 30px 80px -20px rgba(63, 65, 66, 0.35);
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Header                                                                      */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__header {
+  flex-shrink: 0;
+  padding: clamp(1.25rem, 3vw, 2.25rem) clamp(1.5rem, 4vw, 3rem) clamp(1rem, 2vw, 1.5rem);
+  border-bottom: 1px solid rgba(166, 181, 176, 0.25);
+}
+
+.kiosk__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--web-spruce);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.kiosk__event-name {
+  margin-top: 0.5rem;
+  font-family: var(--font-headline), Georgia, serif;
+  color: var(--web-ash);
+  font-size: clamp(22px, 3.2vw, 34px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.kiosk__subtitle {
+  margin-top: 0.4rem;
+  color: var(--web-spruce);
+  font-size: clamp(13px, 1.6vw, 15px);
+  font-weight: 300;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Body — scrolls internally only as a safety net; designed to fit            */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(1.25rem, 3vw, 2.25rem) clamp(1.5rem, 4vw, 3rem);
+}
+
+.kiosk__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+@media (min-width: 760px) {
+  .kiosk__grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+.kiosk__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.kiosk__field + .kiosk__field {
+  margin-top: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.kiosk__label {
+  color: var(--web-ash);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.kiosk__hint {
+  color: var(--web-spruce);
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.kiosk__input {
+  width: 100%;
+  height: 52px;
+  padding: 0 1rem;
+  font-size: 16px; /* >=16px stops iOS Safari zoom-on-focus */
+  color: var(--web-ash);
+  background: #fff;
+  border: 1px solid rgba(87, 108, 117, 0.35);
+  border-radius: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kiosk__input::placeholder {
+  color: rgba(87, 108, 117, 0.5);
+}
+
+.kiosk__input:focus {
+  outline: none;
+  border-color: var(--web-spruce);
+  box-shadow: 0 0 0 3px rgba(87, 108, 117, 0.12);
+}
+
+.kiosk__input--error {
+  border-color: #b4534b;
+}
+
+textarea.kiosk__input {
+  height: auto;
+  min-height: 64px;
+  padding: 0.7rem 1rem;
+  line-height: 1.5;
+  resize: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Interest chips                                                              */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.kiosk__chip {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  line-height: 1.25;
+  color: var(--web-ash);
+  background: #fff;
+  border: 1px solid rgba(87, 108, 117, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.kiosk__chip:hover {
+  border-color: var(--web-spruce);
+}
+
+.kiosk__chip--selected {
+  background: var(--web-spruce);
+  border-color: var(--web-spruce);
+  color: var(--web-off-white);
+}
+
+.kiosk__chip-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(87, 108, 117, 0.45);
+}
+
+.kiosk__chip--selected .kiosk__chip-check {
+  background: var(--web-off-white);
+  border-color: var(--web-off-white);
+  color: var(--web-spruce);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Footer / actions                                                           */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid rgba(166, 181, 176, 0.25);
+  background: rgba(242, 239, 234, 0.5);
+}
+
+.kiosk__error {
+  color: #b4534b;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.kiosk__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 60px;
+  padding: 0 clamp(2rem, 5vw, 3.5rem);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--web-off-white);
+  background: var(--web-spruce);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.kiosk__submit:hover {
+  background: #4c606a;
+}
+
+.kiosk__submit:active {
+  transform: translateY(1px);
+}
+
+.kiosk__submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.kiosk__submit--block {
+  width: 100%;
+}
+
+.kiosk__spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(242, 239, 234, 0.4);
+  border-top-color: var(--web-off-white);
+  animation: kiosk-spin 0.7s linear infinite;
+}
+
+@keyframes kiosk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Exit affordance — discreet so guests don't tap it, reachable for staff     */
+/* -------------------------------------------------------------------------- */
+
+/* Deliberately faint + tiny so a guest won't notice or accidentally tap it.
+   Reachable for staff, and the confirm() dialog is a second safety net. */
+.kiosk__exit {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: rgba(87, 108, 117, 0.22);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.kiosk__exit:hover,
+.kiosk__exit:focus-visible {
+  color: var(--web-spruce);
+  background: rgba(87, 108, 117, 0.1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Setup screen                                                               */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 520px;
+  padding: clamp(2.25rem, 5vw, 3.5rem);
+  /* White card so the dark setup copy reads against the hero backdrop */
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 30px 80px -20px rgba(63, 65, 66, 0.35);
+}
+
+.kiosk__setup-title {
+  font-family: var(--font-headline), Georgia, serif;
+  color: var(--web-ash);
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+}
+
+.kiosk__setup-sub {
+  color: var(--web-spruce);
+  font-size: 15px;
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+.kiosk__setup-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Thank-you screen                                                           */
+/* -------------------------------------------------------------------------- */
+
+.kiosk__thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1 1 auto;
+  padding: clamp(2.5rem, 8vw, 5rem);
+  animation: kiosk-fade-in 0.4s ease;
+}
+
+.kiosk__thanks-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  color: var(--web-off-white);
+  background: var(--web-spruce);
+  margin-bottom: 1.75rem;
+}
+
+.kiosk__thanks-title {
+  font-family: var(--font-headline), Georgia, serif;
+  color: var(--web-ash);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+}
+
+.kiosk__thanks-sub {
+  color: var(--web-spruce);
+  font-size: clamp(15px, 2vw, 18px);
+  font-weight: 300;
+  max-width: 440px;
+}
+
+.kiosk__thanks-next {
+  margin-top: 2.5rem;
+}
+
+@keyframes kiosk-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* react-phone-number-input lives inside .kiosk__input wrapper to match height */
+.kiosk .kiosk-phone {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 1rem;
+  background: #fff;
+  border: 1px solid rgba(87, 108, 117, 0.35);
+  border-radius: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kiosk .kiosk-phone:focus-within {
+  border-color: var(--web-spruce);
+  box-shadow: 0 0 0 3px rgba(87, 108, 117, 0.12);
+}
+
+.kiosk .kiosk-phone--error {
+  border-color: #b4534b;
+}
+
+.kiosk .kiosk-phone .PhoneInputInput {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: var(--web-ash);
+  background: transparent;
+}
+
+.kiosk .kiosk-phone .PhoneInputCountrySelect {
+  color: var(--web-ash);
+}
