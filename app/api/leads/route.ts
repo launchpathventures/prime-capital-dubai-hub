@@ -393,31 +393,75 @@ function getFormName(formMode: string, pageUrl: string): string {
 // =============================================================================
 
 /**
- * AgentCRM doesn't recognise "event" as a formMode — events are filed as
- * `contact` with the event name in formName + leadMagnet. Everything else
- * passes through unchanged.
- */
-function mapFormModeForCrm(mode: string): string {
-  return mode === "event" ? "contact" : mode
-}
-
-/**
- * Pipeline router for the CRM:
- *   - vendor: someone selling property (goals includes "sell" OR landing
- *     page with seller intent set the visitorType already)
- *   - agent: someone applying to be an introducer/agent (set explicitly
- *     via the form prop — no goals signal for this yet)
- *   - investor: default, everything else
+ * Pipeline router for the CRM. In AgentCRM "vendor" means a partner /
+ * service-provider (filed under Partners), NOT a property seller — so a
+ * consumer selling their own home must never be routed there.
+ *
+ *   - vendor:   ONLY when a form sets visitorType "vendor" explicitly (e.g. an
+ *               introducer / partner / service-provider application).
+ *   - agent:    someone applying to be an introducer/agent (set explicitly).
+ *   - seller:   a consumer selling their OWN property (goals include "sell").
+ *               Routed to Leads, not Partners. "sell" stays in `goals`.
+ *   - investor: default, everything else.
+ *
+ * Event leads use deriveVisitorTypeForCrm() below (seller/investor only).
  */
 function deriveVisitorType(
   goals: string[] | undefined,
   explicit: string | undefined,
-): "investor" | "agent" | "vendor" {
+): "investor" | "agent" | "vendor" | "seller" {
   if (explicit === "agent" || explicit === "vendor" || explicit === "investor") {
     return explicit
   }
-  if (goals?.includes("sell")) return "vendor"
+  if (goals?.includes("sell")) return "seller"
   return "investor"
+}
+
+/**
+ * Goals that signal buy-side / investment intent. Used to tell a pure property
+ * seller (→ "seller") apart from an active buyer/investor (→ "investor") for
+ * event leads. Covers both the kiosk's interest codes and the canonical
+ * website LeadGoal values. Tune this list to change seller/investor routing.
+ */
+const BUY_INVESTMENT_GOALS = new Set([
+  "buy-ready",
+  "build-wealth",
+  "advice-only",
+  "commercial",
+  "residential",
+  "invest-offplan",
+  "golden-visa",
+])
+
+/**
+ * Event-lead pipeline router for AgentCRM. Unlike the website router this
+ * NEVER emits "vendor" (AgentCRM reserves "vendor" for partners/service
+ * providers):
+ *   - "seller":   wants to sell AND shows no buy/investment intent
+ *   - "investor": everything else — buy / invest / advice / commercial /
+ *                 residential, or "sell" combined with any of those
+ * "sell" always stays in `goals` regardless of the routed type.
+ */
+function deriveEventVisitorType(goals: string[] | undefined): "investor" | "seller" {
+  const g = goals ?? []
+  const hasSell = g.includes("sell")
+  const hasBuyInvestment = g.some((x) => BUY_INVESTMENT_GOALS.has(x))
+  return hasSell && !hasBuyInvestment ? "seller" : "investor"
+}
+
+/**
+ * Choose the CRM pipeline router by form type. Event leads (kiosk + livestream)
+ * use the seller/investor logic; every other form keeps the legacy router.
+ */
+function deriveVisitorTypeForCrm(leadData: {
+  formMode: string
+  goals?: string[]
+  visitorType?: string
+}): string {
+  if (leadData.formMode === "event") {
+    return deriveEventVisitorType(leadData.goals)
+  }
+  return deriveVisitorType(leadData.goals, leadData.visitorType)
 }
 
 /**
@@ -517,6 +561,10 @@ const leadSchema = z
     // Lead magnet + tagging for CRM categorisation
     leadMagnet: z.string().max(200).optional(),
     leadTag: z.string().max(100).optional(),
+
+    // Lifecycle / stage marker (event leads default to "prospect")
+    leadLifecycle: z.string().max(50).optional(),
+    leadStage: z.string().max(50).optional(),
 
     // Pipeline router
     visitorType: z.enum(["investor", "agent", "vendor"]).optional(),
@@ -657,7 +705,7 @@ interface ForwardResult {
  *   - referringProperty → propertyRef
  *   - referringTeamMember → assigneeSlug, teamMemberEmail → assigneeEmail
  *   - questionsText / enquiryNotes / concerns / privateContext → message
- *   - formMode "event" → "contact" (event name stays in formName + leadMagnet)
+ *   - formMode passes through unchanged (AgentCRM accepts "event")
  */
 function buildAgentCrmPayload(
   leadData: LeadData,
@@ -666,14 +714,13 @@ function buildAgentCrmPayload(
   resolvedAssigneeEmail: string | null,
   siteSource: string,
 ) {
-  const visitorType = deriveVisitorType(leadData.goals, leadData.visitorType)
+  const isEvent = leadData.formMode === "event"
+  const visitorType = deriveVisitorTypeForCrm(leadData)
   const formName = getFormName(leadData.formMode, leadData.pageUrl)
   // For events, the form name already includes the page (e.g. "Event
-  // Registration - Livestream"). Use it as the leadMagnet so the CRM has a
-  // single field carrying event identity, since formMode collapses to "contact".
-  const leadMagnet =
-    leadData.leadMagnet ||
-    (leadData.formMode === "event" ? formName : undefined)
+  // Registration - Livestream"). Use it as the leadMagnet so the CRM always
+  // has a single field carrying event identity even if the client didn't set one.
+  const leadMagnet = leadData.leadMagnet || (isEvent ? formName : undefined)
 
   const payload: Record<string, unknown> = {
     // Identity
@@ -683,10 +730,13 @@ function buildAgentCrmPayload(
     phone: leadData.whatsapp || undefined,
     whatsapp: leadData.whatsapp || undefined,
 
-    // Form context
-    formMode: mapFormModeForCrm(leadData.formMode),
+    // Form context — formMode passes through unchanged (AgentCRM accepts "event")
+    formMode: leadData.formMode,
     formName,
     leadMagnet,
+    // Lifecycle marker — event leads enter AgentCRM as prospects
+    leadLifecycle: leadData.leadLifecycle || (isEvent ? "prospect" : undefined),
+    leadStage: leadData.leadStage || (isEvent ? "prospect" : undefined),
     pageUrl: leadData.pageUrl,
     visitorType,
     submissionId,
@@ -966,8 +1016,8 @@ export async function POST(request: NextRequest) {
       targetPriceLabel: leadData.targetPrice ? BITRIX_BUDGET_LABELS[leadData.targetPrice] : null,
       targetPriceCode: leadData.targetPrice ? BITRIX_TARGET_PRICE_CODES[leadData.targetPrice] : null,
 
-      // Server-derived pipeline router
-      visitorType: deriveVisitorType(leadData.goals, leadData.visitorType),
+      // Server-derived pipeline router (event leads never route to "vendor")
+      visitorType: deriveVisitorTypeForCrm(leadData),
 
       // Server-enriched property data
       propertyInterest: property?.ref || leadData.referringProperty || null,
