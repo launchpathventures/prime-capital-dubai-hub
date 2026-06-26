@@ -568,6 +568,10 @@ const leadSchema = z
     leadLifecycle: z.string().max(50).optional(),
     leadStage: z.string().max(50).optional(),
 
+    // Kiosk distribution scope — who the event's leads are released to:
+    // "team" (all agents) or "managers" (manager/admin distribution only)
+    leadDistribution: z.enum(["team", "managers"]).optional(),
+
     // Pipeline router
     visitorType: z.enum(["investor", "agent", "vendor"]).optional(),
 
@@ -739,6 +743,8 @@ function buildAgentCrmPayload(
     // Lifecycle marker — event leads enter AgentCRM as prospects
     leadLifecycle: leadData.leadLifecycle || (isEvent ? "prospect" : undefined),
     leadStage: leadData.leadStage || (isEvent ? "prospect" : undefined),
+    // Distribution scope for event/kiosk leads ("team" | "managers")
+    leadDistribution: leadData.leadDistribution,
     pageUrl: leadData.pageUrl,
     visitorType,
     submissionId,

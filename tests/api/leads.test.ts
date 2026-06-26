@@ -496,6 +496,54 @@ describe("Lead Form API", () => {
   })
 
   // =============================================================================
+  // EVENT KIOSK METADATA
+  // =============================================================================
+
+  describe("event kiosk metadata", () => {
+    async function postEvent(
+      distribution: "team" | "managers",
+      ip: string,
+    ): Promise<Record<string, unknown>> {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": ip },
+        body: JSON.stringify({
+          firstName: "Guest",
+          whatsapp: "+971501112222",
+          formMode: "event",
+          leadMagnet: "Cityscape Global 2026",
+          leadTag: "event-cityscape-global-2026",
+          leadDistribution: distribution,
+          utmSource: "event",
+          utmMedium: "kiosk",
+          utmCampaign: "event-cityscape-global-2026",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://www.primecapitaldubai.com/register",
+        }),
+      })
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      const [, requestInit] = mockFetch.mock.calls[0]
+      return JSON.parse(String(requestInit.body))
+    }
+
+    it("forwards leadDistribution 'managers' with prospect markers", async () => {
+      const payload = await postEvent("managers", "192.168.3.1")
+      expect(payload.leadDistribution).toBe("managers")
+      expect(payload.leadLifecycle).toBe("prospect")
+      expect(payload.leadStage).toBe("prospect")
+      expect(payload.formMode).toBe("event")
+      expect(payload.utmMedium).toBe("kiosk")
+    })
+
+    it("forwards leadDistribution 'team'", async () => {
+      const payload = await postEvent("team", "192.168.3.2")
+      expect(payload.leadDistribution).toBe("team")
+    })
+  })
+
+  // =============================================================================
   // HTTP METHOD TESTS
   // =============================================================================
 
