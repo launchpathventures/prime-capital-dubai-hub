@@ -5,6 +5,11 @@ completes a registration on the **event kiosk** (the iPad form Prime runs at a
 stand/event). Share this with the AgentCRM team so they can map the fields and
 configure event handling.
 
+> For the full picture — architecture, delivery semantics, the complete
+> `visitorType` model, and worked examples for every form type — see the
+> **[AgentCRM Integration Brief](./agentcrm-integration-brief.md)**. This page is
+> the quick field reference for the event kiosk specifically.
+
 ---
 
 ## Transport
