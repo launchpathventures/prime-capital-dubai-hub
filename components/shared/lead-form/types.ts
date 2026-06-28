@@ -174,6 +174,11 @@ export interface LeadFormData {
   referringTeamMember?: string       // Team member slug from query param
   referringTeamMemberEmail?: string  // Team member email from query param
 
+  // CRM prospect binder — opaque ref from the AgentCRM welcome-email link
+  // (?ref=…). Forwarded verbatim so AgentCRM promotes the existing prospect
+  // (Prospect → Lead) instead of creating a duplicate.
+  ref?: string
+
   // Honeypot for bot protection (hidden field)
   website?: string
 }

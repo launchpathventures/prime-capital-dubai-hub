@@ -163,10 +163,17 @@ export function useLeadForm({
     const property = params.get("property") || undefined
     const teamMember = params.get("teamMember") || undefined
     const teamMemberEmail = params.get("teamMemberEmail") || undefined
+    // AgentCRM welcome-email link params: `ref` binds the existing prospect,
+    // `email` prefills + secondary-matches. Read once at mount and seeded into
+    // form state so they survive multi-step navigation and re-renders.
+    const ref = params.get("ref") || undefined
+    const email = params.get("email")?.trim() || undefined
     return {
       ...(property ? { referringProperty: property } : {}),
       ...(teamMember ? { referringTeamMember: teamMember } : {}),
       ...(teamMemberEmail ? { referringTeamMemberEmail: teamMemberEmail } : {}),
+      ...(ref ? { ref } : {}),
+      ...(email ? { email } : {}),
     }
   }, [])
 
@@ -313,6 +320,8 @@ export function useLeadForm({
         referringProperty: mergedData.referringProperty,
         referringTeamMember: mergedData.referringTeamMember,
         referringTeamMemberEmail: mergedData.referringTeamMemberEmail,
+        // CRM prospect binder from the welcome-email link (?ref=…)
+        ref: mergedData.ref,
         // Lead tagging for CRM categorisation
         leadMagnet: mergedData.leadMagnet || leadMagnet,
         leadTag: mergedData.leadTag || tag,

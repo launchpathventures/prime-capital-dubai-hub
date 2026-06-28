@@ -544,6 +544,72 @@ describe("Lead Form API", () => {
   })
 
   // =============================================================================
+  // PROSPECT PROMOTION (welcome-email round-trip)
+  // =============================================================================
+  //
+  // AgentCRM appends ref/email/utm* to the welcome-email CTA. They must survive
+  // /contact -> /api/leads -> the AgentCRM payload so the existing prospect is
+  // promoted (Prospect -> Lead), not duplicated.
+
+  describe("prospect binder pass-through", () => {
+    it("forwards ref, email, and utm* verbatim for prospect promotion", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "192.168.4.1" },
+        body: JSON.stringify({
+          firstName: "Aisha",
+          email: "aisha@example.com",
+          whatsapp: "+971501234567",
+          formMode: "contact",
+          pageUrl: "https://www.primecapitaldubai.com/contact",
+          ref: "pr_8f2c1234",
+          utmSource: "crm",
+          utmMedium: "email",
+          utmCampaign: "event-aapi-convention-2026",
+          utmContent: "event-welcome",
+          submittedAt: new Date().toISOString(),
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+      expect(payload.ref).toBe("pr_8f2c1234")
+      expect(payload.email).toBe("aisha@example.com")
+      expect(payload.utmSource).toBe("crm")
+      expect(payload.utmMedium).toBe("email")
+      expect(payload.utmCampaign).toBe("event-aapi-convention-2026")
+      expect(payload.utmContent).toBe("event-welcome")
+    })
+
+    it("omits ref entirely when absent (no null)", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "192.168.4.2" },
+        body: JSON.stringify({
+          firstName: "No",
+          lastName: "Ref",
+          email: "noref@example.com",
+          formMode: "contact",
+          pageUrl: "https://www.primecapitaldubai.com/contact",
+          submittedAt: new Date().toISOString(),
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+      expect("ref" in payload).toBe(false)
+    })
+  })
+
+  // =============================================================================
   // HTTP METHOD TESTS
   // =============================================================================
 

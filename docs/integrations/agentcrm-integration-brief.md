@@ -50,6 +50,43 @@ right people.
 - **Best-effort, non-blocking:** forwarding never blocks the user. If AgentCRM is
   unreachable we log it; the guest still sees a success screen.
 
+### Prospect promotion (welcome-email round-trip)
+
+Event kiosk leads enter AgentCRM as **Prospects** (name + contact, no
+qualification). The AgentCRM welcome email links the prospect back to our full
+enquiry form so the same record can be promoted (Prospect → Lead):
+
+```
+AgentCRM welcome email
+  link: https://www.primecapitaldubai.com/contact?ref=…&email=…&utm_*=…
+        │ (prospect clicks)
+        ▼
+  /contact   ← reads params, prefills email, keeps them through submit
+        │ POST
+        ▼
+  /api/leads ← forwards the params into the AgentCRM payload (exact names)
+        │ POST (Bearer)
+        ▼
+  /api/public/enquiry ← resolves ref/email → updates the EXISTING prospect
+```
+
+What survives the round-trip, by **exact payload field name**:
+
+| URL param on the CTA link | → payload field | Purpose |
+|---|---|---|
+| `ref` (e.g. `pr_8f2c…`) | **`ref`** (verbatim) | **Primary binder** — identifies the existing prospect |
+| `email` | `email` | Secondary match + prefilled on the form |
+| `utm_source` (e.g. `crm`) | `utmSource` | Attribution |
+| `utm_medium` (e.g. `email`) | `utmMedium` | Attribution |
+| `utm_campaign` (e.g. `event-aapi-convention-2026`) | `utmCampaign` | The event (matches the kiosk `leadTag`) |
+| `utm_content` (e.g. `event-welcome`) | `utmContent` | Which email drove the click |
+
+`ref` is opaque and forwarded **verbatim** — it's the precise binder and works
+even if the prospect edits their email on the form. If `ref` is ever absent we
+still forward `email` (+ `phone`) and the UTM params, so AgentCRM can de-dupe on
+normalised email/phone. Params are read on `/contact` at load and held in form
+state, so they survive multi-step navigation and re-renders.
+
 ---
 
 ## 3. Transport & delivery semantics
@@ -469,6 +506,7 @@ Likewise illustrative — a recruitment form would set `visitorType: "agent"`:
 
 | Field | Type | Presence | Notes |
 |---|---|---|---|
+| `ref` | string | conditional | **Prospect binder** from the welcome-email link (`?ref=…`), forwarded verbatim. Present only on prospect-promotion submissions; use it to match + promote the existing prospect. |
 | `submissionId` | string (UUID v4) | always | **De-dupe key.** Reused on retries. |
 | `sessionId` | string (UUID v4) | always | Unique per guest/visitor. |
 | `submittedAt` | string (ISO 8601) | always | UTC timestamp. |

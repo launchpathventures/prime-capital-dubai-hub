@@ -581,6 +581,10 @@ const leadSchema = z
     referringTeamMember: z.string().max(100).optional(),
     referringTeamMemberEmail: z.string().max(100).optional(),
 
+    // AgentCRM prospect binder from the welcome-email link — forwarded verbatim
+    // so AgentCRM can promote the existing prospect instead of duplicating it.
+    ref: z.string().max(200).optional(),
+
     // Legacy URL source parameter. Accepted for compatibility, but never
     // forwarded to CRM because CRM expects utmSource explicitly.
     source: z.string().max(100).optional(),
@@ -748,6 +752,9 @@ function buildAgentCrmPayload(
     leadDistribution: leadData.leadDistribution,
     pageUrl: leadData.pageUrl,
     visitorType,
+    // Prospect binder from the AgentCRM welcome-email link (verbatim). Lets
+    // AgentCRM match + promote the existing prospect (Prospect → Lead).
+    ref: leadData.ref,
     submissionId,
     sessionId: leadData.sessionId,
     submittedAt: leadData.submittedAt,
