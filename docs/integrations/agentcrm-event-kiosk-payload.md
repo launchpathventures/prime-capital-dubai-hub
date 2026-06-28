@@ -145,8 +145,8 @@ partner / service-provider, not a property seller. Instead:
 | No goals selected | `"investor"` |
 
 "Buy/investment goals" = `buy-ready`, `build-wealth`, `advice-only`,
-`commercial`, `residential` (plus the canonical website goals `invest-offplan`,
-`golden-visa`).
+`commercial`, `residential`, `golden-visa-wills` (plus the canonical website
+goals `invest-offplan`, `golden-visa`).
 
 ### Full `visitorType` vocabulary (applies to all Prime forms, not just the kiosk)
 
@@ -171,6 +171,7 @@ The kiosk sends these exact string codes. Suggested human labels for display:
 | `buy-ready` | Buying property | buy/investment → investor |
 | `build-wealth` | Building an investment portfolio | buy/investment → investor |
 | `advice-only` | Strategic investment advice | buy/investment → investor |
+| `golden-visa-wills` | Golden Visa & Wills | buy/investment → investor |
 | `business-setup` | Setting up a business in Dubai | neutral |
 | `development` | Building / developing in Dubai | neutral |
 | `sell` | Selling property | seller (unless a buy/investment goal is also present) |

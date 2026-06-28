@@ -102,7 +102,7 @@ their flat must route to `seller` (Leads).
 | No goals at all | `investor` |
 
 "Buy/investment goals" = `buy-ready`, `build-wealth`, `advice-only`,
-`commercial`, `residential`, `invest-offplan`, `golden-visa`.
+`commercial`, `residential`, `golden-visa-wills`, `invest-offplan`, `golden-visa`.
 
 `vendor` and `agent` **only** appear when a dedicated partner/recruitment form
 sets `visitorType` explicitly. (Those forms are noted as illustrative below —
@@ -483,6 +483,7 @@ Likewise illustrative — a recruitment form would set `visitorType: "agent"`:
 | `buy-ready` | Buying property | buy/investment → investor |
 | `build-wealth` | Building an investment portfolio | buy/investment → investor |
 | `advice-only` | Strategic investment advice | buy/investment → investor |
+| `golden-visa-wills` | Golden Visa & Wills | buy/investment → investor |
 | `commercial` | Commercial property | buy/investment → investor |
 | `residential` | Residential property | buy/investment → investor |
 | `business-setup` | Setting up a business in Dubai | neutral |

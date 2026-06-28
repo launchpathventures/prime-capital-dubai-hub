@@ -36,6 +36,7 @@ const INTERESTS: { value: string; label: string }[] = [
   { value: "buy-ready", label: "Buying property" },
   { value: "build-wealth", label: "Building an investment portfolio" },
   { value: "advice-only", label: "Strategic investment advice" },
+  { value: "golden-visa-wills", label: "Golden Visa & Wills" },
   { value: "business-setup", label: "Setting up a business in Dubai" },
   { value: "development", label: "Building / developing in Dubai" },
   { value: "sell", label: "Selling property" },

@@ -433,6 +433,7 @@ const BUY_INVESTMENT_GOALS = new Set([
   "residential",
   "invest-offplan",
   "golden-visa",
+  "golden-visa-wills",
 ])
 
 /**
