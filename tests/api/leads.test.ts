@@ -493,6 +493,41 @@ describe("Lead Form API", () => {
 
       expect(payload.visitorType).toBe("vendor")
     })
+
+    it("honours an explicit visitorType on an event submission (not bypassed)", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Vera",
+          lastName: "Vendor",
+          email: "vera@partner.example",
+          formMode: "event",
+          pageUrl: "https://primecapitaldubai.com/register",
+          goals: ["sell"],
+          // Explicit override must win even though goals would infer "seller"
+          visitorType: "vendor",
+        },
+        "192.168.2.5",
+      )
+
+      expect(payload.visitorType).toBe("vendor")
+    })
+
+    it("accepts and honours an explicit 'seller' (not stripped by schema)", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Stan",
+          lastName: "Seller",
+          email: "stan@example.com",
+          formMode: "contact",
+          pageUrl: "https://primecapitaldubai.com/contact",
+          // No goals — would infer "investor"; explicit "seller" must win.
+          visitorType: "seller",
+        },
+        "192.168.2.6",
+      )
+
+      expect(payload.visitorType).toBe("seller")
+    })
   })
 
   // =============================================================================

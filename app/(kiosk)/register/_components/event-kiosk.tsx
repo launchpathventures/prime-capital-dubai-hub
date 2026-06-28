@@ -26,10 +26,10 @@ import { cn } from "@/lib/utils"
 // -----------------------------------------------------------------------------
 // Interest options
 //
-// Values are sent to AgentCRM as `goals`. Where a value matches the canonical
-// LeadGoal vocabulary ("sell", "buy-ready", "build-wealth", "advice-only") the
-// CRM uses it for routing — notably "sell" routes the lead to the vendor
-// pipeline. The rest are event-specific tags carried as opaque metadata.
+// Values are sent to AgentCRM as `goals` and drive seller/investor routing
+// server-side: a "sell"-only selection routes to "seller" (never "vendor" —
+// AgentCRM reserves that for partners). "sell" combined with any buy/investment
+// interest routes to "investor". The rest are tags carried as metadata.
 // -----------------------------------------------------------------------------
 
 const INTERESTS: { value: string; label: string }[] = [

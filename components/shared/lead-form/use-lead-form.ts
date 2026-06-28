@@ -166,8 +166,11 @@ export function useLeadForm({
     // AgentCRM welcome-email link params: `ref` binds the existing prospect,
     // `email` prefills + secondary-matches. Read once at mount and seeded into
     // form state so they survive multi-step navigation and re-renders.
+    // Only prefill `email` when `ref` is present (i.e. a genuine welcome-email
+    // link) so an unrelated ?email= tracking param can't silently pre-fill and
+    // submit the wrong address.
     const ref = params.get("ref") || undefined
-    const email = params.get("email")?.trim() || undefined
+    const email = ref ? params.get("email")?.trim() || undefined : undefined
     return {
       ...(property ? { referringProperty: property } : {}),
       ...(teamMember ? { referringTeamMember: teamMember } : {}),

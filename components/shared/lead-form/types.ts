@@ -69,8 +69,9 @@ export type FormMode =
   | "newsletter"
   | "event"
 
-// Pipeline router (CRM uses to assign leads). Default is investor.
-export type VisitorType = "investor" | "agent" | "vendor"
+// Pipeline router (CRM uses to assign leads). Default is investor. "seller" is
+// usually inferred server-side from a "sell" goal, not set here.
+export type VisitorType = "investor" | "agent" | "vendor" | "seller"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================
