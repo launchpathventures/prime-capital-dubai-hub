@@ -59,7 +59,7 @@ export const formModeSchema = z.enum([
   "event",
 ])
 
-export const visitorTypeSchema = z.enum(["investor", "agent", "vendor"])
+export const visitorTypeSchema = z.enum(["investor", "agent", "vendor", "seller"])
 
 // =============================================================================
 // STEP SCHEMAS

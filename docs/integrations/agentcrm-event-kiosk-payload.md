@@ -5,6 +5,11 @@ completes a registration on the **event kiosk** (the iPad form Prime runs at a
 stand/event). Share this with the AgentCRM team so they can map the fields and
 configure event handling.
 
+> For the full picture — architecture, delivery semantics, the complete
+> `visitorType` model, and worked examples for every form type — see the
+> **[AgentCRM Integration Brief](./agentcrm-integration-brief.md)**. This page is
+> the quick field reference for the event kiosk specifically.
+
 ---
 
 ## Transport
@@ -39,6 +44,7 @@ Event leads are marked with `leadLifecycle` / `leadStage` = `"prospect"`.
   "formName": "event-registration-register",
   "leadLifecycle": "prospect",
   "leadStage": "prospect",
+  "leadDistribution": "team",
 
   "leadMagnet": "Cityscape Global 2026",
   "leadTag": "event-cityscape-global-2026",
@@ -89,8 +95,9 @@ when no agent is pre-assigned — always the case for the kiosk) and `website`
 |---|---|---|---|
 | `formMode` | string | **always** | Always `"event"` for kiosk leads. |
 | `formName` | string | **always** | Auto-derived, e.g. `"event-registration-register"`. |
-| `leadLifecycle` | string | **always** | Always `"prospect"` — explicit marker that event leads enter as prospects. |
+| `leadLifecycle` | string | **always** | Always `"prospect"` — marker that event leads should enter as prospects. **Currently informational** (see note below). |
 | `leadStage` | string | **always** | Always `"prospect"` (same marker, duplicated for whichever field AgentCRM keys on). |
+| `leadDistribution` | string | **always (event)** | Who the event's leads are released to: **`"team"`** (available to all agents) or **`"managers"`** (held for manager / admin distribution only). Set by staff per event on the kiosk setup screen. |
 | `leadMagnet` | string | **always** | **The human-readable event name** staff typed, e.g. `"Cityscape Global 2026"`. |
 | `leadTag` | string | **always** | **Machine slug for the event**, `event-<slug>`, e.g. `"event-cityscape-global-2026"`. Use this to group/segment all leads from one event. |
 | `utmSource` | string | **always** | Always `"event"`. |
@@ -138,8 +145,20 @@ partner / service-provider, not a property seller. Instead:
 | No goals selected | `"investor"` |
 
 "Buy/investment goals" = `buy-ready`, `build-wealth`, `advice-only`,
-`commercial`, `residential` (plus the canonical website goals `invest-offplan`,
-`golden-visa`).
+`commercial`, `residential`, `golden-visa-wills` (plus the canonical website
+goals `invest-offplan`, `golden-visa`).
+
+### Full `visitorType` vocabulary (applies to all Prime forms, not just the kiosk)
+
+| Value | Meaning | How it's set |
+|---|---|---|
+| `investor` | Buyer / investor / advice — the default Leads pipeline | inferred (default) |
+| `seller` | A consumer selling **their own** property, no buy/investment intent | inferred from a `sell` goal |
+| `vendor` | A **partner / service-provider** (AgentCRM Partners, not Leads) | **explicit only** — a partner application form sets it |
+| `agent` | Agent recruitment applicant | **explicit only** — a recruitment form sets it |
+
+A property seller is **never** routed to `vendor`. `vendor` and `agent` only
+appear when a form sets `visitorType` explicitly.
 
 ---
 
@@ -152,6 +171,7 @@ The kiosk sends these exact string codes. Suggested human labels for display:
 | `buy-ready` | Buying property | buy/investment → investor |
 | `build-wealth` | Building an investment portfolio | buy/investment → investor |
 | `advice-only` | Strategic investment advice | buy/investment → investor |
+| `golden-visa-wills` | Golden Visa & Wills | buy/investment → investor |
 | `business-setup` | Setting up a business in Dubai | neutral |
 | `development` | Building / developing in Dubai | neutral |
 | `sell` | Selling property | seller (unless a buy/investment goal is also present) |
@@ -175,6 +195,7 @@ regardless of the routed `visitorType`.
   "formName": "event-registration-register",
   "leadLifecycle": "prospect",
   "leadStage": "prospect",
+  "leadDistribution": "managers",
   "leadMagnet": "Cityscape Global 2026",
   "leadTag": "event-cityscape-global-2026",
   "pageUrl": "https://primecapitaldubai.com/register",
@@ -206,12 +227,20 @@ Same shape, with:
 
 1. **De-dupe** on `submissionId` (retries reuse the same id), with email/phone
    as a secondary match.
-2. **Mark as prospect** using `leadLifecycle` / `leadStage` = `"prospect"`.
-3. **Segment the event** by `leadTag` (or `utmCampaign`) — every lead from one
+2. **Mark as prospect** for event leads. Today `leadLifecycle` / `leadStage`
+   = `"prospect"` are **informational only** — AgentCRM stores them in the raw
+   payload but does not yet treat them as lifecycle controls. The planned
+   AgentCRM-side change should read these (combined with `formMode: "event"` /
+   `utmMedium: "kiosk"`) to park event/kiosk submissions as Prospects.
+3. **Honour distribution scope** via `leadDistribution`: `"team"` leads can be
+   released to all agents; `"managers"` leads should be held for manager / admin
+   distribution only (do not surface to the general agent pool).
+4. **Segment the event** by `leadTag` (or `utmCampaign`) — every lead from one
    event shares the same value; `leadMagnet` is the display name.
-4. **Assign** event leads from a pool — `assigneeEmail` / `teamMemberEmail` are
+5. **Assign** event leads from a pool — `assigneeEmail` / `teamMemberEmail` are
    `null`, so there's no pre-set owner.
-5. **Contact channel**: treat `phone` / `whatsapp` as a WhatsApp-first number;
+6. **Contact channel**: treat `phone` / `whatsapp` as a WhatsApp-first number;
    note that `email` may be absent (and vice versa).
-6. **Route** `visitorType: "seller"` (pure seller) and `visitorType: "investor"`
-   to the appropriate pipelines. `"vendor"` will never appear on these leads.
+7. **Route** `visitorType` to the right pipeline — `seller` and `investor` for
+   organic leads; `vendor` (Partners) and `agent` only ever arrive when set
+   explicitly by a partner / recruitment form. A property seller is never `vendor`.

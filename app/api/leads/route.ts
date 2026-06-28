@@ -393,37 +393,12 @@ function getFormName(formMode: string, pageUrl: string): string {
 // =============================================================================
 
 /**
- * Pipeline router for the CRM. In AgentCRM "vendor" means a partner /
- * service-provider (filed under Partners), NOT a property seller — so a
- * consumer selling their own home must never be routed there.
- *
- *   - vendor:   ONLY when a form sets visitorType "vendor" explicitly (e.g. an
- *               introducer / partner / service-provider application).
- *   - agent:    someone applying to be an introducer/agent (set explicitly).
- *   - seller:   a consumer selling their OWN property with no buy/investment
- *               intent. Routed to Leads, not Partners. "sell" stays in `goals`.
- *   - investor: default — including a "sell" goal combined with any
- *               buy/investment intent (matches the event-kiosk logic).
- *
- * Event leads use deriveVisitorTypeForCrm() below (seller/investor only).
- */
-function deriveVisitorType(
-  goals: string[] | undefined,
-  explicit: string | undefined,
-): "investor" | "agent" | "vendor" | "seller" {
-  if (explicit === "agent" || explicit === "vendor" || explicit === "investor") {
-    return explicit
-  }
-  // Same seller/investor split as event leads — keeps the website and kiosk
-  // aligned so no property seller is ever filed as a Partner.
-  return deriveEventVisitorType(goals)
-}
-
-/**
  * Goals that signal buy-side / investment intent. Used to tell a pure property
- * seller (→ "seller") apart from an active buyer/investor (→ "investor") for
- * event leads. Covers both the kiosk's interest codes and the canonical
- * website LeadGoal values. Tune this list to change seller/investor routing.
+ * seller (→ "seller") apart from an active buyer/investor (→ "investor").
+ * Covers the kiosk's interest codes and the canonical website LeadGoal values.
+ *
+ * NOTE: this Set drives seller/investor inference for BOTH website and kiosk
+ * leads (they share the same router) — tuning it changes routing everywhere.
  */
 const BUY_INVESTMENT_GOALS = new Set([
   "buy-ready",
@@ -433,18 +408,21 @@ const BUY_INVESTMENT_GOALS = new Set([
   "residential",
   "invest-offplan",
   "golden-visa",
+  "golden-visa-wills",
 ])
 
+const EXPLICIT_VISITOR_TYPES = new Set(["investor", "agent", "vendor", "seller"])
+
 /**
- * Event-lead pipeline router for AgentCRM. Unlike the website router this
- * NEVER emits "vendor" (AgentCRM reserves "vendor" for partners/service
- * providers):
+ * Infer the pipeline router from a lead's goals (used when a form doesn't set
+ * visitorType explicitly). NEVER emits "vendor" — AgentCRM reserves "vendor"
+ * for partners/service-providers, so a property seller must not land there:
  *   - "seller":   wants to sell AND shows no buy/investment intent
  *   - "investor": everything else — buy / invest / advice / commercial /
  *                 residential, or "sell" combined with any of those
  * "sell" always stays in `goals` regardless of the routed type.
  */
-function deriveEventVisitorType(goals: string[] | undefined): "investor" | "seller" {
+function inferVisitorTypeFromGoals(goals: string[] | undefined): "investor" | "seller" {
   const g = goals ?? []
   const hasSell = g.includes("sell")
   const hasBuyInvestment = g.some((x) => BUY_INVESTMENT_GOALS.has(x))
@@ -452,18 +430,20 @@ function deriveEventVisitorType(goals: string[] | undefined): "investor" | "sell
 }
 
 /**
- * Choose the CRM pipeline router by form type. Event leads (kiosk + livestream)
- * use the seller/investor logic; every other form keeps the legacy router.
+ * Resolve the CRM pipeline router for any form (website + kiosk):
+ *   - An explicit `visitorType` set by the form always wins. This is the only
+ *     way "vendor" (partner/service-provider) or "agent" (recruitment) is ever
+ *     sent, and it lets a dedicated form force "seller"/"investor".
+ *   - Otherwise we infer "seller"/"investor" from goals (never "vendor").
  */
 function deriveVisitorTypeForCrm(leadData: {
-  formMode: string
   goals?: string[]
   visitorType?: string
 }): string {
-  if (leadData.formMode === "event") {
-    return deriveEventVisitorType(leadData.goals)
+  if (leadData.visitorType && EXPLICIT_VISITOR_TYPES.has(leadData.visitorType)) {
+    return leadData.visitorType
   }
-  return deriveVisitorType(leadData.goals, leadData.visitorType)
+  return inferVisitorTypeFromGoals(leadData.goals)
 }
 
 /**
@@ -568,13 +548,21 @@ const leadSchema = z
     leadLifecycle: z.string().max(50).optional(),
     leadStage: z.string().max(50).optional(),
 
-    // Pipeline router
-    visitorType: z.enum(["investor", "agent", "vendor"]).optional(),
+    // Kiosk distribution scope — who the event's leads are released to:
+    // "team" (all agents) or "managers" (manager/admin distribution only)
+    leadDistribution: z.enum(["team", "managers"]).optional(),
+
+    // Pipeline router (explicit override; otherwise inferred from goals)
+    visitorType: z.enum(["investor", "agent", "vendor", "seller"]).optional(),
 
     // Context from referring pages
     referringProperty: z.string().max(500).optional(),
     referringTeamMember: z.string().max(100).optional(),
     referringTeamMemberEmail: z.string().max(100).optional(),
+
+    // AgentCRM prospect binder from the welcome-email link — forwarded verbatim
+    // so AgentCRM can promote the existing prospect instead of duplicating it.
+    ref: z.string().max(200).optional(),
 
     // Legacy URL source parameter. Accepted for compatibility, but never
     // forwarded to CRM because CRM expects utmSource explicitly.
@@ -739,8 +727,13 @@ function buildAgentCrmPayload(
     // Lifecycle marker — event leads enter AgentCRM as prospects
     leadLifecycle: leadData.leadLifecycle || (isEvent ? "prospect" : undefined),
     leadStage: leadData.leadStage || (isEvent ? "prospect" : undefined),
+    // Distribution scope for event/kiosk leads ("team" | "managers")
+    leadDistribution: leadData.leadDistribution,
     pageUrl: leadData.pageUrl,
     visitorType,
+    // Prospect binder from the AgentCRM welcome-email link (verbatim). Lets
+    // AgentCRM match + promote the existing prospect (Prospect → Lead).
+    ref: leadData.ref,
     submissionId,
     sessionId: leadData.sessionId,
     submittedAt: leadData.submittedAt,

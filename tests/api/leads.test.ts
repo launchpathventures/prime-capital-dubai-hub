@@ -493,6 +493,155 @@ describe("Lead Form API", () => {
 
       expect(payload.visitorType).toBe("vendor")
     })
+
+    it("honours an explicit visitorType on an event submission (not bypassed)", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Vera",
+          lastName: "Vendor",
+          email: "vera@partner.example",
+          formMode: "event",
+          pageUrl: "https://primecapitaldubai.com/register",
+          goals: ["sell"],
+          // Explicit override must win even though goals would infer "seller"
+          visitorType: "vendor",
+        },
+        "192.168.2.5",
+      )
+
+      expect(payload.visitorType).toBe("vendor")
+    })
+
+    it("accepts and honours an explicit 'seller' (not stripped by schema)", async () => {
+      const payload = await postAndReadPayload(
+        {
+          firstName: "Stan",
+          lastName: "Seller",
+          email: "stan@example.com",
+          formMode: "contact",
+          pageUrl: "https://primecapitaldubai.com/contact",
+          // No goals — would infer "investor"; explicit "seller" must win.
+          visitorType: "seller",
+        },
+        "192.168.2.6",
+      )
+
+      expect(payload.visitorType).toBe("seller")
+    })
+  })
+
+  // =============================================================================
+  // EVENT KIOSK METADATA
+  // =============================================================================
+
+  describe("event kiosk metadata", () => {
+    async function postEvent(
+      distribution: "team" | "managers",
+      ip: string,
+    ): Promise<Record<string, unknown>> {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": ip },
+        body: JSON.stringify({
+          firstName: "Guest",
+          whatsapp: "+971501112222",
+          formMode: "event",
+          leadMagnet: "Cityscape Global 2026",
+          leadTag: "event-cityscape-global-2026",
+          leadDistribution: distribution,
+          utmSource: "event",
+          utmMedium: "kiosk",
+          utmCampaign: "event-cityscape-global-2026",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://www.primecapitaldubai.com/register",
+        }),
+      })
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      const [, requestInit] = mockFetch.mock.calls[0]
+      return JSON.parse(String(requestInit.body))
+    }
+
+    it("forwards leadDistribution 'managers' with prospect markers", async () => {
+      const payload = await postEvent("managers", "192.168.3.1")
+      expect(payload.leadDistribution).toBe("managers")
+      expect(payload.leadLifecycle).toBe("prospect")
+      expect(payload.leadStage).toBe("prospect")
+      expect(payload.formMode).toBe("event")
+      expect(payload.utmMedium).toBe("kiosk")
+    })
+
+    it("forwards leadDistribution 'team'", async () => {
+      const payload = await postEvent("team", "192.168.3.2")
+      expect(payload.leadDistribution).toBe("team")
+    })
+  })
+
+  // =============================================================================
+  // PROSPECT PROMOTION (welcome-email round-trip)
+  // =============================================================================
+  //
+  // AgentCRM appends ref/email/utm* to the welcome-email CTA. They must survive
+  // /contact -> /api/leads -> the AgentCRM payload so the existing prospect is
+  // promoted (Prospect -> Lead), not duplicated.
+
+  describe("prospect binder pass-through", () => {
+    it("forwards ref, email, and utm* verbatim for prospect promotion", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "192.168.4.1" },
+        body: JSON.stringify({
+          firstName: "Aisha",
+          email: "aisha@example.com",
+          whatsapp: "+971501234567",
+          formMode: "contact",
+          pageUrl: "https://www.primecapitaldubai.com/contact",
+          ref: "pr_8f2c1234",
+          utmSource: "crm",
+          utmMedium: "email",
+          utmCampaign: "event-aapi-convention-2026",
+          utmContent: "event-welcome",
+          submittedAt: new Date().toISOString(),
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+      expect(payload.ref).toBe("pr_8f2c1234")
+      expect(payload.email).toBe("aisha@example.com")
+      expect(payload.utmSource).toBe("crm")
+      expect(payload.utmMedium).toBe("email")
+      expect(payload.utmCampaign).toBe("event-aapi-convention-2026")
+      expect(payload.utmContent).toBe("event-welcome")
+    })
+
+    it("omits ref entirely when absent (no null)", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "192.168.4.2" },
+        body: JSON.stringify({
+          firstName: "No",
+          lastName: "Ref",
+          email: "noref@example.com",
+          formMode: "contact",
+          pageUrl: "https://www.primecapitaldubai.com/contact",
+          submittedAt: new Date().toISOString(),
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+
+      const [, requestInit] = mockFetch.mock.calls[0]
+      const payload = JSON.parse(String(requestInit.body))
+      expect("ref" in payload).toBe(false)
+    })
   })
 
   // =============================================================================

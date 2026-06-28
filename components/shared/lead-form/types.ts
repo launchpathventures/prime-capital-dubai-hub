@@ -69,8 +69,9 @@ export type FormMode =
   | "newsletter"
   | "event"
 
-// Pipeline router (CRM uses to assign leads). Default is investor.
-export type VisitorType = "investor" | "agent" | "vendor"
+// Pipeline router (CRM uses to assign leads). Default is investor. "seller" is
+// usually inferred server-side from a "sell" goal, not set here.
+export type VisitorType = "investor" | "agent" | "vendor" | "seller"
 export type FormTheme = "light" | "dark"
 
 // =============================================================================
@@ -173,6 +174,11 @@ export interface LeadFormData {
   referringProperty?: string         // Property slug from query param
   referringTeamMember?: string       // Team member slug from query param
   referringTeamMemberEmail?: string  // Team member email from query param
+
+  // CRM prospect binder — opaque ref from the AgentCRM welcome-email link
+  // (?ref=…). Forwarded verbatim so AgentCRM promotes the existing prospect
+  // (Prospect → Lead) instead of creating a duplicate.
+  ref?: string
 
   // Honeypot for bot protection (hidden field)
   website?: string

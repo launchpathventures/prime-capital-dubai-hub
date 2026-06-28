@@ -26,16 +26,17 @@ import { cn } from "@/lib/utils"
 // -----------------------------------------------------------------------------
 // Interest options
 //
-// Values are sent to AgentCRM as `goals`. Where a value matches the canonical
-// LeadGoal vocabulary ("sell", "buy-ready", "build-wealth", "advice-only") the
-// CRM uses it for routing — notably "sell" routes the lead to the vendor
-// pipeline. The rest are event-specific tags carried as opaque metadata.
+// Values are sent to AgentCRM as `goals` and drive seller/investor routing
+// server-side: a "sell"-only selection routes to "seller" (never "vendor" —
+// AgentCRM reserves that for partners). "sell" combined with any buy/investment
+// interest routes to "investor". The rest are tags carried as metadata.
 // -----------------------------------------------------------------------------
 
 const INTERESTS: { value: string; label: string }[] = [
   { value: "buy-ready", label: "Buying property" },
   { value: "build-wealth", label: "Building an investment portfolio" },
   { value: "advice-only", label: "Strategic investment advice" },
+  { value: "golden-visa-wills", label: "Golden Visa & Wills" },
   { value: "business-setup", label: "Setting up a business in Dubai" },
   { value: "development", label: "Building / developing in Dubai" },
   { value: "sell", label: "Selling property" },
@@ -49,9 +50,24 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type Phase = "setup" | "form" | "thanks"
 
+// Who the event's leads are released to in AgentCRM:
+//   - "team":     available to all agents for pickup
+//   - "managers": held for manager / admin distribution only
+type LeadDistribution = "team" | "managers"
+
+const DISTRIBUTION_OPTIONS: {
+  value: LeadDistribution
+  label: string
+  hint: string
+}[] = [
+  { value: "team", label: "Available to team", hint: "Any agent can pick these up" },
+  { value: "managers", label: "Managers only", hint: "Held for manager / admin distribution" },
+]
+
 interface KioskSession {
   eventName: string
   eventTag: string
+  distribution: LeadDistribution
 }
 
 interface EventKioskProps {
@@ -77,6 +93,7 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
   const [phase, setPhase] = useState<Phase>("setup")
   const [eventName, setEventName] = useState(initialEventName)
   const [eventTag, setEventTag] = useState("")
+  const [distribution, setDistribution] = useState<LeadDistribution>("team")
 
   // Guest form state
   const [fullName, setFullName] = useState("")
@@ -111,6 +128,9 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
       if (saved?.eventName) {
         setEventName(saved.eventName)
         setEventTag(saved.eventTag || toEventTag(saved.eventName))
+        if (saved.distribution === "managers" || saved.distribution === "team") {
+          setDistribution(saved.distribution)
+        }
         setPhase("form")
       }
     } catch {
@@ -156,7 +176,7 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
     try {
       window.sessionStorage.setItem(
         SESSION_KEY,
-        JSON.stringify({ eventName: name, eventTag: tag } satisfies KioskSession),
+        JSON.stringify({ eventName: name, eventTag: tag, distribution } satisfies KioskSession),
       )
     } catch {
       /* non-fatal — kiosk still works, just won't survive a refresh */
@@ -237,6 +257,8 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
           formMode: "event",
           leadMagnet: eventName,
           leadTag: eventTag,
+          // Who these leads are released to: "team" (all agents) or "managers" only
+          leadDistribution: distribution,
 
           // What they're interested in + their note
           goals: interests.length ? interests : undefined,
@@ -308,6 +330,29 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
                 autoComplete="off"
               />
             </div>
+            <div className="kiosk__field">
+              <span className="kiosk__label">Lead distribution</span>
+              <div className="kiosk__seg" role="group" aria-label="Lead distribution">
+                {DISTRIBUTION_OPTIONS.map((opt) => {
+                  const selected = distribution === opt.value
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={cn(
+                        "kiosk__seg-option",
+                        selected && "kiosk__seg-option--selected",
+                      )}
+                      aria-pressed={selected}
+                      onClick={() => setDistribution(opt.value)}
+                    >
+                      <span className="kiosk__seg-title">{opt.label}</span>
+                      <span className="kiosk__seg-hint">{opt.hint}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
             {error && <span className="kiosk__error">{error}</span>}
             <button type="submit" className="kiosk__submit kiosk__submit--block">
               Start Registration
@@ -349,6 +394,10 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
   return (
     <div className="kiosk">
       <form className="kiosk__card" onSubmit={handleSubmit}>
+        {/* Staff-facing cue that this session is restricted distribution */}
+        {distribution === "managers" && (
+          <span className="kiosk__mode-badge">Managers only</span>
+        )}
         <button
           type="button"
           className="kiosk__exit"
