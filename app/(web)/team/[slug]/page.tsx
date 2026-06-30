@@ -138,7 +138,8 @@ export default async function TeamMemberPage({ params }: PageProps) {
                   src={member.photo}
                   alt={member.name}
                   fill
-                  className="object-cover"
+                  className="object-cover object-[center_18%]"
+                  sizes="(max-width: 768px) 12rem, 16rem"
                   priority
                 />
               ) : (
