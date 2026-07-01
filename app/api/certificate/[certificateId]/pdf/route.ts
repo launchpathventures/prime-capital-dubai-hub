@@ -12,6 +12,8 @@ import {
   Page,
   Text,
   View,
+  Svg,
+  Path,
   StyleSheet,
   renderToBuffer,
 } from "@react-pdf/renderer"
@@ -32,6 +34,7 @@ import { config } from "@/lib/config"
 const SPRUCE = "#576C75"
 const ASH = "#3F4142"
 const SERENITY = "#A6B5B0"
+const LOGO_MARK_PATH = "M55.45,11.29c-3.44-2.54-8.34-3.81-14.69-3.81h-15.38v.66c1.03.49,1.77,1.31,2.23,2.45.46,1.15.7,2.85.7,5.09v32.96c0,2.3-.23,4-.7,5.13-.17.41-.38.77-.62,1.1h-1.86c-4.59,0-8.15-1.05-10.69-3.15-2.54-2.1-3.81-5.32-3.81-9.67,0-8.59,4.98-13.23,14.94-13.92v-.73c-1.12-.2-2.39-.29-3.81-.29-4,.05-7.4.73-10.18,2.05-2.78,1.32-4.91,3.09-6.37,5.31-1.46,2.22-2.2,4.87-2.2,7.95,0,4.54,1.72,8.08,5.16,10.62,3.44,2.54,8.34,3.81,14.69,3.81h15.19v-.66c-1.27-.59-2.08-1.56-2.42-2.93-.34-1.37-.51-2.9-.51-4.62V9.46h3.37c4.59,0,8.15,1.05,10.69,3.15,2.54,2.1,3.81,5.32,3.81,9.67,0,8.59-4.98,13.23-14.94,13.92v.73c1.12.2,2.39.29,3.81.29,4-.05,7.4-.73,10.18-2.05,2.78-1.32,4.91-3.09,6.37-5.31,1.46-2.22,2.2-4.87,2.2-7.95,0-4.54-1.72-8.08-5.16-10.62Z"
 
 const styles = StyleSheet.create({
   page: {
@@ -60,6 +63,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 40,
+  },
+  logoMark: {
+    width: 34,
+    height: 34,
+    marginBottom: 12,
   },
   companyName: {
     fontSize: 14,
@@ -161,6 +169,14 @@ const styles = StyleSheet.create({
   },
 })
 
+function LogoMark() {
+  return React.createElement(
+    Svg,
+    { viewBox: "0 0 64 64", style: styles.logoMark },
+    React.createElement(Path, { d: LOGO_MARK_PATH, fill: SPRUCE })
+  )
+}
+
 // =============================================================================
 // PDF Document
 // =============================================================================
@@ -201,6 +217,7 @@ function CertificateDocument({
       React.createElement(
         View,
         { style: styles.content },
+        React.createElement(LogoMark),
         React.createElement(Text, { style: styles.companyName }, config.app.name),
         React.createElement(View, { style: styles.dividerTop }),
         React.createElement(Text, { style: styles.title }, "Certificate of Completion"),

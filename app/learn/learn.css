@@ -359,6 +359,18 @@
   opacity: 1;
 }
 
+.learn-sidebar__status-badge {
+  margin-left: auto;
+  padding: 0.125rem 0.375rem;
+  border-radius: 999px;
+  background: oklch(from var(--color-primary) l c h / 0.1);
+  color: var(--color-primary);
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 /* Competency list in Course Content section */
 .learn-sidebar__competencies {
   display: flex;
@@ -10725,4 +10737,3 @@
 .cert-admin-cert-row__status--revoked {
   color: var(--color-destructive);
 }
-

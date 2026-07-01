@@ -6,18 +6,19 @@
 
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { AwardIcon, Loader2Icon } from "lucide-react"
+import { AwardIcon, Loader2Icon, RotateCcwIcon } from "lucide-react"
 import { issueCertificate } from "@/lib/actions/certificate"
 
 export function ClaimCertificate() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const hasRequested = useRef(false)
 
-  async function handleClaim() {
+  const handleIssue = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -30,7 +31,15 @@ export function ClaimCertificate() {
     }
 
     setLoading(false)
-  }
+  }, [router])
+
+  useEffect(() => {
+    if (hasRequested.current) return
+    hasRequested.current = true
+    queueMicrotask(() => {
+      void handleIssue()
+    })
+  }, [handleIssue])
 
   return (
     <div className="cert-claim">
@@ -39,15 +48,15 @@ export function ClaimCertificate() {
       </div>
       <h2 className="cert-claim__title">You&apos;re Ready!</h2>
       <p className="cert-claim__description">
-        You&apos;ve completed all modules and passed all quizzes.
-        Claim your certificate of completion.
+        You&apos;ve completed all LMS modules.
+        Your certificate is being issued automatically.
       </p>
       {error && (
         <p className="cert-claim__error">{error}</p>
       )}
       <Button
         size="lg"
-        onClick={handleClaim}
+        onClick={handleIssue}
         disabled={loading}
       >
         {loading ? (
@@ -57,8 +66,8 @@ export function ClaimCertificate() {
           </>
         ) : (
           <>
-            <AwardIcon className="h-4 w-4 mr-2" />
-            Claim Your Certificate
+            <RotateCcwIcon className="h-4 w-4 mr-2" />
+            Try Again
           </>
         )}
       </Button>

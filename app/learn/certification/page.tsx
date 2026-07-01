@@ -47,13 +47,10 @@ interface Competency {
 }
 
 interface UserProgress {
-  competenciesCompleted: number
-  totalCompetencies: number
   modulesCompleted: number
   totalModules: number
   quizzesCompleted: number
   totalQuizzes: number
-  averageQuizScore: number | null
 }
 
 interface UserProfile {
@@ -122,36 +119,6 @@ async function getCompetencies(): Promise<Competency[]> {
   return competenciesWithCounts
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- userId reserved for future per-user filtering
-async function getUserProgress(_userId: string): Promise<UserProgress> {
-  const supabase = await createClient()
-  
-  // Get total counts
-  const { count: totalModules } = await supabase
-    .from("learning_modules")
-    .select("*", { count: "exact", head: true })
-  
-  const { count: totalQuizzes } = await supabase
-    .from("quizzes")
-    .select("*", { count: "exact", head: true })
-  
-  const { count: totalCompetencies } = await supabase
-    .from("competencies")
-    .select("*", { count: "exact", head: true })
-  
-  // Get user progress (simplified - in production would track actual progress)
-  // For now, return mock data
-  return {
-    competenciesCompleted: 0,
-    totalCompetencies: totalCompetencies || 0,
-    modulesCompleted: 0,
-    totalModules: totalModules || 0,
-    quizzesCompleted: 0,
-    totalQuizzes: totalQuizzes || 0,
-    averageQuizScore: null,
-  }
-}
-
 // =============================================================================
 // Components
 // =============================================================================
@@ -164,21 +131,9 @@ function ReadinessChecklist({ progress }: { progress: UserProgress }) {
       detail: `${progress.modulesCompleted}/${progress.totalModules} modules completed`,
     },
     {
-      label: "Pass all quizzes",
-      done: progress.quizzesCompleted >= progress.totalQuizzes,
-      detail: `${progress.quizzesCompleted}/${progress.totalQuizzes} quizzes passed`,
-    },
-    {
-      label: "Average quiz score ≥80%",
-      done: (progress.averageQuizScore ?? 0) >= 80,
-      detail: progress.averageQuizScore 
-        ? `Current average: ${Math.round(progress.averageQuizScore)}%`
-        : "Complete quizzes to see average",
-    },
-    {
-      label: "Practice with scenarios",
-      done: false, // Would track scenario practice
-      detail: "Recommended: Practice 3+ scenarios per category",
+      label: "Completion certificate",
+      done: progress.modulesCompleted >= progress.totalModules,
+      detail: "Issued automatically when training is complete",
     },
   ]
   
@@ -315,23 +270,15 @@ export default async function CertificationPage() {
     checkCertificateEligibility(),
   ])
 
-  // Get progress (would be real progress tracking in production)
-  const progress = profile
-    ? await getUserProgress(profile.id)
-    : {
-        competenciesCompleted: 0,
-        totalCompetencies: competencies.length,
-        modulesCompleted: 0,
-        totalModules: competencies.reduce((sum, c) => sum + c.module_count, 0),
-        quizzesCompleted: 0,
-        totalQuizzes: competencies.reduce((sum, c) => sum + c.quiz_count, 0),
-        averageQuizScore: null,
-      }
+  const progress = {
+    modulesCompleted: eligibility.modulesCompleted,
+    totalModules: eligibility.totalModules || competencies.reduce((sum, c) => sum + c.module_count, 0),
+    quizzesCompleted: eligibility.quizzesPassed,
+    totalQuizzes: eligibility.totalQuizzes || competencies.reduce((sum, c) => sum + c.quiz_count, 0),
+  }
 
   const isReadyForCertification =
-    progress.modulesCompleted >= progress.totalModules &&
-    progress.quizzesCompleted >= progress.totalQuizzes &&
-    (progress.averageQuizScore ?? 0) >= 80
+    progress.modulesCompleted >= progress.totalModules
 
   const isCertified = profile?.certification_status === 'certified'
   const hasCertificate = myCertificate && !myCertificate.revokedAt

@@ -10,6 +10,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { Stack, Row, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,6 +29,7 @@ import {
   ArrowRightIcon,
   XIcon,
   CheckIcon,
+  AwardIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { submitQuizAttempt, type QuizAnswer } from "@/lib/actions/learning"
@@ -78,6 +80,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = React.useState(false)
   const [submitError, setSubmitError] = React.useState<string | null>(null)
+  const [issuedCertificateId, setIssuedCertificateId] = React.useState<string | null>(null)
   
   const currentQuestion = questions[currentIndex]
   const totalQuestions = questions.length
@@ -125,7 +128,8 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
           questionId: qId,
           selectedOption: opt,
         }))
-        await submitQuizAttempt(quiz.slug, quizAnswers)
+        const result = await submitQuizAttempt(quiz.slug, quizAnswers)
+        setIssuedCertificateId(result.certificateId ?? null)
         setIsSubmitting(false)
         setState("complete")
 
@@ -153,6 +157,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
     setState("in-progress")
     setLastAnswerCorrect(false)
     setSubmitError(null)
+    setIssuedCertificateId(null)
   }
 
   const handleClose = () => {
@@ -239,6 +244,7 @@ export function QuizSheet({ quiz, questions, trigger, onComplete }: QuizSheetPro
               score={getFinalScore()}
               totalQuestions={totalQuestions}
               passingScore={quiz.passing_score}
+              certificateId={issuedCertificateId}
               onRetry={handleRetry}
               onClose={handleClose}
             />
@@ -454,6 +460,7 @@ interface QuizResultsProps {
   score: number
   totalQuestions: number
   passingScore: number
+  certificateId: string | null
   onRetry: () => void
   onClose: () => void
 }
@@ -462,6 +469,7 @@ function QuizResults({
   score,
   totalQuestions,
   passingScore,
+  certificateId,
   onRetry,
   onClose,
 }: QuizResultsProps) {
@@ -519,6 +527,27 @@ function QuizResults({
             </Stack>
           </CardContent>
         </Card>
+
+        {certificateId && (
+          <Card className="w-full border-primary/30 bg-primary/5">
+            <CardContent className="py-5">
+              <Stack gap="md" align="center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <AwardIcon className="h-6 w-6" />
+                </div>
+                <Stack gap="xs" align="center">
+                  <Title size="h4">Certificate issued</Title>
+                  <Text size="sm" className="text-muted-foreground max-w-xs">
+                    Your completion certificate is ready in the LMS sidebar.
+                  </Text>
+                </Stack>
+                <Button render={<Link href="/learn/certification" />}>
+                  View Certificate
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Actions */}
         <Stack gap="sm" className="w-full">

@@ -28,6 +28,7 @@ import {
   LightbulbIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  AwardIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { submitQuizAttempt, type QuizAnswer } from "@/lib/actions/learning"
@@ -162,6 +163,7 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false)
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set())
+  const [issuedCertificateId, setIssuedCertificateId] = useState<string | null>(null)
   
   const currentQuestion = questions[currentIndex]
   const totalQuestions = questions.length
@@ -227,7 +229,8 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
         questionId: qId,
         selectedOption: opt,
       }))
-      await submitQuizAttempt(quiz.slug, quizAnswers)
+      const result = await submitQuizAttempt(quiz.slug, quizAnswers)
+      setIssuedCertificateId(result.certificateId ?? null)
     } catch (error) {
       console.error("Failed to save quiz attempt:", error)
     }
@@ -244,6 +247,7 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
     setState("in-progress")
     setLastAnswerCorrect(false)
     setExpandedQuestions(new Set())
+    setIssuedCertificateId(null)
   }
   
   const handleDownloadResults = () => {
@@ -346,6 +350,35 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
               </Stack>
             </CardContent>
           </Card>
+
+          {issuedCertificateId && (
+            <Card className="w-full border-primary/30 bg-primary/5">
+              <CardContent className="py-5">
+                <Stack gap="md" align="center" className="text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <AwardIcon className="h-6 w-6" />
+                  </div>
+                  <Stack gap="xs" align="center">
+                    <Title size="h4">Certificate issued</Title>
+                    <Text size="sm" className="text-muted-foreground max-w-md">
+                      Your completion certificate is ready and available from the LMS sidebar.
+                    </Text>
+                  </Stack>
+                  <Row gap="sm" className="flex-wrap justify-center">
+                    <Button render={<Link href="/learn/certification" />}>
+                      View in LMS
+                    </Button>
+                    <Button
+                      variant="outline"
+                      render={<Link href={`/certificate/${issuedCertificateId}`} target="_blank" />}
+                    >
+                      Open Certificate
+                    </Button>
+                  </Row>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
           
           {/* Action Buttons */}
           <Row gap="sm" className="w-full max-w-sm flex-wrap justify-center">
