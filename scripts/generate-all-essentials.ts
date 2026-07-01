@@ -21,6 +21,7 @@
 
 import { createClient } from "@supabase/supabase-js"
 import Anthropic from "@anthropic-ai/sdk"
+import { cachedSystemPrompt } from "../lib/ai/anthropic-cache"
 import { config } from "dotenv"
 import {
   ESSENTIALS_PROMPT_VERSION,
@@ -45,6 +46,11 @@ const API_DELAY_MS = 2000
 
 /** Maximum retries per module */
 const MAX_RETRIES = 3
+
+const SONNET_INPUT_COST_PER_MILLION = 3
+const SONNET_OUTPUT_COST_PER_MILLION = 15
+const CLAUDE_CACHE_WRITE_MULTIPLIER = 1.25
+const CLAUDE_CACHE_READ_MULTIPLIER = 0.1
 
 // =============================================================================
 // TYPES
@@ -82,7 +88,13 @@ interface GenerationResult {
   moduleSlug: string
   moduleTitle: string
   error?: string
-  tokensUsed?: { input: number; output: number }
+  tokensUsed?: {
+    input: number
+    output: number
+    freshInput: number
+    cacheWrite: number
+    cacheRead: number
+  }
   timeMs?: number
 }
 
@@ -226,7 +238,7 @@ async function generateEssentialsForModule(
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4000,
-      system: systemPrompt,
+      system: cachedSystemPrompt(systemPrompt),
       messages: [{ role: "user", content: userPrompt }],
     })
 
@@ -259,6 +271,13 @@ async function generateEssentialsForModule(
       throw new Error(`Database update failed: ${updateError.message}`)
     }
 
+    const cacheWrite = response.usage.cache_creation_input_tokens ?? 0
+    const cacheRead = response.usage.cache_read_input_tokens ?? 0
+    const freshInput = Math.max(
+      0,
+      response.usage.input_tokens - cacheWrite - cacheRead
+    )
+
     return {
       success: true,
       moduleSlug: module.slug,
@@ -266,6 +285,9 @@ async function generateEssentialsForModule(
       tokensUsed: {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
+        freshInput,
+        cacheWrite,
+        cacheRead,
       },
       timeMs: Date.now() - startTime,
     }
@@ -411,6 +433,9 @@ async function main() {
   const results: GenerationResult[] = []
   let totalTokensIn = 0
   let totalTokensOut = 0
+  let totalFreshInputTokens = 0
+  let totalCacheWriteTokens = 0
+  let totalCacheReadTokens = 0
 
   for (let i = 0; i < modulesToProcess.length; i++) {
     const module = modulesToProcess[i]
@@ -449,6 +474,9 @@ async function main() {
       if (result.tokensUsed) {
         totalTokensIn += result.tokensUsed.input
         totalTokensOut += result.tokensUsed.output
+        totalFreshInputTokens += result.tokensUsed.freshInput
+        totalCacheWriteTokens += result.tokensUsed.cacheWrite
+        totalCacheReadTokens += result.tokensUsed.cacheRead
         console.log(`✅ (${formatDuration(result.timeMs || 0)}, ${result.tokensUsed.input + result.tokensUsed.output} tokens)`)
       } else {
         console.log(`✅ (dry run)`)
@@ -479,12 +507,22 @@ async function main() {
   if (!args.dryRun && totalTokensIn > 0) {
     console.log(`\n📊 Token Usage:`)
     console.log(`   Input tokens: ${totalTokensIn.toLocaleString()}`)
+    console.log(`   Fresh input tokens: ${totalFreshInputTokens.toLocaleString()}`)
+    console.log(`   Cache write tokens: ${totalCacheWriteTokens.toLocaleString()}`)
+    console.log(`   Cache read tokens: ${totalCacheReadTokens.toLocaleString()}`)
     console.log(`   Output tokens: ${totalTokensOut.toLocaleString()}`)
     console.log(`   Total tokens: ${(totalTokensIn + totalTokensOut).toLocaleString()}`)
 
-    // Rough cost estimate (Claude Sonnet pricing as of 2024)
-    const inputCost = (totalTokensIn / 1_000_000) * 3
-    const outputCost = (totalTokensOut / 1_000_000) * 15
+    const inputCost =
+      (totalFreshInputTokens / 1_000_000) * SONNET_INPUT_COST_PER_MILLION +
+      (totalCacheWriteTokens / 1_000_000) *
+        SONNET_INPUT_COST_PER_MILLION *
+        CLAUDE_CACHE_WRITE_MULTIPLIER +
+      (totalCacheReadTokens / 1_000_000) *
+        SONNET_INPUT_COST_PER_MILLION *
+        CLAUDE_CACHE_READ_MULTIPLIER
+    const outputCost =
+      (totalTokensOut / 1_000_000) * SONNET_OUTPUT_COST_PER_MILLION
     console.log(`   Estimated cost: ~$${(inputCost + outputCost).toFixed(2)}`)
   }
 

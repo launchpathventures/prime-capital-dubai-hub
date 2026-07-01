@@ -36,6 +36,7 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit"
+import { withCachedFinalTool } from "@/lib/ai/anthropic-cache"
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -341,7 +342,7 @@ ${formatSpec}`
         max_tokens: 4096,
         temperature: 0.5,
         system: systemPrompt,
-        tools: TOOLS,
+        tools: withCachedFinalTool(TOOLS),
         messages: apiMessages,
       },
       { signal: request.signal }

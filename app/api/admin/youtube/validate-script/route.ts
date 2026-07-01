@@ -28,6 +28,7 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit"
+import { cachedSystemPrompt } from "@/lib/ai/anthropic-cache"
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -243,7 +244,7 @@ ${getBrandGuide(profile)}
         model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5-20250929",
         max_tokens: 4096,
         temperature: 0.3,
-        system: systemPrompt,
+        system: cachedSystemPrompt(systemPrompt),
         messages: [
           {
             role: "user",

@@ -40,6 +40,7 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit"
+import { cachedSystemPrompt } from "@/lib/ai/anthropic-cache"
 import type {
   PanelReview,
   ReviewerOutput,
@@ -293,7 +294,7 @@ async function runReviewer(
       model: REVIEWER_MODEL,
       max_tokens: 2048,
       temperature: 0.3,
-      system: systemPrompt,
+      system: cachedSystemPrompt(systemPrompt),
       messages: [
         {
           role: "user",
