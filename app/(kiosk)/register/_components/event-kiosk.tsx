@@ -44,7 +44,6 @@ const INTERESTS: { value: string; label: string }[] = [
   { value: "residential", label: "Residential property" },
 ]
 
-const SESSION_KEY = "pc_kiosk_session"
 // Recent events persist across sessions (localStorage) so an accidental trip to
 // /register offers one-tap access to events this iPad has run before.
 const RECENT_KEY = "pc_kiosk_recent"
@@ -156,41 +155,19 @@ export function EventKiosk({
     return guestIdsRef.current
   }
 
-  // Resume an active kiosk after an accidental refresh — staff shouldn't have
-  // to re-enter the event name if the iPad reloads mid-event.
+  // On mount, load this iPad's recent events for the setup screen. We deliberately
+  // do NOT auto-resume a prior session: visiting /register should always show the
+  // setup screen (with recents for one-tap re-entry), never silently drop staff
+  // back into a previous event. A pre-configured link is the only thing that skips
+  // setup, and it's driven by the URL — so a refresh restores it for free.
   useEffect(() => {
-    // A pre-configured link is authoritative: persist its event so a refresh
-    // keeps it, and ignore any leftover session from a different event. Also
-    // remember it as a recent event for future one-tap access.
     if (preconfigured) {
-      const session = { eventName: presetName, eventTag, distribution } satisfies KioskSession
-      try {
-        window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
-      } catch {
-        /* non-fatal — link still works, just won't survive a refresh */
-      }
-      // Hydrate recents too, so tapping Exit lands on a populated setup screen.
-      setRecent(recordRecent(session))
+      // Record the linked event so it appears in recents (e.g. after Exit).
+      setRecent(recordRecent({ eventName: presetName, eventTag, distribution }))
       return
     }
-    // Offer this iPad's recent events on the setup screen.
     setRecent(readRecent())
-    try {
-      const raw = window.sessionStorage.getItem(SESSION_KEY)
-      if (!raw) return
-      const saved = JSON.parse(raw) as KioskSession
-      if (saved?.eventName) {
-        setEventName(saved.eventName)
-        setEventTag(saved.eventTag || toEventTag(saved.eventName))
-        if (saved.distribution === "managers" || saved.distribution === "team") {
-          setDistribution(saved.distribution)
-        }
-        setPhase("form")
-      }
-    } catch {
-      /* ignore malformed session */
-    }
-    // Mount-only: reads the initial link config / stored session exactly once.
+    // Mount-only: reads the initial link config / stored recents exactly once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -218,20 +195,15 @@ export function EventKiosk({
 
   // ---- Setup phase ----------------------------------------------------------
 
-  // Lock into kiosk mode for a given event: persist the session, record it as a
-  // recent event, clear the form, and show the guest form. Shared by the setup
-  // form and the one-tap "recent events" buttons.
+  // Lock into kiosk mode for a given event: record it as a recent event, clear
+  // the form, and show the guest form. Shared by the setup form and the one-tap
+  // "recent events" buttons.
   const beginSession = useCallback(
     (session: KioskSession) => {
       setEventName(session.eventName)
       setEventTag(session.eventTag)
       setDistribution(session.distribution)
       setError(null)
-      try {
-        window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
-      } catch {
-        /* non-fatal — kiosk still works, just won't survive a refresh */
-      }
       setRecent(recordRecent(session))
       resetGuestForm()
       setPhase("form")
@@ -252,11 +224,6 @@ export function EventKiosk({
   const handleExit = () => {
     if (!window.confirm("End this kiosk session and return to setup?")) return
     if (resetTimer.current) clearTimeout(resetTimer.current)
-    try {
-      window.sessionStorage.removeItem(SESSION_KEY)
-    } catch {
-      /* ignore */
-    }
     resetGuestForm()
     setPhase("setup")
   }
@@ -480,10 +447,6 @@ export function EventKiosk({
   return (
     <div className="kiosk">
       <form className="kiosk__card" onSubmit={handleSubmit}>
-        {/* Staff-facing cue that this session is restricted distribution */}
-        {distribution === "managers" && (
-          <span className="kiosk__mode-badge">Managers only</span>
-        )}
         <button
           type="button"
           className="kiosk__exit"
