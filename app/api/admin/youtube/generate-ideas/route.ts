@@ -31,6 +31,7 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit"
+import { cachedSystemPrompt } from "@/lib/ai/anthropic-cache"
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -154,6 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     const profile = getProfile(profileSlug)
+    const systemPrompt = getSystemPrompt(profile)
 
     // Cap count to a reasonable range — guards against accidental large
     // generations and runaway AI cost.
@@ -174,7 +176,7 @@ export async function POST(request: NextRequest) {
         model: process.env.CLAUDE_MODEL || "claude-sonnet-4-5-20250929",
         max_tokens: 4096,
         temperature: 0.9,
-        system: getSystemPrompt(profile),
+        system: cachedSystemPrompt(systemPrompt),
         messages: [
           {
             role: "user",

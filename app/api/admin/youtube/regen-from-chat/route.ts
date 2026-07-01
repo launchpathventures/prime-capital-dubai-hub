@@ -31,6 +31,7 @@ import {
   createRateLimitResponse,
   RATE_LIMITS,
 } from "@/lib/rate-limit"
+import { cachedSystemPrompt } from "@/lib/ai/anthropic-cache"
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -236,7 +237,7 @@ Generate the improved script now, addressing every point of the rewrite brief ab
         model: process.env.YOUTUBE_SCRIPT_MODEL || "claude-opus-4-5-20251101",
         max_tokens: 16_384,
         temperature: 0.7,
-        system: systemPrompt,
+        system: cachedSystemPrompt(systemPrompt),
         messages: [{ role: "user", content: userMessage }],
       },
       { signal: request.signal }
