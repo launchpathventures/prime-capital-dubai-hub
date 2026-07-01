@@ -474,21 +474,6 @@ textarea.kiosk__input {
   opacity: 0.6;
 }
 
-/* Faint staff cue shown on the guest form when distribution is "managers" */
-.kiosk__mode-badge {
-  position: absolute;
-  top: 0.6rem;
-  left: 0.75rem;
-  z-index: 2;
-  padding: 0.25rem 0.55rem;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(87, 108, 117, 0.55);
-  background: rgba(87, 108, 117, 0.08);
-  border-radius: 999px;
-}
-
 /* -------------------------------------------------------------------------- */
 /* Thank-you screen                                                           */
 /* -------------------------------------------------------------------------- */
