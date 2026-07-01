@@ -59,6 +59,8 @@ interface LearnSidebarProps {
   currentModule?: string
   /** User role for admin visibility */
   userRole?: "learner" | "marketing" | "youtube_editor" | "admin"
+  /** Whether the learner has an issued active completion certificate */
+  certificateAvailable?: boolean
   /** Callback for mobile drawer close */
   onNavigate?: () => void
 }
@@ -73,6 +75,7 @@ export function LearnSidebar({
   currentCompetency,
   currentModule,
   userRole = "learner",
+  certificateAvailable = false,
   onNavigate,
 }: LearnSidebarProps) {
   const [courseExpanded, setCourseExpanded] = React.useState(activeSection === "course")
@@ -294,7 +297,10 @@ export function LearnSidebar({
             onClick={onNavigate}
           >
             <AwardIcon className="learn-sidebar__nav-icon" />
-            <span>Certification Prep</span>
+            <span>{certificateAvailable ? "Certificate Available" : "Certification Prep"}</span>
+            {certificateAvailable && (
+              <span className="learn-sidebar__status-badge">Ready</span>
+            )}
           </Link>
         </nav>
       </div>

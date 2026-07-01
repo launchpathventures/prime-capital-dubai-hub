@@ -22,6 +22,10 @@ export type ActionResult<T = void> =
   | { success: true; data: T }
   | { success: false; error: string }
 
+interface ModuleCompletionResult {
+  certificateId?: string
+}
+
 // =============================================================================
 // PROGRESS ACTIONS
 // =============================================================================
@@ -67,7 +71,7 @@ export async function markModuleStarted(moduleId: string): Promise<ActionResult>
 /**
  * Mark a module as completed.
  */
-export async function markModuleComplete(moduleId: string): Promise<ActionResult> {
+export async function markModuleComplete(moduleId: string): Promise<ActionResult<ModuleCompletionResult>> {
   try {
     const supabase = await createClient()
 
@@ -93,8 +97,24 @@ export async function markModuleComplete(moduleId: string): Promise<ActionResult
 
     if (error) throw error
 
+    let certificateId: string | undefined
+    if (user.email) {
+      try {
+        const { issueCertificateForUser } = await import("@/lib/actions/certificate")
+        const certificateResult = await issueCertificateForUser({
+          userId: user.id,
+          userEmail: user.email,
+        })
+        if (certificateResult.success) {
+          certificateId = certificateResult.data.certificateId
+        }
+      } catch (certificateError) {
+        trackActionError(certificateError, "markModuleComplete.issueCertificate", { moduleId })
+      }
+    }
+
     revalidatePath("/learn")
-    return { success: true, data: undefined }
+    return { success: true, data: { certificateId } }
   } catch (error) {
     trackActionError(error, "markModuleComplete", { moduleId })
     return { success: false, error: "Failed to mark module as completed" }
@@ -117,6 +137,7 @@ export interface QuizResult {
   correctAnswers: string[]
   explanations: Record<string, string>
   certificateEligible?: boolean
+  certificateId?: string
 }
 
 /**
@@ -238,20 +259,37 @@ export async function submitQuizAttempt(
 
   if (saveError) throw saveError
 
-  // If passed and we have a module ID, mark module as complete
+  let certificateId: string | undefined
+
+  // If passed and we have a module ID, mark module as complete.
+  // Certificate issuance is centralized in markModuleComplete so a passing
+  // module quiz does not make a second issuance attempt.
   if (passed && moduleId) {
-    await markModuleComplete(moduleId)
+    const completionResult = await markModuleComplete(moduleId)
+    if (completionResult.success) {
+      certificateId = completionResult.data.certificateId
+    }
   }
 
   revalidatePath("/learn")
 
-  // Check certificate eligibility after a passing quiz
+  // Standalone passing quizzes without a linked module still get a final
+  // eligibility check, but issueCertificateForUser remains one-active-cert
+  // idempotent.
   let certificateEligible = false
-  if (passed) {
+  if (certificateId) {
+    certificateEligible = true
+  } else if (passed && !moduleId && user.email) {
     try {
-      const { checkCertificateEligibility } = await import("@/lib/actions/certificate")
-      const eligibility = await checkCertificateEligibility(user.id)
-      certificateEligible = eligibility.eligible
+      const { issueCertificateForUser } = await import("@/lib/actions/certificate")
+      const certificateResult = await issueCertificateForUser({
+        userId: user.id,
+        userEmail: user.email,
+      })
+      if (certificateResult.success) {
+        certificateEligible = true
+        certificateId = certificateResult.data.certificateId
+      }
     } catch {
       // Non-blocking — don't fail the quiz submission
     }
@@ -264,6 +302,7 @@ export async function submitQuizAttempt(
     correctAnswers,
     explanations,
     certificateEligible,
+    certificateId,
   }
 }
 

@@ -22,6 +22,11 @@ type ActionResult<T = void> =
   | { success: true; data: T }
   | { success: false; error: string }
 
+interface IssueCertificateForUserOptions {
+  userId: string
+  userEmail?: string | null
+}
+
 // =============================================================================
 // Eligibility Check
 // =============================================================================
@@ -85,9 +90,7 @@ export async function checkCertificateEligibility(
 
   const eligible =
     safeTotal > 0 &&
-    safeCompleted >= safeTotal &&
-    safeTotalQuizzes > 0 &&
-    quizzesPassed >= safeTotalQuizzes
+    safeCompleted >= safeTotal
 
   return {
     eligible,
@@ -117,11 +120,32 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
       return { success: false, error: "Not authenticated" }
     }
 
-    // Check for existing active certificate
+    return await issueCertificateForUser({
+      userId: user.id,
+      userEmail: user.email,
+    })
+  } catch (error) {
+    trackActionError(error, "issueCertificate")
+    return { success: false, error: "Failed to issue certificate" }
+  }
+}
+
+/**
+ * Issue a completion certificate for a specific user.
+ * Used by module/quiz completion so certificates are created automatically.
+ */
+export async function issueCertificateForUser({
+  userId,
+  userEmail,
+}: IssueCertificateForUserOptions): Promise<ActionResult<CertificateWithProfile>> {
+  try {
+    const supabase = await createClient()
+
+    // Check for existing active certificate first so completion hooks are idempotent.
     const { data: existing } = await supabase
       .from("completion_certificates")
       .select("*, user_profiles!completion_certificates_user_id_fkey(full_name)")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .is("revoked_at", null)
       .limit(1)
       .single()
@@ -129,25 +153,11 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
     if (existing) {
       return {
         success: true,
-        data: {
-          id: existing.id,
-          certificateId: existing.certificate_id,
-          userId: existing.user_id,
-          issuedAt: existing.issued_at,
-          revokedAt: existing.revoked_at,
-          revokedBy: existing.revoked_by,
-          revokeReason: existing.revoke_reason,
-          modulesCompleted: existing.modules_completed,
-          quizzesPassed: existing.quizzes_passed,
-          courseName: existing.course_name,
-          createdAt: existing.created_at,
-          fullName: existing.user_profiles?.full_name || "Unknown",
-        },
+        data: mapCertificateActionRow(existing),
       }
     }
 
-    // Check eligibility
-    const eligibility = await checkCertificateEligibility(user.id)
+    const eligibility = await checkCertificateEligibility(userId)
     if (!eligibility.eligible) {
       return {
         success: false,
@@ -155,23 +165,20 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
       }
     }
 
-    // Generate certificate ID atomically via database sequence
     const { data: certificateId, error: seqError } = await supabase.rpc("generate_certificate_id")
     if (seqError || !certificateId) throw seqError ?? new Error("Failed to generate certificate ID")
 
-    // Get user profile for name
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("full_name")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single()
 
-    // Insert certificate
     const { data: cert, error: insertError } = await supabase
       .from("completion_certificates")
       .insert({
         certificate_id: certificateId,
-        user_id: user.id,
+        user_id: userId,
         modules_completed: eligibility.modulesCompleted,
         quizzes_passed: eligibility.quizzesPassed,
         course_name: config.learning.courseName,
@@ -179,20 +186,47 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
       .select()
       .single()
 
-    if (insertError) throw insertError
+    if (insertError) {
+      if (insertError.code === "23505") {
+        const { data: racedExisting } = await supabase
+          .from("completion_certificates")
+          .select("*, user_profiles!completion_certificates_user_id_fkey(full_name)")
+          .eq("user_id", userId)
+          .is("revoked_at", null)
+          .limit(1)
+          .single()
 
-    // Fire Zapier webhook (non-blocking)
+        if (racedExisting) {
+          return {
+            success: true,
+            data: mapCertificateActionRow(racedExisting),
+          }
+        }
+      }
+
+      throw insertError
+    }
+
+    const certificateUrl = `${config.app.url}/certificate/${certificateId}`
+    const certificatePdfUrl = `${config.app.url}/api/certificate/${certificateId}/pdf`
+
     triggerZapierWebhook("certificate_issued", {
       learnerName: profile?.full_name || "Unknown",
-      learnerEmail: user.email,
+      learnerEmail: userEmail,
+      recipientEmail: userEmail,
       certificateId,
-      certificateUrl: `${config.app.url}/certificate/${certificateId}`,
+      certificateUrl,
+      certificatePdfUrl,
       modulesCompleted: eligibility.modulesCompleted,
       quizzesPassed: eligibility.quizzesPassed,
+      courseName: config.learning.courseName,
+      emailSubject: `Your ${config.app.name} completion certificate is ready`,
     })
 
     revalidatePath("/learn")
+    revalidatePath("/learn", "layout")
     revalidatePath("/learn/certification")
+    revalidatePath("/learn/progress")
     revalidatePath("/learn/admin/certification")
 
     return {
@@ -213,10 +247,29 @@ export async function issueCertificate(): Promise<ActionResult<CertificateWithPr
       },
     }
   } catch (error) {
-    trackActionError(error, "issueCertificate")
+    trackActionError(error, "issueCertificateForUser", { userId })
     return { success: false, error: "Failed to issue certificate" }
   }
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function mapCertificateActionRow(row: any): CertificateWithProfile {
+  return {
+    id: row.id,
+    certificateId: row.certificate_id,
+    userId: row.user_id,
+    issuedAt: row.issued_at,
+    revokedAt: row.revoked_at,
+    revokedBy: row.revoked_by,
+    revokeReason: row.revoke_reason,
+    modulesCompleted: row.modules_completed,
+    quizzesPassed: row.quizzes_passed,
+    courseName: row.course_name,
+    createdAt: row.created_at,
+    fullName: row.user_profiles?.full_name || "Unknown",
+  }
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // =============================================================================
 // Revoke Certificate (Admin)

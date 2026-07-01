@@ -207,7 +207,7 @@ export default async function LearnDashboardPage() {
             <div className="lms-certificate-banner__content">
               <h3 className="lms-certificate-banner__title">Your Certificate is Ready</h3>
               <p className="lms-certificate-banner__description">
-                You&apos;ve completed all modules. View and download your completion certificate.
+                You&apos;ve completed the training. View and download your completion certificate.
               </p>
             </div>
             <div className="lms-certificate-banner__action">

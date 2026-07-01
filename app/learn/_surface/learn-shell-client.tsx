@@ -56,6 +56,7 @@ interface LearnShellClientProps {
   competencies?: Competency[]
   userRole?: "learner" | "marketing" | "youtube_editor" | "admin"
   user?: UserMenuUser
+  certificateAvailable?: boolean
 }
 
 // -----------------------------------------------------------------------------
@@ -103,6 +104,7 @@ export function LearnShellClient({
   competencies = [],
   userRole = "learner",
   user,
+  certificateAvailable = false,
 }: LearnShellClientProps) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = React.useState(false)
@@ -229,6 +231,7 @@ export function LearnShellClient({
               currentCompetency={currentCompetency}
               currentModule={currentModule}
               userRole={userRole}
+              certificateAvailable={certificateAvailable}
             />
             
             {/* Mobile drawer */}
@@ -259,6 +262,7 @@ export function LearnShellClient({
                   currentCompetency={currentCompetency}
                   currentModule={currentModule}
                   userRole={userRole}
+                  certificateAvailable={certificateAvailable}
                   onNavigate={() => setDrawerOpen(false)}
                 />
               </div>

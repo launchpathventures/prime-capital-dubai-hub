@@ -8,6 +8,7 @@
 
 import { getUserRole, getUserForMenu } from "@/lib/auth/require-auth"
 import { getCompetenciesForSidebar } from "@/lib/learning"
+import { getMyCertificate } from "@/lib/lms/certificate-queries"
 import { LearnShellClient } from "./learn-shell-client"
 
 interface LearnLayoutShellProps {
@@ -16,10 +17,11 @@ interface LearnLayoutShellProps {
 
 export async function LearnLayoutShell({ children }: LearnLayoutShellProps) {
   // Fetch shell data in parallel
-  const [competencies, userRole, userMenu] = await Promise.all([
+  const [competencies, userRole, userMenu, certificate] = await Promise.all([
     getCompetenciesForSidebar(),
     getUserRole(),
     getUserForMenu(),
+    getMyCertificate(),
   ])
 
   return (
@@ -27,6 +29,7 @@ export async function LearnLayoutShell({ children }: LearnLayoutShellProps) {
       competencies={competencies}
       userRole={userRole}
       user={userMenu ?? undefined}
+      certificateAvailable={Boolean(certificate && !certificate.revokedAt)}
     >
       {children}
     </LearnShellClient>
