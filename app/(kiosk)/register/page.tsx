@@ -14,8 +14,14 @@
  * metadata. See ./_components/event-kiosk for the payload contract.
  *
  * Usage:
- *   /register                       → staff type the event name on the setup screen
- *   /register?event=Cityscape%202026 → event name pre-filled, one tap to start
+ *   /register                                  → staff type the event name on the setup screen
+ *   /register?event=Cityscape%202026           → pre-configured link: skips setup, drops
+ *                                                straight into the guest form (no per-use setup)
+ *   /register?event=Cityscape%202026&dist=managers → same, but leads held for managers only
+ *
+ * A pre-configured link is the "preregistered event": share one URL per event and
+ * staff never touch the setup screen. The `event` value is the human-readable name;
+ * `dist` (or `distribution`) selects lead routing — "team" (default) or "managers".
  */
 
 import type { Metadata } from "next"
@@ -27,10 +33,18 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: Promise<{ event?: string }>
+  searchParams: Promise<{ event?: string; dist?: string; distribution?: string }>
 }
 
 export default async function RegisterKioskPage({ searchParams }: PageProps) {
-  const { event } = await searchParams
-  return <EventKiosk initialEventName={event ?? ""} />
+  const { event, dist, distribution } = await searchParams
+  // Accept either `dist` or the longer `distribution`; anything but "managers" is "team".
+  const raw = (dist ?? distribution ?? "").toLowerCase()
+  const initialDistribution = raw === "managers" ? "managers" : "team"
+  return (
+    <EventKiosk
+      initialEventName={event ?? ""}
+      initialDistribution={initialDistribution}
+    />
+  )
 }

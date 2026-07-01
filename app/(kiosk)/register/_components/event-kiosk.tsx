@@ -45,6 +45,10 @@ const INTERESTS: { value: string; label: string }[] = [
 ]
 
 const SESSION_KEY = "pc_kiosk_session"
+// Recent events persist across sessions (localStorage) so an accidental trip to
+// /register offers one-tap access to events this iPad has run before.
+const RECENT_KEY = "pc_kiosk_recent"
+const RECENT_SHOWN = 3
 const THANKS_RESET_MS = 5000
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -70,8 +74,33 @@ interface KioskSession {
   distribution: LeadDistribution
 }
 
+/** Read the recent-events list from localStorage (newest first), tolerating junk. */
+function readRecent(): KioskSession[] {
+  try {
+    const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) ?? "[]")
+    return Array.isArray(list)
+      ? (list as KioskSession[]).filter((e) => e?.eventName && e?.eventTag)
+      : []
+  } catch {
+    return []
+  }
+}
+
+/** Record an event as most-recently-used (front of the list), deduped by tag. Returns the new list. */
+function recordRecent(session: KioskSession): KioskSession[] {
+  const others = readRecent().filter((e) => e.eventTag !== session.eventTag)
+  const next = [session, ...others].slice(0, RECENT_SHOWN)
+  try {
+    window.localStorage.setItem(RECENT_KEY, JSON.stringify(next))
+  } catch {
+    /* non-fatal — recents just won't persist */
+  }
+  return next
+}
+
 interface EventKioskProps {
   initialEventName?: string
+  initialDistribution?: LeadDistribution
 }
 
 /** Slugify an event name into a stable, CRM-friendly tag, e.g. "event-cityscape-2026". */
@@ -89,11 +118,20 @@ function freshId(): string {
   return generateSubmissionId()
 }
 
-export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
-  const [phase, setPhase] = useState<Phase>("setup")
-  const [eventName, setEventName] = useState(initialEventName)
-  const [eventTag, setEventTag] = useState("")
-  const [distribution, setDistribution] = useState<LeadDistribution>("team")
+export function EventKiosk({
+  initialEventName = "",
+  initialDistribution = "team",
+}: EventKioskProps) {
+  // A pre-configured link (event supplied in the URL) is a "preregistered" event:
+  // staff never see the setup screen, they land straight on the guest form.
+  const presetName = initialEventName.trim()
+  const preconfigured = presetName.length > 0
+
+  const [phase, setPhase] = useState<Phase>(preconfigured ? "form" : "setup")
+  const [eventName, setEventName] = useState(presetName)
+  const [eventTag, setEventTag] = useState(preconfigured ? toEventTag(presetName) : "")
+  const [distribution, setDistribution] = useState<LeadDistribution>(initialDistribution)
+  const [recent, setRecent] = useState<KioskSession[]>([])
 
   // Guest form state
   const [fullName, setFullName] = useState("")
@@ -121,6 +159,22 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
   // Resume an active kiosk after an accidental refresh — staff shouldn't have
   // to re-enter the event name if the iPad reloads mid-event.
   useEffect(() => {
+    // A pre-configured link is authoritative: persist its event so a refresh
+    // keeps it, and ignore any leftover session from a different event. Also
+    // remember it as a recent event for future one-tap access.
+    if (preconfigured) {
+      const session = { eventName: presetName, eventTag, distribution } satisfies KioskSession
+      try {
+        window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+      } catch {
+        /* non-fatal — link still works, just won't survive a refresh */
+      }
+      // Hydrate recents too, so tapping Exit lands on a populated setup screen.
+      setRecent(recordRecent(session))
+      return
+    }
+    // Offer this iPad's recent events on the setup screen.
+    setRecent(readRecent())
     try {
       const raw = window.sessionStorage.getItem(SESSION_KEY)
       if (!raw) return
@@ -136,6 +190,8 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
     } catch {
       /* ignore malformed session */
     }
+    // Mount-only: reads the initial link config / stored session exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Focus the first field whenever the blank form is shown.
@@ -162,6 +218,27 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
 
   // ---- Setup phase ----------------------------------------------------------
 
+  // Lock into kiosk mode for a given event: persist the session, record it as a
+  // recent event, clear the form, and show the guest form. Shared by the setup
+  // form and the one-tap "recent events" buttons.
+  const beginSession = useCallback(
+    (session: KioskSession) => {
+      setEventName(session.eventName)
+      setEventTag(session.eventTag)
+      setDistribution(session.distribution)
+      setError(null)
+      try {
+        window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+      } catch {
+        /* non-fatal — kiosk still works, just won't survive a refresh */
+      }
+      setRecent(recordRecent(session))
+      resetGuestForm()
+      setPhase("form")
+    },
+    [resetGuestForm],
+  )
+
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault()
     const name = eventName.trim()
@@ -169,20 +246,7 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
       setError("Enter the event name to start")
       return
     }
-    const tag = toEventTag(name)
-    setEventName(name)
-    setEventTag(tag)
-    setError(null)
-    try {
-      window.sessionStorage.setItem(
-        SESSION_KEY,
-        JSON.stringify({ eventName: name, eventTag: tag, distribution } satisfies KioskSession),
-      )
-    } catch {
-      /* non-fatal — kiosk still works, just won't survive a refresh */
-    }
-    resetGuestForm()
-    setPhase("form")
+    beginSession({ eventName: name, eventTag: toEventTag(name), distribution })
   }
 
   const handleExit = () => {
@@ -359,6 +423,28 @@ export function EventKiosk({ initialEventName = "" }: EventKioskProps) {
               <ArrowRightIcon className="h-4 w-4" />
             </button>
           </form>
+
+          {recent.length > 0 && (
+            <div className="kiosk__recent">
+              <span className="kiosk__recent-label">Recent events</span>
+              <div className="kiosk__recent-list">
+                {recent.map((item) => (
+                  <button
+                    key={item.eventTag}
+                    type="button"
+                    className="kiosk__recent-item"
+                    onClick={() => beginSession(item)}
+                  >
+                    <span className="kiosk__recent-name">{item.eventName}</span>
+                    {item.distribution === "managers" && (
+                      <span className="kiosk__recent-tag">Managers only</span>
+                    )}
+                    <ArrowRightIcon className="kiosk__recent-arrow h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

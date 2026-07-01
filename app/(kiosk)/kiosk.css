@@ -409,6 +409,71 @@ textarea.kiosk__input {
   opacity: 0.75;
 }
 
+/* Recent events — one-tap re-entry on the setup screen */
+.kiosk__recent {
+  width: 100%;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(87, 108, 117, 0.18);
+  text-align: left;
+}
+
+.kiosk__recent-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(87, 108, 117, 0.7);
+  margin-bottom: 0.75rem;
+}
+
+.kiosk__recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kiosk__recent-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: #fff;
+  border: 1px solid rgba(87, 108, 117, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--web-ash);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.kiosk__recent-item:hover {
+  border-color: var(--web-spruce);
+  background: rgba(87, 108, 117, 0.04);
+}
+
+.kiosk__recent-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.kiosk__recent-tag {
+  padding: 0.15rem 0.45rem;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--web-spruce);
+  background: rgba(87, 108, 117, 0.1);
+  border-radius: 3px;
+}
+
+.kiosk__recent-arrow {
+  margin-left: auto;
+  color: var(--web-spruce);
+  opacity: 0.6;
+}
+
 /* Faint staff cue shown on the guest form when distribution is "managers" */
 .kiosk__mode-badge {
   position: absolute;
