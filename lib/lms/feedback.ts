@@ -8,6 +8,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { fetchAllRows } from "@/lib/supabase/fetch-all"
 import { revalidatePath } from "next/cache"
 import type { Feedback, FeedbackInput } from "./feedback-types"
 
@@ -125,23 +126,27 @@ export async function getAllFeedback(filters?: {
 }): Promise<Feedback[]> {
   const supabase = await createClient()
 
-  let query = supabase
-    .from("lms_feedback")
-    .select("*")
-    .order("created_at", { ascending: false })
+  // Paged past the 1000-row cap so the admin list never silently drops feedback.
+  const data = await fetchAllRows<Feedback>((from, to) => {
+    let query = supabase
+      .from("lms_feedback")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, to)
 
-  if (filters?.status && filters.status !== "all") {
-    query = query.eq("status", filters.status)
-  }
+    if (filters?.status && filters.status !== "all") {
+      query = query.eq("status", filters.status)
+    }
 
-  if (filters?.type && filters.type !== "all") {
-    query = query.eq("feedback_type", filters.type)
-  }
+    if (filters?.type && filters.type !== "all") {
+      query = query.eq("feedback_type", filters.type)
+    }
 
-  const { data, error } = await query
-  if (error) throw error
+    return query
+  })
 
-  return (data as Feedback[]) || []
+  return data
 }
 
 // -----------------------------------------------------------------------------

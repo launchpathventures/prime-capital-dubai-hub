@@ -183,20 +183,25 @@ async function getStats() {
     .eq("role", "learner")
     .in("certification_status", ["ready", "in_progress"])
   
-  // Get pass rate from attempts (if table exists)
-  const { data: attempts } = await supabase
+  // Get pass rate from attempts (if table exists). Counted server-side so the ratio
+  // stays correct past the 1000-row cap instead of fetching and counting rows in JS.
+  const { count: totalAttempts } = await supabase
     .from("certification_attempts")
-    .select("outcome")
-  
-  const passRate = attempts && attempts.length > 0
-    ? Math.round((attempts.filter(a => a.outcome === 'passed').length / attempts.length) * 100)
+    .select("*", { count: "exact", head: true })
+  const { count: passedAttempts } = await supabase
+    .from("certification_attempts")
+    .select("*", { count: "exact", head: true })
+    .eq("outcome", "passed")
+
+  const passRate = totalAttempts && totalAttempts > 0
+    ? Math.round(((passedAttempts || 0) / totalAttempts) * 100)
     : null
   
   return {
     certified: certifiedCount || 0,
     pending: pendingCount || 0,
     passRate,
-    totalAttempts: attempts?.length || 0,
+    totalAttempts: totalAttempts || 0,
   }
 }
 
