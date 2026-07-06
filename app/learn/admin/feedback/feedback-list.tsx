@@ -6,6 +6,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server"
+import { fetchAllRows } from "@/lib/supabase/fetch-all"
 import { FeedbackCard } from "./feedback-card"
 import { type Feedback, getFeedbackFileUrls } from "@/lib/lms/feedback"
 import { MessageSquareIcon } from "lucide-react"
@@ -18,27 +19,32 @@ type Props = {
 export async function FeedbackList({ status, type }: Props) {
   const supabase = await createClient()
 
-  let query = supabase
-    .from("lms_feedback")
-    .select(`
-      *,
-      user_profiles:user_id (full_name)
-    `)
-    .order("created_at", { ascending: false })
+  // Paged past the 1000-row cap so no feedback silently disappears from the list.
+  const feedback = await fetchAllRows<Feedback & { user_profiles: { full_name: string } | null }>((from, to) => {
+    let query = supabase
+      .from("lms_feedback")
+      .select(`
+        *,
+        user_profiles:user_id (full_name)
+      `)
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, to)
 
-  if (status && status !== "all") {
-    // Show specific status
-    query = query.eq("status", status)
-  } else {
-    // Default: exclude archived feedback
-    query = query.neq("status", "archived")
-  }
+    if (status && status !== "all") {
+      // Show specific status
+      query = query.eq("status", status)
+    } else {
+      // Default: exclude archived feedback
+      query = query.neq("status", "archived")
+    }
 
-  if (type && type !== "all") {
-    query = query.eq("feedback_type", type)
-  }
+    if (type && type !== "all") {
+      query = query.eq("feedback_type", type)
+    }
 
-  const { data: feedback } = await query
+    return query
+  })
 
   if (!feedback?.length) {
     return (

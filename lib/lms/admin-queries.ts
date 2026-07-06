@@ -5,7 +5,9 @@
  * All queries respect RLS and require admin role.
  */
 
+import { cache } from "react"
 import { createClient } from "@/lib/supabase/server"
+import { fetchAllRows } from "@/lib/supabase/fetch-all"
 
 // =============================================================================
 // Types
@@ -93,8 +95,12 @@ export interface ProgressStats {
 
 /**
  * Get all learners with their progress summary.
+ *
+ * Wrapped in React's `cache()` so multiple callers in the same request (e.g. the team
+ * page calls this directly AND via getProgressStats) share one paginated fetch instead
+ * of hitting the database twice.
  */
-export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
+export const getAllLearnersWithProgress = cache(async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
   const supabase = await createClient()
 
   // Get all user profiles (admins + learners)
@@ -121,27 +127,47 @@ export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
     }
   }
 
-  // Get all learning progress
-  const { data: allProgress } = await supabase
-    .from("learning_progress")
-    .select("user_id, status, completed_at")
-
-  // Get all quiz attempts for last activity
-  const { data: allQuizAttempts } = await supabase
-    .from("quiz_attempts")
-    .select("user_id, attempted_at")
-
-  // Get all scenario progress for last activity
-  const { data: allScenarioProgress } = await supabase
-    .from("scenario_progress")
-    .select("user_id, completed_at")
+  // Get all learning progress, quiz attempts and scenario progress across every learner.
+  // These tables exceed PostgREST's 1000-row cap, so they must be paged (ordered by id) —
+  // a single unpaginated read silently drops rows and undercounts completion for whoever
+  // falls in the truncated tail. The three reads are independent, so run them in parallel.
+  const [allProgress, allQuizAttempts, allScenarioProgress] = await Promise.all([
+    fetchAllRows<{ user_id: string; module_id: string; status: string; completed_at: string | null }>(
+      (from, to) =>
+        supabase
+          .from("learning_progress")
+          .select("user_id, module_id, status, completed_at")
+          .order("id")
+          .range(from, to),
+    ),
+    fetchAllRows<{ user_id: string; attempted_at: string }>(
+      (from, to) =>
+        supabase
+          .from("quiz_attempts")
+          .select("user_id, attempted_at")
+          .order("id")
+          .range(from, to),
+    ),
+    fetchAllRows<{ user_id: string; completed_at: string | null }>(
+      (from, to) =>
+        supabase
+          .from("scenario_progress")
+          .select("user_id, completed_at")
+          .order("id")
+          .range(from, to),
+    ),
+  ])
 
   // Build learner summaries
   const learners: LearnerSummary[] = (profiles || []).map((profile) => {
     const userProgress = allProgress?.filter((p) => p.user_id === profile.id) || []
-    const completedModules = userProgress.filter((p) => p.status === "completed").length
+    // Count distinct completed modules — robust to a row being read twice across a
+    // pagination boundary during a concurrent write, and can never exceed totalModules.
+    const completedModules = new Set(
+      userProgress.filter((p) => p.status === "completed").map((p) => p.module_id),
+    ).size
     const overallProgress = totalModules && totalModules > 0
-      ? Math.round((completedModules / totalModules) * 100)
+      ? Math.min(100, Math.round((completedModules / totalModules) * 100))
       : 0
 
     // Calculate last activity from all sources
@@ -155,7 +181,7 @@ export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
 
     const scenarioDates = (allScenarioProgress || [])
       .filter((s) => s.user_id === profile.id && s.completed_at)
-      .map((s) => new Date(s.completed_at).getTime())
+      .map((s) => new Date(s.completed_at!).getTime())
 
     const allDates = [...progressDates, ...quizDates, ...scenarioDates]
     const lastActivityDate = allDates.length > 0 ? Math.max(...allDates) : null
@@ -181,7 +207,7 @@ export async function getAllLearnersWithProgress(): Promise<LearnerSummary[]> {
   })
 
   return learners
-}
+})
 
 /**
  * Get progress statistics summary.

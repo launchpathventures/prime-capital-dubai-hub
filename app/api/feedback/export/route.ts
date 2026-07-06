@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { fetchAllRows } from "@/lib/supabase/fetch-all"
 import { type Feedback } from "@/lib/lms/feedback"
 
 export async function GET(request: NextRequest) {
@@ -35,28 +36,33 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status")
   const type = searchParams.get("type")
 
-  // Fetch feedback
-  let query = supabase
-    .from("lms_feedback")
-    .select("*")
-    .order("created_at", { ascending: false })
+  // Fetch feedback, paged past the 1000-row cap so exports are never truncated.
+  let feedback: Feedback[]
+  try {
+    feedback = await fetchAllRows<Feedback>((from, to) => {
+      let query = supabase
+        .from("lms_feedback")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
 
-  if (status && status !== "all") {
-    query = query.eq("status", status)
-  }
+      if (status && status !== "all") {
+        query = query.eq("status", status)
+      }
 
-  if (type && type !== "all") {
-    query = query.eq("feedback_type", type)
-  }
+      if (type && type !== "all") {
+        query = query.eq("feedback_type", type)
+      }
 
-  const { data: feedback, error } = await query
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+      return query
+    })
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 })
   }
 
   // Generate Markdown
-  const markdown = generateMarkdown((feedback as Feedback[]) || [])
+  const markdown = generateMarkdown(feedback)
 
   // Return as downloadable file
   return new NextResponse(markdown, {

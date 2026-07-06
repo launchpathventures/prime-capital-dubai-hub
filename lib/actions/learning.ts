@@ -9,6 +9,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { fetchAllRows } from "@/lib/supabase/fetch-all"
 import { revalidatePath } from "next/cache"
 import { config } from "@/lib/config"
 import { trackActionError } from "@/lib/error-tracking"
@@ -350,11 +351,17 @@ export async function getProgressStats(): Promise<ProgressStats> {
   const completedModules = progressRecords?.filter((p) => p.status === "completed").length || 0
   const inProgressModules = progressRecords?.filter((p) => p.status === "in_progress").length || 0
   
-  // Get total quizzes (count unique module_id from quiz_questions)
-  const { data: quizModules } = await supabase
-    .from("quiz_questions")
-    .select("module_id")
-  
+  // Get total quizzes (count unique module_id from quiz_questions). Paged past the
+  // 1000-row cap so the distinct count stays correct as the question bank grows.
+  const quizModules = await fetchAllRows<{ module_id: string }>(
+    (from, to) =>
+      supabase
+        .from("quiz_questions")
+        .select("module_id")
+        .order("id")
+        .range(from, to),
+  )
+
   const uniqueQuizModules = new Set(quizModules?.map((q) => q.module_id) || [])
   const totalQuizzes = uniqueQuizModules.size
   
