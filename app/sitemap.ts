@@ -13,7 +13,7 @@ import { headers } from "next/headers"
 import { config } from "@/lib/config"
 import { getBrand } from "@/lib/brand"
 import { getWebTeamMembers } from "@/lib/content"
-import { getCrmProperties } from "@/lib/crm/client"
+import { getAllCrmProperties } from "@/lib/crm/client"
 
 async function primeCapitalSitemap(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
@@ -30,10 +30,8 @@ async function primeCapitalSitemap(baseUrl: string): Promise<MetadataRoute.Sitem
   const propertyPages: MetadataRoute.Sitemap = []
   if (config.features.properties) {
     try {
-      const { properties } = await getCrmProperties({
-        limit: 50,
-        promotionStatus: "top_property",
-      })
+      // Enumerate the full inventory (off-plan + secondary), not just page 1.
+      const properties = await getAllCrmProperties()
       properties.forEach((property) => {
         propertyPages.push({
           url: `${baseUrl}/properties/${property.slug}`,

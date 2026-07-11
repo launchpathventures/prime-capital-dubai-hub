@@ -235,6 +235,36 @@ export async function getCrmProperties(
 }
 
 /**
+ * Walk the list cursor to collect the full result set under a filter. The CRM
+ * caps each request at 50 rows, so this pages through until exhausted. Bounded
+ * by maxPages (50 rows each) so a misbehaving upstream can't loop forever.
+ *
+ * Used server-side where completeness matters more than a single page (e.g. the
+ * sitemap enumerating every property detail URL).
+ */
+export async function getAllCrmProperties(
+  filters?: CrmListFilters,
+  maxPages = 40,
+  opts?: FetchOptions,
+): Promise<CrmProperty[]> {
+  if (!isCrmConfigured()) return []
+
+  const all: CrmProperty[] = []
+  let cursor = filters?.cursor
+  for (let page = 0; page < maxPages; page++) {
+    const data = await crmFetch<CrmListResponse>(
+      buildListUrl({ ...filters, cursor, limit: 50 }),
+      opts,
+    )
+    if (!data) break
+    all.push(...data.data.map(mapListItem))
+    if (!data.pagination.has_more || !data.pagination.next_cursor) break
+    cursor = data.pagination.next_cursor
+  }
+  return all
+}
+
+/**
  * Fetch a single property by slug or UUID. Returns null on 404 / failure so
  * the PDP can fall back to notFound().
  *

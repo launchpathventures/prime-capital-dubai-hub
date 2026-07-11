@@ -50,6 +50,16 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "api.reelly.io",
       },
+      {
+        // Reelly-sourced listings served via PropertyFinder's shared CDN
+        protocol: "https",
+        hostname: "static.shared.propertyfinder.ae",
+      },
+      {
+        // Reelly backend media bucket
+        protocol: "https",
+        hostname: "reelly-backend.s3.amazonaws.com",
+      },
     ],
   },
   async redirects() {
@@ -118,7 +128,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://uozpalmasfxjsxhfyghn.supabase.co https://api.mapbox.com https://pplx-res.cloudinary.com https://static.propsearch.ae https://skyviewdubai.com https://i.ytimg.com https://api.reelly.io https://purecatamphetamine.github.io; font-src 'self' https://fonts.gstatic.com; media-src 'self' https://vhgtbeimnkitqgekvtrz.supabase.co; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com https://www.youtube.com https://youtube.com; frame-src https://calendly.com https://calendar.google.com https://crm.primecapitaldubai.com https://www.youtube.com https://www.youtube-nocookie.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://uozpalmasfxjsxhfyghn.supabase.co https://api.mapbox.com https://pplx-res.cloudinary.com https://static.propsearch.ae https://skyviewdubai.com https://i.ytimg.com https://api.reelly.io https://static.shared.propertyfinder.ae https://reelly-backend.s3.amazonaws.com https://purecatamphetamine.github.io; font-src 'self' https://fonts.gstatic.com; media-src 'self' https://vhgtbeimnkitqgekvtrz.supabase.co; connect-src 'self' https://ebirxyrjwaulyqizcbcs.supabase.co https://vhgtbeimnkitqgekvtrz.supabase.co https://api.mapbox.com https://va.vercel-scripts.com https://www.youtube.com https://youtube.com; frame-src https://calendly.com https://calendar.google.com https://crm.primecapitaldubai.com https://www.youtube.com https://www.youtube-nocookie.com;",
           },
         ],
       },

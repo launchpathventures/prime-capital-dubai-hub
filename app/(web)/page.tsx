@@ -91,11 +91,13 @@ export default async function HomePage() {
     redirect(config.features.rootRedirect)
   }
 
+  // Featured strip + hero search span the full live inventory (off-plan and
+  // secondary). "newest" surfaces the most recently listed picks up top.
   const [propertiesResult, testimonials, stats, facets] = await Promise.all([
-    getCrmProperties({ limit: 12, promotionStatus: "top_property" }),
+    getCrmProperties({ limit: 12, sort: "newest" }),
     getWebTestimonials(),
     getWebStats(),
-    fetchPropertyFacets({ promotionStatus: "top_property" }),
+    fetchPropertyFacets(),
   ])
   const properties = propertiesResult.properties
   const featuredProperties = properties.slice(0, 3)

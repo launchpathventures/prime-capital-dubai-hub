@@ -1,15 +1,16 @@
 /**
  * CATALYST - Properties Listing Page
  *
- * Curated portfolio sourced from the AgentCRM public API. We hard-gate to
- * promotion_status=top_property so this page only ever shows the curated
- * picks — the CRM's full catalogue is ~1.4k rows and would silently
- * truncate at 50 otherwise.
+ * Full agency inventory sourced from the AgentCRM public API (both off-plan
+ * and secondary listings). The CRM caps each request at 50 rows, so the first
+ * page renders here and the grid walks the cursor via /api/properties to load
+ * the rest (~1.1k rows).
  *
  * Filter values and counts are sourced from the CRM facets endpoint
  * (`/api/public/properties/facets`) — see lib/crm/facets.ts. No hardcoded
  * enums for areas, property types, listing types, or bedrooms live in this
- * surface.
+ * surface. Filter parsing is shared with the pagination route via
+ * lib/crm/browse-filters.ts so page 1 and pages 2+ agree.
  */
 
 import Link from "next/link"
@@ -18,14 +19,7 @@ import Image from "next/image"
 import { config } from "@/lib/config"
 import { getCrmProperties } from "@/lib/crm/client"
 import { fetchPropertyFacets } from "@/lib/crm/facets"
-import type {
-  CrmListFilters,
-  CrmListingType,
-  CrmPromotionStatus,
-  CrmPropertyStatus,
-  CrmPropertyType,
-  CrmSort,
-} from "@/lib/crm"
+import { parseBrowseFilters } from "@/lib/crm/browse-filters"
 import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
@@ -78,25 +72,6 @@ interface PropertiesPageProps {
   }>
 }
 
-const ALLOWED_SORTS: CrmSort[] = ["price_asc", "price_desc", "newest", "oldest"]
-
-function singleParam(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) return value[0]
-  return value
-}
-
-function numericParam(value: string | string[] | undefined): number | undefined {
-  const raw = singleParam(value)
-  if (raw == null || raw === "") return undefined
-  const parsed = Number(raw)
-  return Number.isFinite(parsed) ? parsed : undefined
-}
-
-function textParam(value: string | string[] | undefined): string | undefined {
-  const raw = singleParam(value)?.trim()
-  return raw ? raw : undefined
-}
-
 const USER_FILTER_KEYS = [
   "q",
   "property_type",
@@ -119,33 +94,14 @@ function hasAnyUserFilter(params: Awaited<PropertiesPageProps["searchParams"]>):
   })
 }
 
-function parseFilters(
-  params: Awaited<PropertiesPageProps["searchParams"]>,
-): CrmListFilters {
-  const sortRaw = singleParam(params.sort)
-  const sort = ALLOWED_SORTS.includes(sortRaw as CrmSort) ? (sortRaw as CrmSort) : undefined
-  const propertyType = singleParam(params.property_type) as CrmPropertyType | undefined
-
-  // The CRM silently drops invalid filter values, so we forward strings as-is
-  // (cast to the canonical union type for downstream signatures). No
-  // site-side allowlist — keeps the CRM as the single source of truth for
-  // which values exist.
-  return {
-    q: textParam(params.q),
-    propertyType: propertyType && propertyType !== "all" ? propertyType : undefined,
-    area: textParam(params.area),
-    listingType: singleParam(params.listing_type) as CrmListingType | undefined,
-    bedroomsMin: numericParam(params.bedrooms_min),
-    bedroomsMax: numericParam(params.bedrooms_max),
-    priceMin: numericParam(params.price_min),
-    priceMax: numericParam(params.price_max),
-    status: singleParam(params.status) as CrmPropertyStatus | undefined,
-    promotionStatus:
-      (singleParam(params.promotion_status) as CrmPromotionStatus | undefined) ?? "top_property",
-    tag: textParam(params.tag),
-    sort,
-    limit: 50,
+/** Normalise the route's params object into URLSearchParams for the shared parser. */
+function toSearchParams(params: Awaited<PropertiesPageProps["searchParams"]>): URLSearchParams {
+  const sp = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    const single = Array.isArray(value) ? value[0] : value
+    if (single != null && single !== "") sp.set(key, single)
   }
+  return sp
 }
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
@@ -155,8 +111,9 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     return <FeatureDisabledState />
   }
 
-  const filters = parseFilters(params)
-  const [{ properties, total }, facets] = await Promise.all([
+  const searchParamsObj = toSearchParams(params)
+  const filters = parseBrowseFilters(searchParamsObj)
+  const [{ properties, total, nextCursor, hasMore }, facets] = await Promise.all([
     getCrmProperties(filters),
     fetchPropertyFacets(filters),
   ])
@@ -168,9 +125,11 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     return <EmptyState />
   }
 
+  // Hero stats span the whole filtered result set, not just the first page —
+  // counts come from the facets endpoint (distinct areas / property types).
   const propertyCount = total // pagination.total under the active filter set
-  const categoryCount = new Set(properties.map((p) => p.propertyType.toLowerCase())).size
-  const areaCount = new Set(properties.map((p) => p.area.toLowerCase())).size
+  const categoryCount = facets.propertyTypes.length
+  const areaCount = facets.areas.length
 
   return (
     <div className="web-properties">
@@ -186,7 +145,13 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         </Container>
       </section>
 
-      <PropertiesGrid properties={properties} />
+      <PropertiesGrid
+        // Remount on filter change so load-more state resets to page 1.
+        key={searchParamsObj.toString()}
+        initialProperties={properties}
+        initialCursor={nextCursor}
+        initialHasMore={hasMore}
+      />
 
       <CTASection />
     </div>

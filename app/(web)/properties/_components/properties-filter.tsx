@@ -1,35 +1,80 @@
 /**
- * CATALYST - Properties Grid
+ * CATALYST - Properties Grid + Load More
  *
- * Pure presentation: renders the property card grid. All filtering lives
- * in the URL and is applied at the CRM list call; this component only
- * paints what the server returned.
+ * Renders the property card grid seeded with the server's first page, then
+ * walks the CRM cursor via /api/properties to reveal the rest of the inventory
+ * (the CRM caps each request at 50 rows). Filtering still lives entirely in the
+ * URL; this component is remounted (keyed on the filter string) whenever the
+ * active filters change, so load-more state always resets to page 1.
  */
 
+"use client"
+
+import { useCallback, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useSearchParams } from "next/navigation"
+import { ArrowRightIcon, Loader2Icon, MapPinIcon } from "lucide-react"
 
 import { Container, Stack, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRightIcon, MapPinIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 import { propertyTypeImages } from "../../_surface/property-images"
 import { formatCrmBedrooms, formatCrmPriceRange, getStatusBadge, type CrmProperty } from "@/lib/crm"
 
 interface PropertiesGridProps {
-  properties: CrmProperty[]
+  /** Server-rendered first page (already filtered). */
+  initialProperties: CrmProperty[]
+  /** Opaque cursor for the next page, or null when there is no more inventory. */
+  initialCursor: string | null
+  initialHasMore: boolean
 }
 
-export function PropertiesGrid({ properties }: PropertiesGridProps) {
+interface PropertiesPageResponse {
+  properties: CrmProperty[]
+  nextCursor: string | null
+  hasMore: boolean
+  total: number
+}
+
+export function PropertiesGrid({
+  initialProperties,
+  initialCursor,
+  initialHasMore,
+}: PropertiesGridProps) {
+  const searchParams = useSearchParams()
+  const [properties, setProperties] = useState(initialProperties)
+  const [cursor, setCursor] = useState(initialCursor)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const loadMore = useCallback(async () => {
+    if (!cursor || isLoading) return
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("cursor", cursor)
+      const res = await fetch(`/api/properties?${params.toString()}`)
+      if (!res.ok) return
+      const data = (await res.json()) as PropertiesPageResponse
+      setProperties((prev) => [...prev, ...data.properties])
+      setCursor(data.nextCursor)
+      setHasMore(data.hasMore)
+    } catch {
+      // Swallow: a failed load-more leaves the current results intact and the
+      // button available to retry.
+    } finally {
+      setIsLoading(false)
+    }
+  }, [cursor, isLoading, searchParams])
+
   return (
     <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
       <Container size="xl">
         {properties.length === 0 ? (
           <Stack gap="md" align="center" className="text-center py-12">
-            <Title
-              as="h2"
-              className="font-headline text-[var(--web-ash)] text-2xl font-normal"
-            >
+            <Title as="h2" className="font-headline text-[var(--web-ash)] text-2xl font-normal">
               No properties match those filters
             </Title>
             <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-md">
@@ -37,11 +82,31 @@ export function PropertiesGrid({ properties }: PropertiesGridProps) {
             </Text>
           </Stack>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          <Stack gap="xl" align="center">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+              {properties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+
+            {hasMore && (
+              <Button
+                type="button"
+                onClick={loadMore}
+                disabled={isLoading}
+                className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                    Loading
+                  </>
+                ) : (
+                  "Load More Properties"
+                )}
+              </Button>
+            )}
+          </Stack>
         )}
       </Container>
     </section>
@@ -104,7 +169,9 @@ function PropertyCard({ property }: { property: CrmProperty }) {
           <div className="text-[var(--web-spruce)] text-[14px] font-light mb-4">
             {formatCrmBedrooms(property)}
             {property.bathrooms != null ? ` • ${property.bathrooms} Bath` : ""}
-            {property.sqft != null && property.sqft > 0 ? ` • ${property.sqft.toLocaleString("en-AE")} sqft` : ""}
+            {property.sqft != null && property.sqft > 0
+              ? ` • ${property.sqft.toLocaleString("en-AE")} sqft`
+              : ""}
           </div>
 
           <div className="flex items-center justify-between">
