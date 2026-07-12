@@ -80,10 +80,19 @@ function appendFilterParams(url: URL, filters: CrmListFilters | undefined): void
   if (filters.tag) url.searchParams.set("tag", filters.tag)
 }
 
+/**
+ * `off_plan` is a listing status the CRM also emits as a property_type. It's
+ * redundant with the listing-type filter and confusing sat next to real types
+ * (apartment / villa / townhouse), so we drop it from the Property Type options.
+ */
+const EXCLUDED_PROPERTY_TYPES = new Set(["off_plan"])
+
 function mapFacets(raw: RawFacetsResponse): PublicPropertyFacets {
   return {
     areas: mapFacetOptions(raw.areas),
-    propertyTypes: mapFacetOptions(raw.property_types),
+    propertyTypes: mapFacetOptions(raw.property_types).filter(
+      (option) => !EXCLUDED_PROPERTY_TYPES.has(option.value),
+    ),
     listingTypes: mapFacetOptions(raw.listing_types),
     bedrooms: mapFacetOptions(raw.bedrooms),
   }

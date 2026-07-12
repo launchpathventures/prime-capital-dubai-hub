@@ -80,7 +80,7 @@ const areaImages: Record<string, string> = {
   "Palm Jumeirah": "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?q=80&w=800&auto=format&fit=crop",
   "Dubai Marina": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop",
   "Emirates Hills": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
-  "Jumeirah Bay": "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=800&auto=format&fit=crop",
+  "Dubai Islands": "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=800&auto=format&fit=crop",
   "Business Bay": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop",
 }
 
@@ -405,7 +405,7 @@ function AreasSection() {
     { name: "Palm Jumeirah", description: "Waterfront prestige" },
     { name: "Dubai Marina", description: "Urban sophistication" },
     { name: "Emirates Hills", description: "Private estate living" },
-    { name: "Jumeirah Bay", description: "Ultra-luxury exclusivity" },
+    { name: "Dubai Islands", description: "Beachfront island living" },
     { name: "Business Bay", description: "Central connectivity" },
   ]
 
