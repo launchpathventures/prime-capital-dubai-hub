@@ -28,6 +28,7 @@ import {
   type PublicPropertyFacetOption,
   type PublicPropertyFacets,
 } from "@/lib/crm"
+import { DEFAULT_BROWSE_LISTING_TYPE } from "@/lib/crm/browse-filters"
 
 interface PropertiesFilterBarProps {
   facets: PublicPropertyFacets
@@ -82,7 +83,7 @@ export function PropertiesFilterBar({ facets, resultCount }: PropertiesFilterBar
 
   const currentArea = searchParams.get("area") ?? ""
   const currentType = searchParams.get("property_type") ?? ""
-  const currentListing = searchParams.get("listing_type") ?? ""
+  const currentListing = searchParams.get("listing_type") ?? DEFAULT_BROWSE_LISTING_TYPE
   const currentBedrooms = bedroomBucketFromParams(
     searchParams.get("bedrooms_min"),
     searchParams.get("bedrooms_max"),

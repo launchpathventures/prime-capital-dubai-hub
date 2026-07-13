@@ -5,9 +5,9 @@
  * Shared by the /properties server page (initial render) and the
  * /api/properties route (load-more pagination) so both stay in lockstep.
  *
- * No promotion_status default: the public browse shows the agency's full
- * inventory. Callers that want the curated subset pass promotion_status
- * explicitly.
+ * No promotion_status default: callers that want the curated subset pass
+ * promotion_status explicitly. The public browse defaults to off-plan
+ * listings so the initial portfolio view leads with primary opportunities.
  */
 
 import type {
@@ -21,6 +21,7 @@ import type {
 
 /** Max rows the CRM returns per request; also our page size for load-more. */
 export const BROWSE_PAGE_SIZE = 50
+export const DEFAULT_BROWSE_LISTING_TYPE: CrmListingType = "off_plan"
 
 const ALLOWED_SORTS: CrmSort[] = ["price_asc", "price_desc", "newest", "oldest"]
 
@@ -51,7 +52,7 @@ export function parseBrowseFilters(sp: URLSearchParams): CrmListFilters {
     propertyType:
       propertyType && propertyType !== "all" ? (propertyType as CrmPropertyType) : undefined,
     area: textValue(sp, "area"),
-    listingType: (sp.get("listing_type") as CrmListingType | null) ?? undefined,
+    listingType: (sp.get("listing_type") as CrmListingType | null) ?? DEFAULT_BROWSE_LISTING_TYPE,
     bedroomsMin: numericValue(sp, "bedrooms_min"),
     bedroomsMax: numericValue(sp, "bedrooms_max"),
     priceMin: numericValue(sp, "price_min"),
