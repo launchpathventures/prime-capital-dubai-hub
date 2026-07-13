@@ -15,6 +15,13 @@ import { getBrand } from "@/lib/brand"
 import { getWebTeamMembers } from "@/lib/content"
 import { getAllCrmProperties } from "@/lib/crm/client"
 
+// Brand detection reads headers(), so this route renders dynamically and
+// re-walks the CRM cursor (~23 pages) on a cold cache. Give it generous
+// headroom above the default function timeout; getAllCrmProperties also
+// self-bounds on a wall-clock deadline so a slow upstream degrades to a
+// partial sitemap instead of a 504.
+export const maxDuration = 60
+
 async function primeCapitalSitemap(baseUrl: string): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date("2026-02-11"), changeFrequency: "weekly", priority: 1 },

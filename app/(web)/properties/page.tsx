@@ -125,11 +125,20 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     return <EmptyState />
   }
 
-  // Hero stats span the whole filtered result set, not just the first page —
-  // counts come from the facets endpoint (distinct areas / property types).
+  // Hero stats span the whole filtered result set, not just the first page.
+  // Facets never self-filter (the areas facet still lists every area even when
+  // one area is selected), so when the matching filter is active the distinct
+  // count collapses to 1 — otherwise use the full facet breadth.
   const propertyCount = total // pagination.total under the active filter set
-  const categoryCount = facets.propertyTypes.length
-  const areaCount = facets.areas.length
+  const areaCount = filters.area ? 1 : facets.areas.length
+  // Floor categories at 1 when results exist: some areas are entirely off-plan,
+  // which we hide as a property type, leaving an empty facet that would
+  // otherwise misread as "0 Categories" next to N properties.
+  const categoryCount = filters.propertyType
+    ? 1
+    : properties.length === 0
+      ? 0
+      : Math.max(1, facets.propertyTypes.length)
 
   return (
     <div className="web-properties">

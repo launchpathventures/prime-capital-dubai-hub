@@ -10,7 +10,7 @@
 
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
@@ -19,6 +19,7 @@ import { ArrowRightIcon, Loader2Icon, MapPinIcon } from "lucide-react"
 import { Container, Stack, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { trackError } from "@/lib/error-tracking"
 
 import { propertyTypeImages } from "../../_surface/property-images"
 import { formatCrmBedrooms, formatCrmPriceRange, getStatusBadge, type CrmProperty } from "@/lib/crm"
@@ -48,26 +49,39 @@ export function PropertiesGrid({
   const [cursor, setCursor] = useState(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [isLoading, setIsLoading] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  // Synchronous in-flight guard: isLoading state lags a render, so a fast
+  // double-click could fire the same cursor twice and duplicate cards.
+  const inFlightRef = useRef(false)
 
   const loadMore = useCallback(async () => {
-    if (!cursor || isLoading) return
+    if (!cursor || inFlightRef.current) return
+    inFlightRef.current = true
     setIsLoading(true)
+    setLoadFailed(false)
     try {
       const params = new URLSearchParams(searchParams.toString())
       params.set("cursor", cursor)
       const res = await fetch(`/api/properties?${params.toString()}`)
-      if (!res.ok) return
+      if (!res.ok) throw new Error(`/api/properties responded ${res.status}`)
       const data = (await res.json()) as PropertiesPageResponse
-      setProperties((prev) => [...prev, ...data.properties])
+      // De-dupe defensively so a retry or overlap can't yield duplicate keys.
+      setProperties((prev) => {
+        const seen = new Set(prev.map((p) => p.id))
+        return [...prev, ...data.properties.filter((p) => !seen.has(p.id))]
+      })
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
-    } catch {
-      // Swallow: a failed load-more leaves the current results intact and the
-      // button available to retry.
+    } catch (error) {
+      // Keep current results; surface a retry affordance and report it so the
+      // client-side failure isn't invisible to monitoring.
+      setLoadFailed(true)
+      trackError(error, { context: "properties-load-more" })
     } finally {
+      inFlightRef.current = false
       setIsLoading(false)
     }
-  }, [cursor, isLoading, searchParams])
+  }, [cursor, searchParams])
 
   return (
     <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
@@ -90,21 +104,30 @@ export function PropertiesGrid({
             </div>
 
             {hasMore && (
-              <Button
-                type="button"
-                onClick={loadMore}
-                disabled={isLoading}
-                className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                    Loading
-                  </>
-                ) : (
-                  "Load More Properties"
+              <Stack gap="sm" align="center">
+                <Button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={isLoading}
+                  className="h-12 px-8 bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] rounded-[2px] text-[11px] font-normal uppercase tracking-[0.2em]"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      Loading
+                    </>
+                  ) : loadFailed ? (
+                    "Try Again"
+                  ) : (
+                    "Load More Properties"
+                  )}
+                </Button>
+                {loadFailed && (
+                  <Text className="text-[var(--web-spruce)] text-[13px] font-light">
+                    Couldn&apos;t load more properties. Please try again.
+                  </Text>
                 )}
-              </Button>
+              </Stack>
             )}
           </Stack>
         )}
@@ -142,6 +165,9 @@ function PropertyCard({ property }: { property: CrmProperty }) {
                 {statusBadge}
               </Badge>
             )}
+            {/* Only shows when a visitor explicitly filters by
+                ?promotion_status=top_property — the default browse is ungated,
+                and the CRM currently tags nothing as top_property. */}
             {property.promotionStatus === "top_property" && (
               <Badge
                 variant="secondary"

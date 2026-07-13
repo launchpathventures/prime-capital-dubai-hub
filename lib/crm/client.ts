@@ -4,9 +4,9 @@
  * Reads property data from the public CRM API. The CRM is the source of
  * truth for listings, pricing, payment plans, and the inline enquiry widget.
  *
- * - List callers should pass promotionStatus="top_property" to surface only
- *   curated picks (matches the "Selected Properties" framing on the site).
- *   Without it, the CRM returns the agency's full catalogue (~1.4k rows).
+ * - List endpoint returns the agency's full catalogue (~1.1k rows: off-plan +
+ *   secondary) by default. promotionStatus is an optional pass-through filter,
+ *   NOT a default gate — the public browse deliberately shows all inventory.
  * - Detail endpoint returns any property regardless of status — UI must show
  *   sold / under-offer / off-market badges from the status field.
  * - All endpoints are public-read with permissive CORS; no auth required.
@@ -213,9 +213,9 @@ const EMPTY_RESULT: GetCrmPropertiesResult = {
 }
 
 /**
- * Fetch the curated list of top-promoted properties for an agency.
- * Returns an empty result on misconfiguration or upstream failure (the
- * marketing site renders a "coming soon" state for empty results).
+ * Fetch one page (max 50 rows) of the agency's property list under the given
+ * filters. Returns an empty result on misconfiguration or upstream failure
+ * (the marketing site renders a "coming soon" state for empty results).
  */
 export async function getCrmProperties(
   filters?: CrmListFilters,
@@ -237,7 +237,9 @@ export async function getCrmProperties(
 /**
  * Walk the list cursor to collect the full result set under a filter. The CRM
  * caps each request at 50 rows, so this pages through until exhausted. Bounded
- * by maxPages (50 rows each) so a misbehaving upstream can't loop forever.
+ * two ways so a slow or misbehaving upstream can't hang the caller: maxPages
+ * (hard page cap) and deadlineMs (wall-clock budget). Hitting either returns
+ * the rows gathered so far rather than throwing.
  *
  * Used server-side where completeness matters more than a single page (e.g. the
  * sitemap enumerating every property detail URL).
@@ -245,10 +247,11 @@ export async function getCrmProperties(
 export async function getAllCrmProperties(
   filters?: CrmListFilters,
   maxPages = 40,
-  opts?: FetchOptions,
+  opts?: FetchOptions & { deadlineMs?: number },
 ): Promise<CrmProperty[]> {
   if (!isCrmConfigured()) return []
 
+  const deadline = Date.now() + (opts?.deadlineMs ?? 25_000)
   const all: CrmProperty[] = []
   let cursor = filters?.cursor
   for (let page = 0; page < maxPages; page++) {
@@ -260,6 +263,7 @@ export async function getAllCrmProperties(
     all.push(...data.data.map(mapListItem))
     if (!data.pagination.has_more || !data.pagination.next_cursor) break
     cursor = data.pagination.next_cursor
+    if (Date.now() >= deadline) break // Degrade to a partial set over a timeout.
   }
   return all
 }
