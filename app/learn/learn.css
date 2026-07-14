@@ -10737,3 +10737,93 @@
 .cert-admin-cert-row__status--revoked {
   color: var(--color-destructive);
 }
+
+/* =============================================================================
+   Module Complete — explicit "Mark as complete" control (quiz-independent)
+   ============================================================================= */
+
+.module-complete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: var(--lms-radius-lg);
+  border: 1px solid var(--gray-300);
+  background: var(--color-background);
+  box-shadow: var(--lms-shadow-sm);
+}
+
+.module-complete--done {
+  flex-direction: column;
+  align-items: stretch;
+  border-color: var(--success-200);
+  background: var(--success-50);
+}
+
+.module-complete__lead {
+  min-width: 0;
+}
+
+.module-complete__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--lms-radius-md);
+  background: var(--primary-100);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.module-complete__icon--done {
+  background: var(--success-100);
+  color: var(--success-600);
+}
+
+.module-complete__icon--cert {
+  background: oklch(from var(--color-primary) l c h / 0.12);
+  color: var(--color-primary);
+}
+
+.module-complete__action {
+  flex-shrink: 0;
+}
+
+/* Certificate-issued callout shown when the final module is completed */
+.module-complete__cert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--success-200);
+}
+
+@media (max-width: 640px) {
+  .module-complete__action,
+  .module-complete__action .ui-button {
+    width: 100%;
+  }
+}
+
+/* Completed module in the competency module list */
+.competency-card--complete .competency-card__index {
+  background: var(--success-100);
+  color: var(--success-600);
+}
+
+.lms-card--clickable.competency-card--complete:hover .competency-card__index {
+  background: var(--success-600);
+  color: white;
+  box-shadow: 0 4px 12px oklch(from var(--success-600) l c h / 0.3);
+}
+
+.competency-card__meta-item--complete {
+  color: var(--success-600);
+  font-weight: 600;
+}

@@ -11,14 +11,15 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Stack, Row, Text } from "@/components/core"
-import { 
-  ClockIcon, 
+import {
+  ClockIcon,
   PlayIcon,
   ArrowRightIcon,
   ClipboardCheckIcon,
   SparklesIcon,
   MessageSquareIcon,
   HeadphonesIcon,
+  CheckIcon,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { AudioPlayer, type AudioTrack } from "@/components/lms/audio-player"
@@ -124,6 +125,27 @@ interface ScenarioCategory {
   scenario_count: number | null
 }
 
+/**
+ * Module IDs the current user has completed. Lets the module list show which
+ * modules are done and how many remain.
+ */
+async function getCompletedModuleIds(): Promise<Set<string>> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return new Set()
+
+  const { data } = await supabase
+    .from("learning_progress")
+    .select("module_id")
+    .eq("user_id", user.id)
+    .eq("status", "completed")
+
+  return new Set((data || []).map((r) => r.module_id))
+}
+
 async function getQuizzesForCompetency(competencySlug: string): Promise<Quiz[]> {
   const supabase = await createClient()
   
@@ -203,12 +225,17 @@ export default async function CompetencyPage({ params }: PageProps) {
   
   const firstModule = currentCompetency.modules[0]
   
-  // Get quizzes, scenarios, and audio for this competency
-  const [quizzes, scenarios, competencyAudio] = await Promise.all([
+  // Get quizzes, scenarios, audio, and the user's completed modules for this competency
+  const [quizzes, scenarios, competencyAudio, completedModuleIds] = await Promise.all([
     getQuizzesForCompetency(slug),
     getScenariosForCompetency(slug),
     getCompetencyAudio(currentCompetency.id),
+    getCompletedModuleIds(),
   ])
+
+  const completedCount = currentCompetency.modules.filter((m) =>
+    completedModuleIds.has(m.id)
+  ).length
   
   return (
     <div className="learn-content">
@@ -272,34 +299,42 @@ export default async function CompetencyPage({ params }: PageProps) {
         <div className="lms-section__header">
           <h2 className="lms-section__title">Modules</h2>
           <span className="lms-section__subtitle">
-            {currentCompetency.modules.length} lessons
+            {completedCount} of {currentCompetency.modules.length} complete
           </span>
         </div>
-        
+
         <div className="lms-list">
-          {currentCompetency.modules.map((module, index) => (
-            <Link
-              key={module.id}
-              href={`/learn/${currentCompetency.slug}/${module.slug}`}
-              className="lms-card lms-card--clickable competency-card"
-            >
-              <div className="competency-card__index">
-                {index + 1}
-              </div>
-              <div className="competency-card__body">
-                <h3 className="competency-card__title">{module.title}</h3>
-                <div className="competency-card__meta">
-                  <span className="competency-card__meta-item">
-                    <ClockIcon className="h-3 w-3" />
-                    {module.duration_minutes ? `${module.duration_minutes} min` : '5-10 min read'}
-                  </span>
+          {currentCompetency.modules.map((module, index) => {
+            const isComplete = completedModuleIds.has(module.id)
+            return (
+              <Link
+                key={module.id}
+                href={`/learn/${currentCompetency.slug}/${module.slug}`}
+                className={`lms-card lms-card--clickable competency-card${isComplete ? ' competency-card--complete' : ''}`}
+              >
+                <div className="competency-card__index">
+                  {isComplete ? <CheckIcon className="h-5 w-5" /> : index + 1}
                 </div>
-              </div>
-              <div className="competency-card__action">
-                <ArrowRightIcon className="h-4 w-4" />
-              </div>
-            </Link>
-          ))}
+                <div className="competency-card__body">
+                  <h3 className="competency-card__title">{module.title}</h3>
+                  <div className="competency-card__meta">
+                    <span className="competency-card__meta-item">
+                      <ClockIcon className="h-3 w-3" />
+                      {module.duration_minutes ? `${module.duration_minutes} min` : '5-10 min read'}
+                    </span>
+                    {isComplete && (
+                      <span className="competency-card__meta-item competency-card__meta-item--complete">
+                        Completed
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="competency-card__action">
+                  <ArrowRightIcon className="h-4 w-4" />
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </section>
       
