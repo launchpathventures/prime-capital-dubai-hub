@@ -18,6 +18,7 @@ import { ReadingProgress } from "@/components/lms"
 import { ModuleContentSwitcher } from "@/components/lms/module-content-switcher"
 import { ModuleToCSwitcher } from "@/components/lms/module-toc-switcher"
 import { KnowledgeCheckCTA } from "@/components/lms/knowledge-check-cta"
+import { ModuleCompleteButton } from "@/components/lms/module-complete-button"
 import { ModuleMarketData, hasModuleMarketData } from "@/components/lms/module-market-data"
 import { 
   ChevronLeftIcon,
@@ -161,6 +162,28 @@ async function getRelatedQuiz(
 }
 
 /**
+ * Whether the current user has already completed this module.
+ * Drives the header badge and the "Mark as complete" control's initial state.
+ */
+async function getModuleCompletion(moduleId: string): Promise<boolean> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data } = await supabase
+    .from("learning_progress")
+    .select("status")
+    .eq("user_id", user.id)
+    .eq("module_id", moduleId)
+    .maybeSingle()
+
+  return data?.status === "completed"
+}
+
+/**
  * Get scenarios linked to a competency for the Practice with AI section.
  */
 async function getScenariosForCompetency(
@@ -222,10 +245,11 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
   const deepDiveDuration = currentModule.duration_minutes ? `${currentModule.duration_minutes} min` : "25 min"
   const essentialsDuration = "15 min" // TODO: Calculate from essentials content
   
-  // Get related quiz and scenarios for this module
-  const [relatedQuiz, linkedScenarios] = await Promise.all([
+  // Get related quiz, scenarios, and this user's completion state for the module
+  const [relatedQuiz, linkedScenarios, isCompleted] = await Promise.all([
     getRelatedQuiz(competencySlug, moduleSlug),
     getScenariosForCompetency(competencySlug),
+    getModuleCompletion(currentModule.id),
   ])
   
   // Get audio tracks for this module
@@ -261,6 +285,15 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                     <ClockIcon className="h-3.5 w-3.5" />
                     {mode === "essentials" ? essentialsDuration : deepDiveDuration}
+                  </span>
+                </>
+              )}
+              {isCompleted && (
+                <>
+                  <span>•</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--success-600)' }}>
+                    <CheckCircleIcon className="h-3.5 w-3.5" />
+                    Completed
                   </span>
                 </>
               )}
@@ -307,7 +340,15 @@ export default async function ModulePage({ params, searchParams }: PageProps) {
               <KnowledgeCheckCTA quizId={relatedQuiz.slug} />
             </section>
           )}
-        
+
+          {/* Mark as complete - quiz-independent completion toward the certificate */}
+          <section className="mt-8">
+            <ModuleCompleteButton
+              moduleId={currentModule.id}
+              initialCompleted={isCompleted}
+            />
+          </section>
+
           {/* Navigation */}
           <nav className="lms-nav">
             <div className="lms-nav__prev">
