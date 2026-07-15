@@ -8,7 +8,7 @@ tags: [agentcrm, training, sandbox, supabase, lms]
 
 # AgentCRM Embedded Training Mode
 
-> **Reference copy — not the source of truth.** This epic is implemented in the **AgentCRM product repo** (`catalyst/briefs/backlog-agentcrm-20260715-epic_embedded-training-mode.md`, on branch `docs/embedded-training-mode-briefs`), where it is decomposed into five sub-briefs and carries the live approval status. Build is underway there as of 2026-07-15. This repo only owns the downstream curriculum links/media — see [backlog-20260715_agentcrm-training-mode-lms-links.md](backlog-20260715_agentcrm-training-mode-lms-links.md). Edit the AgentCRM copy, not this one.
+> **Reference copy — STALE, not the source of truth.** This epic is implemented in the **AgentCRM product repo** (`catalyst/briefs/backlog-agentcrm-20260715-epic_embedded-training-mode.md`). As of 2026-07-15 the source-of-truth version has advanced well past this copy: **all five sub-briefs are in review**, the coupling-audit gate was accepted (six thin presentational seams), scope grew on approval to add **bounded synthetic buyer property selection + proposal draft/preview** (Pack A now 7 checks, Pack B 6), local RLS/isolation verification passed, and the **media pack was delivered** (2 demos + 11 screenshots). Do not treat the body below as current — read the AgentCRM copy. This repo owns only the downstream curriculum links/media — see [backlog-20260715_agentcrm-training-mode-lms-links.md](backlog-20260715_agentcrm-training-mode-lms-links.md).
 >
 > **Catalyst Brief** — Read [AGENTS.md](../../AGENTS.md) and [BRIEFS.md](../../.catalyst/BRIEFS.md) before implementing.
 

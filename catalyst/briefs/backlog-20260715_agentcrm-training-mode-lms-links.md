@@ -58,30 +58,53 @@ Receive the media pack + captions from the AgentCRM team. Place assets in the LM
 
 ## 7. Media handoff spec (give to the AgentCRM capture team before sub-brief 5)
 
-Deriving from this repo's existing LMS media conventions so assets drop in without rework:
+**DELIVERED 2026-07-15** by the AgentCRM team. Note the scope grew on approval: the buyer flow now includes bounded synthetic property selection + proposal draft/preview, so the pack is **11 screenshots** (adds 06-property, 07-proposal) + **2 MP4 demos**. Delivered dimensions are 1280×900 (desktop) and 390×844 (mobile) — not the 1920×1080 originally specced, which is fine: these embed as-is.
 
-### Screenshots (~8)
+### Destination paths in this repo
 
-- **Format:** PNG. **Destination path:** `public/images/lms/training/` (embed as `![alt](/images/lms/training/<name>.png)`).
-- **Naming:** kebab-case by state — `signal.png`, `qualification.png`, `outcome.png`, `note.png`, `ncd.png`, `validation.png`, `reset.png`, `mobile.png`.
-- **Alt text:** each asset ships with a one-line descriptive alt string (screen-reader + caption use).
-- **Viewports:** desktop states full-width; at least one capture at the supported mobile lead-workflow width (the `mobile.png` state).
-- **Content rules:** persistent "Training mode — synthetic data" banner visible in-frame; synthetic contacts show the `Training` label; no real names/emails/phones/client data.
+- **Screenshots:** `public/images/lms/training/<file>.png` → embed as `![alt](/images/lms/training/<file>.png)`.
+- **Demos:** `public/media/lms/training/<file>.mp4` → embed via a `<video controls>` tag in the module MDX/markdown (no `videos:` frontmatter schema needed).
 
-### Demonstrations (2 short recordings)
+### Delivered assets (final)
 
-- Buyer First Response and Seller Response-and-Retry, one each.
-- **DECISION (2026-07-15):** capture as **MP4, 1920×1080 landscape, H.264**, delivered as files (not a hosting link). Rationale: the module `videos:` array is empty everywhere and adding a video-embed schema to the LMS sync layer is out of scope for this release; an MP4 in `public/` embedded via a `<video>` tag (or linked) needs no schema change. Keep each demo short (target under ~90s).
-- Each demo ships with a caption/transcript.
+| File | Kind | Caption (for embed alt/figure) |
+|---|---|---|
+| `demos/buyer-first-response.mp4` | MP4 1280×900 7.72s silent | Buyer First Response loop: signal → qualification → note → NCD → property selection → proposal preview → validation. |
+| `demos/seller-follow-up.mp4` | MP4 1280×900 7.20s silent | Seller Response & Retry: preserve No-answer + 2h retry, trigger connected follow-up, then qualification → note → NCD → validation. |
+| `01-buyer-signal.png` | 1280×900 | Start from the synthetic signal: read source context and mission before acting. |
+| `02-buyer-outcome.png` | 1280×900 | Record the supplied outcome: Connected is stored as simulated evidence, never calls a provider. |
+| `03-buyer-qualification.png` | 1280×900 | Confirm, correct, and preserve unknowns: imported values are not treated as confirmed facts. |
+| `04-buyer-note.png` | 1280×900 | Four-part note: context, decision meaning, commitment, owner/timing — learner-reviewed, not AI-graded. |
+| `05-buyer-ncd.png` | 1280×900 | Set the exact next commitment: proposal review, next business day 15:00 Dubai. |
+| `06-buyer-property.png` | 1280×900 | Choose from bounded synthetic candidates: comparison never queries the live catalogue. |
+| `07-buyer-proposal.png` | 1280×900 | Review a contained proposal draft: send, share, public view, tracking do not exist. |
+| `08-buyer-validation.png` | 1280×900 | Inspect each required result: 7 deterministic checks report Pass/Fix independently, no percentage. |
+| `09-mobile-training.png` | 390×844 | Same practice loop on mobile: banner, Exit, mission, progress visible without overflow. |
+| `10-seller-retry.png` | 1280×900 | Preserve the seller retry state: No answer + retry NCD exist before the connected follow-up. |
+| `11-reset-state.png` | 1280×900 | Reset starts a clean private run: evidence, answers, note, NCD, property, proposal return to fixture. |
+
+Full SHA-256 checksums are in the handoff manifest (`.context/attachments/.../pasted_text_2026-07-15_16-25-21.txt`) — verify after copying.
 
 ## 8. Placement map (asset → destination)
 
-The workflow lab (`content/lms/scenarios/agentcrm-workflow-lab.md`) already uses the same golden-thread records (Training Buyer Maya B., Training Seller Karim S.), so media aligns 1:1:
+The workflow lab (`content/lms/scenarios/agentcrm-workflow-lab.md`) already uses the same golden-thread records (Maya B., Karim S.), so media aligns 1:1:
 
 | Asset | Destination |
 |---|---|
-| Buyer demo + signal/qualification/outcome/note/ncd stills | `10-agentcrm-mastery/10.3` (finding/claiming), `10.4` (first call & qualification), `10.5` (notes & follow-up); buyer LABs in the workflow lab |
-| Seller demo + retry/connected stills | `10.4`/`10.5` seller variants; seller LABs (Karim) in the workflow lab |
-| validation / reset stills | module completion/feedback sections; workflow-lab `Self-check` sections |
-| mobile still | `10.1` (operating model & mobile setup) and LAB-01 |
-| "Practice this in Training Mode" links (buyer / seller / capstone) | workflow-lab LAB sections (after `Safety stop` / in `Model Approach`) — point to the embedded Training Centre entry points |
+| `buyer-first-response.mp4` + `01`,`02` | `10.3` finding/filtering/claiming; workflow-lab buyer first-response LAB |
+| `03-buyer-qualification` | `10.4` first call & qualification (buyer) |
+| `04-buyer-note`, `05-buyer-ncd` | `10.5` lead details, notes & follow-up |
+| `06-buyer-property`, `07-buyer-proposal` | `10.6` properties, shortlists & proposals (matches the new buyer property/proposal scope) |
+| `08-buyer-validation`, `11-reset-state` | module `Self-check`/completion sections; workflow-lab self-check |
+| `09-mobile-training` | `10.1` operating model & mobile setup; LAB-01 |
+| `seller-follow-up.mp4` + `10-seller-retry` | `10.4`/`10.5` seller variants; workflow-lab seller (Karim) LABs |
+| "Practice in Training Mode" links (buyer / seller / capstone) | workflow-lab LAB sections (after `Safety stop` / in `Model Approach`) → embedded Training Centre entry points |
+
+## 9. Execution status
+
+- [x] Media pack delivered by AgentCRM (2026-07-15): 2 demos + 11 screenshots, captions, transcripts, checksums.
+- [ ] **BLOCKED — need the binary files.** The manifest is in hand but the 13 actual `.mp4`/`.png` files are not in this workspace or any reachable branch. Drop the delivered `demos/` + `screenshots/` directory into the workspace (e.g. `.context/`), or point to its path.
+- [ ] Copy assets to `public/images/lms/training/` and `public/media/lms/training/`; verify SHA-256.
+- [ ] Embed images + `<video>` demos + "Practice in Training Mode" links per §8.
+- [ ] `pnpm test:run` + `pnpm lint` green; visual check that images resolve.
+- [ ] Commit; PR references the AgentCRM epic completion.
