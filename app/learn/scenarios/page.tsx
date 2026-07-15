@@ -1,8 +1,8 @@
 /**
  * CATALYST - Scenario Practice Index
  * 
- * Overview of all roleplay scenario categories for practice.
- * Learners can browse and practice AI-powered conversations.
+ * Overview of all scenario categories for practice.
+ * Learners can browse AI roleplays and hands-on workflow labs.
  */
 
 import { Metadata } from "next"
@@ -22,7 +22,7 @@ import { createClient } from "@/lib/supabase/server"
 
 export const metadata: Metadata = {
   title: "Practice Scenarios | Learning Portal",
-  description: "Practice real-world client conversations with AI-powered roleplay scenarios.",
+  description: "Practice real-world client conversations and hands-on workflows in a safe training environment.",
 }
 
 // =============================================================================
@@ -68,6 +68,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
   "objections": <ShieldAlertIcon className="h-5 w-5" />,
   "closing": <CheckCircleIcon className="h-5 w-5" />,
   "difficult-situations": <AlertTriangleIcon className="h-5 w-5" />,
+  "agentcrm-workflow-lab": <CheckCircleIcon className="h-5 w-5" />,
+  "agentcrm-roleplays": <MessageSquareIcon className="h-5 w-5" />,
 }
 
 const categoryColors: Record<string, string> = {
@@ -77,6 +79,8 @@ const categoryColors: Record<string, string> = {
   "objections": "from-amber-500/10 to-amber-600/5 border-amber-200/50",
   "closing": "from-green-500/10 to-green-600/5 border-green-200/50",
   "difficult-situations": "from-rose-500/10 to-rose-600/5 border-rose-200/50",
+  "agentcrm-workflow-lab": "from-cyan-500/10 to-cyan-600/5 border-cyan-200/50",
+  "agentcrm-roleplays": "from-indigo-500/10 to-indigo-600/5 border-indigo-200/50",
 }
 
 // =============================================================================
@@ -90,6 +94,8 @@ const competencyLabels: Record<string, string> = {
   "transaction-management": "Transaction Management",
   "objection-navigation": "Objection Navigation",
   "relationship-stewardship": "Relationship Stewardship",
+  "aml-compliance": "AML & Compliance",
+  "agentcrm-mastery": "AgentCRM Mastery",
 }
 
 // =============================================================================
@@ -113,8 +119,8 @@ export default async function ScenariosIndexPage() {
           </div>
           <h1 className="scenario-hero__title">Practice Scenarios</h1>
           <p className="scenario-hero__description">
-            Master client conversations through AI-powered roleplay. Practice handling 
-            real situations you&apos;ll encounter as a Prime Capital consultant.
+            Build confidence through AI roleplay and hands-on workflow labs. Practice the
+            conversations and system decisions you&apos;ll handle as a Prime Capital consultant.
           </p>
           <div className="scenario-hero__stats">
             <span className="scenario-hero__stat">
@@ -148,8 +154,8 @@ export default async function ScenariosIndexPage() {
           <div className="scenario-intro__step">
             <div className="scenario-intro__step-num">3</div>
             <div className="scenario-intro__step-content">
-              <strong>Practice with AI</strong>
-              <span>Start a live roleplay conversation and get instant feedback</span>
+              <strong>Practise safely</strong>
+              <span>Use AI roleplay or complete the named task in a training tenant</span>
             </div>
           </div>
         </div>

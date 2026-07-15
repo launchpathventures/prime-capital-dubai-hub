@@ -184,10 +184,12 @@ export const config = {
       "client-discovery",
       "sales-mastery",
       "property-matching",
+      "aml-compliance",
       "transaction-management",
       "objection-navigation",
       "relationship-stewardship",
       "rera-exam-prep",
+      "agentcrm-mastery",
     ],
   },
 } as const

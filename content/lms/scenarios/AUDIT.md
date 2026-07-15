@@ -1,12 +1,12 @@
 # Content Audit — Scenarios Folder
 
-**Last Audited:** 2026-01-10  
-**Audited By:** GitHub Copilot Agent
+**Last Audited:** 2026-07-15
+**Audited By:** Catalyst Agent
 
 ## Summary
 
-- Files audited: 6
-- Issues fixed: 6 (added frontmatter to all files)
+- Files audited: 11
+- Scenario bank total: 113
 - Status: ✅ PASS
 
 ## Scenario Mapping
@@ -19,6 +19,11 @@
 | objections | objection-navigation, market-intelligence | ✅ |
 | closing | transaction-management, objection-navigation, relationship-stewardship | ✅ |
 | difficult-situations | relationship-stewardship, transaction-management | ✅ |
+| ai-skills | ai-empowered-agent | ✅ |
+| aml-onboarding | aml-compliance | ✅ |
+| aml-red-flags | aml-compliance | ✅ |
+| agentcrm-workflow-lab | agentcrm-mastery | ✅ |
+| agentcrm-roleplays | agentcrm-mastery | ✅ |
 
 ## Fixes Applied
 
@@ -77,8 +82,11 @@ Added YAML frontmatter with required schema fields:
 - The audit brief referenced different filenames than what exists in the repository. The actual files are category-based scenario collections rather than individual scenario files.
 - Each file contains multiple individual scenarios with their own difficulty ratings (⭐, ⭐⭐, ⭐⭐⭐)
 - Competency slugs validated against existing competency folder names in `content/lms/`
-- The `_index.md` file serves as the scenario bank overview and was not modified (it doesn't require frontmatter changes)
-- Total scenario count across all files: **75 scenarios**
+- The `_index.md` file serves as the learner-facing scenario bank overview and contains the current category mapping.
+- AgentCRM Workflow Lab deliberately has no AI persona prompts; its missions are marked complete through the existing self-reflection flow.
+- The AgentCRM lab contains eight connected buyer/seller missions, and each mission names a visible practice-record result plus a short self-check.
+- The six AgentCRM roleplays each end with a `What changes in AgentCRM?` record-state check and stay within agent permissions.
+- Total scenario count across all files: **113 scenarios**
 
 ## Valid Competency Slugs
 
@@ -90,3 +98,6 @@ The following competency slugs are used and validated:
 - `transaction-management`
 - `objection-navigation`
 - `relationship-stewardship`
+- `ai-empowered-agent`
+- `aml-compliance`
+- `agentcrm-mastery`

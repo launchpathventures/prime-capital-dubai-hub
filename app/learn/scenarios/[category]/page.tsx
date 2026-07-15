@@ -148,6 +148,8 @@ const competencyLabels: Record<string, string> = {
   "transaction-management": "Transaction Management",
   "objection-navigation": "Objection Navigation",
   "relationship-stewardship": "Relationship Stewardship",
+  "aml-compliance": "AML & Compliance",
+  "agentcrm-mastery": "AgentCRM Mastery",
 }
 
 // =============================================================================
