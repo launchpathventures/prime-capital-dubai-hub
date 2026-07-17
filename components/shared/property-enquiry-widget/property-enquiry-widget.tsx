@@ -44,6 +44,14 @@ interface PropertyEnquiryWidgetProps {
   propertyName?: string
   /** Canonical PDP URL — sent with the lead. */
   propertyUrl?: string
+  /**
+   * Server-resolved share token (canonical `ref`). Passed as a prop — NOT read
+   * from the URL — because the PDP scrubs `ref`/`share` from the address bar via
+   * history.replaceState, which can run before this widget mounts. Reading the
+   * URL here would silently drop attribution. `present` with a blank value means
+   * an explicit blank `ref` (no token); we forward nothing in that case.
+   */
+  shareRef?: { present: boolean; value: string }
   /** Optional pre-fill for known visitors. */
   prefill?: { name?: string; email?: string; phone?: string }
   /** Title attribute for accessibility. */
@@ -97,9 +105,26 @@ declare global {
   }
 }
 
-function readAttributionParams(): Pick<
+/**
+ * Current page URL with the share token stripped. Sent to the CRM as the lead's
+ * page_url, so it must not carry `ref`/`share` — otherwise the token leaks into
+ * the lead record even though we scrub the address bar.
+ */
+function cleanPageUrl(fallback?: string): string | undefined {
+  if (typeof window === "undefined") return fallback
+  const url = new URL(window.location.href)
+  url.searchParams.delete("ref")
+  url.searchParams.delete("share")
+  return url.toString()
+}
+
+/**
+ * Read UTM params from the URL. The share token (`ref`) is deliberately NOT
+ * read here — it arrives as a prop and the URL is scrubbed of it on mount.
+ */
+function readUtmParams(): Pick<
   WidgetUrlParams,
-  "utmSource" | "utmMedium" | "utmCampaign" | "utmContent" | "utmTerm" | "ref"
+  "utmSource" | "utmMedium" | "utmCampaign" | "utmContent" | "utmTerm"
 > {
   if (typeof window === "undefined") return {}
   const search = new URLSearchParams(window.location.search)
@@ -109,7 +134,6 @@ function readAttributionParams(): Pick<
     utmCampaign: search.get("utm_campaign") ?? undefined,
     utmContent: search.get("utm_content") ?? undefined,
     utmTerm: search.get("utm_term") ?? undefined,
-    ref: search.get("ref") ?? undefined,
   }
 }
 
@@ -132,6 +156,7 @@ export function PropertyEnquiryWidget({
   slug,
   propertyName,
   propertyUrl,
+  shareRef,
   prefill,
   title = "Enquire about this property",
 }: PropertyEnquiryWidgetProps) {
@@ -141,18 +166,22 @@ export function PropertyEnquiryWidget({
 
   // Build the iframe URL on mount so we can fold in UTM params from
   // window.location.search before the iframe loads (single load, no flash).
+  // The share token comes from the `shareRef` prop, never the URL — a
+  // present-but-blank ref forwards nothing (buildWidgetUrl drops empty values).
+  const shareRefValue = shareRef?.present ? shareRef.value : undefined
   useEffect(() => {
     const params: WidgetUrlParams = {
       property: slug,
       propertyName,
       propertyUrl,
-      pageUrl: typeof window !== "undefined" ? window.location.href : propertyUrl,
-      ...readAttributionParams(),
+      pageUrl: cleanPageUrl(propertyUrl),
+      ...readUtmParams(),
+      ref: shareRefValue || undefined,
       ...(prefill ?? {}),
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- defer-mount: read window once on the client.
     setSrc(buildWidgetUrl(params))
-  }, [slug, propertyName, propertyUrl, prefill])
+  }, [slug, propertyName, propertyUrl, shareRefValue, prefill])
 
   // postMessage bridge: ready + resize + analytics. Always validate origin.
   // Height write is imperative via ref so React reconciliation can't stutter

@@ -28,7 +28,9 @@ import { PropertiesGrid } from "./_components/properties-filter"
 import { PropertiesFilterBar } from "./_components/properties-filter-bar"
 import propertiesImage from "@/public/images/hero/properties.jpg"
 
-export const revalidate = 300 // Match CRM Cache-Control max-age
+// The CRM property list is Cache-Control: no-store; do not hold a website ISR
+// cache of anonymous property data. This page is dynamic (also reads filters).
+export const dynamic = "force-dynamic"
 
 export const metadata = {
   title: "Properties",

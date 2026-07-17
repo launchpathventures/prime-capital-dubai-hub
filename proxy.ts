@@ -15,6 +15,7 @@ import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import type { CookieOptions } from "@supabase/ssr"
 import { getBrand, DEFAULT_BRAND_ID } from "@/lib/brand"
+import { shareTokenResponseHeaders } from "@/lib/crm/token-response-headers"
 
 // -----------------------------------------------------------------------------
 // Environment Configuration
@@ -130,6 +131,17 @@ export async function proxy(request: NextRequest) {
   // Attach brand context to all downstream responses
   response.headers.set("x-brand", brand.id)
   response.cookies.set("brand", brand.id, brandCookieOptions)
+
+  // Token-bearing property pages: stamp hard no-store + no-referrer response
+  // headers (defence beyond force-dynamic + <meta name="referrer">).
+  if (pathname.startsWith("/properties")) {
+    const tokenHeaders = shareTokenResponseHeaders(request.nextUrl.searchParams)
+    if (tokenHeaders) {
+      for (const [key, value] of Object.entries(tokenHeaders)) {
+        response.headers.set(key, value)
+      }
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Auth: Route Protection

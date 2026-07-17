@@ -16,36 +16,54 @@
 
 import "server-only"
 
+import { unstable_rethrow } from "next/navigation"
+
 import { config } from "@/lib/config"
 import { trackError } from "@/lib/error-tracking"
 import type {
+  CrmAccess,
   CrmListFilters,
   CrmListResponse,
   CrmProperty,
+  CrmPropertyAccess,
   CrmPropertyDetail,
   CrmPropertyFull,
   CrmPropertyListItem,
 } from "./types"
+import type { SelectedShareToken } from "./share-token"
 
-const REVALIDATE_SECONDS = 300 // CRM advertises Cache-Control max-age=300
 const CRM_PARAM_MAX_LENGTH = 200
 
-interface FetchOptions {
-  /** Skip the in-memory ISR cache for this request (e.g., previews). */
-  noCache?: boolean
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- reserved for future per-request options.
+interface FetchOptions {}
 
 function isCrmConfigured(): boolean {
   return Boolean(
     config.crm.baseUrl &&
-      config.crm.agencySlug &&
-      config.crm.agencySlug.length <= CRM_PARAM_MAX_LENGTH,
+      config.crm.agencyUuid &&
+      config.crm.agencyUuid.length <= CRM_PARAM_MAX_LENGTH,
   )
+}
+
+/**
+ * Redact share tokens before a URL reaches error reporting. Token-bearing
+ * detail URLs must never appear in Sentry breadcrumbs.
+ */
+function scrubUrl(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl)
+    for (const key of ["ref", "share"]) {
+      if (url.searchParams.has(key)) url.searchParams.set(key, "REDACTED")
+    }
+    return url.toString()
+  } catch {
+    return rawUrl
+  }
 }
 
 function buildListUrl(filters: CrmListFilters | undefined): string {
   const url = new URL("/api/public/properties", config.crm.baseUrl)
-  url.searchParams.set("agency", config.crm.agencySlug)
+  url.searchParams.set("agency", config.crm.agencyUuid)
 
   if (filters?.q) url.searchParams.set("q", filters.q)
   if (filters?.listingType) url.searchParams.set("listing_type", filters.listingType)
@@ -74,23 +92,37 @@ function buildListUrl(filters: CrmListFilters | undefined): string {
   return url.toString()
 }
 
-function buildDetailUrl(slugOrId: string): string {
+function buildDetailUrl(slugOrId: string, shareToken?: SelectedShareToken): string {
   const url = new URL(`/api/public/properties/${encodeURIComponent(slugOrId)}`, config.crm.baseUrl)
-  url.searchParams.set("agency", config.crm.agencySlug)
+  url.searchParams.set("agency", config.crm.agencyUuid)
+  // Forward the token under the key the visitor landed with. A present-but-blank
+  // value is preserved so the CRM can distinguish "no token" from "blank ref".
+  if (shareToken?.present) url.searchParams.set(shareToken.key, shareToken.value)
   return url.toString()
 }
 
-async function crmFetch<T>(url: string, opts: FetchOptions = {}): Promise<T | null> {
-  const init: RequestInit & { next?: { revalidate?: number; tags?: string[] } } = {
+async function crmFetch<T>(url: string): Promise<T | null> {
+  // Always no-store. The CRM property list/detail contract is
+  // `Cache-Control: no-store` for BOTH anonymous and token-bearing responses —
+  // a website ISR/TTL cache could keep a full anonymous response public after
+  // the agency flips its default to basic. Do not reintroduce a revalidate cache
+  // until AgentCRM ships a safe anonymous-cache + invalidation contract.
+  const init: RequestInit = {
     headers: { Accept: "application/json" },
-    ...(opts.noCache ? { cache: "no-store" } : { next: { revalidate: REVALIDATE_SECONDS } }),
+    cache: "no-store",
   }
+
+  const safeUrl = scrubUrl(url)
 
   let res: Response
   try {
     res = await fetch(url, init)
   } catch (error) {
-    trackError(error, { context: "crm", url, action: "fetch" })
+    // A no-store fetch during static generation makes the route dynamic; Next
+    // signals that by throwing. Re-throw its control-flow errors (also
+    // notFound/redirect) instead of swallowing them as upstream failures.
+    unstable_rethrow(error)
+    trackError(error, { context: "crm", url: safeUrl, action: "fetch" })
     return null
   }
 
@@ -98,21 +130,36 @@ async function crmFetch<T>(url: string, opts: FetchOptions = {}): Promise<T | nu
   if (res.status === 429) {
     trackError(new Error(`CRM rate limited (${res.status})`), {
       context: "crm",
-      url,
+      url: safeUrl,
       retryAfter: res.headers.get("Retry-After"),
     })
     return null
   }
   if (!res.ok) {
-    trackError(new Error(`CRM responded ${res.status}`), { context: "crm", url, status: res.status })
+    trackError(new Error(`CRM responded ${res.status}`), {
+      context: "crm",
+      url: safeUrl,
+      status: res.status,
+    })
     return null
   }
 
   try {
     return (await res.json()) as T
   } catch (error) {
-    trackError(error, { context: "crm", url, action: "parse" })
+    trackError(error, { context: "crm", url: safeUrl, action: "parse" })
     return null
+  }
+}
+
+/** Map the CRM access block to camelCase. Absent access = full (legacy). */
+function mapAccess(access: CrmAccess | null | undefined): CrmPropertyAccess | null {
+  if (!access) return null
+  return {
+    tier: access.tier,
+    gated: Boolean(access.gated),
+    lockedSections: access.locked_sections ?? [],
+    reason: access.reason ?? null,
   }
 }
 
@@ -161,6 +208,8 @@ function mapListItem(row: CrmPropertyListItem): CrmProperty {
 
     embedUrl: row.embed_url,
     embedHtml: row.embed_html,
+
+    access: mapAccess(row.access),
   }
 }
 
@@ -219,11 +268,10 @@ const EMPTY_RESULT: GetCrmPropertiesResult = {
  */
 export async function getCrmProperties(
   filters?: CrmListFilters,
-  opts?: FetchOptions
 ): Promise<GetCrmPropertiesResult> {
   if (!isCrmConfigured()) return EMPTY_RESULT
 
-  const data = await crmFetch<CrmListResponse>(buildListUrl(filters), opts)
+  const data = await crmFetch<CrmListResponse>(buildListUrl(filters))
   if (!data) return EMPTY_RESULT
 
   return {
@@ -255,10 +303,7 @@ export async function getAllCrmProperties(
   const all: CrmProperty[] = []
   let cursor = filters?.cursor
   for (let page = 0; page < maxPages; page++) {
-    const data = await crmFetch<CrmListResponse>(
-      buildListUrl({ ...filters, cursor, limit: 50 }),
-      opts,
-    )
+    const data = await crmFetch<CrmListResponse>(buildListUrl({ ...filters, cursor, limit: 50 }))
     if (!data) break
     all.push(...data.data.map(mapListItem))
     if (!data.pagination.has_more || !data.pagination.next_cursor) break
@@ -278,12 +323,14 @@ export async function getAllCrmProperties(
  */
 export async function getCrmPropertyBySlug(
   slugOrId: string,
-  opts?: FetchOptions
+  opts?: FetchOptions & { shareToken?: SelectedShareToken }
 ): Promise<CrmPropertyFull | null> {
   if (!isCrmConfigured()) return null
   if (!slugOrId || slugOrId.length > CRM_PARAM_MAX_LENGTH) return null
 
-  const response = await crmFetch<CrmDetailResponse>(buildDetailUrl(slugOrId), opts)
+  // All CRM fetches are no-store (see crmFetch), so anonymous and token-bearing
+  // detail responses are equally uncached — the token just unlocks more fields.
+  const response = await crmFetch<CrmDetailResponse>(buildDetailUrl(slugOrId, opts?.shareToken))
   if (!response) return null
   const row = "data" in response ? response.data : response
   if (!row) return null
