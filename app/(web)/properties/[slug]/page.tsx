@@ -21,11 +21,15 @@ import {
   getStatusBadge,
   isBasicTier,
   isDevelopmentListing,
-  lockedSectionLabel,
 } from "@/lib/crm"
 import { paramReaderFromRecord, selectShareToken } from "@/lib/crm/share-token"
 import { PropertyEnquiryWidget } from "@/components/shared/property-enquiry-widget"
 import { PropertyProse } from "@/components/shared/property-enquiry-widget/property-prose"
+import { formatLegacyPropertyDescription } from "@/lib/crm/property-description"
+import {
+  getPropertyCoverImage,
+  PROPERTY_IMAGE_FALLBACK_ALT,
+} from "../../_surface/property-images"
 import { StripShareToken } from "./strip-share-token"
 
 import {
@@ -47,6 +51,7 @@ import {
   UtensilsIcon,
   SofaIcon,
   LockIcon,
+  ArrowDownIcon,
 } from "lucide-react"
 
 // The CRM serves property detail as Cache-Control: no-store for both anonymous
@@ -130,8 +135,22 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
   // always an off-plan listing — key off the tier too.
   const showStartingFrom = isDevelopment || isBasic
   const propertyUrl = `${SITE_URL}/properties/${property.slug}`
-  const heroImage = property.images[0]
+  const listingHeroImage = property.images[0]
+  const heroImage = getPropertyCoverImage(property.images)
   const galleryImages = property.images.slice(1)
+  const overview = property.overview ??
+    (property.description ? formatLegacyPropertyDescription(property.description) : null)
+  const bedroomValue = formatCrmBedrooms(property)
+  const hasBedroomMetric =
+    property.bedrooms != null || property.bedroomsMin != null || property.bedroomsMax != null
+  const hasBathroomMetric = property.bathrooms != null && property.bathrooms > 0
+  const hasSizeMetric = property.sqft != null && property.sqft > 0
+  const hasCompletionMetric = Boolean(property.completionDate)
+  const keyMetricCount =
+    (hasBedroomMetric ? 1 : 0) +
+    (hasBathroomMetric ? 1 : 0) +
+    (hasSizeMetric ? 1 : 0) +
+    (hasCompletionMetric ? 1 : 0)
 
   return (
     <div className="web-property-detail">
@@ -141,7 +160,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
           title: property.title,
           description: property.overview ?? property.description,
           slug: property.slug,
-          cover_image: heroImage ?? null,
+          cover_image: listingHeroImage ?? null,
           created_at: property.createdAt,
           price: property.priceFrom ?? property.price ?? null,
           area: property.area,
@@ -160,14 +179,19 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
       {/* Hero */}
       <section className="relative min-h-[60vh] flex flex-col justify-end">
         <div className="absolute inset-0 bg-[var(--web-ash)]">
-          {heroImage ? (
-            <Image src={heroImage} alt={property.title} fill className="object-cover" priority />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <BuildingIcon className="h-24 w-24 text-[var(--web-spruce)]/30" />
-            </div>
-          )}
+          <Image
+            src={heroImage.src}
+            alt={heroImage.isFallback ? PROPERTY_IMAGE_FALLBACK_ALT : property.title}
+            fill
+            className="object-cover"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/40" />
+          {heroImage.isFallback && (
+            <span className="absolute right-4 top-24 rounded-[2px] bg-[var(--web-ash)]/80 px-3 py-1.5 text-[9px] uppercase tracking-[0.14em] text-white backdrop-blur-sm sm:right-6">
+              Dubai skyline · Listing images coming soon
+            </span>
+          )}
         </div>
 
         <Container size="xl" className="relative z-10 pt-28 pb-12">
@@ -220,6 +244,37 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
                     <span>{property.buildingName}</span>
                   </>
                 )}
+                {keyMetricCount === 1 && (
+                  <>
+                    <span className="mx-2 text-white/40">•</span>
+                    {hasBedroomMetric && (
+                      <>
+                        <BedDoubleIcon className="h-4 w-4" />
+                        <span>{bedroomValue}</span>
+                      </>
+                    )}
+                    {hasBathroomMetric && (
+                      <>
+                        <BathIcon className="h-4 w-4" />
+                        <span>
+                          {property.bathrooms} {property.bathrooms === 1 ? "bathroom" : "bathrooms"}
+                        </span>
+                      </>
+                    )}
+                    {hasSizeMetric && (
+                      <>
+                        <RulerIcon className="h-4 w-4" />
+                        <span>{property.sqft!.toLocaleString("en-AE")} sqft</span>
+                      </>
+                    )}
+                    {hasCompletionMetric && (
+                      <>
+                        <CalendarIcon className="h-4 w-4" />
+                        <span>{formatCompletionDate(property.completionDate!)}</span>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </Stack>
 
@@ -235,54 +290,58 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
         </Container>
       </section>
 
-      {/* Key metrics bar */}
-      <section className="bg-[var(--web-ash)]">
-        <Container size="xl">
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 py-8">
-            <div className="text-center">
-              <BedDoubleIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
-              <div className="font-headline text-[var(--web-off-white)] text-xl">
-                {formatCrmBedrooms(property)}
-              </div>
-              <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
-                Bedrooms
-              </div>
+      {/* A comparison strip only earns its space when there is more than one fact. */}
+      {keyMetricCount > 1 && (
+        <section className="bg-[var(--web-ash)]">
+          <Container size="xl">
+            <div className="flex flex-wrap justify-center gap-8 md:gap-16 py-8">
+              {hasBedroomMetric && (
+                <div className="text-center">
+                  <BedDoubleIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
+                  <div className="font-headline text-[var(--web-off-white)] text-xl">
+                    {bedroomValue}
+                  </div>
+                  <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
+                    Bedrooms
+                  </div>
+                </div>
+              )}
+
+              {hasBathroomMetric && (
+                <div className="text-center">
+                  <BathIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
+                  <div className="font-headline text-[var(--web-off-white)] text-xl">{property.bathrooms}</div>
+                  <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
+                    Bathrooms
+                  </div>
+                </div>
+              )}
+
+              {hasSizeMetric && (
+                <div className="text-center">
+                  <RulerIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
+                  <div className="font-headline text-[var(--web-off-white)] text-xl">
+                    {property.sqft!.toLocaleString("en-AE")} sqft
+                  </div>
+                  <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">Size</div>
+                </div>
+              )}
+
+              {hasCompletionMetric && (
+                <div className="text-center">
+                  <CalendarIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
+                  <div className="font-headline text-[var(--web-off-white)] text-xl">
+                    {formatCompletionDate(property.completionDate!)}
+                  </div>
+                  <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
+                    Completion
+                  </div>
+                </div>
+              )}
             </div>
-
-            {property.bathrooms != null && property.bathrooms > 0 && (
-              <div className="text-center">
-                <BathIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
-                <div className="font-headline text-[var(--web-off-white)] text-xl">{property.bathrooms}</div>
-                <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
-                  Bathrooms
-                </div>
-              </div>
-            )}
-
-            {property.sqft != null && property.sqft > 0 && (
-              <div className="text-center">
-                <RulerIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
-                <div className="font-headline text-[var(--web-off-white)] text-xl">
-                  {property.sqft.toLocaleString("en-AE")} sqft
-                </div>
-                <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">Size</div>
-              </div>
-            )}
-
-            {property.completionDate && (
-              <div className="text-center">
-                <CalendarIcon className="h-6 w-6 text-[var(--web-serenity)] mx-auto mb-2" />
-                <div className="font-headline text-[var(--web-off-white)] text-xl">
-                  {formatCompletionDate(property.completionDate)}
-                </div>
-                <div className="text-[var(--web-serenity)] text-[11px] uppercase tracking-[0.15em]">
-                  Completion
-                </div>
-              </div>
-            )}
-          </div>
-        </Container>
-      </section>
+          </Container>
+        </section>
+      )}
 
       {/* Content + sidebar */}
       <section className="bg-[var(--web-off-white)] py-[var(--web-section-gap)]">
@@ -290,8 +349,6 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
           <Grid cols={1} className="lg:grid-cols-[2fr_1fr] gap-12">
             {/* Main content */}
             <Stack gap="xl">
-              {isBasic && <LockedDetailsCard lockedSections={property.access?.lockedSections ?? []} />}
-
               {property.notes.length > 0 && (
                 <SectionCard title="Latest Updates" icon={BellIcon}>
                   <Stack gap="sm">
@@ -319,9 +376,9 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
                 </SectionCard>
               )}
 
-              {(property.overview ?? property.description) && (
+              {overview && (
                 <SectionCard title="About This Property" icon={BuildingIcon}>
-                  <PropertyProse content={(property.overview ?? property.description)!} />
+                  <PropertyProse content={overview} />
                 </SectionCard>
               )}
 
@@ -567,7 +624,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
             </Stack>
 
             {/* Sidebar */}
-            <Stack gap="lg">
+            <Stack gap="md">
               <SectionCard title="Property Details" icon={FileTextIcon}>
                 <Stack gap="md">
                   {property.developer && (
@@ -606,12 +663,15 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
               </SectionCard>
 
               <div id="enquiry" className="lg:sticky lg:top-24 scroll-mt-24">
-                <PropertyEnquiryWidget
-                  slug={property.slug}
-                  propertyName={property.title}
-                  propertyUrl={propertyUrl}
-                  shareRef={token.present ? { present: true, value: token.value } : undefined}
-                />
+                <Stack gap="md">
+                  {isBasic && <LockedDetailsCard />}
+                  <PropertyEnquiryWidget
+                    slug={property.slug}
+                    propertyName={property.title}
+                    propertyUrl={propertyUrl}
+                    shareRef={token.present ? { present: true, value: token.value } : undefined}
+                  />
+                </Stack>
               </div>
             </Stack>
           </Grid>
@@ -622,11 +682,11 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
 }
 
 /**
- * Basic-view teaser. Renders once, at the top of the detail column, with a
- * single primary CTA (per the CRM handoff: no repeated unlock buttons, no
- * forced modal). The enquiry widget in the sidebar is the CTA target.
+ * Basic-view request context. It sits directly above the enquiry widget so the
+ * public property information leads the page and the next step is explicit.
+ * The CRM widget remains the single enquiry action (no competing CTA/modal).
  */
-function LockedDetailsCard({ lockedSections }: { lockedSections: string[] }) {
+function LockedDetailsCard() {
   return (
     <div className="bg-white rounded-[2px] border border-[var(--web-serenity)]/30 shadow-sm">
       <div className="flex items-center gap-2.5 px-6 py-4 border-b border-[var(--web-serenity)]/25">
@@ -635,35 +695,27 @@ function LockedDetailsCard({ lockedSections }: { lockedSections: string[] }) {
           as="h2"
           className="font-headline text-[var(--web-ash)] text-[15px] font-normal uppercase tracking-[0.15em] leading-none"
         >
-          Full details on request
+          Request the property file
         </Title>
       </div>
       <div className="px-6 py-6">
         <Stack gap="md">
           <Text className="text-[var(--web-ash)] text-[15px] font-light leading-relaxed">
-            The complete profile for this residence — pricing, plans and developer
-            information — is shared privately with qualified buyers.
+            Current pricing, the payment plan, unit availability and supporting documents
+            are shared directly by our advisory team.
           </Text>
 
-          {lockedSections.length > 0 && (
-            <Grid cols={2} className="gap-3">
-              {lockedSections.map((section) => (
-                <div key={section} className="flex items-center gap-2">
-                  <LockIcon className="h-3.5 w-3.5 text-[var(--web-spruce)] shrink-0" />
-                  <Text className="text-[var(--web-spruce)] text-[14px] font-light">
-                    {lockedSectionLabel(section)}
-                  </Text>
-                </div>
-              ))}
-            </Grid>
-          )}
-
-          <a
-            href="#enquiry"
-            className="inline-flex items-center justify-center self-start px-6 py-3 rounded-[2px] text-[11px] uppercase tracking-[0.2em] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] transition-colors"
-          >
-            Request full details
-          </a>
+          <div className="flex items-start gap-3 bg-[var(--web-off-white)] px-4 py-3 border border-[var(--web-serenity)]/25 rounded-[2px]">
+            <ArrowDownIcon className="h-4 w-4 mt-0.5 text-[var(--web-spruce)] shrink-0" />
+            <Stack gap="xs">
+              <Text className="text-[var(--web-ash)] text-[13px] font-medium leading-normal">
+                Continue in the enquiry panel below
+              </Text>
+              <Text className="text-[var(--web-spruce)] text-[12px] font-light leading-relaxed">
+                Select Enquire Now, leave your contact details and we’ll send you the full file.
+              </Text>
+            </Stack>
+          </div>
         </Stack>
       </div>
     </div>

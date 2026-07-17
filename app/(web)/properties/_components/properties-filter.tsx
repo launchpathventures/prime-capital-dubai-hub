@@ -21,7 +21,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { trackError } from "@/lib/error-tracking"
 
-import { propertyTypeImages } from "../../_surface/property-images"
+import {
+  getPropertyCoverImage,
+  PROPERTY_IMAGE_FALLBACK_ALT,
+} from "../../_surface/property-images"
 import { formatCrmBedrooms, formatCrmPriceRange, getStatusBadge, type CrmProperty } from "@/lib/crm"
 
 interface PropertiesGridProps {
@@ -137,10 +140,7 @@ export function PropertiesGrid({
 }
 
 function PropertyCard({ property }: { property: CrmProperty }) {
-  const imageUrl =
-    property.images[0] ||
-    propertyTypeImages[property.propertyType.toLowerCase()] ||
-    propertyTypeImages.default
+  const coverImage = getPropertyCoverImage(property.images)
   const statusBadge = getStatusBadge(property.status)
 
   return (
@@ -151,8 +151,8 @@ function PropertyCard({ property }: { property: CrmProperty }) {
       <div className="relative">
         <div className="relative h-[220px] overflow-hidden">
           <Image
-            src={imageUrl}
-            alt={property.title}
+            src={coverImage.src}
+            alt={coverImage.isFallback ? PROPERTY_IMAGE_FALLBACK_ALT : property.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -182,6 +182,12 @@ function PropertyCard({ property }: { property: CrmProperty }) {
             <MapPinIcon className="h-3.5 w-3.5" />
             {property.area}
           </div>
+
+          {coverImage.isFallback && (
+            <span className="absolute bottom-4 right-4 rounded-[2px] bg-[var(--web-ash)]/80 px-2.5 py-1 text-[9px] uppercase tracking-[0.12em] text-white backdrop-blur-sm">
+              Listing images coming soon
+            </span>
+          )}
         </div>
 
         <div className="p-5">

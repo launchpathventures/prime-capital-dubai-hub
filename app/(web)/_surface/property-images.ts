@@ -1,21 +1,19 @@
 /**
- * CATALYST - Property Type Images
+ * CATALYST - Property Image Fallback
  *
- * Shared fallback images for property types when no cover image is available.
- * Used by homepage and properties filter components.
+ * A single, recognisably generic Dubai image for listings whose CRM record has
+ * no photography. Property-type stock photos can look like the actual home and
+ * are therefore misleading.
  */
 
-export const propertyTypeImages: Record<string, string> = {
-  villa: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop",
-  penthouse: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop",
-  apartment: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop",
-  townhouse: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
-  default: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200&auto=format&fit=crop",
-}
+export const PROPERTY_IMAGE_FALLBACK = "/images/hero/properties.jpg"
+export const PROPERTY_IMAGE_FALLBACK_ALT = "Dubai skyline — listing images coming soon"
 
-/**
- * Get the image URL for a property type, falling back to default if not found.
- */
-export function getPropertyTypeImage(type: string): string {
-  return propertyTypeImages[type.toLowerCase()] || propertyTypeImages.default
+export function getPropertyCoverImage(images: readonly string[]) {
+  const listingImage = images.find((image) => image.trim().length > 0)
+
+  return {
+    src: listingImage ?? PROPERTY_IMAGE_FALLBACK,
+    isFallback: !listingImage,
+  }
 }
