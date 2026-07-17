@@ -221,7 +221,7 @@ function mapDetail(row: CrmPropertyDetail): CrmPropertyFull {
     features: row.features ?? [],
 
     paymentPlan: row.payment_plan,
-    unitTypes: row.unit_types,
+    unitGroups: row.unit_groups ?? null,
 
     media: row.media,
     masterPlanUrl: row.master_plan_url,

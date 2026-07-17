@@ -75,6 +75,18 @@ export interface CrmUnitType {
   total_units: number
 }
 
+/** Bedroom-level summary returned in detail `unit_groups`. */
+export interface CrmUnitGroup {
+  bedrooms: number | null
+  label: string
+  layouts: number
+  size_min_sqft: number | null
+  size_max_sqft: number | null
+  price_from: number | null
+  available_units: number
+  total_units: number
+}
+
 export interface CrmMedia {
   brochure_url: string | null
   video_url: string | null
@@ -159,6 +171,8 @@ export interface CrmPropertyDetail extends CrmPropertyListItem {
   payment_plan: CrmPaymentPlan | null
 
   unit_types: CrmUnitType[] | null
+  /** Absent on API builds from before the additive unit-group rollout. */
+  unit_groups?: CrmUnitGroup[] | null
 
   media: CrmMedia | null
   master_plan_url: string | null
@@ -263,7 +277,7 @@ export interface CrmPropertyFull extends CrmProperty {
   features: string[]
 
   paymentPlan: CrmPaymentPlan | null
-  unitTypes: CrmUnitType[] | null
+  unitGroups: CrmUnitGroup[] | null
 
   media: CrmMedia | null
   masterPlanUrl: string | null
@@ -397,16 +411,30 @@ export function getStatusBadge(status: CrmPropertyStatus): string | null {
 }
 
 /**
- * Whether the PDP should render the off-plan layout (unit mix, payment plan).
+ * Whether the PDP should render the off-plan presentation. Access metadata is
+ * the stable signal for gated responses; unit groups and list-shape fields
+ * keep full/legacy responses correctly classified when access is absent.
  */
-export function isDevelopmentListing(property: CrmPropertyFull): boolean {
-  return Array.isArray(property.unitTypes) && property.unitTypes.length > 0
+export function isDevelopmentListing(
+  property: Pick<
+    CrmPropertyFull,
+    | "access"
+    | "unitGroups"
+    | "constructionProgress"
+    | "completionDate"
+    | "bedroomsMin"
+    | "bedroomsMax"
+  >,
+): boolean {
+  if (property.access?.gated) return true
+  if (Array.isArray(property.unitGroups) && property.unitGroups.length > 0) return true
+  return isOffPlanListing(property)
 }
 
 /**
  * Heuristic for the listing card: off-plan if construction is incomplete or
  * the completion date sits in the future. Used where we only have list-shape
- * data (no unit_types).
+ * data (no unit_groups).
  */
 export function isOffPlanListing(
   property: Pick<CrmProperty, "constructionProgress" | "completionDate" | "bedroomsMin" | "bedroomsMax">

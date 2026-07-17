@@ -170,4 +170,52 @@ describe("mapping", () => {
     const noAccess = await getCrmPropertyBySlug("marina-tower")
     expect(noAccess?.access).toBeNull()
   })
+
+  it("maps the additive unit_groups contract independently of raw unit_types", async () => {
+    const unitGroups = [
+      {
+        bedrooms: 0,
+        label: "Studio",
+        layouts: 30,
+        size_min_sqft: 393,
+        size_max_sqft: 450,
+        price_from: 748_000,
+        total_units: 0,
+        available_units: 0,
+      },
+      {
+        bedrooms: 1,
+        label: "1 Bedroom",
+        layouts: 45,
+        size_min_sqft: 650,
+        size_max_sqft: 820,
+        price_from: 1_100_000,
+        total_units: 12,
+        available_units: 3,
+      },
+    ]
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        data: listRow({
+          unit_types: [
+            {
+              name: "Studio Type A",
+              bedrooms: 0,
+              bathrooms: 1,
+              size_sqft: 393,
+              price_from: 748_000,
+              price_to: 765_000,
+              total_units: 0,
+              available_units: 0,
+            },
+          ],
+          unit_groups: unitGroups,
+        }),
+      }),
+    )
+
+    const property = await getCrmPropertyBySlug("marina-tower")
+
+    expect(property?.unitGroups).toEqual(unitGroups)
+  })
 })
