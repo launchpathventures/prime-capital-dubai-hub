@@ -16,6 +16,7 @@ import { JsonLd, propertyJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 
 import { getCrmPropertyBySlug } from "@/lib/crm/client"
 import {
+  type CrmUnitGroup,
   formatCrmBedrooms,
   formatCrmPriceRange,
   getStatusBadge,
@@ -82,6 +83,24 @@ function formatNoteDate(date: string): string {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
 }
 
+function formatUnitSizeRange(
+  unit: Pick<CrmUnitGroup, "size_min_sqft" | "size_max_sqft">,
+): string {
+  const min = unit.size_min_sqft != null && unit.size_min_sqft > 0
+    ? unit.size_min_sqft
+    : null
+  const max = unit.size_max_sqft != null && unit.size_max_sqft > 0
+    ? unit.size_max_sqft
+    : null
+
+  if (min != null && max != null && min !== max) {
+    return `${min.toLocaleString("en-AE")}–${max.toLocaleString("en-AE")} sqft`
+  }
+
+  const size = min ?? max
+  return size != null ? `${size.toLocaleString("en-AE")} sqft` : "—"
+}
+
 export async function generateMetadata({ params, searchParams }: PageProps) {
   const { slug } = await params
   const token = selectShareToken(paramReaderFromRecord(await searchParams))
@@ -130,10 +149,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
   const statusBadge = getStatusBadge(property.status)
   const isDevelopment = isDevelopmentListing(property)
   const isBasic = isBasicTier(property)
-  // Off-plan pricing reads "Starting from". In the gated basic view the
-  // unit-mix is withheld (so isDevelopment is false), but a gated response is
-  // always an off-plan listing — key off the tier too.
-  const showStartingFrom = isDevelopment || isBasic
+  const showStartingFrom = isDevelopment
   const propertyUrl = `${SITE_URL}/properties/${property.slug}`
   const listingHeroImage = property.images[0]
   const heroImage = getPropertyCoverImage(property.images)
@@ -146,6 +162,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
   const hasBathroomMetric = property.bathrooms != null && property.bathrooms > 0
   const hasSizeMetric = property.sqft != null && property.sqft > 0
   const hasCompletionMetric = Boolean(property.completionDate)
+  const hasUnitAvailability = property.unitGroups?.some((unit) => unit.total_units > 0) ?? false
   const keyMetricCount =
     (hasBedroomMetric ? 1 : 0) +
     (hasBathroomMetric ? 1 : 0) +
@@ -400,46 +417,48 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
                 </SectionCard>
               )}
 
-              {isDevelopment && property.unitTypes && property.unitTypes.length > 0 && (
+              {isDevelopment && property.unitGroups && property.unitGroups.length > 0 && (
                 <SectionCard title="Available Unit Types" icon={HomeIcon}>
                   <div className="overflow-hidden border border-[var(--web-serenity)]/25 rounded-[2px]">
                     <table className="w-full text-[13px]">
                       <thead className="bg-[var(--web-serenity)]/10">
                         <tr>
                           <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">Type</th>
-                          <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">Beds</th>
+                          <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">Layouts</th>
                           <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">Size</th>
                           <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">From</th>
-                          <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">
-                            Available
-                          </th>
+                          {hasUnitAvailability && (
+                            <th className="text-left px-4 py-3 font-medium text-[var(--web-ash)]">
+                              Available
+                            </th>
+                          )}
                         </tr>
                       </thead>
                       <tbody>
-                        {property.unitTypes.map((unit) => (
+                        {property.unitGroups.map((unit) => (
                           <tr
-                            key={unit.name}
+                            key={`${unit.bedrooms ?? "unspecified"}-${unit.label}`}
                             className="border-t border-[var(--web-serenity)]/20 text-[var(--web-spruce)]"
                           >
-                            <td className="px-4 py-3 font-medium text-[var(--web-ash)]">{unit.name}</td>
-                            <td className="px-4 py-3">{unit.bedrooms ?? "—"}</td>
-                            <td className="px-4 py-3">
-                              {unit.size_sqft != null && unit.size_sqft > 0
-                                ? `${unit.size_sqft.toLocaleString("en-AE")} sqft`
-                                : "—"}
-                            </td>
+                            <td className="px-4 py-3 font-medium text-[var(--web-ash)]">{unit.label}</td>
+                            <td className="px-4 py-3">{unit.layouts.toLocaleString("en-AE")}</td>
+                            <td className="px-4 py-3">{formatUnitSizeRange(unit)}</td>
                             <td className="px-4 py-3">
                               {unit.price_from != null
                                 ? formatCrmPriceRange({
                                     price: unit.price_from,
                                     priceFrom: unit.price_from,
-                                    priceTo: unit.price_to,
+                                    priceTo: null,
                                   })
                                 : "—"}
                             </td>
-                            <td className="px-4 py-3">
-                              {unit.available_units} / {unit.total_units}
-                            </td>
+                            {hasUnitAvailability && (
+                              <td className="px-4 py-3">
+                                {unit.total_units > 0
+                                  ? `${unit.available_units} / ${unit.total_units}`
+                                  : "—"}
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
