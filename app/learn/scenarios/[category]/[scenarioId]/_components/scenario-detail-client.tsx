@@ -7,6 +7,7 @@
  */
 
 import { useState } from "react"
+import { List, Stack, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import {
   SparklesIcon,
@@ -16,6 +17,7 @@ import {
   PencilIcon,
 } from "lucide-react"
 import { ScenarioPractice } from "../../_components/scenario-practice"
+import { ScenarioReflection } from "../../_components/scenario-reflection"
 import { completeScenario } from "@/lib/actions/scenario-actions"
 
 // =============================================================================
@@ -32,6 +34,7 @@ interface ParsedScenario {
   challenges: string
   mistakes: string
   approach: string
+  crmFollowThrough: string
   aiPrompt: string
 }
 
@@ -59,6 +62,11 @@ export function ScenarioDetailClient({
   const [isCompleted, setIsCompleted] = useState(initialCompleted)
   const [copied, setCopied] = useState(false)
   const [showReflection, setShowReflection] = useState(false)
+  const isHandsOn = !scenario.aiPrompt.trim()
+  const crmFollowThrough = scenario.crmFollowThrough
+    .split("\n")
+    .map((line) => line.replace(/^[-•]\s*/, "").trim())
+    .filter(Boolean)
 
   const handleCopy = async () => {
     try {
@@ -146,46 +154,97 @@ export function ScenarioDetailClient({
         </div>
       )}
 
-      {/* Practice CTA */}
-      <div className="scenario-detail__practice-cta">
-        <div className="scenario-detail__practice-cta-content">
-          <h2 className="scenario-detail__practice-cta-title">
-            <SparklesIcon className="h-5 w-5" />
-            Ready to Practice?
-          </h2>
-          <p className="scenario-detail__practice-cta-description">
-            Start an AI roleplay session where you&apos;ll respond as the consultant.
-            The AI will play the client and evaluate your approach at the end.
-          </p>
+      {isHandsOn ? (
+        <div className="scenario-detail__practice-cta">
+          <div className="scenario-detail__practice-cta-content">
+            <h2 className="scenario-detail__practice-cta-title">
+              <CheckCircle2Icon className="h-5 w-5" />
+              Complete the Workflow Mission
+            </h2>
+            <p className="scenario-detail__practice-cta-description">
+              Perform the mission in the approved training environment, retain the
+              named evidence, then submit your reflection here.
+            </p>
+          </div>
+          <ScenarioReflection
+            category={category}
+            scenarioId={scenario.id}
+            scenarioTitle={scenario.title}
+            isCompleted={isCompleted}
+            existingReflection={existingReflection}
+            onComplete={() => setIsCompleted(true)}
+          />
         </div>
-        <Button size="lg" onClick={handleStartPractice} className="scenario-detail__practice-btn">
-          <SparklesIcon className="h-4 w-4 mr-2" />
-          Start AI Practice
-        </Button>
-      </div>
+      ) : (
+        <>
+          {/* Practice CTA */}
+          <div className="scenario-detail__practice-cta">
+            <div className="scenario-detail__practice-cta-content">
+              <h2 className="scenario-detail__practice-cta-title">
+                <SparklesIcon className="h-5 w-5" />
+                Ready to Practice?
+              </h2>
+              <p className="scenario-detail__practice-cta-description">
+                Start an AI roleplay session where you&apos;ll respond as the consultant.
+                The AI will play the client and evaluate your approach at the end.
+              </p>
+            </div>
+            <Button size="lg" onClick={handleStartPractice} className="scenario-detail__practice-btn">
+              <SparklesIcon className="h-4 w-4 mr-2" />
+              Start AI Practice
+            </Button>
+          </div>
 
-      {/* Fallback: Copy prompt */}
-      <details className="scenario-detail__prompt-fallback">
-        <summary>Or copy prompt for external AI (ChatGPT, Claude, etc.)</summary>
-        <div className="scenario-detail__prompt-content">
-          <pre className="scenario-detail__prompt-code">
-            <code>{scenario.aiPrompt}</code>
-          </pre>
-          <Button variant="outline" size="sm" onClick={handleCopy}>
-            {copied ? (
-              <>
-                <CheckIcon className="h-3.5 w-3.5 mr-1.5" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <CopyIcon className="h-3.5 w-3.5 mr-1.5" />
-                Copy Prompt
-              </>
-            )}
-          </Button>
-        </div>
-      </details>
+          {/* Fallback: Copy prompt */}
+          <details className="scenario-detail__prompt-fallback">
+            <summary>Or copy prompt for external AI (ChatGPT, Claude, etc.)</summary>
+            <div className="scenario-detail__prompt-content">
+              <pre className="scenario-detail__prompt-code">
+                <code>{scenario.aiPrompt}</code>
+              </pre>
+              <Button variant="outline" size="sm" onClick={handleCopy}>
+                {copied ? (
+                  <>
+                    <CheckIcon className="h-3.5 w-3.5 mr-1.5" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon className="h-3.5 w-3.5 mr-1.5" />
+                    Copy Prompt
+                  </>
+                )}
+              </Button>
+            </div>
+          </details>
+
+          {crmFollowThrough.length > 0 && (
+            <Stack
+              gap="md"
+              className="scenario-detail__crm-follow-through rounded-xl border bg-muted/30 p-5"
+            >
+              <Title size="h3">What changes in AgentCRM?</Title>
+              <List gap="sm" size="sm">
+                {crmFollowThrough.map((item) => {
+                  const labelledItem = item.match(/^\*\*(.+?):\*\*\s*(.+)$/)
+
+                  return (
+                    <li key={item}>
+                      {labelledItem ? (
+                        <>
+                          <strong>{labelledItem[1]}:</strong> {labelledItem[2]}
+                        </>
+                      ) : (
+                        item
+                      )}
+                    </li>
+                  )
+                })}
+              </List>
+            </Stack>
+          )}
+        </>
+      )}
     </section>
   )
 }

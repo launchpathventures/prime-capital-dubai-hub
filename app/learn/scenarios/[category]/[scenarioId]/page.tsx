@@ -41,6 +41,7 @@ export interface ParsedScenario {
   challenges: string
   mistakes: string
   approach: string
+  crmFollowThrough: string
   aiPrompt: string
 }
 
@@ -101,6 +102,7 @@ function parseScenario(content: string, scenarioId: string): ParsedScenario | nu
   const challenges = extractSection(scenarioContent, "Key Challenges")
   const mistakes = extractSection(scenarioContent, "Common Mistakes")
   const approach = extractSection(scenarioContent, "Model Approach")
+  const crmFollowThrough = extractSection(scenarioContent, "What changes in AgentCRM?")
   const aiPrompt = extractCodeBlock(scenarioContent)
 
   return {
@@ -113,12 +115,14 @@ function parseScenario(content: string, scenarioId: string): ParsedScenario | nu
     challenges,
     mistakes,
     approach,
+    crmFollowThrough,
     aiPrompt,
   }
 }
 
 function extractSection(content: string, sectionName: string): string {
-  const pattern = new RegExp(`### ${sectionName}\\s*\\n([\\s\\S]*?)(?=###|$)`, "i")
+  const escapedSectionName = sectionName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const pattern = new RegExp(`### ${escapedSectionName}\\s*\\n([\\s\\S]*?)(?=###|$)`, "i")
   const match = content.match(pattern)
   return match ? match[1].trim() : ""
 }

@@ -1,15 +1,15 @@
 # Scenario Bank
-## Prime Capital — AI Roleplay Training Scenarios
+## Prime Capital — Practice & Simulation Bank
 
-**Version:** 1.1  
-**Date:** January 2026  
-**Total Scenarios:** 83
+**Version:** 1.2
+**Date:** July 2026
+**Total Scenarios:** 113
 
 ---
 
 ## Purpose
 
-This Scenario Bank provides structured practice situations for Prime Capital consultants to develop client-facing skills through AI-powered roleplay. Each scenario simulates real-world interactions consultants will encounter, allowing safe practice before live client contact.
+This Scenario Bank provides structured practice situations for Prime Capital consultants through AI-powered roleplay and hands-on workflow labs. Each scenario allows safe practice before live client or production-system work.
 
 ---
 
@@ -22,7 +22,7 @@ This Scenario Bank provides structured practice situations for Prime Capital con
 3. **Note the key challenges** you'll need to navigate
 4. **Review common mistakes** to avoid known pitfalls
 5. **Study the model approach** before beginning practice
-6. **Use the AI simulation prompt** to begin your roleplay session
+6. **Use the AI simulation prompt** for roleplays, or complete the named training-tenant evidence for hands-on labs
 7. **Practice until confident** — aim for natural, brand-aligned responses
 
 ### For Managers
@@ -45,6 +45,10 @@ This Scenario Bank provides structured practice situations for Prime Capital con
 | [Closing](closing.md) | 10 | EOI commitment, overcoming hesitation, assumptive techniques |
 | [Difficult Situations](difficult-situations.md) | 10 | Ghosted clients, lost deals, angry clients, developer delays |
 | [AI Skills Practice](ai-skills.md) | 8 | Hands-on Gemini exercises — research, communication, productivity |
+| [AML Onboarding](aml-onboarding.md) | 8 | Customer risk, identity checks, beneficial ownership, and escalation |
+| [AML Red Flags](aml-red-flags.md) | 8 | Suspicious behaviour, sanctions, source of funds, and reporting decisions |
+| [AgentCRM Workflow Lab](agentcrm-workflow-lab.md) | 8 | Connected buyer/seller missions from first signal to deal and ongoing relationship |
+| [AgentCRM Roleplays](agentcrm-roleplays.md) | 6 | High-value agent conversations followed by exact CRM record-state decisions |
 
 ---
 
@@ -75,14 +79,14 @@ Typical errors consultants make — what to avoid.
 ### Model Approach
 A recommended framework for handling the scenario — how to approach it successfully.
 
-### AI Simulation Prompt
-The exact prompt to use with an AI assistant to begin the roleplay.
+### AI Simulation Prompt or Evidence Task
+Roleplays provide the exact prompt used to begin an AI conversation. Hands-on labs instead name the safe in-product task and evidence required.
 
 ---
 
 ## Competency Mapping
 
-Scenarios connect to the six Prime Capital competencies:
+Scenarios connect to Prime Capital competencies:
 
 | Competency | Related Scenarios |
 |------------|-------------------|
@@ -92,6 +96,8 @@ Scenarios connect to the six Prime Capital competencies:
 | Transaction Management | Closing 1-10, Difficult Situations 1-4 |
 | Objection Navigation | Objections 1-20 |
 | Relationship Stewardship | Difficult Situations 1-10, Closing 6-10 |
+| AML & Compliance | AML Onboarding 1-8, AML Red Flags 1-8 |
+| AgentCRM Mastery | AgentCRM Workflow Lab 1-8, AgentCRM Roleplays 1-6 |
 
 ---
 
