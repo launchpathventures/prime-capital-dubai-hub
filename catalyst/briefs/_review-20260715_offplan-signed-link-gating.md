@@ -32,6 +32,17 @@ Deferred to live verification (can't be exercised under jsdom / stale API): end-
 2. **Hard token response headers.** `proxy.ts` (edge middleware — the repo uses `proxy.ts`, not `middleware.ts`) stamps `Cache-Control: private, no-store` + `Referrer-Policy: no-referrer` on token-bearing `/properties*` responses, via the pure `shareTokenResponseHeaders` helper (`lib/crm/token-response-headers.ts`). Unit-tested. Live header inspection remains part of the CRM-deploy gate (acceptance #12).
 3. **Full `tsc --noEmit` green.** Root cause of the earlier JPG errors was a pre-build stale state (missing `.next/types` broke `next-env.d.ts`'s image-types reference); with generated types present it is 0 errors, stable with or without `.next/types`. Added a canonical `typecheck` script (`tsc --noEmit`). Verified: `typecheck` = 0 errors, 145 tests pass, repo lint clean, production build compiles.
 
+### Review round 2 — basic-view request UX (2026-07-17)
+
+1. **Property information now leads.** Removed the locked-details teaser from the top of the main content column, so the public About and Location sections establish value before the request flow.
+2. **Request guidance is attached to the action.** The private property-file explanation now sits directly above the sticky AgentCRM enquiry widget. It explicitly tells visitors to select “Enquire Now,” leave their contact details, and expect the full file from the advisory team.
+3. **Removed the ambiguous desktop jump.** The old `#enquiry` CTA often produced no visible movement because the sticky widget was already onscreen. The separate jump button is gone; the CRM widget remains the single enquiry action and `#enquiry` remains available as the semantic destination.
+
+### Review round 3 — property facts and card rhythm (2026-07-17)
+
+1. **Single facts no longer create an empty summary bar.** When bedrooms is the only available metric, it now appears inline with the hero location metadata. The dark comparison strip renders only when at least two metrics are available.
+2. **Sidebar spacing is consistent.** Property Details, the request context and the AgentCRM widget now share the same `md` (16px) vertical rhythm instead of mixing `lg` (24px) and `sm` (8px) gaps.
+
 ---
 
 ## Objective
@@ -233,7 +244,7 @@ Key insight: **the CRM projection alone delivers the gate with zero website depl
 
 Resolved by the CRM handoff (v2, 2026-07-17): field split, `access` shape, token degradation, issuance, agency UUID (same as the widget's, env `NEXT_PUBLIC_CRM_AGENCY_UUID`), and enquiry channel (iframe widget is the sole PDP owner) are all settled. Remaining:
 
-1. **CTA prominence** — should the basic view push "Request full details" hard (lead-gen), or stay a clean minimal listing? (Product/design call for Prime.)
+1. **CTA prominence — resolved 2026-07-17.** Lead with the useful public listing, then place concise request context immediately beside the enquiry action. Avoid a prominent gate card before the property content and avoid a separate jump CTA on desktop.
 
 ---
 

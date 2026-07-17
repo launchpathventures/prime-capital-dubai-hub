@@ -71,7 +71,10 @@ import { ArrowRightIcon } from "lucide-react"
 import { AnimatedStatsSection } from "./_surface/animated-stats"
 import { ParallaxHero } from "./_surface/parallax-hero"
 import { PropertySearch } from "./_surface/property-search"
-import { propertyTypeImages } from "./_surface/property-images"
+import {
+  getPropertyCoverImage,
+  PROPERTY_IMAGE_FALLBACK_ALT,
+} from "./_surface/property-images"
 import heroImage from "@/public/images/hero/prime-capital-hero.jpg"
 
 // Curated imagery for areas
@@ -248,10 +251,7 @@ function PropertiesSection({ properties }: { properties: CrmProperty[] }) {
           <Grid cols={1} className="md:grid-cols-3 gap-6">
             {properties.map((property) => {
               const isOffPlan = isOffPlanListing(property)
-              const cardImage =
-                property.images[0] ||
-                propertyTypeImages[property.propertyType.toLowerCase()] ||
-                propertyTypeImages.default
+              const cardImage = getPropertyCoverImage(property.images)
 
               return (
                 <Link
@@ -262,8 +262,8 @@ function PropertiesSection({ properties }: { properties: CrmProperty[] }) {
                   <div className="card-lift bg-white rounded-[2px] overflow-hidden shadow-sm">
                     <div className="relative h-[280px] overflow-hidden">
                       <Image
-                        src={cardImage}
-                        alt={property.title}
+                        src={cardImage.src}
+                        alt={cardImage.isFallback ? PROPERTY_IMAGE_FALLBACK_ALT : property.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, 33vw"
@@ -281,6 +281,11 @@ function PropertiesSection({ properties }: { properties: CrmProperty[] }) {
                       >
                         {isOffPlan ? "Off-Plan" : "Ready"}
                       </Badge>
+                      {cardImage.isFallback && (
+                        <span className="absolute bottom-4 right-4 rounded-[2px] bg-[var(--web-ash)]/80 px-2.5 py-1 text-[9px] uppercase tracking-[0.12em] text-white backdrop-blur-sm">
+                          Listing images coming soon
+                        </span>
+                      )}
                     </div>
 
                     <div className="p-6">
