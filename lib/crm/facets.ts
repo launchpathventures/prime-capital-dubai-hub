@@ -42,7 +42,7 @@ const EMPTY_FACETS: PublicPropertyFacets = {
 }
 
 function isCrmConfigured(): boolean {
-  return Boolean(config.crm.baseUrl && config.crm.agencySlug)
+  return Boolean(config.crm.baseUrl && config.crm.agencyUuid)
 }
 
 function sortFacetOptions(options: PublicPropertyFacetOption[]): PublicPropertyFacetOption[] {
@@ -108,7 +108,7 @@ export async function fetchPropertyFacets(
   if (!isCrmConfigured()) return EMPTY_FACETS
 
   const url = new URL("/api/public/properties/facets", config.crm.baseUrl)
-  url.searchParams.set("agency", config.crm.agencySlug)
+  url.searchParams.set("agency", config.crm.agencyUuid)
   appendFilterParams(url, filters)
 
   let res: Response

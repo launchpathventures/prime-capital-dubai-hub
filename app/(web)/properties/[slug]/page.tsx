@@ -19,10 +19,14 @@ import {
   formatCrmBedrooms,
   formatCrmPriceRange,
   getStatusBadge,
+  isBasicTier,
   isDevelopmentListing,
+  lockedSectionLabel,
 } from "@/lib/crm"
+import { paramReaderFromRecord, selectShareToken } from "@/lib/crm/share-token"
 import { PropertyEnquiryWidget } from "@/components/shared/property-enquiry-widget"
 import { PropertyProse } from "@/components/shared/property-enquiry-widget/property-prose"
+import { StripShareToken } from "./strip-share-token"
 
 import {
   ArrowLeftIcon,
@@ -42,12 +46,17 @@ import {
   LayersIcon,
   UtensilsIcon,
   SofaIcon,
+  LockIcon,
 } from "lucide-react"
 
-export const revalidate = 300 // Match the CRM Cache-Control max-age
+// The CRM serves property detail as Cache-Control: no-store for both anonymous
+// and token-bearing responses, so this route must never be cached. Fully dynamic
+// (it also reads searchParams for the share token).
+export const dynamic = "force-dynamic"
 
 interface PageProps {
   params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 const SITE_URL = "https://primecapitaldubai.com"
@@ -68,8 +77,12 @@ function formatNoteDate(date: string): string {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const token = selectShareToken(paramReaderFromRecord(await searchParams))
+  // Metadata (title/OG) only needs the public basic view; never fetch the full
+  // projection here. A token-bearing page must not be indexed or leak the token
+  // via the referrer.
   const property = await getCrmPropertyBySlug(slug)
 
   if (!property) {
@@ -79,7 +92,12 @@ export async function generateMetadata({ params }: PageProps) {
   const heroImage = property.images[0]
   const description = (property.overview ?? property.description)?.slice(0, 160) ?? ""
 
+  const tokenMeta = token.present
+    ? { robots: { index: false, follow: false }, referrer: "no-referrer" as const }
+    : {}
+
   return {
+    ...tokenMeta,
     title: property.title,
     description,
     alternates: { canonical: `/properties/${property.slug}` },
@@ -97,20 +115,27 @@ export async function generateMetadata({ params }: PageProps) {
   }
 }
 
-export default async function PropertyDetailPage({ params }: PageProps) {
+export default async function PropertyDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params
-  const property = await getCrmPropertyBySlug(slug)
+  const token = selectShareToken(paramReaderFromRecord(await searchParams))
+  const property = await getCrmPropertyBySlug(slug, { shareToken: token })
 
   if (!property) notFound()
 
   const statusBadge = getStatusBadge(property.status)
   const isDevelopment = isDevelopmentListing(property)
+  const isBasic = isBasicTier(property)
+  // Off-plan pricing reads "Starting from". In the gated basic view the
+  // unit-mix is withheld (so isDevelopment is false), but a gated response is
+  // always an off-plan listing — key off the tier too.
+  const showStartingFrom = isDevelopment || isBasic
   const propertyUrl = `${SITE_URL}/properties/${property.slug}`
   const heroImage = property.images[0]
   const galleryImages = property.images.slice(1)
 
   return (
     <div className="web-property-detail">
+      {token.present && <StripShareToken />}
       <JsonLd
         data={propertyJsonLd({
           title: property.title,
@@ -200,7 +225,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
             <Stack gap="sm" align="end">
               <div className="text-white/70 text-[13px]">
-                {isDevelopment ? "Starting from" : "Price"}
+                {showStartingFrom ? "Starting from" : "Price"}
               </div>
               <div className="font-headline text-[var(--web-off-white)] text-[clamp(28px,4vw,40px)]">
                 {formatCrmPriceRange(property)}
@@ -265,6 +290,8 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <Grid cols={1} className="lg:grid-cols-[2fr_1fr] gap-12">
             {/* Main content */}
             <Stack gap="xl">
+              {isBasic && <LockedDetailsCard lockedSections={property.access?.lockedSections ?? []} />}
+
               {property.notes.length > 0 && (
                 <SectionCard title="Latest Updates" icon={BellIcon}>
                   <Stack gap="sm">
@@ -578,17 +605,67 @@ export default async function PropertyDetailPage({ params }: PageProps) {
                 </Stack>
               </SectionCard>
 
-              <div className="lg:sticky lg:top-24">
+              <div id="enquiry" className="lg:sticky lg:top-24 scroll-mt-24">
                 <PropertyEnquiryWidget
                   slug={property.slug}
                   propertyName={property.title}
                   propertyUrl={propertyUrl}
+                  shareRef={token.present ? { present: true, value: token.value } : undefined}
                 />
               </div>
             </Stack>
           </Grid>
         </Container>
       </section>
+    </div>
+  )
+}
+
+/**
+ * Basic-view teaser. Renders once, at the top of the detail column, with a
+ * single primary CTA (per the CRM handoff: no repeated unlock buttons, no
+ * forced modal). The enquiry widget in the sidebar is the CTA target.
+ */
+function LockedDetailsCard({ lockedSections }: { lockedSections: string[] }) {
+  return (
+    <div className="bg-white rounded-[2px] border border-[var(--web-serenity)]/30 shadow-sm">
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-[var(--web-serenity)]/25">
+        <LockIcon className="h-4 w-4 text-[var(--web-spruce)]" />
+        <Title
+          as="h2"
+          className="font-headline text-[var(--web-ash)] text-[15px] font-normal uppercase tracking-[0.15em] leading-none"
+        >
+          Full details on request
+        </Title>
+      </div>
+      <div className="px-6 py-6">
+        <Stack gap="md">
+          <Text className="text-[var(--web-ash)] text-[15px] font-light leading-relaxed">
+            The complete profile for this residence — pricing, plans and developer
+            information — is shared privately with qualified buyers.
+          </Text>
+
+          {lockedSections.length > 0 && (
+            <Grid cols={2} className="gap-3">
+              {lockedSections.map((section) => (
+                <div key={section} className="flex items-center gap-2">
+                  <LockIcon className="h-3.5 w-3.5 text-[var(--web-spruce)] shrink-0" />
+                  <Text className="text-[var(--web-spruce)] text-[14px] font-light">
+                    {lockedSectionLabel(section)}
+                  </Text>
+                </div>
+              ))}
+            </Grid>
+          )}
+
+          <a
+            href="#enquiry"
+            className="inline-flex items-center justify-center self-start px-6 py-3 rounded-[2px] text-[11px] uppercase tracking-[0.2em] bg-[var(--web-spruce)] text-[var(--web-off-white)] hover:bg-[var(--web-ash)] transition-colors"
+          >
+            Request full details
+          </a>
+        </Stack>
+      </div>
     </div>
   )
 }

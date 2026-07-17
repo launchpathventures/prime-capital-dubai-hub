@@ -15,6 +15,9 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/',
   redirect: vi.fn(),
+  // No-op like the real thing for non-framework errors (it only re-throws
+  // Next's internal control-flow errors).
+  unstable_rethrow: vi.fn(),
 }))
 
 // Mock next/cache

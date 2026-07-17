@@ -88,6 +88,22 @@ export interface CrmNote {
   date: string
 }
 
+export type CrmAccessTier = "basic" | "full"
+
+/**
+ * Per-response access decision from the CRM. Off-plan listings return
+ * `tier: "basic"` unless the request carries a valid `full` share token; the
+ * gated fields are then simply absent from the payload. `locked_sections`
+ * enumerates what the full view would add so the UI can render a teaser.
+ * Missing on legacy responses — treat absent `access` as full (see mapper).
+ */
+export interface CrmAccess {
+  tier: CrmAccessTier
+  gated: boolean
+  locked_sections: string[]
+  reason: string | null
+}
+
 /** List endpoint property — every documented field. */
 export interface CrmPropertyListItem {
   id: string
@@ -129,6 +145,9 @@ export interface CrmPropertyListItem {
 
   embed_url: string
   embed_html: string
+
+  /** Access decision for this response. Absent on legacy API builds. */
+  access?: CrmAccess | null
 }
 
 /** Detail endpoint extends list shape with rich fields + markdown blocks. */
@@ -184,6 +203,14 @@ export interface CrmListResponse {
 // APP-SHAPED TYPES (camelCase, used by pages/components)
 // =============================================================================
 
+/** Mapped (camelCase) access decision — see CrmAccess. */
+export interface CrmPropertyAccess {
+  tier: CrmAccessTier
+  gated: boolean
+  lockedSections: string[]
+  reason: string | null
+}
+
 export interface CrmProperty {
   id: string
   title: string
@@ -191,6 +218,9 @@ export interface CrmProperty {
   slug: string
   reference: string | null
   description: string | null
+
+  /** Access decision for this response; null when the API omits it (legacy = full). */
+  access: CrmPropertyAccess | null
 
   area: string
   buildingName: string | null
@@ -315,6 +345,37 @@ export interface PublicPropertyFacets {
 // =============================================================================
 // HELPERS
 // =============================================================================
+
+/**
+ * Whether this response is the gated basic tier. Absent `access` (legacy API
+ * builds) is treated as full — never gate a response the CRM didn't gate.
+ */
+export function isBasicTier(property: Pick<CrmProperty, "access">): boolean {
+  return property.access?.tier === "basic"
+}
+
+/**
+ * Human labels for the CRM's `locked_sections` keys, used by the basic-view
+ * teaser. Unknown keys fall back to a title-cased version of the key.
+ */
+const LOCKED_SECTION_LABELS: Record<string, string> = {
+  payment_plan: "Payment plan",
+  unit_types: "Unit types & pricing",
+  developer: "Developer details",
+  documents: "Brochures, floor plans & documents",
+  media: "Media & 3D tours",
+  amenities: "Amenities",
+  reasons_to_invest: "Investment highlights",
+  finishing: "Finishing & materials",
+  notes: "Latest updates",
+}
+
+export function lockedSectionLabel(key: string): string {
+  return (
+    LOCKED_SECTION_LABELS[key] ??
+    key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  )
+}
 
 /**
  * True when the property should display a non-available badge on the PDP.
