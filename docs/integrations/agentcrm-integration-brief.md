@@ -107,9 +107,10 @@ should **de-dupe on `submissionId`** (with email/phone as a secondary match).
 There is no server-side auto-retry today — see Open Questions.
 
 **Field omission.** Any field whose value is empty/unknown is **omitted** from
-the JSON (not sent as `null`). The deliberate exceptions are `assigneeEmail`,
-`teamMemberEmail` (sent as `null` when no owner is pre-assigned) and `website`
-(sent as `""`).
+the JSON (not sent as `null`). The deliberate exceptions are `assigneeEmail`
+and `teamMemberEmail` for non-property forms (sent as `null` when no owner is
+pre-assigned) and `website` (sent as `""`). Property enquiries omit assignment
+controls because AgentCRM resolves the listing agent from `propertyInterest`.
 
 ---
 
@@ -488,10 +489,14 @@ Likewise illustrative — a recruitment form would set `visitorType: "agent"`:
 
 | Field | Type | Notes |
 |---|---|---|
-| `propertyRef` | string | Property slug. |
+| `propertyInterest` | UUID | AgentCRM public API property ID. This is the routing key. |
 | `propertyName` / `propertyUrl` | string | Server-resolved (not trusted from the client). |
 | `developerName` | string | |
 | `isOffPlan` / `isDistressed` | boolean | |
+
+Do not send an agent name, agent ID, email, or slug for property routing.
+AgentCRM resolves the linked listing agent from `propertyInterest`, after
+preserving an existing owner and honouring any valid `ref` share token.
 
 ### Attribution
 
@@ -510,7 +515,7 @@ Likewise illustrative — a recruitment form would set `visitorType: "agent"`:
 | `submissionId` | string (UUID v4) | always | **De-dupe key.** Reused on retries. |
 | `sessionId` | string (UUID v4) | always | Unique per guest/visitor. |
 | `submittedAt` | string (ISO 8601) | always | UTC timestamp. |
-| `assigneeEmail` / `teamMemberEmail` | string \| null | always | Resolved team-member email when the lead came from an agent's page; `null` otherwise (incl. all kiosk leads). |
+| `assigneeEmail` / `teamMemberEmail` | string \| null | non-property forms | Resolved team-member email when the lead came from an agent's page; `null` otherwise (incl. all kiosk leads). Omitted for property enquiries. |
 | `pageUrl` | string | always | Page the lead was submitted from. |
 | `website` | string | always | Honeypot; `""` on legitimate leads, non-empty indicates a bot. |
 

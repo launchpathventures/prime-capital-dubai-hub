@@ -11,11 +11,11 @@
 | **Stage** | `poc` |
 | **Project Version** | `0.1.0` |
 | **Catalyst Version** | `1.0.0` |
-| **Health** | 🟢 Green |
+| **Health** | 🟡 Yellow |
 
 ## Focus
 
-LMS completion and website launch readiness. Building a real estate advisory platform with RERA certification training for Prime Capital Dubai.
+Website launch readiness, including the AgentCRM property-agent display and property-interest routing update. Implementation is ready for review but release remains gated on the upstream CRM deployment.
 
 ## Target
 
@@ -29,8 +29,8 @@ MVP launch — complete LMS with all competencies and polished marketing website
 
 ## Blockers
 
-None currently.
+- AgentCRM PR #335 must be merged and deployed before the property-agent and routing update is released.
 
 ---
 
-*Last updated: 2026-01-18*
+*Last updated: 2026-07-21*

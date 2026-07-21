@@ -10,12 +10,14 @@ import Link from "next/link"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 
-import { Container, Stack, Grid, Text, Title } from "@/components/core"
+import { Container, Stack, Row, Grid, Text, Title } from "@/components/core"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { JsonLd, propertyJsonLd, breadcrumbJsonLd } from "@/lib/json-ld"
 
 import { getCrmPropertyBySlug } from "@/lib/crm/client"
 import {
+  type CrmPropertyFull,
   type CrmUnitGroup,
   formatCrmBedrooms,
   formatCrmPriceRange,
@@ -656,7 +658,6 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
                   <DetailRow label="Location" value={property.area} />
                   {property.address && <DetailRow label="Address" value={property.address} />}
                   {property.floor && <DetailRow label="Floor" value={property.floor} />}
-                  {property.unitNumber && <DetailRow label="Unit" value={property.unitNumber} />}
                   {property.view && <DetailRow label="View" value={property.view} />}
                   {property.furnished && (
                     <DetailRow
@@ -684,6 +685,7 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
               <div id="enquiry" className="lg:sticky lg:top-24 scroll-mt-24">
                 <Stack gap="md">
                   {isBasic && <LockedDetailsCard />}
+                  <PropertyAgentCard agent={property.agent} />
                   <PropertyEnquiryWidget
                     slug={property.slug}
                     propertyName={property.title}
@@ -696,6 +698,49 @@ export default async function PropertyDetailPage({ params, searchParams }: PageP
           </Grid>
         </Container>
       </section>
+    </div>
+  )
+}
+
+function PropertyAgentCard({ agent }: { agent: CrmPropertyFull["agent"] }) {
+  const name = agent?.name ?? "Prime Capital"
+  const title = agent?.title ?? (agent ? null : "Contact our team")
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+
+  return (
+    <div
+      className="property-agent-card rounded-[2px] border border-[var(--web-serenity)]/30 bg-white px-6 py-5 shadow-sm"
+      data-slot="property-agent-card"
+    >
+      <Stack gap="sm">
+        <Text className="text-[var(--web-spruce)] text-[10px] uppercase tracking-[0.16em]">
+          Property adviser
+        </Text>
+        <Row gap="sm" align="center">
+          <Avatar size="lg" className="size-12">
+            {agent?.avatarUrl && <AvatarImage src={agent.avatarUrl} alt={name} />}
+            <AvatarFallback className="bg-[var(--web-spruce)] text-[var(--web-off-white)]">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <Stack gap="xs">
+            <Text className="text-[var(--web-ash)] text-[15px] font-semibold leading-tight">
+              {name}
+            </Text>
+            {title && (
+              <Text className="text-[var(--web-spruce)] text-[12px] font-light leading-tight">
+                {title}
+              </Text>
+            )}
+          </Stack>
+        </Row>
+      </Stack>
     </div>
   )
 }

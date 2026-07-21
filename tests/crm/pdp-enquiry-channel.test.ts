@@ -32,4 +32,15 @@ describe("PDP enquiry channel", () => {
   it("scrubs the share token from the URL when present", () => {
     expect(pageSource).toContain("StripShareToken")
   })
+
+  it("shows the API-provided agent without passing it into the widget", () => {
+    expect(pageSource).toContain("<PropertyAgentCard agent={property.agent} />")
+    const widgetStart = pageSource.indexOf("<PropertyEnquiryWidget")
+    const widgetEnd = pageSource.indexOf("/>", widgetStart)
+    expect(pageSource.slice(widgetStart, widgetEnd)).not.toContain("agent=")
+  })
+
+  it("never renders a secondary unit number", () => {
+    expect(pageSource).not.toContain("property.unitNumber")
+  })
 })

@@ -196,7 +196,7 @@ The CRM team returned the finalized contract — see `.context/agentcrm-signed-l
 
 Secondary/ready listings are full-access, but **unit identity is never public**. The website must tolerate and never re-introduce it:
 
-- No `unit_number` / `unitNumber` — the PDP sidebar already guards `{property.unitNumber && …}`; keep it. Never source a unit number from CMS, URL, analytics, or cache.
+- No `unit_number` / `unitNumber` — the website mapper drops unit identity before creating the app-facing property model, and the PDP has no unit-number render path. Never source a unit number from CMS, URL, analytics, or cache.
 - Redacted unit-identifying prose and media URLs (accept as-is).
 - `slug: null` → route via UUID (the `slug ?? id` fix above).
 

@@ -131,18 +131,46 @@ describe("mapping", () => {
     expect(properties[0].slug).toBe("uuid-secondary")
   })
 
-  it("never exposes commission_rate or raw unit_number", async () => {
+  it("never exposes internal fields, references, or unit identity", async () => {
     mockFetch.mockResolvedValueOnce(
       jsonResponse({
-        data: listRow({ commission_rate: 2.5, unit_number: "APT-1203" }),
+        data: listRow({
+          commission_rate: 2.5,
+          reference: "REF-APT-1203",
+          unit_number: "APT-1203",
+        }),
       }),
     )
     const property = await getCrmPropertyBySlug("marina-tower")
     expect(property).not.toBeNull()
     expect("commission_rate" in (property as object)).toBe(false)
-    // unit_number (snake) is never mapped; only the camel unitNumber exists and
-    // is null unless the API supplies it under the mapped field.
+    expect("reference" in (property as object)).toBe(false)
     expect("unit_number" in (property as object)).toBe(false)
+    expect("unitNumber" in (property as object)).toBe(false)
+  })
+
+  it("maps the additive display-only agent and tolerates legacy omission", async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({
+        data: listRow({
+          agent: {
+            name: "Amina Noor",
+            avatar_url: "https://cdn.example.com/amina.jpg",
+            title: "Property Consultant",
+          },
+        }),
+      }),
+    )
+    const withAgent = await getCrmPropertyBySlug("marina-tower")
+    expect(withAgent?.agent).toEqual({
+      name: "Amina Noor",
+      avatarUrl: "https://cdn.example.com/amina.jpg",
+      title: "Property Consultant",
+    })
+
+    mockFetch.mockResolvedValueOnce(jsonResponse({ data: listRow() }))
+    const legacy = await getCrmPropertyBySlug("marina-tower")
+    expect(legacy?.agent).toBeNull()
   })
 
   it("maps the access block to camelCase, null when absent", async () => {

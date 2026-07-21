@@ -26,6 +26,7 @@ import type {
   CrmListResponse,
   CrmProperty,
   CrmPropertyAccess,
+  CrmPropertyAgent,
   CrmPropertyDetail,
   CrmPropertyFull,
   CrmPropertyListItem,
@@ -163,6 +164,15 @@ function mapAccess(access: CrmAccess | null | undefined): CrmPropertyAccess | nu
   }
 }
 
+function mapAgent(row: CrmPropertyListItem["agent"]): CrmPropertyAgent | null {
+  if (!row) return null
+  return {
+    name: row.name,
+    avatarUrl: row.avatar_url,
+    title: row.title,
+  }
+}
+
 // =============================================================================
 // MAPPERS (snake_case → camelCase)
 // =============================================================================
@@ -172,7 +182,6 @@ function mapListItem(row: CrmPropertyListItem): CrmProperty {
     id: row.id,
     title: row.title,
     slug: row.slug ?? row.id,
-    reference: row.reference,
     description: row.description,
 
     area: row.area,
@@ -208,6 +217,7 @@ function mapListItem(row: CrmPropertyListItem): CrmProperty {
 
     embedUrl: row.embed_url,
     embedHtml: row.embed_html,
+    agent: mapAgent(row.agent),
 
     access: mapAccess(row.access),
   }
@@ -216,7 +226,6 @@ function mapListItem(row: CrmPropertyListItem): CrmProperty {
 function mapDetail(row: CrmPropertyDetail): CrmPropertyFull {
   return {
     ...mapListItem(row),
-    unitNumber: row.unit_number,
     address: row.address,
     features: row.features ?? [],
 

@@ -116,6 +116,13 @@ export interface CrmAccess {
   reason: string | null
 }
 
+/** Display-only listing agent returned by the public property API. */
+export interface CrmPropertyAgentResponse {
+  name: string
+  avatar_url: string | null
+  title: string | null
+}
+
 /** List endpoint property — every documented field. */
 export interface CrmPropertyListItem {
   id: string
@@ -157,6 +164,9 @@ export interface CrmPropertyListItem {
 
   embed_url: string
   embed_html: string
+
+  /** Additive in AgentCRM PR #335; optional until that build is deployed. */
+  agent?: CrmPropertyAgentResponse | null
 
   /** Access decision for this response. Absent on legacy API builds. */
   access?: CrmAccess | null
@@ -225,12 +235,18 @@ export interface CrmPropertyAccess {
   reason: string | null
 }
 
+/** Website-safe, display-only representation of a listing agent. */
+export interface CrmPropertyAgent {
+  name: string
+  avatarUrl: string | null
+  title: string | null
+}
+
 export interface CrmProperty {
   id: string
   title: string
   /** Preferred URL segment. Falls back to id when null at the API. */
   slug: string
-  reference: string | null
   description: string | null
 
   /** Access decision for this response; null when the API omits it (legacy = full). */
@@ -269,10 +285,10 @@ export interface CrmProperty {
 
   embedUrl: string
   embedHtml: string
+  agent: CrmPropertyAgent | null
 }
 
 export interface CrmPropertyFull extends CrmProperty {
-  unitNumber: string | null
   address: string | null
   features: string[]
 
