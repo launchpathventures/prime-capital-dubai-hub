@@ -7,9 +7,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import type { NextRequest } from "next/server"
 
-vi.mock("@/lib/content", () => ({
-  getWebPropertyBySlug: vi.fn(async () => null),
+const crmMocks = vi.hoisted(() => ({
+  getCrmPropertyBySlug: vi.fn(),
 }))
+
+vi.mock("@/lib/crm/client", () => crmMocks)
 
 // Mock the fetch function for Zapier webhook calls
 const mockFetch = vi.fn()
@@ -21,6 +23,7 @@ describe("Lead Form API", () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    crmMocks.getCrmPropertyBySlug.mockResolvedValue(null)
     process.env = {
       ...ORIGINAL_ENV,
       AGENTCRM_API_KEY: "test-agentcrm-key",
@@ -304,6 +307,84 @@ describe("Lead Form API", () => {
       expect(payload.utmCampaign).toBe("test123")
       expect(payload.sessionId).toBe("6f3fdfb4-8697-4c0a-9f68-3b2c83f8f5c5")
       expect(payload.source).toBeUndefined()
+    })
+
+    it("routes a native property enquiry by AgentCRM property UUID only", async () => {
+      crmMocks.getCrmPropertyBySlug.mockResolvedValueOnce({
+        id: "b2f081d7-e7d4-4f08-855b-1b8ed43d6ae4",
+        slug: "marina-apartment",
+        title: "Marina Apartment",
+        developer: null,
+        constructionProgress: 100,
+        completionDate: null,
+        bedroomsMin: 2,
+        bedroomsMax: 2,
+      })
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.72",
+        },
+        body: JSON.stringify({
+          firstName: "Ahmed",
+          email: "ahmed@example.com",
+          whatsapp: "+971501234567",
+          formMode: "property-enquiry",
+          enquiryNotes: "I would like to arrange a viewing.",
+          referringProperty: "marina-apartment",
+          referringTeamMember: "legacy-agent-slug",
+          referringTeamMemberEmail: "agent@primecapitaldubai.com",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://primecapitaldubai.com/contact?property=marina-apartment",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      const payload = JSON.parse(String(mockFetch.mock.calls[0][1].body))
+
+      expect(payload.propertyInterest).toBe("b2f081d7-e7d4-4f08-855b-1b8ed43d6ae4")
+      expect(payload.propertyName).toBe("Marina Apartment")
+      expect(payload.propertyUrl).toBe(
+        "https://primecapitaldubai.com/properties/marina-apartment",
+      )
+      expect(payload.message).toBe("I would like to arrange a viewing.")
+      expect(payload.propertyRef).toBeUndefined()
+      expect(payload.assigneeEmail).toBeUndefined()
+      expect(payload.teamMemberEmail).toBeUndefined()
+      expect(payload.assigneeSlug).toBeUndefined()
+    })
+
+    it("never falls back to legacy assignment controls for a property enquiry", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.73",
+        },
+        body: JSON.stringify({
+          firstName: "Ahmed",
+          email: "ahmed@example.com",
+          formMode: "property-enquiry",
+          referringProperty: "temporarily-unavailable-property",
+          referringTeamMember: "legacy-agent-slug",
+          referringTeamMemberEmail: "agent@primecapitaldubai.com",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://primecapitaldubai.com/contact",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      const payload = JSON.parse(String(mockFetch.mock.calls[0][1].body))
+
+      expect(payload.propertyInterest).toBeUndefined()
+      expect(payload.assigneeEmail).toBeUndefined()
+      expect(payload.teamMemberEmail).toBeUndefined()
+      expect(payload.assigneeSlug).toBeUndefined()
     })
 
     it("keeps accepted AgentCRM enquiry payloads below the 64KB body cap", async () => {

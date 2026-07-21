@@ -13,8 +13,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { randomUUID } from "node:crypto"
-import { getWebPropertyBySlug } from "@/lib/content"
-import type { Property } from "@/lib/content-types"
+import { getCrmPropertyBySlug } from "@/lib/crm/client"
+import { isOffPlanListing } from "@/lib/crm"
 import { deriveSiteSource } from "@/lib/leads/source"
 
 // =============================================================================
@@ -638,6 +638,7 @@ type LeadData = z.infer<typeof leadSchema>
 // =============================================================================
 
 interface EnrichedProperty {
+  id: string
   ref: string
   name: string
   url: string
@@ -656,21 +657,21 @@ const SITE_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://primecapitaldu
  */
 async function enrichProperty(slug: string | undefined): Promise<EnrichedProperty | null> {
   if (!slug) return null
-  let property: Property | null = null
   try {
-    property = await getWebPropertyBySlug(slug)
+    const property = await getCrmPropertyBySlug(slug)
+    if (!property) return null
+    return {
+      id: property.id,
+      ref: property.slug,
+      name: property.title,
+      url: `${SITE_BASE_URL.replace(/\/$/, "")}/properties/${property.slug}`,
+      developerName: property.developer,
+      isOffPlan: isOffPlanListing(property),
+      isDistressed: false,
+    }
   } catch (err) {
     console.error("[Leads API] Property enrichment failed:", err)
     return null
-  }
-  if (!property) return null
-  return {
-    ref: property.slug,
-    name: property.title,
-    url: `${SITE_BASE_URL.replace(/\/$/, "")}/properties/${property.slug}`,
-    developerName: property.developer,
-    isOffPlan: property.completionStatus === "off-plan",
-    isDistressed: property.tags?.includes("distressed") ?? false,
   }
 }
 
@@ -692,7 +693,7 @@ interface ForwardResult {
  * Build the AgentCRM-shaped payload from validated lead data + server-side
  * enrichment. Field renames vs. our internal schema:
  *   - whatsapp → phone (E.164 already enforced upstream)
- *   - referringProperty → propertyRef
+ *   - referringProperty → a server-resolved AgentCRM propertyInterest UUID
  *   - referringTeamMember → assigneeSlug, teamMemberEmail → assigneeEmail
  *   - questionsText / enquiryNotes / concerns / privateContext → message
  *   - formMode passes through unchanged (AgentCRM accepts "event")
@@ -711,6 +712,7 @@ function buildAgentCrmPayload(
   // Registration - Livestream"). Use it as the leadMagnet so the CRM always
   // has a single field carrying event identity even if the client didn't set one.
   const leadMagnet = leadData.leadMagnet || (isEvent ? formName : undefined)
+  const usesPropertyRouting = leadData.formMode === "property-enquiry" || Boolean(property?.id)
 
   const payload: Record<string, unknown> = {
     // Identity
@@ -731,8 +733,8 @@ function buildAgentCrmPayload(
     leadDistribution: leadData.leadDistribution,
     pageUrl: leadData.pageUrl,
     visitorType,
-    // Prospect binder from the AgentCRM welcome-email link (verbatim). Lets
-    // AgentCRM match + promote the existing prospect (Prospect → Lead).
+    // Opaque AgentCRM ref (verbatim). It can bind a welcome-email prospect or
+    // identify a sharing agent; AgentCRM owns validation and precedence.
     ref: leadData.ref,
     submissionId,
     sessionId: leadData.sessionId,
@@ -760,7 +762,7 @@ function buildAgentCrmPayload(
 
     // Property enquiry — server-enriched name/url override anything the
     // client might have sent
-    propertyRef: property?.ref || leadData.referringProperty,
+    propertyInterest: property?.id,
     propertyName: property?.name,
     propertyUrl: property?.url,
     developerName: property?.developerName,
@@ -777,9 +779,11 @@ function buildAgentCrmPayload(
     privateContext: leadData.privateContext,
 
     // Auto-assignment
-    assigneeEmail: resolvedAssigneeEmail,
-    teamMemberEmail: resolvedAssigneeEmail,
-    assigneeSlug: leadData.referringTeamMember,
+    // Property enquiries route from propertyInterest inside AgentCRM. Never
+    // pass display-agent data or legacy assignment controls alongside it.
+    assigneeEmail: usesPropertyRouting ? undefined : resolvedAssigneeEmail,
+    teamMemberEmail: usesPropertyRouting ? undefined : resolvedAssigneeEmail,
+    assigneeSlug: usesPropertyRouting ? undefined : leadData.referringTeamMember,
 
     // Tagging — apply distressed automatically when the property is flagged
     leadTag:

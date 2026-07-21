@@ -93,7 +93,6 @@ interface WidgetMessage {
     height?: number
     leadUuid?: string
     contactId?: string
-    propertyRef?: string
     [k: string]: unknown
   }
 }
@@ -143,7 +142,6 @@ function fireAnalyticsLead(payload: WidgetMessage["payload"]): void {
     event: "generate_lead",
     lead_id: (payload?.leadUuid as string | undefined) ?? null,
     contact_id: (payload?.contactId as string | undefined) ?? null,
-    property_ref: (payload?.propertyRef as string | undefined) ?? null,
   }
   window.dataLayer = window.dataLayer ?? []
   window.dataLayer.push(eventPayload)

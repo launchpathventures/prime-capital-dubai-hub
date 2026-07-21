@@ -45,4 +45,33 @@ describe("PropertyEnquiryWidget attribution", () => {
     const src = iframe.getAttribute("src") ?? ""
     expect(src).not.toMatch(/[?&]ref=/)
   })
+
+  it("does not copy a property reference into website analytics", async () => {
+    window.dataLayer = []
+    render(<PropertyEnquiryWidget slug="marina-tower" />)
+    const iframe = await screen.findByTitle(TITLE)
+    const src = iframe.getAttribute("src") ?? ""
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        origin: new URL(src).origin,
+        data: {
+          type: "widget.enquiry.submitted",
+          payload: {
+            leadUuid: "lead-1",
+            contactId: "contact-1",
+            propertyRef: "REF-APT-1203",
+          },
+        },
+      }),
+    )
+
+    expect(window.dataLayer).toEqual([
+      {
+        event: "generate_lead",
+        lead_id: "lead-1",
+        contact_id: "contact-1",
+      },
+    ])
+  })
 })
