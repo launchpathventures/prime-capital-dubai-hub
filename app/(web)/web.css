@@ -3888,3 +3888,699 @@
   letter-spacing: 0.18em;
   color: var(--web-spruce);
 }
+
+/* =============================================================================
+   LONDON INVESTOR MEETINGS
+   Private, in-person Dubai property invitation. Prefix: london-
+   ============================================================================= */
+
+.london-page {
+  background: var(--web-off-white);
+  color: var(--web-ash);
+}
+
+.london-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--web-ash);
+}
+
+.london-hero__media,
+.london-hero__veil {
+  position: absolute;
+  inset: 0;
+}
+
+.london-hero__image {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.72) contrast(1.04);
+}
+
+.london-hero__veil {
+  background:
+    linear-gradient(90deg, oklch(from var(--web-ash) l c h / 0.97) 0%, oklch(from var(--web-ash) l c h / 0.91) 48%, oklch(from var(--web-ash) l c h / 0.78) 100%),
+    linear-gradient(180deg, oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.46));
+}
+
+.london-hero__grid {
+  align-items: start;
+  gap: clamp(2.5rem, 6vw, 5.5rem);
+  padding-block: clamp(5.5rem, 11vw, 9rem) clamp(3.5rem, 7vw, 6rem);
+}
+
+.london-hero__copy {
+  max-width: 46rem;
+}
+
+.london-eyebrow,
+.london-section-kicker,
+.london-booking-card__eyebrow {
+  margin: 0;
+  color: var(--web-spruce);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.london-eyebrow,
+.london-section-kicker--light {
+  color: var(--web-serenity);
+}
+
+.london-display {
+  margin: 0;
+  color: var(--web-off-white);
+  font-family: var(--font-headline, serif);
+  font-size: clamp(2.75rem, 7.2vw, 6.6rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.london-display em {
+  color: var(--web-serenity);
+  font-weight: 400;
+}
+
+.london-hero__lead {
+  max-width: 40rem;
+  margin: 0;
+  color: oklch(from var(--web-off-white) l c h / 0.82);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 300;
+  line-height: 1.75;
+}
+
+.london-event-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.london-event-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1rem;
+  border: 1px solid oklch(from var(--web-off-white) l c h / 0.13);
+  background: oklch(from var(--web-off-white) l c h / 0.055);
+  backdrop-filter: blur(12px);
+}
+
+.london-event-detail > svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.1rem;
+  flex: 0 0 auto;
+  color: var(--web-serenity);
+  stroke-width: 1.5;
+}
+
+.london-event-detail__label {
+  margin: 0 0 0.2rem;
+  color: oklch(from var(--web-off-white) l c h / 0.52);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.london-event-detail__value {
+  margin: 0;
+  color: var(--web-off-white);
+  font-size: 0.875rem;
+  font-weight: 350;
+  line-height: 1.5;
+}
+
+.london-hero__assurance {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: oklch(from var(--web-off-white) l c h / 0.66);
+}
+
+.london-hero__assurance svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  color: var(--web-serenity);
+}
+
+.london-hero__assurance p {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.london-booking-card {
+  overflow: hidden;
+  width: 100%;
+  scroll-margin-top: calc(var(--web-header-height) + 1rem);
+  border: 1px solid oklch(from var(--web-off-white) l c h / 0.13);
+  border-radius: 2px;
+  background: var(--web-off-white);
+  box-shadow: 0 2rem 5rem oklch(0 0 0 / 0.32);
+}
+
+.london-booking-card__header {
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+
+.london-booking-card__title {
+  margin: 0.65rem 0 0.75rem;
+  color: var(--web-ash);
+  font-family: var(--font-headline, serif);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.london-booking-card__intro,
+.london-booking-card__note {
+  margin: 0;
+  color: var(--web-spruce);
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.london-booking-card__rule {
+  height: 1px;
+  margin-inline: 1.5rem;
+  background: oklch(from var(--web-serenity) l c h / 0.28);
+}
+
+.london-booking-card__form {
+  padding: 1.5rem;
+}
+
+.london-booking-card__note {
+  padding: 0 1.5rem 1.5rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+}
+
+.london-booking-card .lead-form__question {
+  font-family: var(--font-headline, serif);
+  letter-spacing: -0.01em;
+}
+
+.london-booking-card .lead-form__submit {
+  min-height: 3rem;
+  border-radius: 2px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.london-proof-strip {
+  padding-block: 1.25rem;
+  border-bottom: 1px solid oklch(from var(--web-serenity) l c h / 0.22);
+  background: white;
+}
+
+.london-proof-strip__grid {
+  gap: 0;
+}
+
+.london-proof-strip__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid oklch(from var(--web-serenity) l c h / 0.2);
+}
+
+.london-proof-strip__item:last-child {
+  border-bottom: 0;
+}
+
+.london-proof-strip__value {
+  margin: 0;
+  color: var(--web-ash);
+  font-family: var(--font-headline, serif);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.london-proof-strip__label {
+  margin: 0;
+  color: var(--web-spruce);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.london-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+}
+
+.london-section--paper,
+.london-team-section {
+  background: var(--web-off-white);
+}
+
+.london-section--white {
+  background: white;
+}
+
+.london-section--dark,
+.london-final-cta {
+  background: var(--web-ash);
+}
+
+.london-intro-grid,
+.london-fit-grid,
+.london-process-grid,
+.london-final-cta__grid {
+  gap: clamp(2rem, 6vw, 5rem);
+  align-items: start;
+}
+
+.london-section-title {
+  margin: 0;
+  max-width: 42rem;
+  color: var(--web-ash);
+  font-family: var(--font-headline, serif);
+  font-size: clamp(2rem, 4.3vw, 3.75rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.london-section-title--light {
+  color: var(--web-off-white);
+}
+
+.london-prose,
+.london-prose-text,
+.london-section-heading__lead,
+.london-reason-card__body,
+.london-team-card__bio,
+.london-step__body,
+.london-final-cta__body {
+  color: var(--web-spruce);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.78;
+}
+
+.london-prose p,
+.london-prose-text,
+.london-section-heading__lead,
+.london-team-card__bio,
+.london-step__body,
+.london-final-cta__body {
+  margin: 0;
+}
+
+.london-section-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 48rem;
+  margin: 0 auto clamp(2.5rem, 5vw, 4.5rem);
+  text-align: center;
+}
+
+.london-section-heading .london-section-kicker {
+  margin-bottom: 0.875rem;
+}
+
+.london-section-heading .london-section-title {
+  margin-inline: auto;
+}
+
+.london-section-heading__lead {
+  max-width: 39rem;
+  margin: 1.25rem auto 0;
+  color: oklch(from var(--web-off-white) l c h / 0.68);
+  text-wrap: balance;
+}
+
+.london-section-heading__lead--dark {
+  color: var(--web-spruce);
+}
+
+.london-reason-grid {
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid oklch(from var(--web-off-white) l c h / 0.12);
+  background: oklch(from var(--web-off-white) l c h / 0.12);
+}
+
+.london-reason-card {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: var(--web-ash);
+}
+
+.london-reason-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3.5rem;
+}
+
+.london-reason-card__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--web-serenity);
+  stroke-width: 1.25;
+}
+
+.london-reason-card__number {
+  margin: 0;
+  color: oklch(from var(--web-off-white) l c h / 0.4);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+}
+
+.london-reason-card__title {
+  margin: 0 0 0.9rem;
+  color: var(--web-off-white);
+  font-family: var(--font-headline, serif);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.london-reason-card__body {
+  margin: 0;
+  color: oklch(from var(--web-off-white) l c h / 0.64);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.london-goal-list {
+  border-top: 1px solid oklch(from var(--web-serenity) l c h / 0.32);
+}
+
+.london-goal-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid oklch(from var(--web-serenity) l c h / 0.32);
+}
+
+.london-goal-list__item p {
+  margin: 0;
+  color: var(--web-ash);
+  font-size: 0.95rem;
+  font-weight: 350;
+  line-height: 1.55;
+}
+
+.london-goal-list__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.05rem;
+  flex: 0 0 auto;
+  background: var(--web-spruce);
+  color: var(--web-off-white);
+  border-radius: 999px;
+}
+
+.london-goal-list__icon svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  stroke-width: 2;
+}
+
+.london-team-grid {
+  gap: 1.25rem;
+}
+
+.london-team-card {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 0.42fr) minmax(0, 0.58fr);
+  min-height: 24rem;
+  overflow: hidden;
+  border: 1px solid oklch(from var(--web-serenity) l c h / 0.25);
+  background: white;
+  transition:
+    border-color var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
+}
+
+.london-team-card:hover {
+  border-color: oklch(from var(--web-serenity) l c h / 0.62);
+  box-shadow: 0 1rem 2.5rem oklch(0 0 0 / 0.055);
+  transform: translateY(-2px);
+}
+
+.london-team-card__portrait {
+  position: relative;
+  min-height: 20rem;
+  overflow: hidden;
+  background: var(--web-serenity);
+}
+
+.london-team-card__image {
+  object-fit: cover;
+  filter: saturate(0.82);
+}
+
+.london-team-card__image--ruhaan {
+  object-position: 50% 28%;
+  filter: saturate(0.72) brightness(0.82);
+  transform: translateY(5%) scale(1.06);
+}
+
+.london-team-card__image--ahmed {
+  object-position: 50% 20%;
+  filter: saturate(0.78) brightness(1.05);
+  transform: translateY(-7%) scale(1.18);
+}
+
+.london-team-card__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.london-team-card__role {
+  margin: 0 0 0.65rem;
+  color: var(--web-spruce);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.london-team-card__name {
+  margin: 0 0 1rem;
+  color: var(--web-ash);
+  font-family: var(--font-headline, serif);
+  font-size: clamp(1.55rem, 2.7vw, 2.3rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.london-team-card__bio {
+  font-size: 0.86rem;
+  line-height: 1.68;
+}
+
+.london-step-list {
+  border-top: 1px solid oklch(from var(--web-serenity) l c h / 0.3);
+}
+
+.london-step {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 1.35rem;
+  border-bottom: 1px solid oklch(from var(--web-serenity) l c h / 0.3);
+}
+
+.london-step__number {
+  margin: 0.2rem 0 0;
+  color: var(--web-serenity);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.london-step__title {
+  margin: 0 0 0.35rem;
+  color: var(--web-ash);
+  font-family: var(--font-headline, serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.london-step__body {
+  font-size: 0.9rem;
+  line-height: 1.62;
+}
+
+.london-final-cta {
+  padding-block: clamp(3.5rem, 7vw, 5.5rem);
+}
+
+.london-final-cta__grid {
+  align-items: center;
+}
+
+.london-final-cta__title {
+  margin: 0;
+  max-width: 42rem;
+  color: var(--web-off-white);
+  font-family: var(--font-headline, serif);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.london-final-cta__body {
+  color: oklch(from var(--web-off-white) l c h / 0.65);
+}
+
+.london-final-cta__action {
+  display: flex;
+}
+
+.london-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding-inline: 1.75rem;
+  border: 1px solid var(--web-off-white);
+  border-radius: 2px;
+  background: var(--web-off-white);
+  color: var(--web-ash);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition:
+    background var(--duration-normal) var(--ease-out),
+    color var(--duration-normal) var(--ease-out),
+    transform var(--duration-normal) var(--ease-out);
+}
+
+.london-button svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.london-button:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.london-button:hover svg {
+  transform: translateX(2px);
+}
+
+.london-button:focus-visible {
+  outline: 2px solid var(--web-serenity);
+  outline-offset: 4px;
+}
+
+@media (min-width: 640px) {
+  .london-event-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .london-proof-strip__item {
+    justify-content: center;
+    border-right: 1px solid oklch(from var(--web-serenity) l c h / 0.25);
+    border-bottom: 0;
+  }
+
+  .london-proof-strip__item:last-child {
+    border-right: 0;
+  }
+
+  .london-intro-grid,
+  .london-fit-grid,
+  .london-process-grid,
+  .london-final-cta__grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .london-final-cta__action {
+    justify-content: flex-end;
+  }
+}
+
+@media (min-width: 1024px) {
+  .london-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(24rem, 30rem);
+  }
+
+  .london-booking-card {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .london-hero__veil {
+    background:
+      linear-gradient(180deg, oklch(from var(--web-ash) l c h / 0.92), oklch(from var(--web-ash) l c h / 0.97)),
+      linear-gradient(180deg, oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.38));
+  }
+
+  .london-section-heading {
+    text-align: center;
+  }
+
+  .london-team-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .london-team-card__portrait {
+    min-height: 24rem;
+  }
+
+  .london-final-cta__action,
+  .london-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .london-booking-card__header,
+  .london-booking-card__form {
+    padding-inline: 1.15rem;
+  }
+
+  .london-booking-card__rule {
+    margin-inline: 1.15rem;
+  }
+
+  .london-booking-card__note {
+    padding-inline: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .london-team-card:hover,
+  .london-button:hover,
+  .london-button:hover svg {
+    transform: none;
+  }
+}

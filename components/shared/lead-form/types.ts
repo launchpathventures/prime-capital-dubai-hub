@@ -219,6 +219,12 @@ export interface LeadFormProps {
   /** Optional: Show a property name/location field on the contact step with this label */
   propertyLabel?: string
 
+  /** Optional: Placeholder for the combined property/location field */
+  propertyPlaceholder?: string
+
+  /** Optional: Custom contact-step submit label when it opens a booking calendar */
+  contactSubmitLabel?: string
+
   /** Optional: Show separate property name and location fields instead of a single combined field */
   showPropertyFields?: boolean
 

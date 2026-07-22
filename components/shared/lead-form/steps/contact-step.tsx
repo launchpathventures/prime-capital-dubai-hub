@@ -25,6 +25,8 @@ interface ContactStepProps {
   onSubmit?: (data: Partial<LeadFormData>) => void
   /** Optional: show a combined property name/location field with this label */
   propertyLabel?: string
+  /** Optional: placeholder for the combined property/location field */
+  propertyPlaceholder?: string
   /** Optional: show separate property name and location fields */
   showPropertyFields?: boolean
   /** Optional: show a concerns/notes textarea */
@@ -46,6 +48,7 @@ export function ContactStep({
   isSubmitting = false,
   onSubmit,
   propertyLabel,
+  propertyPlaceholder,
   showPropertyFields,
   showConcerns,
   submitLabel,
@@ -203,7 +206,7 @@ export function ContactStep({
               type="text"
               value={propertyLocation}
               onChange={(e) => setPropertyLocation(e.target.value)}
-              placeholder="e.g. Marina Gate Tower 2, Dubai Marina"
+              placeholder={propertyPlaceholder ?? "e.g. Marina Gate Tower 2, Dubai Marina"}
               className="lead-form__input"
               autoComplete="off"
             />
