@@ -15,7 +15,7 @@
 
 ## Focus
 
-Website launch readiness, including the AgentCRM property-agent display and property-interest routing update. Implementation is ready for review but release remains gated on the upstream CRM deployment.
+Website launch readiness, including review of the new London investor-meetings invitation at `/london` and the AgentCRM property-agent routing update. The property release remains gated on the upstream CRM deployment.
 
 ## Target
 
