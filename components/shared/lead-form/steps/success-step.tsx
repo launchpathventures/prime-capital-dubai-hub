@@ -4,7 +4,8 @@
  * For download mode: shows success then redirects after a brief delay.
  * For Calendly URLs: embeds Calendly's official widget with prefill + booking
  * postMessage hook. For Google Calendar appointment URLs: embeds the booking
- * page in an iframe with name/email/phone prefilled via query params.
+ * page in an iframe. Google does not support URL-based contact prefill, so the
+ * lead remains captured in CRM while Google asks the visitor to confirm it.
  */
 
 "use client"
@@ -67,19 +68,25 @@ export function SuccessStep({
     const vendor = detectBookingVendor(calendlyUrl)
 
     if (vendor === "google") {
-      const embedUrl = buildGoogleCalendarUrl(calendlyUrl, data)
+      const embedUrl = buildGoogleCalendarUrl(calendlyUrl)
       return (
-        <iframe
-          src={embedUrl}
-          title="Book your call"
-          className="lead-form__booking-iframe"
-          style={{
-            width: "100%",
-            minWidth: "320px",
-            height: "780px",
-            border: 0,
-          }}
-        />
+        <>
+          <p className="lead-form__booking-note">
+            Your details have been saved. Choose a time below and confirm them with
+            Google to complete your booking.
+          </p>
+          <iframe
+            src={embedUrl}
+            title="Choose your meeting time"
+            className="lead-form__booking-iframe"
+            style={{
+              width: "100%",
+              minWidth: "320px",
+              height: "780px",
+              border: 0,
+            }}
+          />
+        </>
       )
     }
 
@@ -295,27 +302,10 @@ function detectBookingVendor(url: string): "calendly" | "google" | "unknown" {
   return "unknown"
 }
 
-/**
- * Build Google Calendar appointment URL with prefill params.
- * Google decodes %20 for spaces in name; we keep it explicit to match Calendly's
- * pattern and avoid the `+` ambiguity that URLSearchParams introduces.
- */
-function buildGoogleCalendarUrl(
-  baseUrl: string,
-  data: Partial<LeadFormData>,
-): string {
-  const parts: string[] = ["gv=true"]
-  const add = (key: string, value: string) => {
-    parts.push(`${key}=${encodeURIComponent(value)}`)
-  }
-
-  const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ")
-  if (fullName) add("name", fullName)
-  if (data.email) add("email", data.email)
-  if (data.whatsapp) add("phone", data.whatsapp)
-
+/** Build Google's supported inline appointment-schedule URL. */
+function buildGoogleCalendarUrl(baseUrl: string): string {
   const separator = baseUrl.includes("?") ? "&" : "?"
-  return `${baseUrl}${separator}${parts.join("&")}`
+  return `${baseUrl}${separator}gv=true`
 }
 
 /**

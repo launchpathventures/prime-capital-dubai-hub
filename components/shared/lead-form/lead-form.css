@@ -900,3 +900,10 @@
 .lead-form__combo-option--custom.lead-form__combo-option--active {
   color: var(--lf-text);
 }
+
+.lead-form__booking-note {
+  margin: 0 0 1rem;
+  color: var(--lf-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
