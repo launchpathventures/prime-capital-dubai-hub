@@ -125,7 +125,7 @@ export const config = {
      */
     ahmedBooking:
       process.env.NEXT_PUBLIC_AHMED_BOOKING_URL ||
-      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ3wD-uT_GoWbEW82SGuRGEi7UNl4oZZTR_FXfHsgwKmny033KkjDLNcSmobJy2onjr5DDJBPcl_",
+      "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0RaVlRjUT7NTlWU7O78n_xyuFyks8eNIFCYtqJz3o2326VPbBWzJMYM2r-4Ioo31rUpp6gp9Gx",
     /** Calendly scheduling link (15-minute seller consultation) */
     calendlySeller: "https://calendly.com/tahirmajithia/15min",
     /**
