@@ -5493,6 +5493,14 @@
   text-wrap: balance;
 }
 
+/* Landing headlines stay editorial without overpowering the conversion path. */
+.lead-magnet-funnel-hero__title {
+  max-width: 13.5ch;
+  font-size: clamp(2.75rem, 4.5vw, 4rem);
+  letter-spacing: -0.035em;
+  line-height: 0.99;
+}
+
 .lead-magnet-funnel-hero__lead,
 .framework-document-hero__lead,
 .second-opinion-confirmation__lead {
@@ -6387,6 +6395,10 @@
 }
 
 @media (max-width: 767px) {
+  .lead-magnet-funnel-hero {
+    min-height: 0;
+  }
+
   .lead-magnet-funnel-hero__veil {
     background:
       linear-gradient(180deg, oklch(from var(--web-ash) l c h / 0.91), oklch(from var(--web-ash) l c h / 0.97)),
@@ -6394,23 +6406,95 @@
   }
 
   .lead-magnet-funnel-hero__container {
+    min-height: 0;
     align-items: flex-start;
-    padding-top: calc(var(--web-header-height) + 3rem);
-    padding-bottom: 3.5rem;
+    padding-top: calc(var(--web-header-height) + 1.75rem);
+    padding-bottom: 3rem;
   }
 
   .lead-magnet-funnel-hero__grid {
-    gap: 3rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
   }
 
-  .lead-magnet-funnel-hero__title,
+  /* On mobile, put the conversion surface immediately after the promise. */
+  .lead-magnet-funnel-hero__copy {
+    display: contents;
+  }
+
+  .lead-magnet-funnel-hero__copy > .core-stack:first-child {
+    order: 1;
+    gap: 0.875rem;
+  }
+
+  .lead-magnet-funnel-card {
+    order: 2;
+  }
+
+  .lead-magnet-funnel-signals {
+    order: 3;
+    margin-top: 0.5rem;
+  }
+
+  .lead-magnet-funnel-hero__trust {
+    order: 4;
+  }
+
+  .lead-magnet-funnel-hero__copy > .lead-magnet-disclaimer {
+    order: 5;
+  }
+
+  .lead-magnet-funnel-hero__title {
+    max-width: 14ch;
+    font-size: clamp(2.25rem, 10vw, 2.75rem);
+    letter-spacing: -0.03em;
+    line-height: 1.01;
+  }
+
   .framework-document-hero__title,
   .second-opinion-confirmation__title {
     font-size: clamp(2.75rem, 14vw, 4.4rem);
   }
 
+  .lead-magnet-funnel-hero__lead {
+    font-size: 0.975rem;
+    line-height: 1.55;
+  }
+
   .lead-magnet-funnel-card {
-    padding: 1.3rem;
+    padding: 1rem;
+  }
+
+  .lead-magnet-funnel-card > .core-stack {
+    gap: 1rem;
+  }
+
+  .lead-magnet-funnel-card__title {
+    max-width: 22ch;
+    font-size: 1.55rem;
+    line-height: 1.08;
+  }
+
+  .lead-magnet-funnel-card__intro {
+    line-height: 1.5;
+  }
+
+  .lead-magnet-funnel-card .lead-form {
+    --lf-font-question: clamp(1.35rem, 6vw, 1.6rem);
+    --lf-gap: 1rem;
+  }
+
+  .lead-magnet-funnel-card .lead-form__progress {
+    margin-bottom: 1rem;
+  }
+
+  .lead-magnet-funnel-card .lead-form__input,
+  .lead-magnet-funnel-card .lead-form__submit {
+    min-height: 3rem;
+  }
+
+  .lead-magnet-funnel-card .lead-form__actions {
+    margin-top: 1rem;
   }
 
   .framework-document-hero,
