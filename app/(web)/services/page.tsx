@@ -18,7 +18,8 @@ import {
   HomeIcon,
   TrendingUpIcon,
 } from "lucide-react"
-import servicesImage from "@/public/images/hero/services.jpg"
+
+const servicesImage = "/images/hero/services.jpg"
 
 export const metadata = {
   title: "Services",

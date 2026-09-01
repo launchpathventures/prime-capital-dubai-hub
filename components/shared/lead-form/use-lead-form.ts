@@ -8,7 +8,13 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { useAttribution, generateSubmissionId } from "@/lib/hooks/use-attribution"
-import type { LeadFormData, FormMode, StepId, LeadGoal } from "./types"
+import type {
+  LeadFormData,
+  FormJourney,
+  FormMode,
+  StepId,
+  LeadGoal,
+} from "./types"
 
 // =============================================================================
 // STEP DEFINITIONS
@@ -76,6 +82,14 @@ const STEPS: StepDef[] = [
   { id: "success", modes: ALL_MODES },
 ]
 
+const SECOND_OPINION_STEPS: StepId[] = [
+  "name",
+  "contact",
+  "second-opinion-property",
+  "second-opinion-review",
+  "success",
+]
+
 // Returning leads (property-enquiry with bitrixLeadId) skip these steps —
 // they go straight to enquiry-intent → property-appeal → success.
 const RETURNING_LEAD_SKIP_STEPS: StepId[] = [
@@ -95,11 +109,14 @@ const RETURNING_LEAD_SKIP_STEPS: StepId[] = [
 
 interface UseLeadFormOptions {
   mode: FormMode
+  journey?: FormJourney
   onSuccess?: (data: LeadFormData) => void
   honeypot?: string
   tag?: string
   bitrixLeadId?: string
   leadMagnet?: string
+  leadMagnetId?: LeadFormData["leadMagnetId"]
+  leadMagnetFields?: LeadFormData["leadMagnetFields"]
   initialData?: Partial<LeadFormData>
   persistKey?: string
   prefillKey?: string
@@ -134,11 +151,14 @@ interface UseLeadFormReturn {
 
 export function useLeadForm({
   mode,
+  journey = "default",
   onSuccess,
   honeypot,
   tag,
   bitrixLeadId,
   leadMagnet,
+  leadMagnetId,
+  leadMagnetFields,
   initialData,
   persistKey,
   prefillKey,
@@ -163,6 +183,7 @@ export function useLeadForm({
     const property = params.get("property") || undefined
     const teamMember = params.get("teamMember") || undefined
     const teamMemberEmail = params.get("teamMemberEmail") || undefined
+    const share = params.get("share") || undefined
     // AgentCRM welcome-email link params: `ref` binds the existing prospect,
     // `email` prefills + secondary-matches. Read once at mount and seeded into
     // form state so they survive multi-step navigation and re-renders.
@@ -176,6 +197,7 @@ export function useLeadForm({
       ...(teamMember ? { referringTeamMember: teamMember } : {}),
       ...(teamMemberEmail ? { referringTeamMemberEmail: teamMemberEmail } : {}),
       ...(ref ? { ref } : {}),
+      ...(share ? { share } : {}),
       ...(email ? { email } : {}),
     }
   }, [])
@@ -194,6 +216,8 @@ export function useLeadForm({
     formMode: mode,
     ...(bitrixLeadId ? { bitrixLeadId } : {}),
     ...(leadMagnet ? { leadMagnet } : {}),
+    ...(leadMagnetId ? { leadMagnetId } : {}),
+    ...(leadMagnetFields ? { leadMagnetFields } : {}),
     ...(tag ? { leadTag: tag } : {}),
     submissionId: submissionIdRef.current,
     sessionId: attribution.sessionId,
@@ -203,12 +227,12 @@ export function useLeadForm({
   const [stepIndex, setStepIndex] = useState(() => {
     if (!skipPrefilledContact || !hasContactPrefill(data)) return 0
 
-    const initialSteps = getAvailableStepIds(mode, data, isReturningLead)
-    const contactIndex = initialSteps.indexOf("contact")
-    if (contactIndex === -1) return 0
+    return getStepAfterContactIndex(mode, data, isReturningLead, journey)
+  })
+  const [firstStepIndex, setFirstStepIndex] = useState(() => {
+    if (!skipPrefilledContact || !hasContactPrefill(data)) return 0
 
-    const nextIndex = Math.min(contactIndex + 1, initialSteps.length - 1)
-    return initialSteps[nextIndex] === "success" ? 0 : nextIndex
+    return getStepAfterContactIndex(mode, data, isReturningLead, journey)
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -227,27 +251,53 @@ export function useLeadForm({
         ...restored,
         formMode: mode,
         ...(leadMagnet ? { leadMagnet } : {}),
+        ...(leadMagnetId ? { leadMagnetId } : {}),
+        ...(leadMagnetFields ? { leadMagnetFields } : {}),
         ...(tag ? { leadTag: tag } : {}),
       }
 
       if (skipPrefilledContact && hasContactPrefill(nextData)) {
-        setStepIndex(getStepAfterContactIndex(mode, nextData, isReturningLead))
+        const restoredStepIndex = getStepAfterContactIndex(
+          mode,
+          nextData,
+          isReturningLead,
+          journey,
+        )
+        setFirstStepIndex(restoredStepIndex)
+        setStepIndex(restoredStepIndex)
       }
 
       return nextData
     })
-  }, [isReturningLead, leadMagnet, mode, prefillKey, skipPrefilledContact, tag])
+  }, [
+    isReturningLead,
+    journey,
+    leadMagnet,
+    leadMagnetFields,
+    leadMagnetId,
+    mode,
+    prefillKey,
+    skipPrefilledContact,
+    tag,
+  ])
 
   // Calculate available steps based on mode and conditions
   const availableSteps = useMemo(() => {
-    return getAvailableStepIds(mode, data, isReturningLead)
-  }, [mode, data, isReturningLead])
+    return getAvailableStepIds(mode, data, isReturningLead, journey)
+  }, [mode, data, isReturningLead, journey])
 
   const currentStep = availableSteps[stepIndex] ?? "name"
-  const totalSteps = availableSteps.length - 1 // Exclude success step from count
-  const progress = Math.round((stepIndex / totalSteps) * 100)
+  const currentStepIndex = Math.max(0, stepIndex - firstStepIndex)
+  const totalSteps = Math.max(
+    1,
+    availableSteps.length - 1 - firstStepIndex,
+  ) // Exclude success and any prefilled steps from the visible journey.
+  const progress = Math.min(
+    100,
+    Math.round(((currentStepIndex + 1) / totalSteps) * 100),
+  )
 
-  const canGoBack = stepIndex > 0 && currentStep !== "success"
+  const canGoBack = stepIndex > firstStepIndex && currentStep !== "success"
   const canGoNext = stepIndex < availableSteps.length - 1
 
   // Navigation
@@ -258,10 +308,10 @@ export function useLeadForm({
   }, [stepIndex, availableSteps.length])
 
   const prevStep = useCallback(() => {
-    if (stepIndex > 0) {
+    if (stepIndex > firstStepIndex) {
       setStepIndex((i) => i - 1)
     }
-  }, [stepIndex])
+  }, [firstStepIndex, stepIndex])
 
   // Data updates
   const updateData = useCallback((updates: Partial<LeadFormData>) => {
@@ -295,6 +345,7 @@ export function useLeadForm({
         locations: mergedData.locations,
         bedrooms: mergedData.bedrooms,
         propertyName: mergedData.propertyName,
+        propertyUrl: mergedData.propertyUrl,
         propertyLocation: mergedData.propertyLocation,
         concerns: mergedData.concerns,
         propertyType: mergedData.propertyType,
@@ -328,6 +379,11 @@ export function useLeadForm({
         // Lead tagging for CRM categorisation
         leadMagnet: mergedData.leadMagnet || leadMagnet,
         leadTag: mergedData.leadTag || tag,
+        leadMagnetId: mergedData.leadMagnetId || leadMagnetId,
+        leadMagnetFields: mergedData.leadMagnetFields || leadMagnetFields,
+        leadMagnetDocuments: mergedData.leadMagnetDocuments,
+        consent: mergedData.consent,
+        share: mergedData.share,
         // Honeypot for bot protection
         website: honeypot,
       }
@@ -360,6 +416,8 @@ export function useLeadForm({
     honeypot,
     bitrixLeadId,
     leadMagnet,
+    leadMagnetFields,
+    leadMagnetId,
     persistKey,
     tag,
     nextStep,
@@ -368,7 +426,7 @@ export function useLeadForm({
 
   return {
     currentStep,
-    currentStepIndex: stepIndex,
+    currentStepIndex,
     totalSteps,
     data,
     isSubmitting,
@@ -387,8 +445,11 @@ export function useLeadForm({
 function getAvailableStepIds(
   mode: FormMode,
   data: Partial<LeadFormData>,
-  isReturningLead: boolean
+  isReturningLead: boolean,
+  journey: FormJourney,
 ) {
+  if (journey === "second-opinion") return SECOND_OPINION_STEPS
+
   return STEPS.filter((step) => {
     if (!step.modes.includes(mode)) return false
     if (isReturningLead && RETURNING_LEAD_SKIP_STEPS.includes(step.id)) return false
@@ -400,9 +461,15 @@ function getAvailableStepIds(
 function getStepAfterContactIndex(
   mode: FormMode,
   data: Partial<LeadFormData>,
-  isReturningLead: boolean
+  isReturningLead: boolean,
+  journey: FormJourney,
 ) {
-  const initialSteps = getAvailableStepIds(mode, data, isReturningLead)
+  const initialSteps = getAvailableStepIds(
+    mode,
+    data,
+    isReturningLead,
+    journey,
+  )
   const contactIndex = initialSteps.indexOf("contact")
   if (contactIndex === -1) return 0
 
@@ -424,12 +491,14 @@ function getLeadFormPrefillData(data: Partial<LeadFormData>) {
   const lastName = getPrefillString(data.lastName)
   const email = getPrefillString(data.email)
   const whatsapp = getPrefillString(data.whatsapp)
+  const consent = data.consent === true ? true : undefined
 
   return {
     ...(firstName ? { firstName } : {}),
     ...(lastName ? { lastName } : {}),
     ...(email ? { email } : {}),
     ...(whatsapp ? { whatsapp } : {}),
+    ...(consent ? { consent } : {}),
   } satisfies Partial<LeadFormData>
 }
 

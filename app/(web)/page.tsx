@@ -75,7 +75,8 @@ import {
   getPropertyCoverImage,
   PROPERTY_IMAGE_FALLBACK_ALT,
 } from "./_surface/property-images"
-import heroImage from "@/public/images/hero/prime-capital-hero.jpg"
+
+const heroImage = "/images/hero/prime-capital-hero.jpg"
 
 // Curated imagery for areas
 const areaImages: Record<string, string> = {

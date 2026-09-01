@@ -15,7 +15,7 @@
 
 ## Focus
 
-Website launch readiness, including review of the new London investor-meetings invitation at `/london` and the AgentCRM property-agent routing update. The property release remains gated on the upstream CRM deployment.
+Website launch readiness, including the YouTube lead-magnet destinations, the London investor-meetings invitation at `/london`, and AgentCRM routing updates. The lead-magnet funnel is live in production with its shared LeadForm journey, working decision file, captioned walkthrough, private document storage, durable delivery queue, and AgentCRM contract verified end to end.
 
 ## Target
 
@@ -33,4 +33,4 @@ MVP launch — complete LMS with all competencies and polished marketing website
 
 ---
 
-*Last updated: 2026-07-21*
+*Last updated: 2026-09-01*

@@ -28,6 +28,8 @@ import {
   PrivateContextStep,
   EnquiryIntentStep,
   PropertyAppealStep,
+  SecondOpinionPropertyStep,
+  SecondOpinionReviewStep,
   SuccessStep,
 } from "./steps"
 import type { LeadFormProps } from "./types"
@@ -38,17 +40,24 @@ export function LeadForm({
   onSuccess,
   className,
   theme = "light",
+  journey = "default",
   redirectUrl,
   redirectDelay,
+  redirectLabel,
+  redirectNote,
   downloadAsset,
   calendlyUrl,
   propertyLabel,
   propertyPlaceholder,
   contactSubmitLabel,
+  finalSubmitLabel,
   showPropertyFields,
   showConcerns,
   autoFocus = true,
   tag,
+  leadMagnetId,
+  leadMagnetFields,
+  consentLabel,
   propertyContext,
   bitrixLeadId,
   initialData,
@@ -63,6 +72,9 @@ export function LeadForm({
 
   const {
     currentStep,
+    currentStepIndex,
+    totalSteps,
+    progress,
     data,
     isSubmitting,
     error,
@@ -73,11 +85,14 @@ export function LeadForm({
     submit,
   } = useLeadForm({
     mode,
+    journey,
     onSuccess,
     honeypot,
     tag,
     bitrixLeadId,
     leadMagnet: downloadAsset,
+    leadMagnetId,
+    leadMagnetFields,
     initialData,
     persistKey,
     prefillKey,
@@ -139,6 +154,7 @@ export function LeadForm({
             theme={theme}
             mode={mode}
             autoFocus={autoFocus}
+            journey={journey}
           />
         )
 
@@ -161,6 +177,8 @@ export function LeadForm({
             autoFocus={autoFocus}
             onBack={prevStep}
             canGoBack={canGoBack}
+            consentLabel={consentLabel}
+            journey={journey}
           />
         )
 
@@ -278,6 +296,29 @@ export function LeadForm({
           />
         ) : null
 
+      case "second-opinion-property":
+        return (
+          <SecondOpinionPropertyStep
+            data={data}
+            onUpdate={updateData}
+            onNext={advanceStep}
+            onBack={prevStep}
+            canGoBack={canGoBack}
+          />
+        )
+
+      case "second-opinion-review":
+        return (
+          <SecondOpinionReviewStep
+            data={data}
+            onSubmit={submit}
+            isSubmitting={isSubmitting}
+            submitLabel={finalSubmitLabel}
+            onBack={prevStep}
+            canGoBack={canGoBack}
+          />
+        )
+
       case "success":
         return (
           <SuccessStep
@@ -288,6 +329,8 @@ export function LeadForm({
             customMessage={successMessage}
             redirectUrl={redirectUrl}
             redirectDelay={redirectDelay}
+            redirectLabel={redirectLabel}
+            redirectNote={redirectNote}
             calendlyUrl={calendlyUrl}
           />
         )
@@ -324,6 +367,27 @@ export function LeadForm({
             onChange={(e) => setHoneypot(e.target.value)}
           />
         </div>
+
+        {journey === "second-opinion" && currentStep !== "success" && (
+          <div className="lead-form__journey-progress">
+            <div className="lead-form__journey-meta">
+              <span>Project Second Opinion</span>
+              <span>
+                Step {currentStepIndex + 1} of {totalSteps}
+              </span>
+            </div>
+            <div
+              className="lead-form__journey-track"
+              role="progressbar"
+              aria-label="Second Opinion request progress"
+              aria-valuemin={1}
+              aria-valuemax={totalSteps}
+              aria-valuenow={currentStepIndex + 1}
+            >
+              <span style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        )}
 
         {/* Form content */}
         <div className="lead-form__content" key={currentStep}>

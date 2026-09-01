@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from "react"
 import Script from "next/script"
 import { CheckIcon, ExternalLinkIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import type { LeadFormData, FormTheme, FormMode } from "../types"
 
 interface SuccessStepProps {
@@ -23,6 +24,8 @@ interface SuccessStepProps {
   customMessage?: string
   redirectUrl?: string
   redirectDelay?: number
+  redirectLabel?: string
+  redirectNote?: string
   calendlyUrl?: string
 }
 
@@ -32,11 +35,13 @@ export function SuccessStep({
   customMessage,
   redirectUrl,
   redirectDelay = 3000,
+  redirectLabel = "Open Strategy Kit Now",
+  redirectNote = "You'll also receive a copy via email.",
   calendlyUrl,
 }: SuccessStepProps) {
   const firstName = data.firstName || "there"
   const [countdown, setCountdown] = useState(Math.ceil(redirectDelay / 1000))
-  const shouldRedirect = mode === "download" && !!redirectUrl && !calendlyUrl
+  const shouldRedirect = !!redirectUrl && !calendlyUrl
   const [isRedirecting] = useState(shouldRedirect)
 
   // Handle redirect for download mode
@@ -147,7 +152,7 @@ export function SuccessStep({
       <h2 className="lead-form__success-title">Thank you, {firstName}</h2>
       <p className="lead-form__success-message">{message}</p>
 
-      {mode === "download" && redirectUrl && (
+      {redirectUrl && (
         <>
           <div className="lead-form__redirect-progress" style={{ marginTop: "1.5rem" }}>
             <div
@@ -155,16 +160,16 @@ export function SuccessStep({
               style={{ animationDuration: `${redirectDelay}ms` }}
             />
           </div>
-          <button
+          <Button
             onClick={handleManualRedirect}
             className="lead-form__submit"
             style={{ marginTop: "1rem" }}
           >
             <ExternalLinkIcon size={16} style={{ marginRight: "0.5rem" }} />
-            Open Strategy Kit Now
-          </button>
+            {redirectLabel}
+          </Button>
           <p className="lead-form__redirect-note" style={{ marginTop: "0.75rem" }}>
-            You&apos;ll also receive a copy via email.
+            {redirectNote}
           </p>
         </>
       )}

@@ -907,3 +907,195 @@
   font-size: 0.875rem;
   line-height: 1.5;
 }
+
+/* =============================================================================
+   SPECIALIST JOURNEY: PROJECT SECOND OPINION
+   Uses the same field, option, navigation and success language as every
+   enquiry form while making the longer evidence request easy to scan.
+   ============================================================================= */
+
+.lead-form__journey-progress {
+  display: grid;
+  gap: 0.625rem;
+  margin-bottom: 2rem;
+}
+
+.lead-form__journey-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--lf-text-muted);
+  font-size: var(--lf-font-tiny);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lead-form__journey-track {
+  height: 2px;
+  overflow: hidden;
+  background: var(--lf-border);
+}
+
+.lead-form__journey-track span {
+  display: block;
+  height: 100%;
+  background: var(--lf-accent);
+  transition: width 240ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.lead-form__property-routes {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.lead-form__route-option.ui-button {
+  height: auto;
+  min-height: 4.75rem;
+  justify-content: flex-start;
+  white-space: normal;
+}
+
+.lead-form__route-option > svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  color: var(--lf-text-muted);
+}
+
+.lead-form__route-option .lead-form__option-content {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+.lead-form__route-option .lead-form__option-label,
+.lead-form__route-option .lead-form__option-description {
+  display: block;
+}
+
+.lead-form__upload {
+  position: relative;
+  display: flex;
+  min-height: 9rem;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border: 1px dashed var(--lf-border-hover);
+  background: var(--lf-option-bg-hover);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition:
+    border-color var(--lf-transition-fast),
+    background var(--lf-transition-fast);
+}
+
+.lead-form__upload:hover,
+.lead-form__upload:focus-within {
+  border-color: var(--lf-border-active);
+  background: var(--lf-option-bg-active);
+}
+
+.lead-form__upload > svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  color: var(--lf-accent);
+}
+
+.lead-form__upload > span {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.lead-form__upload strong,
+.lead-form__file-row strong {
+  color: var(--lf-text);
+  font-size: var(--lf-font-body);
+  font-weight: 400;
+}
+
+.lead-form__upload small,
+.lead-form__file-row small {
+  display: block;
+  color: var(--lf-text-subtle);
+  font-size: var(--lf-font-tiny);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.lead-form__upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.lead-form__file-list {
+  display: grid;
+  border-top: 1px solid var(--lf-border);
+}
+
+.lead-form__file-row {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--lf-border);
+}
+
+.lead-form__file-row > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--lf-text-muted);
+}
+
+.lead-form__file-row .ui-button {
+  width: 2rem;
+  height: 2rem;
+}
+
+.lead-form__review-source {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) 1.25rem;
+  gap: 0.75rem;
+  align-items: center;
+  border-top: 1px solid var(--lf-border);
+  border-bottom: 1px solid var(--lf-border);
+  color: var(--lf-text-muted);
+  padding-block: 0.875rem;
+  font-size: var(--lf-font-small);
+}
+
+.lead-form__review-source svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.lead-form__review-source svg:last-child {
+  color: var(--lf-accent);
+}
+
+.lead-form__review-promise {
+  border-left: 2px solid var(--lf-border-active);
+  color: var(--lf-text-muted);
+  background: var(--lf-option-bg-hover);
+  padding: 0.875rem 1rem;
+  font-size: var(--lf-font-small);
+  line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+  .lead-form__property-routes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lead-form__route-option.ui-button {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 7.25rem;
+  }
+}

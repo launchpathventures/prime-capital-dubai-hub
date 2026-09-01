@@ -11,7 +11,8 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon, CheckIcon, ShieldCheckIcon, EyeIcon, TrendingUpIcon, SearchIcon } from "lucide-react"
 import { ParallaxHero } from "../_surface/parallax-hero"
-import aboutImage from "@/public/images/hero/about.jpg"
+
+const aboutImage = "/images/hero/about.jpg"
 
 export const metadata = {
   title: "About Us",

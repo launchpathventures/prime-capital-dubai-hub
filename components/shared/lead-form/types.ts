@@ -73,6 +73,7 @@ export type FormMode =
 // usually inferred server-side from a "sell" goal, not set here.
 export type VisitorType = "investor" | "agent" | "vendor" | "seller"
 export type FormTheme = "light" | "dark"
+export type FormJourney = "default" | "second-opinion"
 
 // =============================================================================
 // FORM DATA
@@ -114,6 +115,7 @@ export interface LeadFormData {
 
   // Step: Property Interest (property-enquiry mode)
   bitrixLeadId?: string
+  propertyUrl?: string
   enquiryIntent?: string[]
   propertyAppeals?: string[]
   enquiryNotes?: string
@@ -127,6 +129,22 @@ export interface LeadFormData {
   // Lead magnet / tagging
   leadMagnet?: string  // e.g. "Dubai Off-Plan Guide 2026"
   leadTag?: string     // e.g. "distressed", "livestream-q2-2026"
+  leadMagnetId?:
+    | "prime-investor-decision-framework"
+    | "prime-project-second-opinion"
+  leadMagnetFields?: {
+    source_script?: string
+    price?: string
+    objective?: string
+    payment_plan?: string
+  }
+  leadMagnetDocuments?: Array<{
+    url: string
+    filename: string
+    contentType: string
+    sizeBytes: number
+  }>
+  consent?: true
 
   // Pipeline router
   visitorType?: VisitorType
@@ -179,6 +197,7 @@ export interface LeadFormData {
   // (?ref=…). Forwarded verbatim so AgentCRM promotes the existing prospect
   // (Prospect → Lead) instead of creating a duplicate.
   ref?: string
+  share?: string
 
   // Honeypot for bot protection (hidden field)
   website?: string
@@ -207,11 +226,20 @@ export interface LeadFormProps {
   /** Optional: Light or dark theme */
   theme?: FormTheme
 
+  /** Optional: A specialist journey composed from the shared form engine */
+  journey?: FormJourney
+
   /** Optional: URL to redirect to after successful submission (download mode) */
   redirectUrl?: string
 
   /** Optional: Delay in ms before redirecting (default: 3000) */
   redirectDelay?: number
+
+  /** Optional: Label for the manual redirect action */
+  redirectLabel?: string
+
+  /** Optional: Supporting note beneath the manual redirect action */
+  redirectNote?: string
 
   /** Optional: Calendly URL to embed inline after submission */
   calendlyUrl?: string
@@ -225,6 +253,9 @@ export interface LeadFormProps {
   /** Optional: Custom contact-step submit label when it opens a booking calendar */
   contactSubmitLabel?: string
 
+  /** Optional: Custom label for the specialist journey's final submit action */
+  finalSubmitLabel?: string
+
   /** Optional: Show separate property name and location fields instead of a single combined field */
   showPropertyFields?: boolean
 
@@ -237,6 +268,15 @@ export interface LeadFormProps {
   /** Optional: Tag for CRM categorisation (e.g. "distressed") */
   tag?: string
 
+  /** Optional: Structured AgentCRM lead-magnet identifier */
+  leadMagnetId?: LeadFormData["leadMagnetId"]
+
+  /** Optional: Structured lead-magnet fields */
+  leadMagnetFields?: LeadFormData["leadMagnetFields"]
+
+  /** Consent copy shown beside a required checkbox on the contact step */
+  consentLabel?: string
+
   /** Optional: Property context for property-enquiry mode */
   propertyContext?: PropertyContext
 
@@ -246,10 +286,10 @@ export interface LeadFormProps {
   /** Optional: Seed the form with known values */
   initialData?: Partial<LeadFormData>
 
-  /** Optional: Persist completed contact fields under this sessionStorage key */
+  /** Optional: Persist completed contact fields and consent under this sessionStorage key */
   persistKey?: string
 
-  /** Optional: Restore contact fields from this sessionStorage key */
+  /** Optional: Restore contact fields and consent from this sessionStorage key */
   prefillKey?: string
 
   /** Optional: Start after name/contact when restored data has those fields */
@@ -272,6 +312,8 @@ export type StepId =
   | "private-context"
   | "enquiry-intent"
   | "property-appeal"
+  | "second-opinion-property"
+  | "second-opinion-review"
   | "success"
 
 export interface StepConfig {

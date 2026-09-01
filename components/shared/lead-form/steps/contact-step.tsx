@@ -10,7 +10,13 @@ import { useState, useRef, useEffect } from "react"
 import { ArrowRightIcon, CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PhoneInput } from "@/components/ui/phone-input/phone-input"
-import type { LeadFormData, FormTheme, FormMode } from "../types"
+import { Checkbox } from "@/components/ui/checkbox"
+import type {
+  LeadFormData,
+  FormJourney,
+  FormTheme,
+  FormMode,
+} from "../types"
 import { contactStepSchema } from "../schema"
 import { LeadFormBackButton } from "./back-button"
 
@@ -37,6 +43,8 @@ interface ContactStepProps {
   autoFocus?: boolean
   onBack?: () => void
   canGoBack?: boolean
+  consentLabel?: string
+  journey?: FormJourney
 }
 
 export function ContactStep({
@@ -55,12 +63,15 @@ export function ContactStep({
   autoFocus = true,
   onBack,
   canGoBack,
+  consentLabel,
+  journey = "default",
 }: ContactStepProps) {
   const [email, setEmail] = useState(data.email || "")
   const [whatsapp, setWhatsapp] = useState(data.whatsapp || "")
   const [propertyName, setPropertyName] = useState(data.propertyName || "")
   const [propertyLocation, setPropertyLocation] = useState(data.propertyLocation || "")
   const [concerns, setConcerns] = useState(data.concerns || "")
+  const [consent, setConsent] = useState(data.consent === true)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const emailRef = useRef<HTMLInputElement>(null)
 
@@ -88,8 +99,17 @@ export function ContactStep({
       return
     }
 
+    if (consentLabel && !consent) {
+      setErrors({ consent: "Please confirm before continuing" })
+      return
+    }
+
     setErrors({})
-    const updates: Partial<LeadFormData> = { email, whatsapp }
+    const updates: Partial<LeadFormData> = {
+      email,
+      whatsapp,
+      ...(consent ? { consent: true as const } : {}),
+    }
     if (showPropertyFields) {
       updates.propertyName = propertyName
       updates.propertyLocation = propertyLocation
@@ -110,7 +130,17 @@ export function ContactStep({
   return (
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
-        {mode === "private" ? (
+        {journey === "second-opinion" ? (
+          <>
+            <p className="lead-form__greeting">Thank you, {firstName}.</p>
+            <h2 className="lead-form__question">
+              How should the adviser reach you?
+            </h2>
+            <p className="lead-form__subtext">
+              These details stay with Prime and the adviser handling your request.
+            </p>
+          </>
+        ) : mode === "private" ? (
           <>
             <h2 className="lead-form__question">
               How should we reach you?
@@ -225,6 +255,31 @@ export function ContactStep({
               rows={4}
               style={{ resize: "vertical" }}
             />
+          </div>
+        )}
+
+        {consentLabel && (
+          <div className="lead-form__field">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="lead-form-consent"
+                checked={consent}
+                onCheckedChange={(checked) => setConsent(checked === true)}
+                aria-invalid={Boolean(errors.consent)}
+                aria-describedby={errors.consent ? "consent-error" : undefined}
+              />
+              <label
+                htmlFor="lead-form-consent"
+                className="lead-form__label normal-case tracking-normal leading-relaxed"
+              >
+                {consentLabel}
+              </label>
+            </div>
+            {errors.consent && (
+              <span id="consent-error" role="alert" className="lead-form__error">
+                {errors.consent}
+              </span>
+            )}
           </div>
         )}
       </div>
