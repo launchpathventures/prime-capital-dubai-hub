@@ -64,6 +64,17 @@ describe("agency requests", () => {
     expect(url).toContain(`agency=${AGENCY_UUID}`)
   })
 
+  it("forwards the AgentCRM top-property promotion filter", async () => {
+    mockFetch.mockResolvedValueOnce(
+      jsonResponse({ data: [], pagination: { next_cursor: null, has_more: false, total: 0 } }),
+    )
+    await getCrmProperties({ promotionStatus: "top_property", limit: 3, sort: "newest" })
+    const url = new URL(mockFetch.mock.calls[0][0] as string)
+    expect(url.searchParams.get("promotion_status")).toBe("top_property")
+    expect(url.searchParams.get("limit")).toBe("3")
+    expect(url.searchParams.get("sort")).toBe("newest")
+  })
+
   it("queries the detail endpoint with the agency UUID and never caches (no-store)", async () => {
     mockFetch.mockResolvedValueOnce(jsonResponse({ data: listRow() }))
     await getCrmPropertyBySlug("marina-tower")

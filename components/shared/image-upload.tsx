@@ -24,6 +24,7 @@ type ImageUploadProps = {
   folder: "properties" | "team"
   aspectRatio?: "square" | "video" | "portrait"
   placeholder?: string
+  guidance?: string
 }
 
 export function ImageUpload({
@@ -33,6 +34,7 @@ export function ImageUpload({
   folder,
   aspectRatio = "video",
   placeholder = "Click to upload or drag and drop",
+  guidance,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -203,6 +205,7 @@ export function ImageUpload({
                 <ImageIcon className="h-10 w-10 text-muted-foreground" />
                 <Text size="sm" variant="muted">{placeholder}</Text>
                 <Text size="xs" variant="muted">JPEG, PNG, WebP or GIF (max 10MB)</Text>
+                {guidance && <Text size="xs" variant="muted">{guidance}</Text>}
               </Stack>
             </div>
           )}

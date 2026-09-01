@@ -169,6 +169,7 @@ export function TeamMemberEditForm({ member }: TeamMemberEditFormProps) {
                       folder="team"
                       aspectRatio="square"
                       placeholder="Upload a professional headshot"
+                      guidance="Use a square image, ideally 1200 × 1200px or larger, with the face centred and consistent headroom."
                     />
                   </div>
 

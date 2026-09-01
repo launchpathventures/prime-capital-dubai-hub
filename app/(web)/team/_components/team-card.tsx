@@ -32,14 +32,14 @@ export function TeamCard({ member }: { member: TeamMember }) {
           aria-label={`View profile for ${member.name}`}
         />
 
-        {/* Image - square aspect ratio for compact cards */}
+        {/* A fixed frame + cover crop keeps mixed source dimensions consistent. */}
         <div className="relative aspect-square overflow-hidden bg-[var(--web-serenity)]/20">
           {member.photo ? (
             <Image
               src={member.photo}
               alt={member.name}
               fill
-              className="img-zoom object-cover object-top"
+              className="img-zoom object-cover object-center"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (

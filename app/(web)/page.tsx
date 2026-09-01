@@ -95,16 +95,19 @@ export default async function HomePage() {
     redirect(config.features.rootRedirect)
   }
 
-  // Featured strip + hero search span the full live inventory (off-plan and
-  // secondary). "newest" surfaces the most recently listed picks up top.
+  // AgentCRM owns the homepage selection. Editors promote a listing with the
+  // `top_property` status; the website never substitutes arbitrary inventory.
   const [propertiesResult, testimonials, stats, facets] = await Promise.all([
-    getCrmProperties({ limit: 12, sort: "newest" }),
+    getCrmProperties({
+      limit: 3,
+      promotionStatus: "top_property",
+      sort: "newest",
+    }),
     getWebTestimonials(),
     getWebStats(),
     fetchPropertyFacets(),
   ])
-  const properties = propertiesResult.properties
-  const featuredProperties = properties.slice(0, 3)
+  const featuredProperties = propertiesResult.properties
 
   // Hero search dropdowns are populated from the canonical CRM facets, not
   // inferred from the loaded property list.
@@ -241,7 +244,7 @@ function PropertiesSection({ properties }: { properties: CrmProperty[] }) {
               as="h2"
               className="font-headline text-[var(--web-ash)] text-[clamp(28px,4vw,40px)] font-normal leading-[1.3]"
             >
-              Selected Properties
+              Our Top Properties
             </Title>
             <Text className="text-[var(--web-spruce)] text-[15px] font-light max-w-[500px]">
               Hand-picked opportunities representing the finest of Dubai real estate.
