@@ -10,6 +10,7 @@ import Link from "next/link"
 import { CheckIcon } from "lucide-react"
 import { Container, Grid, Row, Stack, Text, Title } from "@/components/core"
 import {
+  FRAMEWORK_DIRECT_ACCESS_KEY,
   FRAMEWORK_SECOND_OPINION_PREFILL_KEY,
 } from "@/lib/lead-magnets/constants"
 import {
@@ -30,19 +31,21 @@ export const metadata: Metadata = {
 }
 
 interface InvestorDecisionFrameworkPageProps {
-  searchParams: Promise<{ review?: string }>
+  searchParams: Promise<{ access?: string; review?: string }>
 }
 
 export default async function InvestorDecisionFrameworkPage({
   searchParams,
 }: InvestorDecisionFrameworkPageProps) {
   const cookieStore = await cookies()
-  const { review } = await searchParams
+  const { access, review } = await searchParams
+  const hasDirectAccess = access === FRAMEWORK_DIRECT_ACCESS_KEY
   const hasReviewAccess =
     process.env.NODE_ENV !== "production" && review === "1"
 
   if (
     cookieStore.get("pc_framework_access")?.value !== "granted" &&
+    !hasDirectAccess &&
     !hasReviewAccess
   ) {
     redirect(config.links.leadMagnets.frameworkLanding)
