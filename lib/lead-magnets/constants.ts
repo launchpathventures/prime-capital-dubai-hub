@@ -8,6 +8,7 @@ export const SECOND_OPINION_LEAD_MAGNET_ID =
   "prime-project-second-opinion" as const
 export const FRAMEWORK_SECOND_OPINION_PREFILL_KEY =
   "prime:framework:second-opinion-prefill"
+export const FRAMEWORK_DIRECT_ACCESS_KEY = "tahirmajithia"
 
 export const SECOND_OPINION_INSTRUCTION =
   "Second Opinion request from YouTube. Get in touch with this lead and give them a second opinion on the property below. Cover what appears supported, what remains unproven, and the next decision you would make. Their submitted details and any documents are on this lead."
