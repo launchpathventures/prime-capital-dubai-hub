@@ -117,11 +117,11 @@ export const FRAMEWORK_CHECKS = [
 ] as const
 
 export const FRAMEWORK_WALKTHROUGH_CAPTIONS = [
-  "Start with one property and one objective. Keep your own notes beside this page.",
-  "First, define what the property must do. A property is not suitable simply because the sales case is persuasive.",
-  "Second, write down the full financial commitment, not only the quoted price. Record every payment, charge and continuing cost you can establish.",
-  "Third, separate each claim from its evidence. Note the source, date and whether it relates to this property or a different reference.",
-  "Fourth, identify the real competition and supply. Compare the alternatives available to the same buyer or tenant, including relevant future supply.",
-  "Fifth, describe who may buy or rent the property later, why they would choose it and what else they could choose instead.",
-  "Finish with three lines: what appears supported, what remains unproven, and the next decision you need to make.",
+  "Use this framework with one specific property in front of you. Before you examine the sales case, write down the outcome the property must deliver and your intended holding period.",
+  "Check one: objective fit. If you cannot define what success means, you cannot test whether the property belongs in your plan.",
+  "Check two: the full financial commitment. Put the price beside every payment, charge, finance cost, fit-out cost and continuing cost you can establish. Mark anything still estimated.",
+  "Check three: evidence. Separate every claim from its source. Record the date, the document or dataset, and whether it relates to this property or a different reference. Repetition is not evidence.",
+  "Check four: competition and supply. Identify what the same buyer or tenant can choose now. Then record the relevant completed stock and future supply expected during your holding period.",
+  "Check five: exit. Define the future buyer or tenant, why this property may remain relevant to them, what they can afford, and the strongest alternative they could choose.",
+  "Finish with three lines: what appears supported, what remains unproven, and the next decision to make. If one line is unclear, you have identified exactly what must be established next.",
 ] as const

@@ -78,7 +78,7 @@ export default async function InvestorDecisionFrameworkPage({
             </Text>
             <Row gap="lg" wrap className="framework-document-hero__meta">
               <Text>05 decision checks</Text>
-              <Text>71-second walkthrough</Text>
+              <Text>90-second walkthrough</Text>
               <Text>Print-ready reference</Text>
             </Row>
           </Stack>
@@ -140,11 +140,11 @@ export default async function InvestorDecisionFrameworkPage({
                   controls
                   preload="metadata"
                   playsInline
-                  poster="/videos/investor-decision-framework-walkthrough-poster.png"
+                  poster="/videos/investor-decision-framework-walkthrough-poster.jpg"
                 >
                   <source
                     src={config.links.leadMagnets.frameworkWalkthrough}
-                    type="video/webm"
+                    type="video/mp4"
                   />
                   <track
                     kind="captions"
