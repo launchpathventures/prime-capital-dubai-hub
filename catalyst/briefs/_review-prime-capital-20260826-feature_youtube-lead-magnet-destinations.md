@@ -28,7 +28,7 @@ Production rollout completed on 1 Sep 2026:
 4. A labelled Framework release-QA submission passed through the website queue and received AgentCRM HTTP 200 (`submissionId: 8e46ce82-8273-42e1-b2f5-3ec7c82e9093`).
 5. The production Vercel deployment reached Ready and was promoted to `primecapitaldubai.com` and `www.primecapitaldubai.com`.
 6. Final mobile conversion refinement reduced the landing headlines to 36–44px, moved each form directly below the opening promise on narrow screens, tightened form spacing, and verified both journeys at 320px and 390px without horizontal overflow.
-7. Added a deliberate production-safe direct-access link for Tahir to share the working Framework without requiring the enquiry form. The standard landing-page journey remains gated. Share URL: `https://www.primecapitaldubai.com/investor-decision-framework/use?access=tahirmajithia`.
+7. Added a deliberate production-safe direct-access link for Tahir to share the working Framework without requiring the enquiry form. The standard landing-page journey remains gated. Short share URL: `https://primecapitaldubai.com/framework/tahir`.
 
 The current Second Opinion confirmation makes no invented turnaround promise: it states that the assigned adviser will confirm timing on first contact. Prime can replace that with a specific commitment later if the operating team adopts one.
 

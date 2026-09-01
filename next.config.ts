@@ -62,6 +62,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/framework/tahir",
+        destination:
+          "/investor-decision-framework/use?access=tahirmajithia",
+      },
+    ];
+  },
   async redirects() {
     // Hostname-scoped 301s for the Tahir surface. These cover legacy
     // Squarespace URLs and event-specific landing pages that have been
