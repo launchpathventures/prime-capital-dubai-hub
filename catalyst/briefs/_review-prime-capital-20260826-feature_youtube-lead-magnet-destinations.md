@@ -27,6 +27,7 @@ Production rollout completed on 1 Sep 2026:
 3. The required AgentCRM and retry-cron credentials were configured for Vercel production and preview.
 4. A labelled Framework release-QA submission passed through the website queue and received AgentCRM HTTP 200 (`submissionId: 8e46ce82-8273-42e1-b2f5-3ec7c82e9093`).
 5. The production Vercel deployment reached Ready and was promoted to `primecapitaldubai.com` and `www.primecapitaldubai.com`.
+6. Final mobile conversion refinement reduced the landing headlines to 36–44px, moved each form directly below the opening promise on narrow screens, tightened form spacing, and verified both journeys at 320px and 390px without horizontal overflow.
 
 The current Second Opinion confirmation makes no invented turnaround promise: it states that the assigned adviser will confirm timing on first contact. Prime can replace that with a specific commitment later if the operating team adopts one.
 
