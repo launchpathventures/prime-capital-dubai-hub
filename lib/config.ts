@@ -140,7 +140,7 @@ export const config = {
       frameworkLanding: "/investor-decision-framework",
       frameworkAccess: "/investor-decision-framework/use",
       frameworkWalkthrough:
-        "/videos/investor-decision-framework-walkthrough.webm",
+        "/videos/investor-decision-framework-walkthrough.mp4",
       secondOpinion: "/project-second-opinion",
       secondOpinionConfirmation: "/project-second-opinion/thank-you",
     },
