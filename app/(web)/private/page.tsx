@@ -31,7 +31,8 @@ import {
   HandshakeIcon,
   ChevronDownIcon,
 } from "lucide-react"
-import privateImage from "@/public/images/hero/private.jpg"
+
+const privateImage = "/images/hero/private.jpg"
 
 export const metadata = {
   title: "Private",

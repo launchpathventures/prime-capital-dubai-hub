@@ -10,7 +10,12 @@
 import { useState, useRef, useEffect } from "react"
 import { ArrowRightIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { LeadFormData, FormTheme, FormMode } from "../types"
+import type {
+  LeadFormData,
+  FormJourney,
+  FormTheme,
+  FormMode,
+} from "../types"
 import { nameStepSchema } from "../schema"
 
 interface NameStepProps {
@@ -20,9 +25,17 @@ interface NameStepProps {
   theme: FormTheme
   mode?: FormMode
   autoFocus?: boolean
+  journey?: FormJourney
 }
 
-export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: NameStepProps) {
+export function NameStep({
+  data,
+  onUpdate,
+  onNext,
+  mode,
+  autoFocus = true,
+  journey = "default",
+}: NameStepProps) {
   const [firstName, setFirstName] = useState(data.firstName || "")
   const [lastName, setLastName] = useState(data.lastName || "")
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -61,13 +74,19 @@ export function NameStep({ data, onUpdate, onNext, mode, autoFocus = true }: Nam
     <form onSubmit={handleSubmit} className="lead-form__step">
       <div>
         <h2 className="lead-form__question">
-          {mode === "private"
+          {journey === "second-opinion"
+            ? "Who should the adviser contact?"
+            : mode === "private"
             ? "Your name"
             : mode === "property-enquiry"
               ? "Let\u2019s start with your name"
               : "Hello. Who am I speaking with today?"}
         </h2>
-        {mode !== "private" && mode !== "property-enquiry" && (
+        {journey === "second-opinion" ? (
+          <p className="lead-form__subtext">
+            Start with the person requesting the review.
+          </p>
+        ) : mode !== "private" && mode !== "property-enquiry" && (
           <p className="lead-form__subtext">
             So we know who we&#39;re speaking with
           </p>

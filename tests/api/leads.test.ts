@@ -265,6 +265,117 @@ describe("Lead Form API", () => {
   // =============================================================================
 
   describe("CRM Contract", () => {
+    it("forwards Framework lead-magnet context and grants gated access", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.70",
+        },
+        body: JSON.stringify({
+          firstName: "Nadia",
+          lastName: "Khan",
+          email: "nadia@example.com",
+          whatsapp: "+971501234567",
+          formMode: "download",
+          leadMagnetId: "prime-investor-decision-framework",
+          leadMagnetFields: { source_script: "prime-01-distressed-deal" },
+          consent: true,
+          ref: "contact-ref-token",
+          share: "share-token",
+          submissionId: "29c7c5ac-308d-4d81-95d6-00f5e8316b36",
+          submittedAt: new Date().toISOString(),
+          pageUrl:
+            "https://primecapitaldubai.com/investor-decision-framework?utm_source=youtube",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+      expect(response.headers.get("set-cookie")).toContain("pc_framework_access=granted")
+
+      const payload = JSON.parse(String(mockFetch.mock.calls[0][1].body))
+      expect(payload.formMode).toBe("download")
+      expect(payload.formName).toBe(
+        "download-request-investor-decision-framework",
+      )
+      expect(payload.leadMagnetId).toBe(
+        "prime-investor-decision-framework",
+      )
+      expect(payload.leadMagnetFields).toEqual({
+        source_script: "prime-01-distressed-deal",
+      })
+      expect(payload.phone).toBe("+971501234567")
+      expect(payload.whatsapp).toBe("+971501234567")
+      expect(payload.ref).toBe("contact-ref-token")
+      expect(payload.share).toBe("share-token")
+    })
+
+    it("maps Second Opinion fields to native and structured CRM fields", async () => {
+      const { POST } = await import("@/app/api/leads/route")
+      const request = new Request("http://localhost/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "192.168.1.74",
+        },
+        body: JSON.stringify({
+          firstName: "Omar",
+          lastName: "Ali",
+          email: "omar@example.com",
+          whatsapp: "+971501234567",
+          formMode: "contact",
+          leadMagnetId: "prime-project-second-opinion",
+          consent: true,
+          propertyUrl: "https://example.com/listing",
+          propertyName: "Sample Residence",
+          locations: ["Dubai Marina"],
+          bedrooms: 2,
+          enquiryNotes: "Check the claimed rental evidence.",
+          leadMagnetFields: {
+            price: "AED 2.4m",
+            objective: "Income",
+            payment_plan: "60/40",
+          },
+          leadMagnetDocuments: [
+            {
+              url: "https://primecapitaldubai.com/api/lead-magnets/documents/29c7c5ac-308d-4d81-95d6-00f5e8316b36",
+              filename: "brochure.pdf",
+              contentType: "application/pdf",
+              sizeBytes: 1024,
+            },
+          ],
+          submissionId: "39c7c5ac-308d-4d81-95d6-00f5e8316b37",
+          submittedAt: new Date().toISOString(),
+          pageUrl: "https://primecapitaldubai.com/project-second-opinion",
+        }),
+      })
+
+      const response = await POST(request as unknown as NextRequest)
+      expect(response.status).toBe(200)
+
+      const payload = JSON.parse(String(mockFetch.mock.calls[0][1].body))
+      expect(payload.propertyUrl).toBe("https://example.com/listing")
+      expect(payload.propertyName).toBe("Sample Residence")
+      expect(payload.propertyInterest).toBe("Sample Residence")
+      expect(payload.locations).toEqual(["Dubai Marina"])
+      expect(payload.bedrooms).toBe(2)
+      expect(payload.message).toBe("Check the claimed rental evidence.")
+      expect(payload.leadMagnetFields).toEqual({
+        price: "AED 2.4m",
+        objective: "Income",
+        payment_plan: "60/40",
+      })
+      expect(payload.leadMagnetDocuments[0].filename).toBe("brochure.pdf")
+      expect(payload.leadMagnetInstruction).toContain(
+        "what appears supported, what remains unproven",
+      )
+      expect(payload.assigneeEmail).toBeUndefined()
+      expect(payload.teamMemberEmail).toBeUndefined()
+      expect(payload.leadDistribution).toBeUndefined()
+    })
+
     it("forwards a stable site source and explicit UTM fields", async () => {
       const { POST } = await import("@/app/api/leads/route")
 

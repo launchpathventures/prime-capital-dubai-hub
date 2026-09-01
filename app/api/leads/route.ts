@@ -10,12 +10,18 @@
  * Both forwarders are best-effort; failures don't block the user.
  */
 
-import { NextRequest, NextResponse } from "next/server"
+import { after, NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { randomUUID } from "node:crypto"
 import { getCrmPropertyBySlug } from "@/lib/crm/client"
 import { isOffPlanListing } from "@/lib/crm"
 import { deriveSiteSource } from "@/lib/leads/source"
+import {
+  deliverQueuedLeadMagnet,
+  enqueueLeadMagnetDelivery,
+  sendAgentCrmPayload,
+} from "@/lib/lead-magnets/delivery"
+import { SECOND_OPINION_INSTRUCTION } from "@/lib/lead-magnets/constants"
 
 // =============================================================================
 // RATE LIMITING
@@ -518,6 +524,7 @@ const leadSchema = z
 
     // Optional fields - seller qualification
     propertyName: z.string().max(500).optional(),
+    propertyUrl: z.string().url().max(1000).optional(),
     propertyLocation: z.string().max(500).optional(),
     concerns: z.string().max(2000).optional(),
     propertyType: z.string().max(100).optional(),
@@ -543,6 +550,32 @@ const leadSchema = z
     // Lead magnet + tagging for CRM categorisation
     leadMagnet: z.string().max(200).optional(),
     leadTag: z.string().max(100).optional(),
+    leadMagnetId: z
+      .enum([
+        "prime-investor-decision-framework",
+        "prime-project-second-opinion",
+      ])
+      .optional(),
+    leadMagnetFields: z
+      .object({
+        source_script: z.string().max(100).optional(),
+        price: z.string().max(200).optional(),
+        objective: z.string().max(1000).optional(),
+        payment_plan: z.string().max(1000).optional(),
+      })
+      .optional(),
+    leadMagnetDocuments: z
+      .array(
+        z.object({
+          url: z.string().url().max(1000),
+          filename: z.string().max(255),
+          contentType: z.string().max(150),
+          sizeBytes: z.number().int().positive().max(10 * 1024 * 1024),
+        }),
+      )
+      .max(6)
+      .optional(),
+    consent: z.literal(true).optional(),
 
     // Lifecycle / stage marker (event leads default to "prospect")
     leadLifecycle: z.string().max(50).optional(),
@@ -563,6 +596,7 @@ const leadSchema = z
     // AgentCRM prospect binder from the welcome-email link — forwarded verbatim
     // so AgentCRM can promote the existing prospect instead of duplicating it.
     ref: z.string().max(200).optional(),
+    share: z.string().max(200).optional(),
 
     // Legacy URL source parameter. Accepted for compatibility, but never
     // forwarded to CRM because CRM expects utmSource explicitly.
@@ -628,6 +662,81 @@ const leadSchema = z
         path: ["email"],
         message: "Email or phone is required",
       })
+    }
+
+    if (data.leadMagnetId) {
+      if (!data.firstName.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["firstName"],
+          message: "First name is required",
+        })
+      }
+      if (!data.lastName.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["lastName"],
+          message: "Last name is required",
+        })
+      }
+      if (!data.email.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["email"],
+          message: "Email is required",
+        })
+      }
+      if (!data.whatsapp.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["whatsapp"],
+          message: "Phone is required",
+        })
+      }
+    }
+
+    if (data.leadMagnetId && data.consent !== true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["consent"],
+        message: "Consent is required",
+      })
+    }
+
+    if (data.leadMagnetId === "prime-project-second-opinion") {
+      const hasTypedProperty = Boolean(
+        data.propertyName?.trim() &&
+          data.locations?.[0]?.trim() &&
+          data.leadMagnetFields?.price?.trim() &&
+          data.bedrooms !== undefined,
+      )
+      const hasPropertyRoute = Boolean(
+        data.propertyUrl?.trim() ||
+          data.leadMagnetDocuments?.length ||
+          hasTypedProperty,
+      )
+      if (!hasPropertyRoute) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["propertyName"],
+          message:
+            "Provide a property link, document, or complete typed property details",
+        })
+      }
+      if (!data.leadMagnetFields?.objective?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["leadMagnetFields", "objective"],
+          message: "Objective is required",
+        })
+      }
+      if (!data.enquiryNotes?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["enquiryNotes"],
+          message: "What to check is required",
+        })
+      }
     }
   })
 
@@ -712,7 +821,10 @@ function buildAgentCrmPayload(
   // Registration - Livestream"). Use it as the leadMagnet so the CRM always
   // has a single field carrying event identity even if the client didn't set one.
   const leadMagnet = leadData.leadMagnet || (isEvent ? formName : undefined)
-  const usesPropertyRouting = leadData.formMode === "property-enquiry" || Boolean(property?.id)
+  const usesPropertyRouting =
+    leadData.formMode === "property-enquiry" ||
+    Boolean(property?.id) ||
+    leadData.leadMagnetId === "prime-project-second-opinion"
 
   const payload: Record<string, unknown> = {
     // Identity
@@ -726,6 +838,13 @@ function buildAgentCrmPayload(
     formMode: leadData.formMode,
     formName,
     leadMagnet,
+    leadMagnetId: leadData.leadMagnetId,
+    leadMagnetFields: leadData.leadMagnetFields,
+    leadMagnetDocuments: leadData.leadMagnetDocuments,
+    leadMagnetInstruction:
+      leadData.leadMagnetId === "prime-project-second-opinion"
+        ? SECOND_OPINION_INSTRUCTION
+        : undefined,
     // Lifecycle marker — event leads enter AgentCRM as prospects
     leadLifecycle: leadData.leadLifecycle || (isEvent ? "prospect" : undefined),
     leadStage: leadData.leadStage || (isEvent ? "prospect" : undefined),
@@ -736,6 +855,7 @@ function buildAgentCrmPayload(
     // Opaque AgentCRM ref (verbatim). It can bind a welcome-email prospect or
     // identify a sharing agent; AgentCRM owns validation and precedence.
     ref: leadData.ref,
+    share: leadData.share,
     submissionId,
     sessionId: leadData.sessionId,
     submittedAt: leadData.submittedAt,
@@ -762,9 +882,13 @@ function buildAgentCrmPayload(
 
     // Property enquiry — server-enriched name/url override anything the
     // client might have sent
-    propertyInterest: property?.id,
-    propertyName: property?.name,
-    propertyUrl: property?.url,
+    propertyInterest:
+      property?.id ||
+      (leadData.leadMagnetId === "prime-project-second-opinion"
+        ? leadData.propertyName
+        : undefined),
+    propertyName: property?.name || leadData.propertyName,
+    propertyUrl: property?.url || leadData.propertyUrl,
     developerName: property?.developerName,
     isOffPlan: property?.isOffPlan,
     isDistressed: property?.isDistressed,
@@ -986,6 +1110,74 @@ export async function POST(request: NextRequest) {
       resolvedAssigneeEmail,
       siteSource,
     )
+
+    // Lead magnets use a durable queue before AgentCRM delivery. The browser
+    // waits only for the queue write, not the remote CRM, so access and the
+    // confirmation journey remain available during a CRM outage.
+    if (leadData.leadMagnetId) {
+      const queued =
+        process.env.NODE_ENV === "test"
+          ? null
+          : await enqueueLeadMagnetDelivery({
+              submissionId,
+              formMode: leadData.formMode,
+              payload: agentCrmPayload,
+            })
+
+      if (
+        process.env.NODE_ENV !== "test" &&
+        !queued &&
+        leadData.leadMagnetId === "prime-project-second-opinion"
+      ) {
+        return NextResponse.json(
+          { error: "Your request could not be saved. Please try again." },
+          { status: 503 },
+        )
+      }
+
+      if (process.env.NODE_ENV === "test") {
+        await sendAgentCrmPayload(
+          agentCrmPayload,
+          submissionId,
+          leadData.formMode,
+        )
+      } else if (queued) {
+        after(async () => {
+          await deliverQueuedLeadMagnet(queued)
+        })
+      } else {
+        // Framework access is never withheld for a missing queue. This direct
+        // background attempt is intentionally only the low-intent fallback;
+        // document-backed Second Opinion requests require durable storage.
+        after(async () => {
+          await sendAgentCrmPayload(
+            agentCrmPayload,
+            submissionId,
+            leadData.formMode,
+          )
+        })
+      }
+
+      const response = NextResponse.json({
+        success: true,
+        message: "Thank you for your enquiry. We'll be in touch shortly.",
+        submissionId,
+      })
+
+      if (
+        leadData.leadMagnetId === "prime-investor-decision-framework"
+      ) {
+        response.cookies.set("pc_framework_access", "granted", {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          path: "/investor-decision-framework",
+          maxAge: 60 * 60 * 24 * 30,
+        })
+      }
+
+      return response
+    }
 
     const leadDataWithoutLegacySource = { ...leadData }
     delete leadDataWithoutLegacySource.source

@@ -26,7 +26,8 @@ import { ArrowRightIcon } from "lucide-react"
 
 import { PropertiesGrid } from "./_components/properties-filter"
 import { PropertiesFilterBar } from "./_components/properties-filter-bar"
-import propertiesImage from "@/public/images/hero/properties.jpg"
+
+const propertiesImage = "/images/hero/properties.jpg"
 
 // The CRM property list is Cache-Control: no-store; do not hold a website ISR
 // cache of anonymous property data. This page is dynamic (also reads filters).

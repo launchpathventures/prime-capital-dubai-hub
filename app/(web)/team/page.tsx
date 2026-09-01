@@ -15,7 +15,8 @@ import { Container, Stack, Grid, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { ArrowRightIcon } from "lucide-react"
 import { TeamCard } from "./_components/team-card"
-import teamImage from "@/public/images/hero/team.jpg"
+
+const teamImage = "/images/hero/team.jpg"
 
 export const metadata = {
   title: "Our Team",

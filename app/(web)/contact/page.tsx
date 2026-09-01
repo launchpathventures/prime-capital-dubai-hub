@@ -13,7 +13,8 @@ import { ContactFormSection } from "./contact-form-section"
 import { getCrmPropertyBySlug } from "@/lib/crm/client"
 import { isOffPlanListing } from "@/lib/crm"
 import type { PropertyContext } from "@/components/shared/lead-form/types"
-import contactImage from "@/public/images/hero/contact.jpg"
+
+const contactImage = "/images/hero/contact.jpg"
 
 export const metadata = {
   title: "Contact Us",

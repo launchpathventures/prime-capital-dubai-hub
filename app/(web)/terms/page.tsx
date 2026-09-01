@@ -17,7 +17,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Container, Stack, Grid, Text } from "@/components/core"
 import { config } from "@/lib/config"
-import aboutImage from "@/public/images/hero/about.jpg"
+
+const aboutImage = "/images/hero/about.jpg"
 import {
   BuildingIcon,
   BriefcaseIcon,

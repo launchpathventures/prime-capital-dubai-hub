@@ -136,6 +136,14 @@ export const config = {
     ahmedStrategyKit:
       process.env.NEXT_PUBLIC_AHMED_STRATEGY_KIT_URL ||
       "https://gamma.app/docs/The-Prime-Capital-2026-Investor-Strategy-Kit-nra1olekeesasny",
+    leadMagnets: {
+      frameworkLanding: "/investor-decision-framework",
+      frameworkAccess: "/investor-decision-framework/use",
+      frameworkWalkthrough:
+        "/videos/investor-decision-framework-walkthrough.webm",
+      secondOpinion: "/project-second-opinion",
+      secondOpinionConfirmation: "/project-second-opinion/thank-you",
+    },
   },
 
   /**
