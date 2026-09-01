@@ -5879,7 +5879,17 @@
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--web-ash);
+}
+
+.framework-video--refined video:fullscreen,
+.framework-video--refined video:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: var(--web-ash);
 }
 
 .framework-workspace {

@@ -151,7 +151,6 @@ export default async function InvestorDecisionFrameworkPage({
                     src="/videos/investor-decision-framework-walkthrough.vtt"
                     srcLang="en"
                     label="English"
-                    default
                   />
                   Your browser does not support this video.
                 </video>
