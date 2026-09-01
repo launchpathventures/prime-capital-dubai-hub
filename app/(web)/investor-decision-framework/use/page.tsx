@@ -146,12 +146,6 @@ export default async function InvestorDecisionFrameworkPage({
                     src={config.links.leadMagnets.frameworkWalkthrough}
                     type="video/mp4"
                   />
-                  <track
-                    kind="captions"
-                    src="/videos/investor-decision-framework-walkthrough.vtt"
-                    srcLang="en"
-                    label="English"
-                  />
                   Your browser does not support this video.
                 </video>
               </div>

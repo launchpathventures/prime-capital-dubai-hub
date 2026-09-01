@@ -29,8 +29,9 @@ Production rollout completed on 1 Sep 2026:
 5. The production Vercel deployment reached Ready and was promoted to `primecapitaldubai.com` and `www.primecapitaldubai.com`.
 6. Final mobile conversion refinement reduced the landing headlines to 36–44px, moved each form directly below the opening promise on narrow screens, tightened form spacing, and verified both journeys at 320px and 390px without horizontal overflow.
 7. Added a deliberate production-safe direct-access link for Tahir to share the working Framework without requiring the enquiry form. The standard landing-page journey remains gated. Short share URL: `https://primecapitaldubai.com/framework/tahir`.
-8. Replaced the browser-recorded walkthrough with a 90-second Remotion composition, scripted from the approved five-check framework and voiced through the project's configured ElevenLabs voice. The render includes burned-in scene captions and a matching WebVTT track.
+8. Replaced the browser-recorded walkthrough with a 90-second Remotion composition, scripted from the approved five-check framework and voiced through the project's configured ElevenLabs voice. The render includes burned-in scene captions and a matching WebVTT transcript asset.
 9. Corrected fullscreen playback so the 16:9 composition is always contained within the viewport, and stopped the optional WebVTT track from opening by default over the burned-in captions.
+10. Removed the browser caption track from the embedded player after mobile Safari continued enabling it from device accessibility preferences. The walkthrough retains its permanent burned-in captions without the duplicate mobile overlay.
 
 The current Second Opinion confirmation makes no invented turnaround promise: it states that the assigned adviser will confirm timing on first contact. Prime can replace that with a specific commitment later if the operating team adopts one.
 
