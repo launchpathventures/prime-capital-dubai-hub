@@ -336,6 +336,7 @@ Project-specific components composed from Core. See `shared/README.md`.
 - dev-card: Development helper cards with amber styling (respects `isDevToolsEnabled()`)
 - label-value: Label-value pairs (inline, fixed, vertical variants)
 - stat-card: Dashboard metric cards with trend indicators
+- team-photo-crop-dialog: Square crop, zoom, and focal-position editor used by team photo uploads
 - theme-toggle: Theme (light/dark/auto) and density selector
 - theme-provider: next-themes wrapper for app
 

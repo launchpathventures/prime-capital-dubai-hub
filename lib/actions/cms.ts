@@ -8,6 +8,7 @@
 "use server"
 
 import { revalidatePath, revalidateTag } from "next/cache"
+import sharp from "sharp"
 import { createClient } from "@/lib/supabase/server"
 import { WEB_CONTENT_TAGS } from "@/lib/content"
 import { trackActionError } from "@/lib/error-tracking"
@@ -587,6 +588,7 @@ export async function updateSiteSetting(key: string, value: Record<string, unkno
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const TEAM_PHOTO_SIZE = 1200
 
 /**
  * Upload an image to Supabase storage for CMS content.
@@ -614,15 +616,34 @@ export async function uploadCmsImage(
       return { success: false, error: "File too large. Maximum size is 10MB." }
     }
 
+    let uploadBody: File | Buffer = file
+    let contentType = file.type
+    let ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
+
+    // Team photos are a square asset across the website. The CMS cropper sends
+    // an exact square, while this server-side pass also protects direct calls.
+    if (folder === "team") {
+      uploadBody = await sharp(Buffer.from(await file.arrayBuffer()))
+        .rotate()
+        .resize(TEAM_PHOTO_SIZE, TEAM_PHOTO_SIZE, {
+          fit: "cover",
+          position: "centre",
+        })
+        .jpeg({ quality: 90, mozjpeg: true })
+        .toBuffer()
+      contentType = "image/jpeg"
+      ext = "jpg"
+    }
+
     // Generate unique filename
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg"
     const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
     // Upload to Supabase storage
     const { error: uploadError } = await supabase.storage
       .from("cms")
-      .upload(filename, file, {
+      .upload(filename, uploadBody, {
         cacheControl: "3600",
+        contentType,
         upsert: false,
       })
 
