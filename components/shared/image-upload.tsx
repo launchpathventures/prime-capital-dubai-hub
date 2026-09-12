@@ -2,11 +2,13 @@
  * Image Upload Component
  *
  * Reusable image upload with preview and drag-and-drop support.
+ * Team photos are visually cropped before upload so public cards receive a
+ * predictable square source instead of relying on CSS to guess the framing.
  */
 
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import Image from "next/image"
 import { Stack, Text } from "@/components/core"
 import { Button } from "@/components/ui/button"
@@ -16,6 +18,10 @@ import { UploadIcon, XIcon, ImageIcon, Loader2Icon } from "lucide-react"
 import { uploadCmsImage } from "@/lib/actions/cms"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import {
+  TeamPhotoCropDialog,
+  type TeamPhotoCropSource,
+} from "@/components/shared/team-photo-crop-dialog"
 
 type ImageUploadProps = {
   label: string
@@ -40,6 +46,7 @@ export function ImageUpload({
   const [isDragging, setIsDragging] = useState(false)
   const [showUrlInput, setShowUrlInput] = useState(false)
   const [urlInputValue, setUrlInputValue] = useState("")
+  const [cropSource, setCropSource] = useState<TeamPhotoCropSource | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const aspectClasses = {
@@ -48,7 +55,7 @@ export function ImageUpload({
     portrait: "aspect-[3/4]",
   }
 
-  const handleFileSelect = useCallback(async (file: File) => {
+  const uploadFile = useCallback(async (file: File) => {
     setIsUploading(true)
     try {
       const formData = new FormData()
@@ -69,11 +76,46 @@ export function ImageUpload({
     }
   }, [folder, onChange])
 
+  const openCropper = useCallback((file: File) => {
+    const url = URL.createObjectURL(file)
+    const image = new window.Image()
+
+    image.onload = () => {
+      setCropSource({ file, image, url })
+    }
+    image.onerror = () => {
+      URL.revokeObjectURL(url)
+      toast.error("This image could not be opened")
+    }
+    image.src = url
+  }, [])
+
+  const handleFileSelect = useCallback((file: File) => {
+    if (folder === "team" && aspectRatio === "square") {
+      openCropper(file)
+      return
+    }
+
+    void uploadFile(file)
+  }, [aspectRatio, folder, openCropper, uploadFile])
+
+  useEffect(() => {
+    return () => {
+      if (cropSource) URL.revokeObjectURL(cropSource.url)
+    }
+  }, [cropSource])
+
+  const handleCropConfirm = useCallback(async (file: File) => {
+    setCropSource(null)
+    await uploadFile(file)
+  }, [uploadFile])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       handleFileSelect(file)
     }
+    e.target.value = ""
   }
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -114,15 +156,17 @@ export function ImageUpload({
     <Stack gap="sm">
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowUrlInput(!showUrlInput)}
-          className="text-xs h-7"
-        >
-          {showUrlInput ? "Upload file" : "Use URL instead"}
-        </Button>
+        {folder !== "team" && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowUrlInput(!showUrlInput)}
+            className="text-xs h-7"
+          >
+            {showUrlInput ? "Upload file" : "Use URL instead"}
+          </Button>
+        )}
       </div>
 
       {showUrlInput ? (
@@ -219,6 +263,12 @@ export function ImageUpload({
           />
         </div>
       )}
+
+      <TeamPhotoCropDialog
+        source={cropSource}
+        onCancel={() => setCropSource(null)}
+        onConfirm={handleCropConfirm}
+      />
     </Stack>
   )
 }
