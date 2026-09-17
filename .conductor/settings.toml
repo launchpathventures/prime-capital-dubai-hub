@@ -1,0 +1,11 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+archive = ""
+setup = "cp $CONDUCTOR_ROOT_PATH/.env.local .env.local; pnpm install"
+
+[scripts.run.run]
+available_in = "local"
+command = "pnpm run dev"
+default = true
+icon = "play"
