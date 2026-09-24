@@ -71,9 +71,7 @@ export function AddUserForm() {
         <form onSubmit={handleSubmit}>
           <div className="admin-users-modal__body">
             <p className="admin-users-modal__intro">
-              Create a new user account with a temporary password.
-              <br />
-              <span style={{ fontSize: '0.85em', opacity: 0.8 }}>The user should change this after their first login.</span>
+              Create a new user account. They can sign in with their Google account.
             </p>
             
             <div className="admin-users-modal__field">
