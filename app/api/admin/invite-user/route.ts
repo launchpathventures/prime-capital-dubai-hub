@@ -2,7 +2,8 @@
  * CATALYST - Admin Create User API
  * 
  * API route for admins to create new users.
- * Uses Supabase Admin API to create users with a default password.
+ * Users log in via Google SSO or the returned magic link, so a password is
+ * optional — AUTH_DEFAULT_PASSWORD is only applied when configured.
  */
 
 import { createClient } from "@supabase/supabase-js"
@@ -37,12 +38,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 })
   }
 
-  // Ensure default password is configured
-  if (!defaultPassword) {
-    console.error("AUTH_DEFAULT_PASSWORD environment variable is not set")
-    return NextResponse.json({ error: "Server configuration error: default password not configured" }, { status: 500 })
-  }
-  
   // Create admin client with service role
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -58,10 +53,9 @@ export async function POST(request: Request) {
     }
   })
   
-  // Create user with default password
   const { data, error } = await adminClient.auth.admin.createUser({
     email,
-    password: defaultPassword,
+    ...(defaultPassword && { password: defaultPassword }),
     email_confirm: true, // Auto-confirm email so they can login immediately
     user_metadata: {
       full_name: fullName,
@@ -74,11 +68,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
   
-  // Create user profile
+  // Upsert because the handle_new_user trigger already inserts a 'learner'
+  // profile — a plain insert would conflict and drop the chosen role
   if (data.user) {
     const { error: profileError } = await adminClient
       .from('user_profiles')
-      .insert({
+      .upsert({
         id: data.user.id,
         full_name: fullName || null,
         role: role,
