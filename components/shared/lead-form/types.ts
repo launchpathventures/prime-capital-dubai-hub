@@ -106,6 +106,9 @@ export interface LeadFormData {
   saleTimeline?: SaleTimeline
   targetPrice?: PriceRange
 
+  // Event attendance location (multi-city events, e.g. India roadshow)
+  eventCity?: string
+
   // Concerns (landing mode — free text)
   concerns?: string
 
@@ -250,6 +253,9 @@ export interface LeadFormProps {
   /** Optional: Placeholder for the combined property/location field */
   propertyPlaceholder?: string
 
+  /** Optional: Adds a final "which city will you attend?" step (multi-city events) */
+  eventCities?: EventCityOption[]
+
   /** Optional: Custom contact-step submit label when it opens a booking calendar */
   contactSubmitLabel?: string
 
@@ -314,6 +320,7 @@ export type StepId =
   | "property-appeal"
   | "second-opinion-property"
   | "second-opinion-review"
+  | "event-city"
   | "success"
 
 export interface StepConfig {
@@ -326,6 +333,16 @@ export interface StepConfig {
 // =============================================================================
 // OPTIONS FOR SELECTS
 // =============================================================================
+
+/** One stop of a multi-city event, shown as a choice card on the event-city step */
+export interface EventCityOption {
+  /** Sent to the CRM as `eventCity` — must match the agreed spelling exactly */
+  value: string
+  day: string
+  date: string
+  venue: string
+  hours: string
+}
 
 export interface SelectOption<T = string> {
   value: T

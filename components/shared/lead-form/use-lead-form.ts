@@ -79,6 +79,8 @@ const STEPS: StepDef[] = [
   },
   { id: "questions", modes: ["contact"] },
   { id: "private-context", modes: ["private"] },
+  // Only included when the form is given `eventCities` (see getAvailableStepIds)
+  { id: "event-city", modes: ["event"] },
   { id: "success", modes: ALL_MODES },
 ]
 
@@ -121,6 +123,7 @@ interface UseLeadFormOptions {
   persistKey?: string
   prefillKey?: string
   skipPrefilledContact?: boolean
+  hasEventCityStep?: boolean
 }
 
 interface UseLeadFormReturn {
@@ -163,6 +166,7 @@ export function useLeadForm({
   persistKey,
   prefillKey,
   skipPrefilledContact,
+  hasEventCityStep = false,
 }: UseLeadFormOptions): UseLeadFormReturn {
   // Returning lead: has Bitrix Lead ID, skips name/contact/goals/budget
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
@@ -227,12 +231,12 @@ export function useLeadForm({
   const [stepIndex, setStepIndex] = useState(() => {
     if (!skipPrefilledContact || !hasContactPrefill(data)) return 0
 
-    return getStepAfterContactIndex(mode, data, isReturningLead, journey)
+    return getStepAfterContactIndex(mode, data, isReturningLead, journey, hasEventCityStep)
   })
   const [firstStepIndex, setFirstStepIndex] = useState(() => {
     if (!skipPrefilledContact || !hasContactPrefill(data)) return 0
 
-    return getStepAfterContactIndex(mode, data, isReturningLead, journey)
+    return getStepAfterContactIndex(mode, data, isReturningLead, journey, hasEventCityStep)
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -262,6 +266,7 @@ export function useLeadForm({
           nextData,
           isReturningLead,
           journey,
+          hasEventCityStep,
         )
         setFirstStepIndex(restoredStepIndex)
         setStepIndex(restoredStepIndex)
@@ -270,6 +275,7 @@ export function useLeadForm({
       return nextData
     })
   }, [
+    hasEventCityStep,
     isReturningLead,
     journey,
     leadMagnet,
@@ -283,8 +289,8 @@ export function useLeadForm({
 
   // Calculate available steps based on mode and conditions
   const availableSteps = useMemo(() => {
-    return getAvailableStepIds(mode, data, isReturningLead, journey)
-  }, [mode, data, isReturningLead, journey])
+    return getAvailableStepIds(mode, data, isReturningLead, journey, hasEventCityStep)
+  }, [mode, data, isReturningLead, journey, hasEventCityStep])
 
   const currentStep = availableSteps[stepIndex] ?? "name"
   const currentStepIndex = Math.max(0, stepIndex - firstStepIndex)
@@ -347,6 +353,7 @@ export function useLeadForm({
         propertyName: mergedData.propertyName,
         propertyUrl: mergedData.propertyUrl,
         propertyLocation: mergedData.propertyLocation,
+        eventCity: mergedData.eventCity,
         concerns: mergedData.concerns,
         propertyType: mergedData.propertyType,
         saleTimeline: mergedData.saleTimeline,
@@ -447,11 +454,13 @@ function getAvailableStepIds(
   data: Partial<LeadFormData>,
   isReturningLead: boolean,
   journey: FormJourney,
+  hasEventCityStep: boolean,
 ) {
   if (journey === "second-opinion") return SECOND_OPINION_STEPS
 
   return STEPS.filter((step) => {
     if (!step.modes.includes(mode)) return false
+    if (step.id === "event-city" && !hasEventCityStep) return false
     if (isReturningLead && RETURNING_LEAD_SKIP_STEPS.includes(step.id)) return false
     if (step.condition && !step.condition(data)) return false
     return true
@@ -463,12 +472,14 @@ function getStepAfterContactIndex(
   data: Partial<LeadFormData>,
   isReturningLead: boolean,
   journey: FormJourney,
+  hasEventCityStep: boolean,
 ) {
   const initialSteps = getAvailableStepIds(
     mode,
     data,
     isReturningLead,
     journey,
+    hasEventCityStep,
   )
   const contactIndex = initialSteps.indexOf("contact")
   if (contactIndex === -1) return 0
