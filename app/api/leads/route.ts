@@ -21,6 +21,7 @@ import {
   enqueueLeadMagnetDelivery,
   sendAgentCrmPayload,
 } from "@/lib/lead-magnets/delivery"
+import { INDIA_ROADSHOW_CITIES, INDIA_ROADSHOW_TAG } from "@/lib/events/india-roadshow"
 import { SECOND_OPINION_INSTRUCTION } from "@/lib/lead-magnets/constants"
 
 // =============================================================================
@@ -527,6 +528,7 @@ const leadSchema = z
     propertyUrl: z.string().url().max(1000).optional(),
     propertyLocation: z.string().max(500).optional(),
     concerns: z.string().max(2000).optional(),
+    eventCity: z.enum(INDIA_ROADSHOW_CITIES).optional(),
     propertyType: z.string().max(100).optional(),
     saleTimeline: z.string().max(100).optional(),
     targetPrice: z.string().max(100).optional(),
@@ -643,6 +645,14 @@ const leadSchema = z
     website: z.string().max(500).optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.leadTag === INDIA_ROADSHOW_TAG && !data.eventCity) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["eventCity"],
+        message: "Event city is required",
+      })
+    }
+
     if (data.bitrixLeadId) return
 
     const hasName = Boolean(data.firstName.trim() || data.lastName.trim())
@@ -815,6 +825,7 @@ function buildAgentCrmPayload(
   siteSource: string,
 ) {
   const isEvent = leadData.formMode === "event"
+  const isRoadshow = leadData.leadTag === INDIA_ROADSHOW_TAG
   const visitorType = deriveVisitorTypeForCrm(leadData)
   const formName = getFormName(leadData.formMode, leadData.pageUrl)
   // For events, the form name already includes the page (e.g. "Event
@@ -828,6 +839,10 @@ function buildAgentCrmPayload(
 
   const payload: Record<string, unknown> = {
     // Identity
+    // Roadshow only: its AgentCRM contract takes a single `name`
+    name: isRoadshow
+      ? [leadData.firstName, leadData.lastName].filter(Boolean).join(" ") || undefined
+      : undefined,
     firstName: leadData.firstName || undefined,
     lastName: leadData.lastName || undefined,
     email: leadData.email || undefined,
@@ -839,7 +854,10 @@ function buildAgentCrmPayload(
     formName,
     leadMagnet,
     leadMagnetId: leadData.leadMagnetId,
-    leadMagnetFields: leadData.leadMagnetFields,
+    // `event_city` duplicates `eventCity` until AgentCRM ships its own mapping
+    leadMagnetFields: isRoadshow && leadData.eventCity
+      ? { ...leadData.leadMagnetFields, event_city: leadData.eventCity }
+      : leadData.leadMagnetFields,
     leadMagnetDocuments: leadData.leadMagnetDocuments,
     leadMagnetInstruction:
       leadData.leadMagnetId === "prime-project-second-opinion"
@@ -860,6 +878,9 @@ function buildAgentCrmPayload(
     sessionId: leadData.sessionId,
     submittedAt: leadData.submittedAt,
     _source: siteSource,
+
+    // Event city the registrant will attend (fixed list, e.g. "Ludhiana")
+    eventCity: leadData.eventCity,
 
     // Coalesced free-text
     message: buildMessage(leadData),
@@ -948,8 +969,9 @@ function buildAgentCrmPayload(
     // Bitrix lead id (for returning leads — CRM dedupes by email/phone too)
     bitrixLeadId: leadData.bitrixLeadId,
 
-    // Honeypot — pass through so CRM's own honeypot is the second layer
-    website: leadData.website ?? "",
+    // Honeypot — pass through so CRM's own honeypot is the second layer. The
+    // roadshow contract says never to send an empty `website`.
+    website: leadData.website || (isRoadshow ? undefined : ""),
   }
 
   for (const k of Object.keys(payload)) {
@@ -1239,6 +1261,9 @@ export async function POST(request: NextRequest) {
         const t = leadData.leadTag || (property?.isDistressed ? "distressed" : null)
         return t ? t.charAt(0).toUpperCase() + t.slice(1).replace(/-/g, " ") : null
       })(),
+
+      // Event attendance location (multi-city events)
+      eventCity: leadData.eventCity ?? null,
 
       // Coalesced free-text → message (also keep the originals)
       message: buildMessage(leadData) ?? null,

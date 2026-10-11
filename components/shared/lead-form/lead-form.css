@@ -1099,3 +1099,89 @@
     min-height: 7.25rem;
   }
 }
+
+/* =============================================================================
+   EVENT CITY STEP
+   Large choice cards for multi-city events: city, day/date, venue and hours.
+   ============================================================================= */
+
+.lead-form__city-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lead-form__city-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.125rem 1.25rem;
+  text-align: left;
+  font-family: inherit;
+  color: var(--lf-text);
+  background: transparent;
+  border: 1px solid var(--lf-border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color var(--lf-transition-fast),
+              background var(--lf-transition-fast);
+}
+
+.lead-form__city-card:hover {
+  border-color: var(--lf-border-hover);
+  background: var(--lf-option-bg-hover);
+}
+
+.lead-form__city-card--selected {
+  border-color: var(--lf-border-active);
+  background: var(--lf-option-bg-active);
+}
+
+.lead-form__city-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lead-form__city-name {
+  font-family: var(--font-headline, inherit);
+  font-size: 1.625rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--lf-text);
+}
+
+.lead-form__city-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  color: var(--lf-text);
+  border: 1px solid var(--lf-border-active);
+  border-radius: 999px;
+}
+
+.lead-form__city-check svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.lead-form__city-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--lf-text-muted);
+}
+
+.lead-form__city-detail svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+  opacity: 0.8;
+}

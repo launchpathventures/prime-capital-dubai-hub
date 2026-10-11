@@ -30,6 +30,7 @@ import {
   PropertyAppealStep,
   SecondOpinionPropertyStep,
   SecondOpinionReviewStep,
+  EventCityStep,
   SuccessStep,
 } from "./steps"
 import type { LeadFormProps } from "./types"
@@ -49,6 +50,7 @@ export function LeadForm({
   calendlyUrl,
   propertyLabel,
   propertyPlaceholder,
+  eventCities,
   contactSubmitLabel,
   finalSubmitLabel,
   showPropertyFields,
@@ -97,6 +99,7 @@ export function LeadForm({
     persistKey,
     prefillKey,
     skipPrefilledContact,
+    hasEventCityStep: Boolean(eventCities?.length),
   })
 
   const advanceStep = () => {
@@ -138,7 +141,10 @@ export function LeadForm({
   }, [currentStep])
 
   // Determine if contact step is the last step (for landing/download modes)
-  const isContactLastStep = mode === "landing" || mode === "download" || mode === "event"
+  const isContactLastStep =
+    mode === "landing" ||
+    mode === "download" ||
+    (mode === "event" && !eventCities?.length)
   // For returning leads, property-appeal is the last step before success
   const isReturningLead = mode === "property-enquiry" && !!bitrixLeadId
 
@@ -318,6 +324,20 @@ export function LeadForm({
             canGoBack={canGoBack}
           />
         )
+
+      case "event-city":
+        return eventCities ? (
+          <EventCityStep
+            data={data}
+            cities={eventCities}
+            onSubmit={submit}
+            isSubmitting={isSubmitting}
+            theme={theme}
+            submitLabel={finalSubmitLabel}
+            onBack={prevStep}
+            canGoBack={canGoBack}
+          />
+        ) : null
 
       case "success":
         return (
