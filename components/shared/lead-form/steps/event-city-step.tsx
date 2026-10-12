@@ -9,7 +9,7 @@
 "use client"
 
 import { useId, useState } from "react"
-import { CalendarDaysIcon, CheckIcon, ClockIcon, MapPinIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { EventCityOption, LeadFormData, FormTheme } from "../types"
 import { LeadFormBackButton } from "./back-button"
@@ -88,16 +88,7 @@ export function EventCityStep({
                 </span>
               </span>
               <span className="lead-form__city-detail">
-                <CalendarDaysIcon aria-hidden />
-                {city.day} {city.date} 2026
-              </span>
-              <span className="lead-form__city-detail">
-                <MapPinIcon aria-hidden />
-                {city.venue}
-              </span>
-              <span className="lead-form__city-detail">
-                <ClockIcon aria-hidden />
-                {city.hours}
+                {city.venue} · {city.day.slice(0, 3)} {city.date} · {city.hours}
               </span>
             </button>
           )
