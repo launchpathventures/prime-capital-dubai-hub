@@ -4,6 +4,8 @@
  * TypeScript types for the multi-step lead capture form.
  */
 
+import type { Country } from "react-phone-number-input"
+
 // =============================================================================
 // ENUM TYPES
 // =============================================================================
@@ -252,6 +254,12 @@ export interface LeadFormProps {
 
   /** Optional: Placeholder for the combined property/location field */
   propertyPlaceholder?: string
+
+  /** Optional: Default country for the WhatsApp field (ISO code, e.g. "IN"); defaults to AE */
+  phoneCountry?: Country
+
+  /** Optional: Placeholder for the WhatsApp field */
+  phonePlaceholder?: string
 
   /** Optional: Adds a final "which city will you attend?" step (multi-city events) */
   eventCities?: EventCityOption[]

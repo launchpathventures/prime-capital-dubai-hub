@@ -1326,7 +1326,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[Leads API] Error:", error)
     return NextResponse.json(
-      { error: "Failed to process form submission" },
+      { error: "We couldn't process your submission. Please try again in a moment." },
       { status: 500 }
     )
   }

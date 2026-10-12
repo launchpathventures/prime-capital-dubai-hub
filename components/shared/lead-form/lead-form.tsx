@@ -51,6 +51,8 @@ export function LeadForm({
   propertyLabel,
   propertyPlaceholder,
   eventCities,
+  phoneCountry,
+  phonePlaceholder,
   contactSubmitLabel,
   finalSubmitLabel,
   showPropertyFields,
@@ -177,6 +179,8 @@ export function LeadForm({
             onSubmit={submit}
             propertyLabel={propertyLabel}
             propertyPlaceholder={propertyPlaceholder}
+            phoneCountry={phoneCountry}
+            phonePlaceholder={phonePlaceholder}
             showPropertyFields={showPropertyFields}
             showConcerns={showConcerns}
             submitLabel={contactSubmitLabel ?? (calendlyUrl ? "Book Call" : undefined)}

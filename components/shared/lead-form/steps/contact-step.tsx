@@ -17,6 +17,7 @@ import type {
   FormTheme,
   FormMode,
 } from "../types"
+import type { Country } from "react-phone-number-input"
 import { contactStepSchema } from "../schema"
 import { LeadFormBackButton } from "./back-button"
 
@@ -33,6 +34,9 @@ interface ContactStepProps {
   propertyLabel?: string
   /** Optional: placeholder for the combined property/location field */
   propertyPlaceholder?: string
+  /** Optional: default country and placeholder for the WhatsApp field */
+  phoneCountry?: Country
+  phonePlaceholder?: string
   /** Optional: show separate property name and location fields */
   showPropertyFields?: boolean
   /** Optional: show a concerns/notes textarea */
@@ -57,6 +61,8 @@ export function ContactStep({
   onSubmit,
   propertyLabel,
   propertyPlaceholder,
+  phoneCountry,
+  phonePlaceholder,
   showPropertyFields,
   showConcerns,
   submitLabel,
@@ -189,7 +195,8 @@ export function ContactStep({
             id="whatsapp"
             value={whatsapp}
             onChange={(v) => setWhatsapp(v ?? "")}
-            placeholder="50 123 4567"
+            defaultCountry={phoneCountry}
+            placeholder={phonePlaceholder ?? "50 123 4567"}
             aria-required
             aria-invalid={!!errors.whatsapp}
             aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}

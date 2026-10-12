@@ -189,6 +189,8 @@ export default function IndiaRoadshowPage() {
                   tag={INDIA_ROADSHOW_TAG}
                   downloadAsset="India Roadshow 2026"
                   eventCities={EVENT_CITIES}
+                  phoneCountry="IN"
+                  phonePlaceholder="98765 43210"
                   finalSubmitLabel="Register"
                   successMessage="You're registered. We'll confirm your place by WhatsApp and email."
                 />

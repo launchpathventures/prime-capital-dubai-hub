@@ -105,6 +105,9 @@ const RETURNING_LEAD_SKIP_STEPS: StepId[] = [
   "questions",
 ]
 
+const SUBMIT_FAILED_MESSAGE =
+  "We couldn't send your details. Please try again in a moment."
+
 // =============================================================================
 // HOOK
 // =============================================================================
@@ -403,7 +406,7 @@ export function useLeadForm({
 
       if (!response.ok) {
         const result = await response.json()
-        throw new Error(result.error || "Failed to submit form")
+        throw new Error(result.error || SUBMIT_FAILED_MESSAGE)
       }
 
       writeLeadFormPrefill(persistKey, finalData)
@@ -412,7 +415,15 @@ export function useLeadForm({
       nextStep()
       onSuccess?.(finalData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong")
+      // A TypeError here means the request never reached the server (offline,
+      // blocked, DNS) — say what to do instead of the browser's "Failed to fetch".
+      setError(
+        err instanceof TypeError
+          ? "We couldn't reach the server. Check your connection and try again."
+          : err instanceof Error
+            ? err.message
+            : SUBMIT_FAILED_MESSAGE,
+      )
     } finally {
       setIsSubmitting(false)
     }

@@ -88,7 +88,12 @@ export function EventCityStep({
                 </span>
               </span>
               <span className="lead-form__city-detail">
-                {city.venue} · {city.day.slice(0, 3)} {city.date} · {city.hours}
+                {/* nowrap segments so a narrow phone wraps between facts, not mid-time */}
+                <span className="whitespace-nowrap">{city.venue}</span> ·{" "}
+                <span className="whitespace-nowrap">
+                  {city.day.slice(0, 3)} {city.date}
+                </span>{" "}
+                · <span className="whitespace-nowrap">{city.hours}</span>
               </span>
             </button>
           )
