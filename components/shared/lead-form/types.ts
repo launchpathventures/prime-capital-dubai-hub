@@ -219,7 +219,7 @@ export interface LeadFormProps {
   /** Optional: Override the download asset name */
   downloadAsset?: string
 
-  /** Optional: Custom success message */
+  /** Optional: Custom success message (`{city}` is replaced with the chosen event city) */
   successMessage?: string
 
   /** Optional: Callback after successful submission */
