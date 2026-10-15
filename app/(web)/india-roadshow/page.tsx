@@ -68,7 +68,7 @@ const roadshowSteps = [
   {
     number: "02",
     title: "Get your details",
-    body: "We confirm your place and send a reminder with the venue and timing for your city.",
+    body: "We email you the venue and timing for your city, then send a reminder the day before.",
   },
   {
     number: "03",
@@ -80,7 +80,7 @@ const roadshowSteps = [
 export const metadata: Metadata = {
   title: "Dubai Property Roadshow in India — 30 Oct to 1 Nov 2026",
   description:
-    "Meet the Prime Capital Dubai team in three Indian cities on 30 and 31 October and 1 November 2026. Register your place for a free, no-obligation Dubai property investment session.",
+    "Meet the Prime Capital Dubai team in three Indian cities on 30 and 31 October and 1 November 2026. Register for a free, no-obligation Dubai property investment session.",
   alternates: {
     canonical: "/india-roadshow",
   },
@@ -176,8 +176,8 @@ export default function IndiaRoadshowPage() {
                   Join us in India
                 </Title>
                 <Text className="london-booking-card__intro">
-                  Tell us who you are and which city you will attend. We will
-                  confirm your place on WhatsApp.
+                  Tell us who you are and which city you will attend. You&apos;ll
+                  receive the details by email.
                 </Text>
               </div>
               <div className="london-booking-card__rule" />
@@ -192,7 +192,7 @@ export default function IndiaRoadshowPage() {
                   phoneCountry="IN"
                   phonePlaceholder="98765 43210"
                   finalSubmitLabel="Register"
-                  successMessage="You're registered. We'll confirm your place by WhatsApp and email."
+                  successMessage="You're registered for the India 2026 Roadshow in {city}. We've emailed you the details, and a member of our team will be in touch before the event."
                 />
               </div>
               <Text className="london-booking-card__note">
@@ -310,7 +310,7 @@ export default function IndiaRoadshowPage() {
                 {INDIA_ROADSHOW_DATES} · India
               </Text>
               <Title as="h2" className="london-final-cta__title">
-                Reserve your place at the roadshow.
+                Register for the roadshow.
               </Title>
               <Text className="london-final-cta__body">
                 Free to attend. Choose your city and register today.

@@ -137,7 +137,10 @@ export function SuccessStep({
     }
   }
 
-  const message = customMessage || getDefaultMessage()
+  // {city} lets multi-city events name the attendee's chosen city
+  const message = customMessage
+    ? customMessage.replace("{city}", data.eventCity || "your city")
+    : getDefaultMessage()
 
   const handleManualRedirect = () => {
     if (redirectUrl) window.location.href = redirectUrl
