@@ -36,6 +36,9 @@ export const SMOKE_PATHS = [
 const OFF_VALUES = new Set(["0", "false", "off", "no", "disabled"])
 const USER_AGENT = "PrimeCapitalSmoke/1.0 (+https://www.primecapitaldubai.com)"
 
+/** One quiet period so a brief Supabase 503 does not move production. */
+export const PROBE_RETRY_WAIT_MS = 45_000
+
 export function rollbackEnabled(value) {
   if (value == null) return true
   const normalized = String(value).trim().toLowerCase()
@@ -161,6 +164,36 @@ export function decideRollback({
   }
 }
 
+/**
+ * The first failed probe of the new SHA is not a rollback. Wait and run the
+ * failing checks once more. Rollback is allowed only when that second attempt
+ * still has failures.
+ *
+ * @param {{ attempt: number, failedCount: number }} input
+ */
+export function retryBeforeRollback({ attempt, failedCount }) {
+  if (failedCount === 0) {
+    return { retry: false, waitMs: 0, rollbackAllowed: false }
+  }
+  if (attempt < 2) {
+    return { retry: true, waitMs: PROBE_RETRY_WAIT_MS, rollbackAllowed: false }
+  }
+  return { retry: false, waitMs: 0, rollbackAllowed: true }
+}
+
+/**
+ * @param {number} attempt
+ * @param {Array<{ ok: boolean, inconclusive?: boolean, url: string, status: number, detail: string }>} probes
+ */
+export function formatProbeAttempt(attempt, probes) {
+  const lines = [`### Attempt ${attempt}`]
+  for (const probe of probes) {
+    const label = probe.inconclusive ? "INCONCLUSIVE" : probe.ok ? "PASS" : "FAIL"
+    lines.push(`- ${label} ${probe.url} → HTTP ${probe.status} ${probe.detail}`)
+  }
+  return lines.join("\n")
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -189,7 +222,7 @@ async function probeOnce(url, kind) {
   })
   const body = await response.text()
   if (isChallenge(response, body)) {
-    return { ok: false, inconclusive: true, url, status: response.status, detail: "bot challenge" }
+    return { ok: false, inconclusive: true, url, kind, status: response.status, detail: "bot challenge" }
   }
   if (kind === "health") {
     let parsed = null
@@ -203,6 +236,7 @@ async function probeOnce(url, kind) {
       ok,
       inconclusive: false,
       url,
+      kind,
       status: response.status,
       detail: parsed?.status || body.slice(0, 160),
     }
@@ -214,46 +248,31 @@ async function probeOnce(url, kind) {
     ok,
     inconclusive: false,
     url,
+    kind,
     status: response.status,
     detail: html ? `${body.length} bytes` : contentType || "no content-type",
   }
 }
 
-async function probeAll(origins) {
-  const jobs = origins.flatMap((origin) =>
+function smokeJobs(origins) {
+  return origins.flatMap((origin) =>
     SMOKE_PATHS.map((spec) => ({ url: new URL(spec.path, origin).href, kind: spec.kind })),
   )
-  const first = await Promise.all(
+}
+
+async function probeJobs(jobs) {
+  return Promise.all(
     jobs.map((job) =>
       probeOnce(job.url, job.kind).catch((error) => ({
         ok: false,
         inconclusive: false,
         url: job.url,
+        kind: job.kind,
         status: 0,
         detail: error instanceof Error ? error.message : String(error),
       })),
     ),
   )
-  const failed = first.flatMap((result, index) => (result.ok ? [] : [{ result, job: jobs[index] }]))
-  if (failed.length === 0) return first
-  await sleep(2000)
-  const retried = await Promise.all(
-    failed.map(({ job }) =>
-      probeOnce(job.url, job.kind).catch((error) => ({
-        ok: false,
-        inconclusive: false,
-        url: job.url,
-        status: 0,
-        detail: error instanceof Error ? error.message : String(error),
-      })),
-    ),
-  )
-  const byUrl = new Map(first.map((result) => [result.url, result]))
-  retried.forEach((result, index) => {
-    const previous = failed[index].result
-    byUrl.set(result.url, result.ok ? result : { ...result, detail: `${result.detail} (first attempt HTTP ${previous.status})` })
-  })
-  return jobs.map((job) => byUrl.get(job.url))
 }
 
 async function waitForSha({ origin, expectedSha, attempts, intervalMs }) {
@@ -359,21 +378,47 @@ async function main() {
 
   let probeResults = []
   if (version.live) {
-    probeResults = await probeAll(origins)
-    for (const probe of probeResults) {
-      const label = probe.inconclusive ? "INCONCLUSIVE" : probe.ok ? "PASS" : "FAIL"
-      lines.push(`- ${label} ${probe.url} → HTTP ${probe.status} ${probe.detail}`)
+    const jobs = smokeJobs(origins)
+    const attempt1 = await probeJobs(jobs)
+    lines.push("", formatProbeAttempt(1, attempt1))
+    const firstFailures = attempt1.filter((probe) => !probe.ok)
+    const retry = retryBeforeRollback({ attempt: 1, failedCount: firstFailures.length })
+    if (retry.retry) {
+      lines.push(
+        `- Waiting ${retry.waitMs / 1000}s, then re-probing ${firstFailures.length} failing check(s)`,
+      )
+      await sleep(retry.waitMs)
+      const attempt2 = await probeJobs(firstFailures.map((probe) => ({ url: probe.url, kind: probe.kind })))
+      lines.push("", formatProbeAttempt(2, attempt2))
+      const byUrl = new Map(attempt1.map((probe) => [probe.url, probe]))
+      for (const probe of attempt2) byUrl.set(probe.url, probe)
+      probeResults = jobs.map((job) => byUrl.get(job.url))
+    } else {
+      probeResults = attempt1
+      lines.push("", "### Attempt 2", "- not run; attempt 1 passed")
     }
   }
 
-  const probesOk = version.live && probeResults.length > 0 && probeResults.every((probe) => probe.ok)
+  const secondGate = retryBeforeRollback({
+    attempt: probeResults.some((probe) => !probe.ok) ? 2 : 1,
+    failedCount: probeResults.filter((probe) => !probe.ok).length,
+  })
+  const probesOk =
+    version.live && probeResults.length > 0 && probeResults.every((probe) => probe.ok) && !secondGate.rollbackAllowed
   const inconclusive = probeResults.some((probe) => probe.inconclusive)
   let rollbackTargetId = null
   let targetSha = null
   let currentIsRollback = deploymentIsRollback({ description: process.env.DEPLOYMENT_DESCRIPTION || "" })
   let lookupNote = ""
 
-  const needsLookup = version.live && !probesOk && !inconclusive && rollbackEnabled(autoRollback) && !currentIsRollback && token
+  const needsLookup =
+    version.live &&
+    secondGate.rollbackAllowed &&
+    !probesOk &&
+    !inconclusive &&
+    rollbackEnabled(autoRollback) &&
+    !currentIsRollback &&
+    token
   if (needsLookup) {
     try {
       const deployments = await listProductionDeployments({ token, teamId, projectId })
@@ -416,11 +461,9 @@ async function main() {
           `- Alias after rollback: ${restored.live ? "serving previous SHA" : "previous SHA not observed"} (${restored.sha || "none"})`,
         )
         if (restored.live) {
-          const reprobes = await probeAll(origins)
+          const reprobes = await probeJobs(smokeJobs(origins))
           restoredOk = reprobes.every((probe) => probe.ok)
-          for (const probe of reprobes) {
-            lines.push(`- recheck ${probe.ok ? "PASS" : "FAIL"} ${probe.url} → HTTP ${probe.status} ${probe.detail}`)
-          }
+          lines.push("", formatProbeAttempt(1, reprobes).replace("### Attempt 1", "### Recheck after rollback"))
         }
       }
     } catch (error) {

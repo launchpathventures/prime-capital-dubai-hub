@@ -16,7 +16,7 @@ This runbook covers how to rollback a failed deployment to a previous known-good
 
 A successful Vercel **Production** deployment runs `.github/workflows/post-deploy-smoke.yml`. The job waits until `https://primecapitaldubai.com/api/version` (which redirects to `www`) serves the new commit SHA, then probes `/api/health` and the public checklist routes on both the apex and `www` host. `/api/health` must be HTTP 200 with `"status": "healthy"` — the route returns 503 when Supabase is down.
 
-If those probes fail, the job calls the Vercel instant-rollback API and points production at the previous **READY** production deployment:
+If any check fails, the job waits 45 seconds and probes only those failing checks once more. Both attempts are written to the job summary. A single failure, including a brief Supabase 503, does not move production. The job calls the Vercel instant-rollback API only when the second attempt still fails, and points production at the previous **READY** production deployment:
 
 `POST /v1/projects/{projectId}/rollback/{deploymentId}`
 

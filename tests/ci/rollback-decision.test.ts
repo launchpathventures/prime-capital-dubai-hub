@@ -11,6 +11,8 @@ import {
   decideRollback,
   deploymentIsRollback,
   findDeploymentBySha,
+  formatProbeAttempt,
+  retryBeforeRollback,
   rollbackEnabled,
   selectRollbackTarget,
   shaMatches,
@@ -168,5 +170,51 @@ describe("decideRollback", () => {
     expect(decision.rollback).toBe(false)
     expect(decision.fail).toBe(true)
     expect(decision.reason).toMatch(/inconclusive/i)
+  })
+})
+
+describe("retryBeforeRollback", () => {
+  it("waits 45s and re-probes failing checks once, rolling back only if they fail again", () => {
+    const health = {
+      url: "https://www.primecapitaldubai.com/api/health",
+      status: 503,
+      detail: "unhealthy",
+      ok: false,
+      inconclusive: false,
+    }
+    const home = {
+      url: "https://www.primecapitaldubai.com/",
+      status: 200,
+      detail: "1200 bytes",
+      ok: true,
+      inconclusive: false,
+    }
+
+    expect(retryBeforeRollback({ attempt: 1, failedCount: 1 })).toEqual({
+      retry: true,
+      waitMs: 45_000,
+      rollbackAllowed: false,
+    })
+    expect(retryBeforeRollback({ attempt: 1, failedCount: 0 })).toEqual({
+      retry: false,
+      waitMs: 0,
+      rollbackAllowed: false,
+    })
+    expect(retryBeforeRollback({ attempt: 2, failedCount: 0 }).rollbackAllowed).toBe(false)
+    expect(retryBeforeRollback({ attempt: 2, failedCount: 1 })).toEqual({
+      retry: false,
+      waitMs: 0,
+      rollbackAllowed: true,
+    })
+
+    const summary = [
+      formatProbeAttempt(1, [health, home]),
+      formatProbeAttempt(2, [{ ...health, status: 200, detail: "healthy", ok: true }]),
+    ].join("\n")
+    expect(summary).toContain("### Attempt 1")
+    expect(summary).toContain("FAIL https://www.primecapitaldubai.com/api/health → HTTP 503 unhealthy")
+    expect(summary).toContain("PASS https://www.primecapitaldubai.com/ → HTTP 200 1200 bytes")
+    expect(summary).toContain("### Attempt 2")
+    expect(summary).toContain("PASS https://www.primecapitaldubai.com/api/health → HTTP 200 healthy")
   })
 })

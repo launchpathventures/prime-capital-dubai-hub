@@ -7,7 +7,8 @@
 # from the default branch, so pull requests do not spend minutes here.
 #
 # A passing run is usually about 1 minute (checkout + version poll + probes).
-# A rollback waits for the previous SHA and re-probes, up to about 4 minutes.
+# A failed probe waits 45s and retries the failing checks once before rollback.
+# A rollback then waits for the previous SHA and re-probes, up to about 5 minutes.
 # Job timeout is 8 minutes. There is no pnpm install.
 #
 # Rollback is on unless the repository variable AUTO_ROLLBACK is false, 0, off,

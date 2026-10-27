@@ -178,10 +178,10 @@ Non-draft pull requests run `.github/workflows/ci.yml`: lint, typecheck, `tests/
 
 After a successful Vercel production deployment, `.github/workflows/post-deploy-smoke.yml` probes:
 
-- `https://primecapitaldubai.com/api/health` (follows the redirect to `www`; 503 fails)
+- `https://primecapitaldubai.com/api/health` (follows the redirect to `www`; a 503 fails that attempt)
 - `/`, `/contact`, `/properties`, `/team`, and `/auth/login` on both `primecapitaldubai.com` and `www.primecapitaldubai.com`
 
-It confirms `/api/version` is serving the new commit before those probes count. A failure instant-rolls back to the previous READY production deployment unless `AUTO_ROLLBACK` is off. See [Deployment Rollback](./deployment-rollback.md).
+It confirms `/api/version` is serving the new commit before those probes count. A failed check is waited out for 45 seconds and probed once more; rollback happens only if it fails again, unless `AUTO_ROLLBACK` is off. Both attempts are in the job summary. See [Deployment Rollback](./deployment-rollback.md).
 
 These checks are read-only. Form submission, a real login, the learn dashboard, and admin pages stay on this manual checklist.
 
