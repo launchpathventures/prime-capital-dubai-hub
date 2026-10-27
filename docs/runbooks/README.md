@@ -6,7 +6,8 @@ This directory contains runbooks for common operational tasks and incident respo
 
 | Runbook | Description |
 |---------|-------------|
-| [Deployment Rollback](./deployment-rollback.md) | Steps to rollback a failed deployment |
+| [Deployment Rollback](./deployment-rollback.md) | Automatic and manual production rollback |
+| [Migration expand/contract](./migration-expand-contract.md) | Marker and rollback SQL for destructive migrations |
 | [API Key Rotation](./api-key-rotation.md) | How to rotate API keys and secrets |
 | [Auth Incident Response](./auth-incident-response.md) | Responding to authentication incidents |
 | [Backup & Retention Policy](./backup-retention-policy.md) | Data backup strategy and retention |

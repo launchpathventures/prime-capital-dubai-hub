@@ -1,0 +1,61 @@
+# Pull request checks. Drafts are skipped so a draft does not spend Actions minutes.
+# One job, cancel-in-progress, pnpm store cache. No production build.
+#
+# Local timing on a warm tree: lint ~18s, tsc ~15s, vitest tests/api+tests/ci ~5s,
+# migration guard under 1s. GitHub-hosted minutes are mostly checkout and pnpm
+# install. Expect about 3–5 minutes with a warm pnpm cache and about 5–8 minutes
+# cold. The guard runs before install so a bad migration fails without one.
+
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint, typecheck, unit tests
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch pull request base
+        run: git fetch --no-tags --depth=1 origin ${{ github.event.pull_request.base.sha }}
+
+      - name: Migration expand/contract guard
+        run: node scripts/check-migrations.mjs ${{ github.event.pull_request.base.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm exec vitest run tests/api tests/ci

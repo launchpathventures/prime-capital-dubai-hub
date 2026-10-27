@@ -174,14 +174,23 @@ See [Deployment Rollback](./deployment-rollback.md) for rollback procedures.
 
 ## Automated Testing
 
-In addition to manual smoke tests, ensure CI/CD runs:
+Non-draft pull requests run `.github/workflows/ci.yml`: lint, typecheck, `tests/api` plus the rollback-decision tests in `tests/ci`, and the [migration expand/contract guard](./migration-expand-contract.md). Drafts are skipped.
+
+After a successful Vercel production deployment, `.github/workflows/post-deploy-smoke.yml` probes:
+
+- `https://primecapitaldubai.com/api/health` (follows the redirect to `www`; 503 fails)
+- `/`, `/contact`, `/properties`, `/team`, and `/auth/login` on both `primecapitaldubai.com` and `www.primecapitaldubai.com`
+
+It confirms `/api/version` is serving the new commit before those probes count. A failure instant-rolls back to the previous READY production deployment unless `AUTO_ROLLBACK` is off. See [Deployment Rollback](./deployment-rollback.md).
+
+These checks are read-only. Form submission, a real login, the learn dashboard, and admin pages stay on this manual checklist.
 
 ```bash
-# Run before deployment
-pnpm test:run
-pnpm tsc --noEmit
+# What CI runs before deployment (no production build)
 pnpm lint
-pnpm build
+pnpm typecheck
+pnpm exec vitest run tests/api tests/ci
+node scripts/check-migrations.mjs <base-sha>
 ```
 
 ---

@@ -12,6 +12,38 @@ This runbook covers how to rollback a failed deployment to a previous known-good
 
 ## Rollback Procedures
 
+### Option 0: Automatic instant rollback (default)
+
+A successful Vercel **Production** deployment runs `.github/workflows/post-deploy-smoke.yml`. The job waits until `https://primecapitaldubai.com/api/version` (which redirects to `www`) serves the new commit SHA, then probes `/api/health` and the public checklist routes on both the apex and `www` host. `/api/health` must be HTTP 200 with `"status": "healthy"` — the route returns 503 when Supabase is down.
+
+If those probes fail, the job calls the Vercel instant-rollback API and points production at the previous **READY** production deployment:
+
+`POST /v1/projects/{projectId}/rollback/{deploymentId}`
+
+It then waits for `/api/version` to show the previous SHA, probes again, writes the result to the GitHub Actions job summary, and **fails the job** even when the restore worked.
+
+The job does not roll back when:
+
+- the new SHA never appears on the alias (the previous deployment is still serving; rolling back could move the alias anyway)
+- the response looks like a bot challenge rather than the app
+- the deployment is already a rollback
+- there is no previous READY production deployment
+- `VERCEL_TOKEN` is missing
+- the repository variable `AUTO_ROLLBACK` is `false`, `0`, `off`, `no`, or `disabled`
+
+`AUTO_ROLLBACK` unset means rollback is **on**. Create the variable only to turn it off. Do not put the token in a variable.
+
+| Name | Kind | Required | Purpose |
+|------|------|----------|---------|
+| `VERCEL_TOKEN` | Actions secret | Yes, for rollback | Vercel API token that can roll back `prime-capital-dubai-hub` |
+| `AUTO_ROLLBACK` | Repository variable | No | Kill switch. Unset = on |
+| `VERCEL_TEAM_ID` | Repository variable | No | Overrides `team_HshsUsC6U4lidrM07nzJLx1n` |
+| `VERCEL_PROJECT_ID` | Repository variable | No | Overrides `prj_3XrkSo2JCGR2WTC5wcFUAgMBUB9x` |
+
+Instant rollback does not undo SQL. See [Migration expand/contract guard](./migration-expand-contract.md). On a Hobby plan, Vercel only allows rolling back to the immediately previous production deployment; the script asks for the previous READY deployment and surfaces the API error if Vercel rejects it.
+
+Manual options below stay available when the workflow cannot reach the API.
+
 ### Option 1: Vercel Dashboard Rollback (Fastest)
 
 1. **Navigate to Vercel Dashboard**

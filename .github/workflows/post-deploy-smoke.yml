@@ -1,0 +1,55 @@
+# After a successful Vercel production deployment, probe the live alias and
+# instant-rollback to the previous READY deployment if smoke fails.
+#
+# Trigger is deployment_status, not push. On this repo Vercel sets
+# deployment.environment to "Production" and deployment.ref to the commit SHA
+# (not "master"). Preview deployments are ignored. The workflow file only runs
+# from the default branch, so pull requests do not spend minutes here.
+#
+# A passing run is usually about 1 minute (checkout + version poll + probes).
+# A rollback waits for the previous SHA and re-probes, up to about 4 minutes.
+# Job timeout is 8 minutes. There is no pnpm install.
+#
+# Rollback is on unless the repository variable AUTO_ROLLBACK is false, 0, off,
+# no, or disabled. Required secret for the rollback call: VERCEL_TOKEN.
+# Optional overrides: repository variables VERCEL_TEAM_ID, VERCEL_PROJECT_ID.
+
+name: Post-deploy smoke
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: probe production and roll back on failure
+    # Job-level so preview deployment_status runs (skipped by `if`) do not
+    # queue behind this group. cancel-in-progress is off so a rollback is not
+    # aborted by a second production event.
+    concurrency:
+      group: post-deploy-smoke-production
+      cancel-in-progress: false
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Smoke and maybe instant rollback
+        env:
+          EXPECTED_SHA: ${{ github.event.deployment.sha }}
+          DEPLOYMENT_DESCRIPTION: ${{ github.event.deployment_status.description }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          AUTO_ROLLBACK: ${{ vars.AUTO_ROLLBACK }}
+          SMOKE_ORIGINS: https://primecapitaldubai.com,https://www.primecapitaldubai.com
+        run: node scripts/post-deploy-smoke.mjs

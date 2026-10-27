@@ -153,7 +153,7 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
@@ -201,7 +201,7 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
@@ -236,7 +236,7 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
@@ -298,13 +298,13 @@ describe("Admin User Invite API", () => {
     })
 
     it("should create user profile after successful user creation", async () => {
-      const mockInsert = vi.fn().mockResolvedValue({ error: null })
+      const mockUpsert = vi.fn().mockResolvedValue({ error: null })
       mockAdminClient.auth.admin.createUser.mockResolvedValue({
         data: { user: { id: "new-user-789" } },
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: mockInsert,
+        upsert: mockUpsert,
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
@@ -322,7 +322,7 @@ describe("Admin User Invite API", () => {
       await POST(request)
 
       expect(mockAdminClient.from).toHaveBeenCalledWith("user_profiles")
-      expect(mockInsert).toHaveBeenCalledWith({
+      expect(mockUpsert).toHaveBeenCalledWith({
         id: "new-user-789",
         full_name: "Profile User",
         role: "admin",
@@ -331,7 +331,7 @@ describe("Admin User Invite API", () => {
     })
 
     it("should still return success even if profile creation fails", async () => {
-      const mockInsert = vi.fn().mockResolvedValue({
+      const mockUpsert = vi.fn().mockResolvedValue({
         error: { message: "Profile creation failed" }
       })
       mockAdminClient.auth.admin.createUser.mockResolvedValue({
@@ -339,7 +339,7 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: mockInsert,
+        upsert: mockUpsert,
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
@@ -376,12 +376,17 @@ describe("Admin User Invite API", () => {
       })
     })
 
-    it("should return 500 when default password is not configured", async () => {
-      // Remove default password
+    it("should create the user without a password when AUTH_DEFAULT_PASSWORD is unset", async () => {
+      // Password is optional: Google SSO or the magic link is the login path.
       delete process.env.AUTH_DEFAULT_PASSWORD
-
-      // Need to re-import to pick up changed env
       vi.resetModules()
+      mockAdminClient.auth.admin.createUser.mockResolvedValue({
+        data: { user: { id: "new-user-no-password" } },
+        error: null,
+      })
+      mockAdminClient.from.mockReturnValue({
+        upsert: vi.fn().mockResolvedValue({ error: null }),
+      })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
@@ -395,10 +400,10 @@ describe("Admin User Invite API", () => {
       })
 
       const response = await POST(request)
-      expect(response.status).toBe(500)
-
-      const data = await response.json()
-      expect(data.error).toContain("configuration error")
+      expect(response.status).toBe(200)
+      expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(
+        expect.not.objectContaining({ password: expect.anything() }),
+      )
     })
   })
 })
