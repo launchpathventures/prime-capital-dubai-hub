@@ -87,6 +87,45 @@ describe("selectRollbackTarget", () => {
     expect(target?.id).toBe("dpl_prev")
   })
 
+  it("skips deployments Vercel says are not rollback candidates", () => {
+    const target = selectRollbackTarget(
+      [current, { ...previous, isRollbackCandidate: false }, { ...older, isRollbackCandidate: true }],
+      "dpl_new",
+    )
+    expect(target?.id).toBe("dpl_older")
+  })
+
+  it("skips a production build that never served the domains", () => {
+    const target = selectRollbackTarget(
+      [current, { ...previous, aliasAssigned: null }, { ...older, aliasAssigned: 150 }],
+      "dpl_new",
+    )
+    expect(target?.id).toBe("dpl_older")
+  })
+
+  it("skips deployments that are themselves rollbacks", () => {
+    const target = selectRollbackTarget(
+      [current, { ...previous, meta: { ...previous.meta, action: "rollback" } }, older],
+      "dpl_new",
+    )
+    expect(target?.id).toBe("dpl_older")
+  })
+
+  it("picks the deployment that was serving before this one, not the next one by creation time", () => {
+    // dpl_bad (created 250) was rolled away from; dpl_prev (created 200) was
+    // restored afterwards, so it served most recently before dpl_new.
+    const bad = { ...previous, uid: "dpl_bad", created: 250, aliasAssigned: 260 }
+    const restored = { ...previous, created: 200, aliasAssigned: 280 }
+    const newest = { ...current, aliasAssigned: 310 }
+    expect(selectRollbackTarget([newest, bad, restored, older], "dpl_new")?.id).toBe("dpl_prev")
+  })
+
+  it("ignores deployments that started serving after the current one", () => {
+    const newest = { ...current, aliasAssigned: 310 }
+    const later = { ...previous, uid: "dpl_later", aliasAssigned: 400 }
+    expect(selectRollbackTarget([later, newest, older], "dpl_new")?.id).toBe("dpl_older")
+  })
+
   it("returns null when the failed deployment is missing or is the oldest READY deploy", () => {
     expect(selectRollbackTarget([current, previous], "dpl_missing")).toBeNull()
     expect(selectRollbackTarget([previous], "dpl_prev")).toBeNull()

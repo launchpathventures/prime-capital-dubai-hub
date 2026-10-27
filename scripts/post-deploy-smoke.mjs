@@ -7,7 +7,7 @@
  *
  * Approach follows launchpathventures/agentcrm scripts/shared-post-deploy-smoke.mjs:
  * confirm the SHA is on the production alias, probe public routes, and on
- * failure call Vercel's instant rollback to the previous READY deployment.
+ * failure call Vercel's instant rollback to the deployment that was serving production before.
  */
 
 import { appendFileSync, realpathSync } from "node:fs"
@@ -66,7 +66,17 @@ export function normalizeDeployment(raw) {
     sha: meta.githubCommitSha || meta.gitCommitSha || null,
     meta,
     description: raw?.description || "",
+    // Vercel reports false/absent when a deployment cannot be rolled back to.
+    rollbackCandidate: raw?.isRollbackCandidate,
+    // Time the production domains were last pointed at this deployment.
+    servedAt: typeof raw?.aliasAssigned === "number" ? raw.aliasAssigned : null,
+    neverServed: raw?.aliasAssigned === false || raw?.aliasAssigned === null,
   }
+}
+
+/** When the deployment started serving production, falling back to creation time. */
+function servingSince(deployment) {
+  return deployment.servedAt ?? deployment.created
 }
 
 function isProductionReady(deployment) {
@@ -74,14 +84,27 @@ function isProductionReady(deployment) {
   return deployment.target == null || deployment.target === "production"
 }
 
+/**
+ * The rollback target is the deployment that was serving production before the
+ * current one: READY production, eligible per Vercel, served the domains, not
+ * itself a rollback, and serving before the current deployment did. Among those
+ * the one that served most recently wins, so a deployment that was already
+ * rolled away from is passed over in favour of the one restored in its place.
+ */
 export function selectRollbackTarget(deployments, currentId) {
-  const ready = deployments
-    .map(normalizeDeployment)
+  const all = deployments.map(normalizeDeployment)
+  const current = all.find((deployment) => deployment.id === currentId)
+  if (!current) return null
+  const currentSince = servingSince(current)
+  const candidates = all
     .filter(isProductionReady)
-    .sort((left, right) => right.created - left.created)
-  const index = ready.findIndex((deployment) => deployment.id === currentId)
-  if (index < 0) return null
-  return ready[index + 1] || null
+    .filter((deployment) => deployment.id !== currentId)
+    .filter((deployment) => deployment.rollbackCandidate !== false)
+    .filter((deployment) => !deployment.neverServed)
+    .filter((deployment) => !deploymentIsRollback(deployment))
+    .filter((deployment) => servingSince(deployment) < currentSince)
+    .sort((left, right) => servingSince(right) - servingSince(left) || right.created - left.created)
+  return candidates[0] || null
 }
 
 export function findDeploymentBySha(deployments, sha) {

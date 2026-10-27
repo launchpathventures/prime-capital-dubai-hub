@@ -16,7 +16,7 @@ This runbook covers how to rollback a failed deployment to a previous known-good
 
 A successful Vercel **Production** deployment runs `.github/workflows/post-deploy-smoke.yml`. The job waits until `https://primecapitaldubai.com/api/version` (which redirects to `www`) serves the new commit SHA, then probes `/api/health` and the public checklist routes on both the apex and `www` host. `/api/health` must be HTTP 200 with `"status": "healthy"` — the route returns 503 when Supabase is down.
 
-If any check fails, the job waits 45 seconds and probes only those failing checks once more. Both attempts are written to the job summary. A single failure, including a brief Supabase 503, does not move production. The job calls the Vercel instant-rollback API only when the second attempt still fails, and points production at the previous **READY** production deployment:
+If any check fails, the job waits 45 seconds and probes only those failing checks once more. Both attempts are written to the job summary. A single failure, including a brief Supabase 503, does not move production. The job calls the Vercel instant-rollback API only when the second attempt still fails, and points production at the deployment that was serving production before this one (a **READY** production deployment that Vercel lists as a rollback candidate, has served the production domains, and is not itself a rollback):
 
 `POST /v1/projects/{projectId}/rollback/{deploymentId}`
 
@@ -27,7 +27,7 @@ The job does not roll back when:
 - the new SHA never appears on the alias (the previous deployment is still serving; rolling back could move the alias anyway)
 - the response looks like a bot challenge rather than the app
 - the deployment is already a rollback
-- there is no previous READY production deployment
+- there is no eligible previous production deployment
 - `VERCEL_TOKEN` is missing
 - the repository variable `AUTO_ROLLBACK` is `false`, `0`, `off`, `no`, or `disabled`
 
@@ -40,7 +40,16 @@ The job does not roll back when:
 | `VERCEL_TEAM_ID` | Repository variable | No | Overrides `team_HshsUsC6U4lidrM07nzJLx1n` |
 | `VERCEL_PROJECT_ID` | Repository variable | No | Overrides `prj_3XrkSo2JCGR2WTC5wcFUAgMBUB9x` |
 
-Instant rollback does not undo SQL. See [Migration expand/contract guard](./migration-expand-contract.md). On a Hobby plan, Vercel only allows rolling back to the immediately previous production deployment; the script asks for the previous READY deployment and surfaces the API error if Vercel rejects it.
+#### Undo the instant rollback / re-enable auto-assignment
+
+After an instant rollback, Vercel stops assigning the production domains to new deployments from `master`. Later pushes still build, but they do not go live, and the post-deploy job fails with "new deploy is not live". Production stays on the rolled-back deployment until someone restores auto-assignment:
+
+1. Fix the problem and push to `master` (or decide the rolled-back deployment is the one to keep).
+2. In the Vercel dashboard, open the project **Deployments** tab and use **Undo Rollback**, or promote the deployment you want live (**Promote to Production**). Either restores auto-assignment of the production domains.
+3. From the CLI, `vercel promote <deployment-url-or-id>` does the same.
+4. Confirm `https://primecapitaldubai.com/api/version` shows the SHA you expect, and that the next push to `master` goes live on its own.
+
+Instant rollback does not undo SQL. See [Migration expand/contract guard](./migration-expand-contract.md). On a Hobby plan, Vercel only allows rolling back to the immediately previous production deployment; the script asks for the deployment that was serving before and surfaces the API error if Vercel rejects it.
 
 Manual options below stay available when the workflow cannot reach the API.
 

@@ -1,5 +1,5 @@
 # After a successful Vercel production deployment, probe the live alias and
-# instant-rollback to the previous READY deployment if smoke fails.
+# instant-rollback to the deployment that was serving before if smoke fails.
 #
 # Trigger is deployment_status, not push. On this repo Vercel sets
 # deployment.environment to "Production" and deployment.ref to the commit SHA
@@ -9,7 +9,9 @@
 # A passing run is usually about 1 minute (checkout + version poll + probes).
 # A failed probe waits 45s and retries the failing checks once before rollback.
 # A rollback then waits for the previous SHA and re-probes, up to about 5 minutes.
-# Job timeout is 8 minutes. There is no pnpm install.
+# Worst case is about 13 minutes: setup 2, version wait 4, probes and retry 2,
+# Vercel calls 1, post-rollback version wait 4. Job timeout is 20 minutes so a
+# rollback can finish and write its summary. There is no pnpm install.
 #
 # Rollback is on unless the repository variable AUTO_ROLLBACK is false, 0, off,
 # no, or disabled. Required secret for the rollback call: VERCEL_TOKEN.
@@ -34,7 +36,7 @@ jobs:
       cancel-in-progress: false
     if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -2,7 +2,7 @@
  * CATALYST - Expand/contract migration guard tests
  *
  * Historical migrations are not re-litigated. A changed file that drops data
- * must say so and carry rollback SQL. Routine trigger/policy replacements must
+ * must say so and carry rollback SQL under supabase/rollback/. Routine trigger/policy replacements must
  * stay silent so the existing 34 migrations can still be edited safely when
  * they only recreate functions.
  */
@@ -11,6 +11,8 @@ import { describe, expect, it } from "vitest"
 import {
   evaluateMigration,
   parseChangedPaths,
+  parseMisplacedRollbacks,
+  rollbackPathFor,
 } from "../../scripts/check-migrations.mjs"
 
 const dropTable = `
@@ -63,46 +65,91 @@ describe("evaluateMigration", () => {
     }
   })
 
-  it("rejects a marker that has an empty rollback block", () => {
+  it("rejects a marker with no rollback file", () => {
     const result = evaluateMigration({
-      filename: "supabase/migrations/20261027_empty_rollback.sql",
-      sql: `-- expand-contract: destructive\nDROP TABLE public.widgets;\n-- rollback-begin\n-- rollback-end\n`,
+      filename: "supabase/migrations/20261027_no_rollback.sql",
+      sql: `-- expand-contract: destructive\nDROP TABLE public.widgets;\n`,
     })
     expect(result.ok).toBe(false)
-    expect(result.problems?.join(" ")).toMatch(/rollback/)
+    expect(result.problems?.join(" ")).toContain("supabase/rollback/20261027_no_rollback.sql")
   })
 
-  it("accepts a marker plus an in-file rollback block", () => {
+  it("rejects a rollback file that is empty or only comments", () => {
+    for (const rollbackSql of ["", "  \n", "-- todo\n/* later */"]) {
+      const result = evaluateMigration({
+        filename: "supabase/migrations/20261027_empty_rollback.sql",
+        sql: `-- expand-contract: destructive\nDROP TABLE public.widgets;\n`,
+        rollbackSql,
+      })
+      expect(result.ok).toBe(false)
+      expect(result.problems?.join(" ")).toMatch(/rollback/)
+    }
+  })
+
+  it("accepts a marker plus a rollback file", () => {
     const result = evaluateMigration({
       filename: "supabase/migrations/20261027_drop.sql",
-      sql: `-- expand-contract: destructive\n${dropTable}\n-- rollback-begin\nCREATE TABLE public.legacy_widgets (id uuid);\n-- rollback-end\n`,
+      sql: `-- expand-contract: destructive\n${dropTable}`,
+      rollbackSql: "CREATE TABLE public.legacy_widgets (id uuid);",
     })
     expect(result.ok).toBe(true)
     expect(result.hits).toContain("drop-table")
   })
 
-  it("accepts a marker plus a sibling rollback file", () => {
+  it("requires the marker even when a rollback file exists", () => {
     const result = evaluateMigration({
       filename: "supabase/migrations/20261027_drop.sql",
-      sql: `-- expand-contract: destructive\nALTER TABLE public.widgets DROP COLUMN title;`,
-      siblingRollbackSql: "ALTER TABLE public.widgets ADD COLUMN title text;",
+      sql: "ALTER TABLE public.widgets DROP COLUMN title;",
+      rollbackSql: "ALTER TABLE public.widgets ADD COLUMN title text;",
     })
-    expect(result.ok).toBe(true)
-    expect(result.hits).toContain("drop-column")
+    expect(result.ok).toBe(false)
+    expect(result.problems?.join(" ")).toMatch(/expand-contract: destructive/)
   })
 
-  it("does not flag rollback SQL that only runs when the forward migration is additive", () => {
+  it("does not accept undo statements inside the forward file as a rollback", () => {
     const result = evaluateMigration({
-      filename: "supabase/migrations/20261027_add.sql",
-      sql: `
-        ALTER TABLE public.widgets ADD COLUMN title text;
-        -- rollback-begin
-        ALTER TABLE public.widgets DROP COLUMN title;
-        -- rollback-end
-      `,
+      filename: "supabase/migrations/20261027_drop.sql",
+      sql: `-- expand-contract: destructive\nALTER TABLE public.widgets DROP COLUMN title;\nALTER TABLE public.widgets ADD COLUMN title text;\n`,
+    })
+    expect(result.ok).toBe(false)
+    expect(result.problems?.join(" ")).toContain("supabase/rollback/")
+  })
+
+  it("flags table and column renames", () => {
+    for (const [sql, id] of [
+      ["ALTER TABLE public.widgets RENAME TO gadgets;", "rename-table"],
+      ["ALTER TABLE IF EXISTS public.widgets RENAME COLUMN title TO name;", "rename-column"],
+      ["alter table public.widgets rename title to name;", "rename-column"],
+    ] as const) {
+      const result = evaluateMigration({ filename: "supabase/migrations/20261027_rename.sql", sql })
+      expect(result.ok).toBe(false)
+      expect(result.hits).toContain(id)
+    }
+  })
+
+  it("does not flag renaming a constraint or an index", () => {
+    const result = evaluateMigration({
+      filename: "supabase/migrations/20261027_rename_constraint.sql",
+      sql: "ALTER TABLE public.widgets RENAME CONSTRAINT old_pk TO new_pk;\nALTER INDEX old_idx RENAME TO new_idx;",
     })
     expect(result.ok).toBe(true)
-    expect(result.hits).toEqual([])
+  })
+
+  it("flags SET NOT NULL on an existing column", () => {
+    const result = evaluateMigration({
+      filename: "supabase/migrations/20261027_not_null.sql",
+      sql: "ALTER TABLE public.widgets ALTER COLUMN title SET NOT NULL;",
+    })
+    expect(result.ok).toBe(false)
+    expect(result.hits).toContain("set-not-null")
+  })
+
+  it("allows DROP NOT NULL and new NOT NULL columns", () => {
+    const result = evaluateMigration({
+      filename: "supabase/migrations/20261027_relax.sql",
+      sql: "ALTER TABLE public.widgets ALTER COLUMN title DROP NOT NULL;\nALTER TABLE public.widgets ADD COLUMN slug text NOT NULL DEFAULT '';",
+    })
+    expect(result.ok).toBe(true)
   })
 
   it("flags an in-place column type change", () => {
@@ -116,14 +163,30 @@ describe("evaluateMigration", () => {
 })
 
 describe("parseChangedPaths", () => {
-  it("keeps changed forward migrations and skips rollback companions", () => {
-    const stdout = [
-      "supabase/migrations/20261027_drop.sql",
-      "supabase/migrations/20261027_drop.rollback.sql",
-      "docs/runbooks/migration-expand-contract.md",
-      "supabase/migrations/nested/nope.txt",
-      "",
-    ].join("\n")
+  const stdout = [
+    "supabase/migrations/20261027_drop.sql",
+    "supabase/migrations/20261027_drop.rollback.sql",
+    "supabase/migrations/20261028_undo_rollback.sql",
+    "supabase/rollback/20261027_drop.sql",
+    "docs/runbooks/migration-expand-contract.md",
+    "supabase/migrations/nested/nope.txt",
+    "",
+  ].join("\n")
+
+  it("keeps changed forward migrations only", () => {
     expect(parseChangedPaths(stdout)).toEqual(["supabase/migrations/20261027_drop.sql"])
+  })
+
+  it("reports rollback-named files inside supabase/migrations", () => {
+    expect(parseMisplacedRollbacks(stdout)).toEqual([
+      "supabase/migrations/20261027_drop.rollback.sql",
+      "supabase/migrations/20261028_undo_rollback.sql",
+    ])
+  })
+
+  it("maps a migration to its rollback file outside supabase/migrations", () => {
+    expect(rollbackPathFor("supabase/migrations/20261027_drop.sql")).toBe(
+      "supabase/rollback/20261027_drop.sql",
+    )
   })
 })
