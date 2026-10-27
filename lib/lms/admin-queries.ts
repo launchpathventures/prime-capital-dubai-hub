@@ -235,7 +235,10 @@ export async function getProgressStats(): Promise<ProgressStats> {
 /**
  * Get detailed progress for a single learner.
  */
-export async function getLearnerDetail(userId: string): Promise<LearnerDetail | null> {
+export async function getLearnerDetail(
+  userId: string,
+  options?: { ownEmail?: string | null }
+): Promise<LearnerDetail | null> {
   const supabase = await createClient()
 
   // Get user profile
@@ -250,9 +253,14 @@ export async function getLearnerDetail(userId: string): Promise<LearnerDetail | 
     return null
   }
 
-  // Get user email
-  const { data: authUsers } = await supabase.rpc("get_all_users")
-  const email = authUsers?.find((u: { id: string; email: string }) => u.id === userId)?.email || "No email"
+  // Learner pages pass the session email; other callers look up the user list.
+  let email: string
+  if (options && options.ownEmail !== undefined) {
+    email = options.ownEmail || "No email"
+  } else {
+    const { data: authUsers } = await supabase.rpc("get_all_users")
+    email = authUsers?.find((u: { id: string; email: string }) => u.id === userId)?.email || "No email"
+  }
 
   // Get competencies with modules (both ordered by display_order)
   const { data: competencies } = await supabase
@@ -519,8 +527,8 @@ export async function getMyProgress(): Promise<LearnerDetail | null> {
     return null
   }
   
-  // Reuse getLearnerDetail with current user's ID
-  return getLearnerDetail(user.id)
+  // Reuse getLearnerDetail with the current user's id and session email.
+  return getLearnerDetail(user.id, { ownEmail: user.email ?? null })
 }
 
 /**
