@@ -29,7 +29,7 @@ interface LoginPageProps {
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_domain: "Only authorized company accounts can sign in.",
   auth_callback_error: "Authentication failed. Please try again.",
-  database_error: "Account setup failed. Please try again or contact support.",
+  database_error: "Account setup failed. Please try again or contact support. (Only @primecapitaldubai.com accounts can be created.)",
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {

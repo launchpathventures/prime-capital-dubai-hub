@@ -1,25 +1,9 @@
--- CATALYST - Minimal Supabase storage/auth stub for the storage policy tests (serviceos#2011)
+-- CATALYST - Minimal Supabase storage stub for the storage policy tests (serviceos#2011)
 --
--- Plain Postgres has no Supabase schemas, so this recreates just enough of them
--- (roles, auth.uid()/role(), storage.objects with RLS, storage.foldername()) plus
--- the storage policies that existed in prod BEFORE the lock migration. The
--- migration under test is applied on top of this.
-
+-- Recreates storage.buckets/objects with RLS, storage.foldername(), and the storage
+-- policies that existed in prod BEFORE the lock migration. The migration under test
+-- is applied on top. Load auth-stub.sql and profiles-stub.sql first.
 -- Roles are created by scratch-db.ts (cluster-wide, so parallel test files would race).
-
-CREATE SCHEMA auth;
-GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
-
-CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$
-  SELECT coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
-$$;
-CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
-  SELECT nullif(auth.jwt() ->> 'sub', '')::uuid
-$$;
-CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$
-  SELECT nullif(auth.jwt() ->> 'role', '')
-$$;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth TO anon, authenticated, service_role;
 
 CREATE SCHEMA storage;
 GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
@@ -50,12 +34,6 @@ BEGIN
   RETURN _parts[1:array_length(_parts, 1) - 1];
 END
 $$;
-
-CREATE TABLE public.user_profiles (
-  id uuid PRIMARY KEY,
-  role text NOT NULL DEFAULT 'learner'
-);
-GRANT SELECT ON public.user_profiles TO anon, authenticated, service_role;
 
 INSERT INTO storage.buckets (id, name, public) VALUES
   ('lms-audio', 'lms-audio', true),

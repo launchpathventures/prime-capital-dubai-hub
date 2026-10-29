@@ -17,7 +17,9 @@ import type { Client } from "pg"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { ADMIN_URL, createScratchDb } from "./scratch-db"
 
-const STUB_SQL = readFileSync(path.join(__dirname, "fixtures/storage-stub.sql"), "utf8")
+const STUB_SQL = ["auth-stub", "profiles-stub", "storage-stub"]
+  .map((f) => readFileSync(path.join(__dirname, `fixtures/${f}.sql`), "utf8"))
+  .join("\n")
 const MIGRATION_SQL = readFileSync(
   path.join(__dirname, "../../supabase/migrations/20261029130000_lock_storage_writes.sql"),
   "utf8"
@@ -68,7 +70,7 @@ describe.skipIf(!ADMIN_URL)("storage policies (serviceos#2011)", () => {
     cmd: Cmd,
     bucket: string,
     objectPath: string,
-    renameTo?: string
+    moveTo?: { name?: string; bucket?: string }
   ): Promise<Outcome> {
     await db.query("BEGIN")
     try {
@@ -84,8 +86,8 @@ describe.skipIf(!ADMIN_URL)("storage policies (serviceos#2011)", () => {
         )
       } else if (cmd === "UPDATE") {
         result = await db.query(
-          "UPDATE storage.objects SET name = $3 WHERE bucket_id = $1 AND name = $2",
-          [bucket, objectPath, renameTo ?? objectPath]
+          "UPDATE storage.objects SET name = $3, bucket_id = $4 WHERE bucket_id = $1 AND name = $2",
+          [bucket, objectPath, moveTo?.name ?? objectPath, moveTo?.bucket ?? bucket]
         )
       } else if (cmd === "DELETE") {
         result = await db.query(
@@ -197,7 +199,7 @@ describe.skipIf(!ADMIN_URL)("storage policies (serviceos#2011)", () => {
           "UPDATE",
           "voice-recordings",
           `${LEARNER}/seed.webm`,
-          `${OTHER_LEARNER}/stolen.webm`
+          { name: `${OTHER_LEARNER}/stolen.webm` }
         )
       ).toBe("refused")
     })
@@ -230,6 +232,22 @@ describe.skipIf(!ADMIN_URL)("storage policies (serviceos#2011)", () => {
     })
     it("can delete", async () => {
       expect(await attempt(admin, "DELETE", "cms", SEEDED.cms)).toBe("allowed")
+    })
+  })
+
+  describe("admin moving objects between buckets", () => {
+    it("cannot move a cms object into lms-audio (UPDATE WITH CHECK)", async () => {
+      expect(await attempt(admin, "UPDATE", "cms", SEEDED.cms, { bucket: "lms-audio" })).toBe(
+        "refused"
+      )
+    })
+    it("cannot move a cms object into voice-recordings", async () => {
+      expect(
+        await attempt(admin, "UPDATE", "cms", SEEDED.cms, {
+          bucket: "voice-recordings",
+          name: `${LEARNER}/moved.webm`,
+        })
+      ).toBe("refused")
     })
   })
 
@@ -278,6 +296,7 @@ describe.skipIf(!ADMIN_URL)("storage policies (serviceos#2011)", () => {
     // Runs last (file order): restores the pre-lock state, then re-applies the lock.
     it("restores the old open policies, and the migration re-locks them", async () => {
       await db.query(ROLLBACK_SQL)
+      await db.query(ROLLBACK_SQL) // re-runnable
       expect(await attempt(anon, "INSERT", "lms-audio", "rollback/probe.bin")).toBe("allowed")
       expect(await attempt(learner, "INSERT", "cms", "rollback/probe.jpg")).toBe("allowed")
       expect(await attempt(anon, "SELECT", "voice-recordings", `${LEARNER}/seed.webm`)).toBe(

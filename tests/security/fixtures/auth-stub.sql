@@ -1,13 +1,11 @@
--- CATALYST - Minimal Supabase auth stub for the sign-up domain tests (serviceos#2011, F3)
+-- CATALYST - Minimal Supabase auth stub for the security tests (serviceos#2011)
 --
--- Just enough of auth.users and the roles GoTrue uses. The test then loads the
--- real handle_new_user() migration, creates the on_auth_user_created trigger,
--- and applies the migration under test.
-
--- Roles are created by scratch-db.ts (cluster-wide, so parallel test files would race).
+-- auth.users plus auth.uid()/role()/jwt() reading request.jwt.claims, as on
+-- Supabase. Roles are created by scratch-db.ts (cluster-wide, so parallel test
+-- files would race).
 
 CREATE SCHEMA auth;
-GRANT USAGE ON SCHEMA auth TO supabase_auth_admin;
+GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role, supabase_auth_admin;
 
 CREATE TABLE auth.users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -20,9 +18,13 @@ CREATE TABLE auth.users (
 );
 GRANT SELECT, INSERT, UPDATE ON auth.users TO supabase_auth_admin;
 
-CREATE TABLE public.user_profiles (
-  id uuid PRIMARY KEY,
-  full_name text,
-  role text NOT NULL DEFAULT 'learner',
-  certification_status text
-);
+CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE AS $$
+  SELECT coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
+$$;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
+  SELECT nullif(auth.jwt() ->> 'sub', '')::uuid
+$$;
+CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$
+  SELECT nullif(auth.jwt() ->> 'role', '')
+$$;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth TO anon, authenticated, service_role, supabase_auth_admin;
