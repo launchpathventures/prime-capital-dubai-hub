@@ -17,8 +17,11 @@ import { ADMIN_URL, createScratchDb } from "./scratch-db"
 const read = (rel: string) => readFileSync(path.join(__dirname, rel), "utf8")
 const STUB_SQL = ["auth-stub", "profiles-stub"].map((f) => read(`fixtures/${f}.sql`)).join("\n")
 const HANDLE_NEW_USER_SQL = read("../../supabase/migrations/20260410000000_fix_handle_new_user_trigger.sql")
-const MIGRATION_SQL = read("../../supabase/migrations/20261029140000_enforce_signup_domain.sql")
+const BASE_MIGRATION_SQL = read("../../supabase/migrations/20261029140000_enforce_signup_domain.sql")
+const LPV_MIGRATION_SQL = read("../../supabase/migrations/20261029160000_allow_launchpathventures_signup.sql")
+const MIGRATION_SQL = `${BASE_MIGRATION_SQL}\n${LPV_MIGRATION_SQL}`
 const ROLLBACK_SQL = read("../../supabase/rollback/20261029140000_enforce_signup_domain.down.sql")
+const LPV_ROLLBACK_SQL = read("../../supabase/rollback/20261029160000_allow_launchpathventures_signup.down.sql")
 
 const GOOGLE_APP_META = JSON.stringify({ provider: "google", providers: ["google"] })
 
@@ -137,8 +140,22 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
     ["U+0130 lookalike domain", "a@PR\u0130MECAPITALDUBAI.com"],
     ["non-ASCII local part", "j\u00fcrgen@primecapitaldubai.com"],
     ["control character", "a\u0007@primecapitaldubai.com"],
-    // Documented pending Tim's decision (QUESTION on serviceos#2011)
-    ["launchpathventures.com (pending QUESTION)", "new.person@launchpathventures.com"],
+    // Lookalikes of launchpathventures.com
+    ["launchpathventures.com as a subdomain", "a@mail.launchpathventures.com"],
+    ["launchpathventures.com as a suffix lookalike", "a@evillaunchpathventures.com"],
+    ["launchpathventures.com as a prefix lookalike", "a@launchpathventures.com.evil.example"],
+    ["launchpathventures.com U+0130 lookalike", "a@launchpath\u0130ventures.com"],
+    ["launchpathventures.com Cyrillic lookalike", "a@launchpathventur\u0435s.com"],
+    ["launchpathventures.com as the local part", "launchpathventures.com@evil.example"],
+    ["launchpathventures.com with two @ signs", "a@evil.example@launchpathventures.com"],
+  ]
+
+  // Allowed on both layers; everyone gets a learner profile, nobody is auto-admin.
+  const ALLOWED: [string, string][] = [
+    ["primecapitaldubai.com", "new.hire@primecapitaldubai.com"],
+    ["primecapitaldubai.com, mixed case", "New.Hire@PrimeCapitalDubai.com"],
+    ["launchpathventures.com", "new.person@launchpathventures.com"],
+    ["launchpathventures.com, mixed case", "New.Person@LaunchPathVentures.com"],
   ]
 
   describe("BEFORE INSERT trigger", () => {
@@ -152,30 +169,20 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
         await db.query("SET LOCAL ROLE supabase_auth_admin")
         await expect(
           db.query("INSERT INTO auth.users (email) VALUES ('x@gmail.com')")
-        ).rejects.toThrow(/limited to @primecapitaldubai\.com/)
+        ).rejects.toThrow(/limited to @primecapitaldubai\.com or @launchpathventures\.com/)
       } finally {
         await db.query("ROLLBACK")
       }
     })
 
-    it("allows a primecapitaldubai.com sign-up and gives it a learner profile", async () => {
-      const outcome = await signUp("new.hire@primecapitaldubai.com", async (c) => {
+    it.each(ALLOWED)("allows %s and gives it a learner profile", async (_label, email) => {
+      const outcome = await signUp(email, async (c) => {
         const { rows } = await c.query(
           `SELECT p.role, p.certification_status FROM public.user_profiles p
-             JOIN auth.users u ON u.id = p.id WHERE u.email = 'new.hire@primecapitaldubai.com'`
+             JOIN auth.users u ON u.id = p.id WHERE u.email = $1`,
+          [email]
         )
         expect(rows).toEqual([{ role: "learner", certification_status: "in_progress" }])
-      })
-      expect(outcome).toBe("created")
-    })
-
-    it("matches the domain case-insensitively, and still creates the profile", async () => {
-      const outcome = await signUp("New.Hire@PrimeCapitalDubai.com", async (c) => {
-        const { rows } = await c.query(
-          `SELECT p.role FROM public.user_profiles p
-             JOIN auth.users u ON u.id = p.id WHERE u.email = 'New.Hire@PrimeCapitalDubai.com'`
-        )
-        expect(rows).toEqual([{ role: "learner" }])
       })
       expect(outcome).toBe("created")
     })
@@ -188,12 +195,9 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
       expect(result.error?.message).toMatch(/primecapitaldubai\.com/)
     })
 
-    it.each([["new.hire@primecapitaldubai.com"], ["New.Hire@PrimeCapitalDubai.com"]])(
-      "allows %s",
-      async (email) => {
-        expect(await hook(email)).toEqual({})
-      }
-    )
+    it.each(ALLOWED)("allows %s", async (_label, email) => {
+      expect(await hook(email)).toEqual({})
+    })
 
     it("rejects an anonymous sign-in payload (no email, is_anonymous)", async () => {
       const payload = gotruePayload(null, { is_anonymous: true, app_metadata: { provider: "anonymous" }, identities: [] })
@@ -235,6 +239,7 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
     })
     it("allows moving to a company address", async () => {
       expect(await updateEmail(EXISTING_ADMIN_ID, "moved@primecapitaldubai.com")).toBe("updated")
+      expect(await updateEmail(EXISTING_ADMIN_ID, "moved@launchpathventures.com")).toBe("updated")
     })
     it("allows an UPDATE that leaves the email unchanged (existing launchpathventures.com account)", async () => {
       expect(await updateEmail(EXISTING_ADMIN_ID, EXISTING_ADMIN_EMAIL)).toBe("updated")
@@ -294,6 +299,11 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
         "a@PR\u0130MECAPITALDUBAI.com",
         "j\u00fcrgen@primecapitaldubai.com",
         "new.person@launchpathventures.com",
+        "New.Person@LaunchPathVentures.COM",
+        "a@mail.launchpathventures.com",
+        "a@evillaunchpathventures.com",
+        "a@launchpathventures.com.evil.example",
+        "a@launchpath\u0130ventures.com",
       ]
       for (const email of samples) {
         const { rows } = await db.query("SELECT public.is_allowed_signup_email($1) AS ok", [email])
@@ -331,14 +341,88 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
     })
   })
 
+  describe("function attributes (pg_proc)", () => {
+    const attrs = async (signature: string) => {
+      const { rows } = await db.query(
+        `SELECT p.prosecdef AS secdef, p.provolatile AS volatility, p.proconfig AS config,
+                pg_get_userbyid(p.proowner) AS owner,
+                has_function_privilege('supabase_auth_admin', p.oid, 'EXECUTE') AS auth_admin,
+                has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated,
+                has_function_privilege('anon', p.oid, 'EXECUTE') AS anon
+           FROM pg_proc p WHERE p.oid = $1::regprocedure`,
+        [signature]
+      )
+      return rows[0]
+    }
+    const pinned = { secdef: false, config: ['search_path=""'], owner: "postgres" }
+
+    it("allowed_signup_domains: invoker, STABLE, pinned search_path, callable by the auth service", async () => {
+      expect(await attrs("public.allowed_signup_domains()")).toMatchObject({
+        ...pinned,
+        volatility: "s",
+        auth_admin: true,
+      })
+    })
+
+    it("hook_before_user_created: invoker, STABLE, pinned search_path, only supabase_auth_admin may call it", async () => {
+      expect(await attrs("public.hook_before_user_created(jsonb)")).toMatchObject({
+        ...pinned,
+        volatility: "s",
+        auth_admin: true,
+        authenticated: false,
+        anon: false,
+      })
+    })
+
+    it("enforce_signup_email_domain: invoker trigger function with a pinned search_path", async () => {
+      expect(await attrs("public.enforce_signup_email_domain()")).toMatchObject({
+        ...pinned,
+        volatility: "v",
+      })
+    })
+  })
+
+  describe("rollback SQL", () => {
+    it("assigns no admin role anywhere (static check)", () => {
+      for (const sql of [ROLLBACK_SQL, LPV_ROLLBACK_SQL]) {
+        const code = sql.replace(/--.*$/gm, "")
+        expect(code).not.toMatch(/'admin'/i)
+        expect(code).not.toMatch(/user_role/i)
+      }
+    })
+  })
+
   describe("rollback", () => {
-    it("removes the enforcement, and the migration restores it", async () => {
+    it("the follow-up rollback returns to primecapitaldubai.com only, and the migration re-allows launchpathventures.com", async () => {
+      await db.query(LPV_ROLLBACK_SQL)
+      await db.query(LPV_ROLLBACK_SQL) // re-runnable
+      expect(await signUp("new.person@launchpathventures.com")).toBe("refused")
+      expect(await signUp("new.hire@primecapitaldubai.com")).toBe("created")
+
+      await db.query(LPV_MIGRATION_SQL)
+      expect(await signUp("new.person@launchpathventures.com")).toBe("created")
+    })
+
+    it("removes the enforcement, and the migrations restore it", async () => {
       await db.query(ROLLBACK_SQL)
       await db.query(ROLLBACK_SQL) // re-runnable
       expect(await signUp("someone@gmail.com")).toBe("created")
 
+      // The rollback must never bring back auto-admin, for any domain
+      for (const email of ["new.person@launchpathventures.com", "new.hire@primecapitaldubai.com"]) {
+        await signUp(email, async (c) => {
+          const { rows } = await c.query(
+            `SELECT p.role FROM public.user_profiles p
+               JOIN auth.users u ON u.id = p.id WHERE u.email = $1`,
+            [email]
+          )
+          expect(rows).toEqual([{ role: "learner" }])
+        })
+      }
+
       await db.query(MIGRATION_SQL)
       expect(await signUp("someone@gmail.com")).toBe("refused")
+      expect(await signUp("new.person@launchpathventures.com")).toBe("created")
     })
   })
 })
