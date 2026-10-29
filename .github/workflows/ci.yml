@@ -1,10 +1,10 @@
 # Pull request checks. Drafts are skipped so a draft does not spend Actions minutes.
-# One job, cancel-in-progress, pnpm store cache. No production build.
+# One job, cancel-in-progress, pnpm store cache. The production build needs no secrets.
 #
 # Local timing on a warm tree: lint ~18s, tsc ~15s, vitest tests/api+tests/ci ~5s,
-# migration guard under 1s. GitHub-hosted minutes are mostly checkout and pnpm
-# install. Expect about 3–5 minutes with a warm pnpm cache and about 5–8 minutes
-# cold. The guard runs before install so a bad migration fails without one.
+# build ~1 min, migration guard under 1s. GitHub-hosted minutes are mostly checkout and pnpm
+# install. Expect about 4–6 minutes with a warm pnpm cache and about 6–9 minutes
+# cold (AI engineering estimate). The guard runs before install so a bad migration fails without one.
 
 name: CI
 
@@ -21,13 +21,13 @@ concurrency:
 
 jobs:
   check:
-    name: lint, typecheck, unit tests
+    name: lint, typecheck, unit tests, build
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 1
           persist-credentials: false
@@ -39,12 +39,12 @@ jobs:
         run: node scripts/check-migrations.mjs ${{ github.event.pull_request.base.sha }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
           version: 10
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: pnpm
@@ -60,3 +60,11 @@ jobs:
 
       - name: Unit tests
         run: pnpm exec vitest run tests/api tests/ci
+
+      # No secrets or repository variables are passed. The build succeeded locally
+      # with no .env.local; if CI's bare environment ever breaks it, drop this step
+      # rather than adding secrets. Catches build-only failures lint and tsc miss.
+      - name: Build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: pnpm build

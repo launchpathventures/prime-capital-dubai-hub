@@ -15,6 +15,9 @@ import { pathToFileURL } from "node:url"
 
 export const PRODUCTION_ORIGIN = "https://primecapitaldubai.com"
 export const WWW_ORIGIN = "https://www.primecapitaldubai.com"
+/** Partner brand served by the same Vercel project (proxy.ts maps the host to the /tahir surface). The apex redirects to www. */
+export const TAHIR_ORIGIN = "https://tahirmajithia.com"
+export const TAHIR_WWW_ORIGIN = "https://www.tahirmajithia.com"
 
 /** Live project. Repository variables VERCEL_TEAM_ID and VERCEL_PROJECT_ID override these. */
 export const DEFAULT_TEAM_ID = "team_HshsUsC6U4lidrM07nzJLx1n"
@@ -31,6 +34,18 @@ export const SMOKE_PATHS = [
   { path: "/properties", kind: "page" },
   { path: "/team", kind: "page" },
   { path: "/auth/login", kind: "page" },
+]
+
+/**
+ * Tahir routes are rewritten to /tahir/*, so /properties and /team do not exist
+ * on that host. /api/health is shared and answers on every host.
+ */
+export const TAHIR_SMOKE_PATHS = [
+  { path: "/api/health", kind: "health" },
+  { path: "/", kind: "page" },
+  { path: "/about", kind: "page" },
+  { path: "/contact", kind: "page" },
+  { path: "/services", kind: "page" },
 ]
 
 const ON_VALUES = new Set(["1", "true", "on", "yes", "enabled"])
@@ -307,12 +322,18 @@ function writeSummary(markdown) {
   }
 }
 
-function isChallenge(response, body) {
+/**
+ * Bot challenge pages, not the app. The body match is anchored to the <title>
+ * (or Cloudflare's verification script) so ordinary page copy containing
+ * "just a moment" cannot turn a real failure into an inconclusive result.
+ */
+export function isChallenge(response, body) {
   if (response.headers?.get?.("x-vercel-mitigated")) return true
-  return /vercel security checkpoint|cf-browser-verification|just a moment/i.test(body)
+  if (response.headers?.get?.("cf-mitigated")) return true
+  return /<title>\s*(?:just a moment|vercel security checkpoint)|cf-browser-verification/i.test(body)
 }
 
-async function probeOnce(url, kind) {
+export async function probeOnce(url, kind) {
   const response = await fetch(url, {
     redirect: "follow",
     cache: "no-store",
@@ -356,10 +377,18 @@ async function probeOnce(url, kind) {
   }
 }
 
-function smokeJobs(origins) {
-  return origins.flatMap((origin) =>
-    SMOKE_PATHS.map((spec) => ({ url: new URL(spec.path, origin).href, kind: spec.kind })),
+/** @param {Array<{ origins: string[], paths: Array<{ path: string, kind: string }> }>} surfaces */
+export function smokeJobs(surfaces) {
+  return surfaces.flatMap(({ origins, paths }) =>
+    origins.flatMap((origin) => paths.map((spec) => ({ url: new URL(spec.path, origin).href, kind: spec.kind }))),
   )
+}
+
+function parseOrigins(value) {
+  return value
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 }
 
 async function probeJobs(jobs) {
@@ -434,7 +463,7 @@ async function listProductionDeployments({ token, teamId, projectId }) {
 }
 
 /** Read-only GitHub call using the job's GITHUB_TOKEN. Any problem is "unknown", never "passed". */
-async function targetSmokeStatus({ sha, env }) {
+export async function targetSmokeStatus({ sha, env }) {
   const repository = env.GITHUB_REPOSITORY
   const githubToken = env.GITHUB_TOKEN
   if (!repository || !githubToken || !sha) return "unknown"
@@ -517,10 +546,13 @@ export async function runSmoke(env, deps = defaultDeps) {
   const expectedSha = env.EXPECTED_SHA || ""
   if (!expectedSha) throw new Error("EXPECTED_SHA is required")
 
-  const origins = (env.SMOKE_ORIGINS || `${PRODUCTION_ORIGIN},${WWW_ORIGIN}`)
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean)
+  const origins = parseOrigins(env.SMOKE_ORIGINS || `${PRODUCTION_ORIGIN},${WWW_ORIGIN}`)
+  // Same deployment serves both brands, so a rollback moves both; an explicit empty value turns Tahir probes off.
+  const tahirOrigins = parseOrigins(env.SMOKE_TAHIR_ORIGINS ?? `${TAHIR_ORIGIN},${TAHIR_WWW_ORIGIN}`)
+  const surfaces = [
+    { origins, paths: SMOKE_PATHS },
+    { origins: tahirOrigins, paths: TAHIR_SMOKE_PATHS },
+  ]
   const versionOrigin = origins[0]
   const attempts = Number(env.VERSION_ATTEMPTS || 12)
   const intervalMs = Number(env.VERSION_INTERVAL_MS || 5000)
@@ -533,7 +565,7 @@ export async function runSmoke(env, deps = defaultDeps) {
     "## Post-deploy smoke",
     "",
     `- Expected SHA: \`${expectedSha}\``,
-    `- Origins: ${origins.join(", ")}`,
+    `- Origins: ${[...origins, ...tahirOrigins].join(", ")}`,
     `- Rollback: ${rollbackEnabled(autoRollback) ? "on" : "off"} (\`AUTO_ROLLBACK\`, opt-in)`,
   ]
 
@@ -561,7 +593,7 @@ export async function runSmoke(env, deps = defaultDeps) {
   let superseded = false
   let liveShaUnknown = false
   if (version.live) {
-    const jobs = smokeJobs(origins)
+    const jobs = smokeJobs(surfaces)
     const attempt1 = await deps.probeJobs(jobs)
     lines.push("", formatProbeAttempt(1, attempt1))
     const firstFailures = attempt1.filter((probe) => !probe.ok)
@@ -593,8 +625,8 @@ export async function runSmoke(env, deps = defaultDeps) {
     attempt: probeResults.some((probe) => !probe.ok) ? 2 : 1,
     failedCount: probeResults.filter((probe) => !probe.ok).length,
   })
-  const probesOk =
-    version.live && probeResults.length > 0 && probeResults.every((probe) => probe.ok) && !secondGate.rollbackAllowed
+  // probeResults stays empty unless the new SHA went live, so this also covers versionLive.
+  const probesOk = probeResults.length > 0 && probeResults.every((probe) => probe.ok)
   const inconclusive = probeResults.some((probe) => probe.inconclusive)
   const healthOnlyFailure = isHealthOnlyFailure(probeResults)
   let rollbackTargetId = null
@@ -683,7 +715,7 @@ export async function runSmoke(env, deps = defaultDeps) {
         `- Alias after rollback: ${restored.live ? "serving previous SHA" : "previous SHA not observed"} (${restored.sha || "none"})`,
       )
       if (restored.live) {
-        const reprobes = await deps.probeJobs(smokeJobs(origins))
+        const reprobes = await deps.probeJobs(smokeJobs(surfaces))
         restoredOk = reprobes.every((probe) => probe.ok)
         lines.push("", formatProbeAttempt(1, reprobes).replace("### Attempt 1", "### Recheck after rollback"))
       }

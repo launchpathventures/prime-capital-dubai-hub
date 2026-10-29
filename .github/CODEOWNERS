@@ -1,0 +1,12 @@
+# Release-safety paths. A merge to master is a production deploy, so changes here
+# need the owner's review. Enforced only when branch protection requires
+# "Review from Code Owners" (a setting; see docs/runbooks/deployment-rollback.md).
+/.github/                       @launchpathventures
+/scripts/post-deploy-smoke.mjs  @launchpathventures
+/scripts/check-migrations.mjs   @launchpathventures
+/supabase/                      @launchpathventures
+/docs/runbooks/                 @launchpathventures
+/app/api/health/                @launchpathventures
+/app/api/version/               @launchpathventures
+/proxy.ts                       @launchpathventures
+/next.config.ts                 @launchpathventures

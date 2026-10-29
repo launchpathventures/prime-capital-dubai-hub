@@ -6,6 +6,8 @@
  * rollback file under supabase/rollback/ with the same name. The rollback is
  * never executed by the CLI or this script; it is there for the reviewer.
  * Rollback SQL must stay out of supabase/migrations, which `supabase db push` applies.
+ * A deleted or renamed migration file is refused outright: the history that was
+ * applied to production must not be rewritten, add a new migration instead.
  */
 
 import { execFileSync } from "node:child_process"
@@ -19,6 +21,17 @@ const DESTRUCTIVE_RULES = [
   { id: "delete-from", re: /\bDELETE\s+FROM\b/i },
   { id: "drop-schema", re: /\bDROP\s+SCHEMA\b/i },
   { id: "drop-type", re: /\bDROP\s+TYPE\b/i },
+  { id: "drop-view", re: /\bDROP\s+(?:MATERIALIZED\s+)?VIEW\b/i },
+  { id: "drop-index", re: /\bDROP\s+INDEX\b/i },
+  { id: "drop-constraint", re: /\bDROP\s+CONSTRAINT\b/i },
+  {
+    // An UPDATE statement with no WHERE rewrites every row. `DO UPDATE SET` (upsert) has no table name, so it never matches.
+    id: "update-without-where",
+    test: (sql) =>
+      (sql.match(/\bUPDATE\s+(?:ONLY\s+)?(?!SET\b)[\w."]+(?:\s+(?:AS\s+)?(?!SET\b)\w+)?\s+SET\b[^;]*/gi) || []).some(
+        (statement) => !/\bWHERE\b/i.test(statement),
+      ),
+  },
   { id: "alter-type", re: /\bALTER\s+COLUMN\b[^;]{0,200}\b(?:SET\s+DATA\s+)?TYPE\b/i },
   { id: "set-not-null", re: /\bALTER\s+COLUMN\b[^;]{0,200}\bSET\s+NOT\s+NULL\b/i },
   { id: "rename-table", re: /\bALTER\s+TABLE\b[^;]*?\bRENAME\s+TO\b/i },
@@ -47,6 +60,11 @@ export function parseChangedPaths(stdout) {
   return changedSql(stdout).filter((file) => !isMisplacedRollback(file))
 }
 
+/** Deleted (or renamed-away) migration files, from `git diff --diff-filter=D --no-renames --name-only`. */
+export function parseDeletedPaths(stdout) {
+  return changedSql(stdout)
+}
+
 export function parseMisplacedRollbacks(stdout) {
   return changedSql(stdout).filter(isMisplacedRollback)
 }
@@ -65,7 +83,7 @@ function hasMarker(sql) {
 
 function findDestructive(sql) {
   const stripped = stripSqlComments(sql)
-  return DESTRUCTIVE_RULES.filter((rule) => rule.re.test(stripped)).map((rule) => rule.id)
+  return DESTRUCTIVE_RULES.filter((rule) => (rule.test ? rule.test(stripped) : rule.re.test(stripped))).map((rule) => rule.id)
 }
 
 /**
@@ -106,17 +124,27 @@ function main() {
     console.error("usage: node scripts/check-migrations.mjs <base-sha>")
     process.exit(2)
   }
-  const stdout = execFileSync(
-    "git",
-    ["diff", "--name-only", "--diff-filter=AMR", base, "HEAD", "--", "supabase/migrations"],
-    { encoding: "utf8" },
-  )
+  // --no-renames reports a rename as a delete plus an add, so the old file is caught below.
+  const diff = (filter) =>
+    execFileSync(
+      "git",
+      ["diff", "--name-only", "--no-renames", `--diff-filter=${filter}`, base, "HEAD", "--", "supabase/migrations"],
+      { encoding: "utf8" },
+    )
+  const stdout = diff("AM")
   const files = parseChangedPaths(stdout)
   const failures = parseMisplacedRollbacks(stdout).map((filename) => ({
     filename,
     hits: ["rollback-in-migrations"],
     problems: ["rollback SQL must live under supabase/rollback/, not supabase/migrations/"],
   }))
+  for (const filename of parseDeletedPaths(diff("D"))) {
+    failures.push({
+      filename,
+      hits: ["deleted-migration"],
+      problems: ["applied migrations must not be deleted or renamed; add a new migration instead"],
+    })
+  }
   for (const file of files) {
     const sql = readFileSync(file, "utf8")
     const rollbackFile = rollbackPathFor(file)
@@ -131,7 +159,7 @@ function main() {
       for (const problem of failure.problems) console.error(`  - ${problem}`)
     }
     console.error(
-      `::error::${failures.length} migration(s) need an expand/contract marker and rollback SQL under supabase/rollback/`,
+      `::error::${failures.length} migration(s) need an expand/contract marker and rollback SQL under supabase/rollback/, or must not delete or rename applied migrations`,
     )
     process.exit(1)
   }

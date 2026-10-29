@@ -14,11 +14,19 @@ In the forward SQL, outside comments:
 - `DELETE FROM`
 - `DROP SCHEMA`
 - `DROP TYPE`
+- `DROP VIEW` and `DROP MATERIALIZED VIEW`
+- `DROP INDEX`
+- `DROP CONSTRAINT`
+- `UPDATE ... SET` with no `WHERE` in the same statement (an upsert's `ON CONFLICT ... DO UPDATE SET` is not matched)
 - `ALTER COLUMN ... TYPE` (including `SET DATA TYPE`)
 - `ALTER COLUMN ... SET NOT NULL`
 - `ALTER TABLE ... RENAME TO` (table) and `ALTER TABLE ... RENAME [COLUMN] a TO b` (column)
 
 Replacing a trigger, policy, or function (`DROP TRIGGER`, `DROP POLICY`, `DROP FUNCTION`, then `CREATE`) is not treated as destructive. Those statements are how this repo updates functions today.
+
+## Deleted or renamed migrations
+
+Deleting or renaming a file under `supabase/migrations` is refused outright, with no marker option. An applied migration is history. A rename also changes its version, so the CLI sees a new migration. To undo a change, add a new migration. If a file was added by mistake and never applied anywhere, that is a decision for a human, not the guard.
 
 ## What a destructive change must include
 
@@ -39,7 +47,7 @@ The guard checks that the rollback file has SQL beyond comments. It does **not**
 
 ## Known limits of the guard
 
-It is a review aid, not a security control. It does not flag `DROP VIEW`, `DROP INDEX`, `DROP CONSTRAINT`, or an `UPDATE` without `WHERE`; it does not check deleted migration files; a `--` inside a string literal hides the rest of that line from it; and any changed file whose name contains `rollback` is rejected, including innocent names such as `add_rollback_audit`. Review those by hand.
+It is a review aid, not a security control. It matches statements with regular expressions, so an `UPDATE` whose `WHERE` sits in a different statement or a dynamic `EXECUTE` string is not understood; a `--` inside a string literal hides the rest of that line from it; and any changed file whose name contains `rollback` is rejected, including innocent names such as `add_rollback_audit`. Review those by hand.
 
 ## Example
 

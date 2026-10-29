@@ -26,6 +26,7 @@ This directory contains runbooks for common operational tasks and incident respo
 | Environment | URL |
 |-------------|-----|
 | Production | `https://primecapitaldubai.com` |
+| Production (partner brand, same deployment) | `https://tahirmajithia.com` |
 | Staging | `https://staging.primecapitaldubai.com` |
 | Vercel Dashboard | `https://vercel.com/dashboard` |
 | Supabase Dashboard | `https://app.supabase.com` |

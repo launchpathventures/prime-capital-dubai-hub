@@ -68,6 +68,7 @@ const env = {
   VERCEL_TOKEN: "test-token",
   AUTO_ROLLBACK: "true",
   SMOKE_ORIGINS: "https://example.test",
+  SMOKE_TAHIR_ORIGINS: "https://tahir.example.test",
 }
 
 const pageFails = (job: Job) => job.kind === "page" && job.url.endsWith("/contact")
@@ -201,6 +202,93 @@ describe("runSmoke", () => {
     expect(rollbackTo).not.toHaveBeenCalled()
     expect(result.reason).toMatch(/could not re-check the live SHA/)
     expect(result.lines.join("\n")).toMatch(/Could not re-read the live SHA before rollback/)
+  })
+
+  it("probes the Tahir domain too, with its own page set, and lists it in the summary", async () => {
+    const { deps } = makeDeps()
+    const result = await runSmoke({ ...env, SMOKE_TAHIR_ORIGINS: "https://tahirmajithia.com,https://www.tahirmajithia.com" }, deps)
+    const urls = (deps.probeJobs.mock.calls[0][0] as Job[]).map((job) => job.url)
+    for (const host of ["https://tahirmajithia.com", "https://www.tahirmajithia.com"]) {
+      expect(urls).toEqual(
+        expect.arrayContaining([`${host}/api/health`, `${host}/`, `${host}/about`, `${host}/contact`, `${host}/services`]),
+      )
+      // Tahir rewrites to /tahir/*, so primary-brand-only routes are not probed there.
+      expect(urls).not.toContain(`${host}/properties`)
+      expect(urls).not.toContain(`${host}/team`)
+    }
+    expect(urls).toContain("https://example.test/properties")
+    expect(result.lines.join("\n")).toContain("https://www.tahirmajithia.com")
+  })
+
+  it("probes the real production hosts of both brands by default", async () => {
+    const { deps } = makeDeps()
+    await runSmoke({ ...env, SMOKE_ORIGINS: undefined, SMOKE_TAHIR_ORIGINS: undefined }, deps)
+    const hosts = new Set((deps.probeJobs.mock.calls[0][0] as Job[]).map((job) => new URL(job.url).host))
+    expect(hosts).toEqual(
+      new Set(["primecapitaldubai.com", "www.primecapitaldubai.com", "tahirmajithia.com", "www.tahirmajithia.com"]),
+    )
+  })
+
+  it("turns Tahir probes off only when SMOKE_TAHIR_ORIGINS is explicitly empty", async () => {
+    const { deps } = makeDeps()
+    await runSmoke({ ...env, SMOKE_TAHIR_ORIGINS: "" }, deps)
+    const urls = (deps.probeJobs.mock.calls[0][0] as Job[]).map((job) => job.url)
+    expect(urls.every((url) => url.startsWith("https://example.test"))).toBe(true)
+  })
+
+  it("rolls back when only the Tahir domain fails a page, because one deployment serves both brands", async () => {
+    const { deps, rollbackTo } = makeDeps({
+      failing: (job) => job.url.startsWith("https://tahir.example.test") && job.url.endsWith("/services"),
+      liveShas: [NEW_SHA, NEW_SHA, NEW_SHA, PREV_SHA],
+    })
+    const result = await runSmoke(env, deps)
+    expect(rollbackTo).toHaveBeenCalledTimes(1)
+    expect(result.lines.join("\n")).toMatch(/FAIL https:\/\/tahir\.example\.test\/services/)
+    // the recheck after rollback covers both brands as well
+    const recheck = deps.probeJobs.mock.calls.at(-1)![0] as Job[]
+    expect(recheck.some((job) => job.url.startsWith("https://tahir.example.test"))).toBe(true)
+  })
+
+  it("does not roll back when only the Tahir /api/health fails and every page passes", async () => {
+    const { deps, rollbackTo } = makeDeps({
+      failing: (job) => job.kind === "health" && job.url.startsWith("https://tahir.example.test"),
+    })
+    const result = await runSmoke(env, deps)
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.reason).toMatch(/only \/api\/health failed/)
+  })
+
+  it("uses creation time when Vercel omits aliasAssigned on the previous deployment", async () => {
+    const mixed = [
+      { ...deployments[0], aliasAssigned: 400 },
+      { ...deployments[1] }, // no aliasAssigned at all
+    ]
+    const { deps, rollbackTo } = makeDeps({
+      failing: pageFails,
+      deployments: mixed,
+      liveShas: [NEW_SHA, NEW_SHA, NEW_SHA, PREV_SHA],
+    })
+    await runSmoke(env, deps)
+    expect(rollbackTo).toHaveBeenCalledWith(expect.objectContaining({ deploymentId: "dpl_prev" }))
+  })
+
+  it("uses creation time for both when aliasAssigned is missing everywhere", async () => {
+    const bare = deployments.map(({ ...deployment }) => deployment)
+    const { deps, rollbackTo } = makeDeps({
+      failing: pageFails,
+      deployments: bare,
+      liveShas: [NEW_SHA, NEW_SHA, NEW_SHA, PREV_SHA],
+    })
+    await runSmoke(env, deps)
+    expect(rollbackTo).toHaveBeenCalledTimes(1)
+  })
+
+  it("refuses a previous deployment whose aliasAssigned is false (never served)", async () => {
+    const neverServed = [{ ...deployments[0] }, { ...deployments[1], aliasAssigned: false }]
+    const { deps, rollbackTo } = makeDeps({ failing: pageFails, deployments: neverServed })
+    const result = await runSmoke(env, deps)
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.reason).toMatch(/no verified rollback target/)
   })
 
   it("passes cleanly without touching Vercel when every probe passes", async () => {

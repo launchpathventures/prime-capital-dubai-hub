@@ -167,6 +167,7 @@ See [Deployment Rollback](./deployment-rollback.md) for rollback procedures.
 | Environment | URL | Purpose |
 |-------------|-----|---------|
 | Production | https://primecapitaldubai.com | Live site |
+| Production (partner brand) | https://tahirmajithia.com | Same deployment, Tahir surface |
 | Preview | Vercel preview URL | PR testing |
 | Local | http://localhost:3000 | Development |
 
@@ -174,14 +175,17 @@ See [Deployment Rollback](./deployment-rollback.md) for rollback procedures.
 
 ## Automated Testing
 
-Non-draft pull requests run `.github/workflows/ci.yml`: lint, typecheck, `tests/api` plus the rollback-decision tests in `tests/ci`, and the [migration expand/contract guard](./migration-expand-contract.md). Drafts are skipped.
+Non-draft pull requests run `.github/workflows/ci.yml`: lint, typecheck, `tests/api` plus the `tests/ci` tests, a production `pnpm build` (no secrets passed), and the [migration expand/contract guard](./migration-expand-contract.md). Drafts are skipped.
 
 After a successful Vercel production deployment, `.github/workflows/post-deploy-smoke.yml` probes:
 
 - `https://primecapitaldubai.com/api/health` (follows the redirect to `www`; a 503 fails that attempt)
 - `/`, `/contact`, `/properties`, `/team`, and `/auth/login` on both `primecapitaldubai.com` and `www.primecapitaldubai.com`
+- `/api/health`, `/`, `/about`, `/contact`, and `/services` on both `tahirmajithia.com` and `www.tahirmajithia.com` (apex redirects to `www`). The Tahir host serves the `/tahir/*` surface from the same Vercel deployment, so one rollback moves both sites.
 
-It confirms `/api/version` is serving the new commit before those probes count. A failed check is waited out for 45 seconds and probed once more; rollback happens only if it fails again and `AUTO_ROLLBACK` has been turned on (it is off by default, in which case the job fails and logs the rollback target it would have used). A failure of only `/api/health` with every page passing never rolls back. Both attempts are in the job summary. See [Deployment Rollback](./deployment-rollback.md).
+It confirms `/api/version` is serving the new commit before those probes count. A failed check is waited out for 45 seconds and probed once more; rollback happens only if it fails again and `AUTO_ROLLBACK` has been turned on (it is off by default, in which case the job fails and logs the rollback target it would have used). A failure of only `/api/health` with every page passing never rolls back. Both attempts are in the job summary. When the job fails, a second job opens (or comments on) the GitHub issue "Post-deploy smoke failed on production" and mentions the repository owner. See [Deployment Rollback](./deployment-rollback.md).
+
+A deployment that was promoted or instantly rolled back by hand does not raise a new "Production success" event, so these checks do not run for it. Run `curl https://www.primecapitaldubai.com/api/version` and the quick smoke test above yourself after any manual promote or rollback.
 
 These checks are read-only. Form submission, a real login, the learn dashboard, and admin pages stay on this manual checklist.
 
@@ -190,6 +194,7 @@ These checks are read-only. Form submission, a real login, the learn dashboard, 
 pnpm lint
 pnpm typecheck
 pnpm exec vitest run tests/api tests/ci
+pnpm build
 node scripts/check-migrations.mjs <base-sha>
 ```
 
