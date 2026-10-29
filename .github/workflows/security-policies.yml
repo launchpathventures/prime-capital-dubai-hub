@@ -1,0 +1,60 @@
+# CATALYST - Storage policy, sign-up domain and profile-role tests (serviceos#2011)
+#
+# Runs tests/security against a throwaway local Postgres service. Only touches
+# the CI service container; no Supabase project or secret is involved.
+name: Security policy tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - "tests/security/**"
+      - "lib/auth/config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/security-policies.yml"
+  push:
+    branches: [master]
+    paths:
+      - "supabase/**"
+      - "tests/security/**"
+      - "lib/auth/config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/security-policies.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  security-policies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      STORAGE_POLICY_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      # Actions pinned to commit SHAs (the comment is the tag they were resolved from)
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run tests/security

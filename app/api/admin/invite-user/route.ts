@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js"
 import { createClient as createServerClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { rewriteMagicLink } from "@/lib/auth/magic-link"
+import { SIGNUP_EMAIL_DOMAINS, isAllowedSignupEmail } from "@/lib/auth/config"
 
 export async function POST(request: Request) {
   const defaultPassword = process.env.AUTH_DEFAULT_PASSWORD
@@ -36,6 +37,15 @@ export async function POST(request: Request) {
   
   if (!email) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 })
+  }
+
+  // The database refuses other domains too (serviceos#2011); check first so the
+  // admin gets a clear message instead of a generic "Database error".
+  if (!isAllowedSignupEmail(email)) {
+    return NextResponse.json(
+      { error: `Only ${SIGNUP_EMAIL_DOMAINS.map((d) => `@${d}`).join(" or ")} email addresses can be added.` },
+      { status: 400 }
+    )
   }
 
   // Create admin client with service role
