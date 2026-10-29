@@ -6,6 +6,9 @@ name: Security policy tests
 
 on:
   pull_request:
+    # ready_for_review re-runs the suite when a draft is marked ready, since drafts
+    # into non-production bases skip the job below.
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "supabase/**"
       - "tests/security/**"
@@ -26,8 +29,22 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same PR cancels the superseded run. Only pull_request runs share a
+# group; every other event (push to master) gets a group keyed on its own run id, so a
+# production push is never cancelled and never replaces a queued run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   security-policies:
+    # Draft PRs skip the job (it reports "skipped") until ready_for_review. PRs into the
+    # production branch (master, the only long-lived branch) always run the full suite,
+    # drafts included. Pushes always run. Required-check status: none is configured today.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.draft == false ||
+      github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
