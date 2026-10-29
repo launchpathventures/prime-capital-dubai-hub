@@ -4,19 +4,7 @@
 -- real handle_new_user() migration, creates the on_auth_user_created trigger,
 -- and applies the migration under test.
 
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
-    CREATE ROLE anon NOLOGIN;
-  END IF;
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
-    CREATE ROLE authenticated NOLOGIN;
-  END IF;
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'supabase_auth_admin') THEN
-    CREATE ROLE supabase_auth_admin NOLOGIN;
-  END IF;
-END
-$$;
+-- Roles are created by scratch-db.ts (cluster-wide, so parallel test files would race).
 
 CREATE SCHEMA auth;
 GRANT USAGE ON SCHEMA auth TO supabase_auth_admin;

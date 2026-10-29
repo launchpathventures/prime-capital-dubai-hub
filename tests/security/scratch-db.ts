@@ -30,6 +30,30 @@ export async function createScratchDb(prefix: string) {
   const name = `${prefix}_${process.pid}_${Date.now()}`
   const root = new Client({ connectionString: ADMIN_URL })
   await root.connect()
+  // Roles are cluster-wide and survive DROP DATABASE; test files run in parallel,
+  // so create them idempotently under an advisory lock.
+  await root.query("SELECT pg_advisory_lock(2011)")
+  try {
+    await root.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+          CREATE ROLE anon NOLOGIN;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+          CREATE ROLE authenticated NOLOGIN;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
+          CREATE ROLE service_role NOLOGIN BYPASSRLS;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'supabase_auth_admin') THEN
+          CREATE ROLE supabase_auth_admin NOLOGIN;
+        END IF;
+      END
+      $$`)
+  } finally {
+    await root.query("SELECT pg_advisory_unlock(2011)")
+  }
   await root.query(`CREATE DATABASE ${name}`)
   const db = new Client({ connectionString: withDatabase(ADMIN_URL!, name) })
   await db.connect()

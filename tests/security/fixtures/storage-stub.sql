@@ -5,20 +5,7 @@
 -- the storage policies that existed in prod BEFORE the lock migration. The
 -- migration under test is applied on top of this.
 
--- Roles are cluster-wide and survive DROP DATABASE, so create them idempotently.
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
-    CREATE ROLE anon NOLOGIN;
-  END IF;
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
-    CREATE ROLE authenticated NOLOGIN;
-  END IF;
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
-    CREATE ROLE service_role NOLOGIN BYPASSRLS;
-  END IF;
-END
-$$;
+-- Roles are created by scratch-db.ts (cluster-wide, so parallel test files would race).
 
 CREATE SCHEMA auth;
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
