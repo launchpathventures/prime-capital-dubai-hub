@@ -20,7 +20,7 @@ If any check fails, the job waits 45 seconds, confirms the new SHA is still the 
 
 `POST /v1/projects/{projectId}/rollback/{deploymentId}`
 
-The target is the deployment that was serving production before this one: **READY**, listed by Vercel as a rollback candidate, has served the production domains, is not itself a rollback, and has a git SHA. The job summary records the target's id, SHA, and first line of its commit message. Just before calling the API the job checks `/api/version` once more; if the live SHA is no longer the one it judged, it does not roll back.
+The target is the deployment that was serving production before this one: **READY**, reported by Vercel as a rollback candidate, is not the same commit as the failing deploy, has served the production domains, is not itself a rollback, and has a git SHA. The job summary records the target's id, SHA, and first line of its commit message. Just before calling the API the job checks `/api/version` once more; if the live SHA is no longer the one it judged, it does not roll back.
 
 After the call it waits for `/api/version` to show the previous SHA, probes again, and **fails the job** even when the restore worked.
 

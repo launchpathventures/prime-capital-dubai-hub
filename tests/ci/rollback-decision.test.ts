@@ -15,6 +15,7 @@ import {
   isHealthOnlyFailure,
   retryBeforeRollback,
   rollbackEnabled,
+  sanitizeForLog,
   selectRollbackTarget,
   shaMatches,
 } from "../../scripts/post-deploy-smoke.mjs"
@@ -30,6 +31,7 @@ const current = {
 const previous = {
   uid: "dpl_prev",
   created: 200,
+  isRollbackCandidate: true,
   readyState: "READY",
   target: "production",
   meta: { githubCommitSha: "bbb2222222222222222222222222222222222222" },
@@ -38,6 +40,7 @@ const previous = {
 const older = {
   uid: "dpl_older",
   created: 100,
+  isRollbackCandidate: true,
   state: "READY",
   target: "production",
   meta: { githubCommitSha: "ccc3333333333333333333333333333333333333" },
@@ -90,7 +93,21 @@ describe("selectRollbackTarget", () => {
   it("refuses when the best candidate is not a rollback candidate, instead of skipping to an older one", () => {
     const { target, reason } = pick([current, { ...previous, isRollbackCandidate: false }, older])
     expect(target).toBeNull()
-    expect(reason).toMatch(/not a rollback candidate/)
+    expect(reason).toMatch(/not reported as a rollback candidate/)
+  })
+
+  it("refuses when Vercel does not report the candidate flag at all", () => {
+    const { isRollbackCandidate: _flag, ...unflagged } = previous
+    void _flag
+    const { target, reason } = pick([current, unflagged, older])
+    expect(target).toBeNull()
+    expect(reason).toMatch(/not reported as a rollback candidate/)
+  })
+
+  it("never targets a deployment of the same commit as the failing one (redeploy)", () => {
+    const sameCommit = { ...previous, meta: { githubCommitSha: current.meta.githubCommitSha } }
+    const { target } = pick([current, sameCommit, older])
+    expect(target).toBeNull()
   })
 
   it("skips a production build that never served the domains", () => {
@@ -147,6 +164,7 @@ describe("deploymentIsRollback", () => {
   it("recognises Vercel rollback metadata and dashboard descriptions", () => {
     expect(deploymentIsRollback({ meta: { action: "rollback" } })).toBe(true)
     expect(deploymentIsRollback({ description: "Rolled back to a previous deployment" })).toBe(true)
+    expect(deploymentIsRollback({ description: "auto rollback: production smoke failed" })).toBe(true)
     expect(deploymentIsRollback({ meta: { githubCommitSha: "abc" }, description: "Deployment has completed" })).toBe(false)
     expect(deploymentIsRollback(null)).toBe(false)
   })
@@ -293,5 +311,16 @@ describe("isHealthOnlyFailure", () => {
     expect(isHealthOnlyFailure([probe("health", true), probe("page", false)])).toBe(false)
     expect(isHealthOnlyFailure([probe("health", true), probe("page", true)])).toBe(false)
     expect(isHealthOnlyFailure([])).toBe(false)
+  })
+})
+
+describe("sanitizeForLog", () => {
+  it("keeps one plain line so external text cannot start a workflow command or format the summary", () => {
+    const cleaned = sanitizeForLog("x\r::stop-commands::tok\nsecond [link](http://e.test) <b> `c` | @team")
+    expect(cleaned).toBe("x")
+    const inline = sanitizeForLog("see [link](http://e.test) <b> `c` | @team *bold*")
+    expect(inline).not.toMatch(/[`<>|[\]()*@]/)
+    expect(sanitizeForLog("a".repeat(500), 100)).toHaveLength(100)
+    expect(sanitizeForLog(null)).toBe("")
   })
 })

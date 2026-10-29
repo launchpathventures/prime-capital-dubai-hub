@@ -120,8 +120,11 @@ export function selectRollbackTarget(deployments, currentId) {
       reason: "previous deployment is ambiguous (a deployment in the window may have been rolled away from)",
     }
   }
-  if (target.rollbackCandidate === false) {
-    return { target: null, reason: `previous deployment ${target.id} is not a rollback candidate` }
+  if (shaMatches(target.sha, current.sha)) {
+    return { target: null, reason: `previous deployment ${target.id} is the same commit as the failing one` }
+  }
+  if (target.rollbackCandidate !== true) {
+    return { target: null, reason: `previous deployment ${target.id} is not reported as a rollback candidate` }
   }
   if (!target.sha) {
     return { target: null, reason: `previous deployment ${target.id} has no git SHA to verify the restore` }
@@ -143,7 +146,7 @@ export function deploymentIsRollback(deployment) {
   if (meta.action === "rollback") return true
   if (meta.rollback === true || meta.rollback === "1" || meta.rollback === "true") return true
   // Description only: a commit message is author text and must not switch rollback off.
-  return /rolled back|instant rollback/i.test(deployment.description || "")
+  return /rolled back|instant rollback|auto rollback/i.test(deployment.description || "")
 }
 
 /**
@@ -306,7 +309,7 @@ async function probeOnce(url, kind) {
       url,
       kind,
       status: response.status,
-      detail: parsed?.status || body.slice(0, 160),
+      detail: sanitizeForLog(parsed?.status || body, 160),
     }
   }
   const contentType = response.headers.get("content-type") || ""
@@ -337,7 +340,7 @@ async function probeJobs(jobs) {
         url: job.url,
         kind: job.kind,
         status: 0,
-        detail: error instanceof Error ? error.message : String(error),
+        detail: sanitizeForLog(error instanceof Error ? error.message : error, 180),
       })),
     ),
   )
@@ -361,10 +364,10 @@ async function waitForSha({ origin, expectedSha, attempts, intervalMs }) {
       } catch {
         sha = null
       }
-      last = { status: response.status, sha, detail: body.slice(0, 180) }
+      last = { status: response.status, sha: sha == null ? null : sanitizeForLog(sha, 64), detail: sanitizeForLog(body, 180) }
       if (shaMatches(sha, expectedSha)) return { live: true, attempts: attempt, ...last }
     } catch (error) {
-      last = { status: 0, sha: null, detail: error instanceof Error ? error.message : String(error) }
+      last = { status: 0, sha: null, detail: sanitizeForLog(error instanceof Error ? error.message : error, 180) }
     }
     if (attempt < attempts) await sleep(intervalMs)
   }
@@ -423,9 +426,21 @@ export function isHealthOnlyFailure(probes) {
   return failed.length > 0 && failed.every((probe) => probe.kind === "health") && pages.every((probe) => probe.ok)
 }
 
-/** One line for the job summary; author-controlled text is flattened so it cannot break the markdown. */
+/**
+ * External text (commit messages, response bodies, API errors) goes into the job
+ * log and summary. A lone CR could start a workflow command, and markdown or
+ * HTML characters would format the summary, so keep one plain line.
+ */
+export function sanitizeForLog(value, max = 100) {
+  return String(value ?? "")
+    .split(/[\r\n\u2028\u2029]/)[0]
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/[`<>|\[\]()*_#@&\\]/g, "'")
+    .slice(0, max)
+}
+
 function describeTarget(target) {
-  const message = (target.commitMessage || "").split("\n")[0].replace(/[`<>|]/g, "'").slice(0, 100)
+  const message = sanitizeForLog(target.commitMessage)
   return `\`${target.id}\`, sha \`${target.sha}\`${message ? `, "${message}"` : ""}`
 }
 
@@ -551,7 +566,7 @@ export async function runSmoke(env, deps = defaultDeps) {
       }
     } catch (error) {
       targetNote = "deployment lookup failed"
-      lookupNote = `deployment lookup failed: ${error instanceof Error ? error.message : String(error)}`
+      lookupNote = `deployment lookup failed: ${sanitizeForLog(error instanceof Error ? error.message : error, 200)}`
     }
     // Last check before acting: only roll back while the SHA this job judged is still live.
     if (rollbackTargetId && rollbackEnabled(autoRollback) && !(await stillExpected("before rollback"))) {
@@ -592,7 +607,7 @@ export async function runSmoke(env, deps = defaultDeps) {
         lines.push("", formatProbeAttempt(1, reprobes).replace("### Attempt 1", "### Recheck after rollback"))
       }
     } catch (error) {
-      lines.push(`- Rollback API failed: ${error instanceof Error ? error.message : String(error)}`)
+      lines.push(`- Rollback API failed: ${sanitizeForLog(error instanceof Error ? error.message : error, 200)}`)
     }
     lines.push(
       restoredOk

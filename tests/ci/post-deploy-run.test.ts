@@ -17,9 +17,10 @@ const deployments = [
   {
     uid: "dpl_prev",
     created: 200,
+    isRollbackCandidate: true,
     readyState: "READY",
     target: "production",
-    meta: { githubCommitSha: PREV_SHA, githubCommitMessage: "feat: previous `change`\nbody" },
+    meta: { githubCommitSha: PREV_SHA, githubCommitMessage: "feat: previous `change`\r::stop-commands::x\nbody" },
   },
 ]
 
@@ -78,6 +79,7 @@ describe("runSmoke", () => {
     expect(summary).toContain(PREV_SHA)
     expect(summary).toContain("feat: previous 'change'")
     expect(summary).not.toContain("body")
+    expect(summary).not.toMatch(/\r|::stop-commands::/)
     expect(result.fail).toBe(true)
   })
 
