@@ -38,9 +38,9 @@ concurrency:
 
 jobs:
   security-policies:
-    # Draft PRs skip the job (it reports "skipped") until ready_for_review. PRs into the
-    # production branch (master, the only long-lived branch) always run the full suite,
-    # drafts included. Pushes always run. Required-check status: none is configured today.
+    # Drafts skip (reports "skipped") until ready_for_review; PRs into master and pushes always run.
+    # WARNING: do not make this check required without first adding a paths-filter gate job.
+    # The workflow-level `paths:` above creates no check on docs-only PRs, so it would hang pending.
     if: >-
       github.event_name != 'pull_request' ||
       github.event.pull_request.draft == false ||
