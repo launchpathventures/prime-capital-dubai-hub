@@ -12,42 +12,49 @@ This runbook covers how to rollback a failed deployment to a previous known-good
 
 ## Rollback Procedures
 
-### Option 0: Automatic instant rollback (default)
+### Option 0: Automatic instant rollback (opt-in, off by default)
 
 A successful Vercel **Production** deployment runs `.github/workflows/post-deploy-smoke.yml`. The job waits until `https://primecapitaldubai.com/api/version` (which redirects to `www`) serves the new commit SHA, then probes `/api/health` and the public checklist routes on both the apex and `www` host. `/api/health` must be HTTP 200 with `"status": "healthy"` — the route returns 503 when Supabase is down.
 
-If any check fails, the job waits 45 seconds and probes only those failing checks once more. Both attempts are written to the job summary. A single failure, including a brief Supabase 503, does not move production. The job calls the Vercel instant-rollback API only when the second attempt still fails, and points production at the deployment that was serving production before this one (a **READY** production deployment that Vercel lists as a rollback candidate, has served the production domains, and is not itself a rollback):
+If any check fails, the job waits 45 seconds, confirms the new SHA is still the one live, and probes only the failing checks once more. Both attempts are written to the job summary. A single failure, including a brief Supabase 503, does not move production. The job calls the Vercel instant-rollback API only when the second attempt still fails, rollback is turned on, and the target is verified:
 
 `POST /v1/projects/{projectId}/rollback/{deploymentId}`
 
-It then waits for `/api/version` to show the previous SHA, probes again, writes the result to the GitHub Actions job summary, and **fails the job** even when the restore worked.
+The target is the deployment that was serving production before this one: **READY**, listed by Vercel as a rollback candidate, has served the production domains, is not itself a rollback, and has a git SHA. The job summary records the target's id, SHA, and first line of its commit message. Just before calling the API the job checks `/api/version` once more; if the live SHA is no longer the one it judged, it does not roll back.
 
-The job does not roll back when:
+After the call it waits for `/api/version` to show the previous SHA, probes again, and **fails the job** even when the restore worked.
+
+**Rollback is off unless `AUTO_ROLLBACK` is `true`, `1`, `on`, `yes`, or `enabled`.** With it off, a failed smoke still fails the job and the summary logs the rollback target it would have used, so the logic can be watched on real deploys first. Do not put the token in a variable.
+
+The job fails without rolling back when:
 
 - the new SHA never appears on the alias (the previous deployment is still serving; rolling back could move the alias anyway)
+- a different SHA is live by the time it would act (a newer deploy superseded this one)
 - the response looks like a bot challenge rather than the app
+- only `/api/health` fails and every page probe passes (usually a dependency outage; rolling back healthy code would not help and stops later deploys going live)
 - the deployment is already a rollback
-- there is no eligible previous production deployment
+- there is no eligible previous production deployment, or it cannot be verified (for example the order of recent deployments is ambiguous because one was rolled away from, the best candidate is not a rollback candidate, or it has no git SHA)
 - `VERCEL_TOKEN` is missing
-- the repository variable `AUTO_ROLLBACK` is `false`, `0`, `off`, `no`, or `disabled`
-
-`AUTO_ROLLBACK` unset means rollback is **on**. Create the variable only to turn it off. Do not put the token in a variable.
+- `AUTO_ROLLBACK` is not enabled
 
 | Name | Kind | Required | Purpose |
 |------|------|----------|---------|
-| `VERCEL_TOKEN` | Actions secret | Yes, for rollback | Vercel API token that can roll back `prime-capital-dubai-hub` |
-| `AUTO_ROLLBACK` | Repository variable | No | Kill switch. Unset = on |
+| `VERCEL_TOKEN` | Secret in the GitHub Environment `production` (not a repository secret) | Yes, for rollback | Team-scoped Vercel token with the least access that can list deployments and roll back `prime-capital-dubai-hub` |
+| `AUTO_ROLLBACK` | Repository variable | No | Opt-in switch. Unset = off |
 | `VERCEL_TEAM_ID` | Repository variable | No | Overrides `team_HshsUsC6U4lidrM07nzJLx1n` |
 | `VERCEL_PROJECT_ID` | Repository variable | No | Overrides `prj_3XrkSo2JCGR2WTC5wcFUAgMBUB9x` |
 
-#### Undo the instant rollback / re-enable auto-assignment
+The workflow runs from the deployed commit, so the `if` on the job is not a security boundary. The token is protected by the Environment `production` being limited to `master`.
 
-After an instant rollback, Vercel stops assigning the production domains to new deployments from `master`. Later pushes still build, but they do not go live, and the post-deploy job fails with "new deploy is not live". Production stays on the rolled-back deployment until someone restores auto-assignment:
+#### After an instant rollback: restoring auto-assignment
 
-1. Fix the problem and push to `master` (or decide the rolled-back deployment is the one to keep).
-2. In the Vercel dashboard, open the project **Deployments** tab and use **Undo Rollback**, or promote the deployment you want live (**Promote to Production**). Either restores auto-assignment of the production domains.
-3. From the CLI, `vercel promote <deployment-url-or-id>` does the same.
-4. Confirm `https://primecapitaldubai.com/api/version` shows the SHA you expect, and that the next push to `master` goes live on its own.
+After an instant rollback, Vercel stops assigning the production domains to new deployments from `master`. Later pushes still build, but they do not go live, and the post-deploy job fails with "new deploy is not live". Production stays on the rolled-back deployment until someone promotes a deployment:
+
+1. Fix the problem and push to `master`; wait for that deployment to be **READY**.
+2. Promote that specific fixed deployment: in the Vercel dashboard open **Deployments**, pick the fixed deployment, and use **Promote to Production**, or run `vercel promote <deployment-url-or-id>`. This restores auto-assignment of the production domains.
+3. Confirm `https://primecapitaldubai.com/api/version` shows the SHA of the fixed deployment, and that the next push to `master` goes live on its own.
+
+Do **not** use **Undo Rollback** for this. It is not documented to do what is needed, and it can put the deployment that was rolled away from (the bad one) back live. Only use it if someone has confirmed on a non-production project exactly what it does.
 
 Instant rollback does not undo SQL. See [Migration expand/contract guard](./migration-expand-contract.md). On a Hobby plan, Vercel only allows rolling back to the immediately previous production deployment; the script asks for the deployment that was serving before and surfaces the API error if Vercel rejects it.
 

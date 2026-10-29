@@ -37,6 +37,10 @@ Replacing a trigger, policy, or function (`DROP TRIGGER`, `DROP POLICY`, `DROP F
 
 The guard checks that the rollback file has SQL beyond comments. It does **not** execute it, and it does not connect to Supabase. Applying the rollback is a manual step: instant deployment rollback does not reverse schema changes. Prefer expand then contract (ship the code that stops reading a column, then drop the column in a later migration) so the previous production deployment still runs against the new schema.
 
+## Known limits of the guard
+
+It is a review aid, not a security control. It does not flag `DROP VIEW`, `DROP INDEX`, `DROP CONSTRAINT`, or an `UPDATE` without `WHERE`; it does not check deleted migration files; a `--` inside a string literal hides the rest of that line from it; and any changed file whose name contains `rollback` is rejected, including innocent names such as `add_rollback_audit`. Review those by hand.
+
 ## Example
 
 `supabase/migrations/20261027_drop_legacy_name.sql`:

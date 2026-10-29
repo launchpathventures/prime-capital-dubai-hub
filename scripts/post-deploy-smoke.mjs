@@ -33,17 +33,16 @@ export const SMOKE_PATHS = [
   { path: "/auth/login", kind: "page" },
 ]
 
-const OFF_VALUES = new Set(["0", "false", "off", "no", "disabled"])
+const ON_VALUES = new Set(["1", "true", "on", "yes", "enabled"])
 const USER_AGENT = "PrimeCapitalSmoke/1.0 (+https://www.primecapitaldubai.com)"
 
 /** One quiet period so a brief Supabase 503 does not move production. */
 export const PROBE_RETRY_WAIT_MS = 45_000
 
+/** Opt-in: rollback runs only when AUTO_ROLLBACK is explicitly turned on. */
 export function rollbackEnabled(value) {
-  if (value == null) return true
-  const normalized = String(value).trim().toLowerCase()
-  if (!normalized) return true
-  return !OFF_VALUES.has(normalized)
+  if (value == null) return false
+  return ON_VALUES.has(String(value).trim().toLowerCase())
 }
 
 export function shaMatches(live, expected) {
@@ -66,6 +65,7 @@ export function normalizeDeployment(raw) {
     sha: meta.githubCommitSha || meta.gitCommitSha || null,
     meta,
     description: raw?.description || "",
+    commitMessage: meta.githubCommitMessage || "",
     // Vercel reports false/absent when a deployment cannot be rolled back to.
     rollbackCandidate: raw?.isRollbackCandidate,
     // Time the production domains were last pointed at this deployment.
@@ -86,25 +86,47 @@ function isProductionReady(deployment) {
 
 /**
  * The rollback target is the deployment that was serving production before the
- * current one: READY production, eligible per Vercel, served the domains, not
- * itself a rollback, and serving before the current deployment did. Among those
- * the one that served most recently wins, so a deployment that was already
- * rolled away from is passed over in favour of the one restored in its place.
+ * current one: READY production, served the domains, not itself a rollback, and
+ * serving before the current deployment did. Returns { target, reason }.
+ *
+ * Fails closed (target null) when the choice cannot be verified:
+ * - Vercel does not document whether a rollback refreshes `aliasAssigned`, so if
+ *   ordering by serving time disagrees with ordering by creation time, a
+ *   deployment in the window may have been rolled away from and the "previous"
+ *   one is ambiguous.
+ * - the best candidate is not a rollback candidate per Vercel, or has no git SHA
+ *   to confirm the restore with. Older deployments are never skipped to.
  */
 export function selectRollbackTarget(deployments, currentId) {
   const all = deployments.map(normalizeDeployment)
   const current = all.find((deployment) => deployment.id === currentId)
-  if (!current) return null
+  if (!current) return { target: null, reason: "current deployment not found in the latest production deployments" }
   const currentSince = servingSince(current)
-  const candidates = all
+  const served = all
     .filter(isProductionReady)
     .filter((deployment) => deployment.id !== currentId)
-    .filter((deployment) => deployment.rollbackCandidate !== false)
     .filter((deployment) => !deployment.neverServed)
     .filter((deployment) => !deploymentIsRollback(deployment))
     .filter((deployment) => servingSince(deployment) < currentSince)
-    .sort((left, right) => servingSince(right) - servingSince(left) || right.created - left.created)
-  return candidates[0] || null
+  if (served.length === 0) return { target: null, reason: "no previous READY production deployment" }
+  const byServed = [...served].sort(
+    (left, right) => servingSince(right) - servingSince(left) || right.created - left.created,
+  )
+  const byCreated = [...served].sort((left, right) => right.created - left.created)
+  const target = byServed[0]
+  if (target.id !== byCreated[0].id) {
+    return {
+      target: null,
+      reason: "previous deployment is ambiguous (a deployment in the window may have been rolled away from)",
+    }
+  }
+  if (target.rollbackCandidate === false) {
+    return { target: null, reason: `previous deployment ${target.id} is not a rollback candidate` }
+  }
+  if (!target.sha) {
+    return { target: null, reason: `previous deployment ${target.id} has no git SHA to verify the restore` }
+  }
+  return { target, reason: "" }
 }
 
 export function findDeploymentBySha(deployments, sha) {
@@ -120,8 +142,8 @@ export function deploymentIsRollback(deployment) {
   const meta = deployment.meta || {}
   if (meta.action === "rollback") return true
   if (meta.rollback === true || meta.rollback === "1" || meta.rollback === "true") return true
-  const description = `${deployment.description || ""} ${meta.githubCommitMessage || ""}`
-  return /rolled back|instant rollback/i.test(description)
+  // Description only: a commit message is author text and must not switch rollback off.
+  return /rolled back|instant rollback/i.test(deployment.description || "")
 }
 
 /**
@@ -133,6 +155,9 @@ export function deploymentIsRollback(deployment) {
  * @param {boolean} input.currentIsRollback
  * @param {boolean} input.tokenPresent
  * @param {boolean} [input.inconclusive]
+ * @param {boolean} [input.healthOnlyFailure] only /api/health failed; every page probe passed
+ * @param {boolean} [input.superseded] the live SHA is no longer the one this job is judging
+ * @param {string} [input.targetNote] why no target was chosen
  */
 export function decideRollback({
   probesOk,
@@ -142,6 +167,9 @@ export function decideRollback({
   currentIsRollback,
   tokenPresent,
   inconclusive = false,
+  healthOnlyFailure = false,
+  superseded = false,
+  targetNote = "",
 }) {
   if (!versionLive) {
     return {
@@ -153,11 +181,26 @@ export function decideRollback({
   if (probesOk) {
     return { rollback: false, fail: false, reason: "production smoke passed" }
   }
+  if (superseded) {
+    return {
+      rollback: false,
+      fail: true,
+      reason: "a different deployment is live now; not rolling back (it is not the one this job judged)",
+    }
+  }
   if (inconclusive) {
     return {
       rollback: false,
       fail: true,
       reason: "smoke was inconclusive (bot challenge or incomplete response); not rolling back",
+    }
+  }
+  if (healthOnlyFailure) {
+    return {
+      rollback: false,
+      fail: true,
+      reason:
+        "only /api/health failed and every page probe passed (likely a dependency outage); not rolling back",
     }
   }
   if (currentIsRollback) {
@@ -168,7 +211,7 @@ export function decideRollback({
     }
   }
   if (!rollbackEnabled(autoRollback)) {
-    return { rollback: false, fail: true, reason: "AUTO_ROLLBACK kill switch is off" }
+    return { rollback: false, fail: true, reason: "AUTO_ROLLBACK is not enabled; rollback is opt-in" }
   }
   if (!tokenPresent) {
     return { rollback: false, fail: true, reason: "VERCEL_TOKEN is not set; cannot roll back" }
@@ -177,7 +220,9 @@ export function decideRollback({
     return {
       rollback: false,
       fail: true,
-      reason: "no previous READY production deployment to roll back to",
+      reason: targetNote
+        ? `no verified rollback target: ${targetNote}`
+        : "no previous READY production deployment to roll back to",
     }
   }
   return {
@@ -299,6 +344,7 @@ async function probeJobs(jobs) {
 }
 
 async function waitForSha({ origin, expectedSha, attempts, intervalMs }) {
+  /** @type {{ status: number, sha: string | null, detail: string }} */
   let last = { status: 0, sha: null, detail: "no response" }
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
@@ -370,39 +416,74 @@ function isDirectRun() {
   }
 }
 
-async function main() {
-  const expectedSha = process.env.EXPECTED_SHA || ""
+/** True when the only failures are /api/health and every page probe passed. */
+export function isHealthOnlyFailure(probes) {
+  const failed = probes.filter((probe) => !probe.ok)
+  const pages = probes.filter((probe) => probe.kind !== "health")
+  return failed.length > 0 && failed.every((probe) => probe.kind === "health") && pages.every((probe) => probe.ok)
+}
+
+/** One line for the job summary; author-controlled text is flattened so it cannot break the markdown. */
+function describeTarget(target) {
+  const message = (target.commitMessage || "").split("\n")[0].replace(/[`<>|]/g, "'").slice(0, 100)
+  return `\`${target.id}\`, sha \`${target.sha}\`${message ? `, "${message}"` : ""}`
+}
+
+const defaultDeps = {
+  waitForSha,
+  probeJobs,
+  listProductionDeployments,
+  rollbackTo,
+  sleep,
+}
+
+/**
+ * Runs the whole check. Returns { fail, lines, rolledBack } so tests can drive it
+ * with fake dependencies; the CLI writes the summary and sets the exit code.
+ */
+export async function runSmoke(env, deps = defaultDeps) {
+  const expectedSha = env.EXPECTED_SHA || ""
   if (!expectedSha) throw new Error("EXPECTED_SHA is required")
 
-  const origins = (process.env.SMOKE_ORIGINS || `${PRODUCTION_ORIGIN},${WWW_ORIGIN}`)
+  const origins = (env.SMOKE_ORIGINS || `${PRODUCTION_ORIGIN},${WWW_ORIGIN}`)
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean)
   const versionOrigin = origins[0]
-  const attempts = Number(process.env.VERSION_ATTEMPTS || 12)
-  const intervalMs = Number(process.env.VERSION_INTERVAL_MS || 5000)
-  const autoRollback = process.env.AUTO_ROLLBACK
-  const token = process.env.VERCEL_TOKEN || ""
-  const teamId = process.env.VERCEL_TEAM_ID || DEFAULT_TEAM_ID
-  const projectId = process.env.VERCEL_PROJECT_ID || DEFAULT_PROJECT_ID
+  const attempts = Number(env.VERSION_ATTEMPTS || 12)
+  const intervalMs = Number(env.VERSION_INTERVAL_MS || 5000)
+  const autoRollback = env.AUTO_ROLLBACK
+  const token = env.VERCEL_TOKEN || ""
+  const teamId = env.VERCEL_TEAM_ID || DEFAULT_TEAM_ID
+  const projectId = env.VERCEL_PROJECT_ID || DEFAULT_PROJECT_ID
 
   const lines = [
     "## Post-deploy smoke",
     "",
     `- Expected SHA: \`${expectedSha}\``,
     `- Origins: ${origins.join(", ")}`,
-    `- Rollback: ${rollbackEnabled(autoRollback) ? "on" : "off"} (\`AUTO_ROLLBACK\`)`,
+    `- Rollback: ${rollbackEnabled(autoRollback) ? "on" : "off"} (\`AUTO_ROLLBACK\`, opt-in)`,
   ]
 
-  const version = await waitForSha({ origin: versionOrigin, expectedSha, attempts, intervalMs })
+  const version = await deps.waitForSha({ origin: versionOrigin, expectedSha, attempts, intervalMs })
   lines.push(
     `- Version on ${versionOrigin}: ${version.live ? "live" : "not live"} (HTTP ${version.status}, sha ${version.sha || "none"}, ${version.attempts} attempt(s))`,
   )
 
+  // A newer deploy may go live while this job waits; it must never be rolled back for this job's SHA.
+  const stillExpected = async (when) => {
+    const check = await deps.waitForSha({ origin: versionOrigin, expectedSha, attempts: 1, intervalMs })
+    if (!check.live) {
+      lines.push(`- Live SHA is no longer the expected one ${when} (sha ${check.sha || "none"}, HTTP ${check.status})`)
+    }
+    return check.live
+  }
+
   let probeResults = []
+  let superseded = false
   if (version.live) {
     const jobs = smokeJobs(origins)
-    const attempt1 = await probeJobs(jobs)
+    const attempt1 = await deps.probeJobs(jobs)
     lines.push("", formatProbeAttempt(1, attempt1))
     const firstFailures = attempt1.filter((probe) => !probe.ok)
     const retry = retryBeforeRollback({ attempt: 1, failedCount: firstFailures.length })
@@ -410,12 +491,17 @@ async function main() {
       lines.push(
         `- Waiting ${retry.waitMs / 1000}s, then re-probing ${firstFailures.length} failing check(s)`,
       )
-      await sleep(retry.waitMs)
-      const attempt2 = await probeJobs(firstFailures.map((probe) => ({ url: probe.url, kind: probe.kind })))
-      lines.push("", formatProbeAttempt(2, attempt2))
-      const byUrl = new Map(attempt1.map((probe) => [probe.url, probe]))
-      for (const probe of attempt2) byUrl.set(probe.url, probe)
-      probeResults = jobs.map((job) => byUrl.get(job.url))
+      await deps.sleep(retry.waitMs)
+      if (await stillExpected("before attempt 2")) {
+        const attempt2 = await deps.probeJobs(firstFailures.map((probe) => ({ url: probe.url, kind: probe.kind })))
+        lines.push("", formatProbeAttempt(2, attempt2))
+        const byUrl = new Map(attempt1.map((probe) => [probe.url, probe]))
+        for (const probe of attempt2) byUrl.set(probe.url, probe)
+        probeResults = jobs.map((job) => byUrl.get(job.url))
+      } else {
+        superseded = true
+        probeResults = attempt1
+      }
     } else {
       probeResults = attempt1
       lines.push("", "### Attempt 2", "- not run; attempt 1 passed")
@@ -429,32 +515,47 @@ async function main() {
   const probesOk =
     version.live && probeResults.length > 0 && probeResults.every((probe) => probe.ok) && !secondGate.rollbackAllowed
   const inconclusive = probeResults.some((probe) => probe.inconclusive)
+  const healthOnlyFailure = isHealthOnlyFailure(probeResults)
   let rollbackTargetId = null
   let targetSha = null
-  let currentIsRollback = deploymentIsRollback({ description: process.env.DEPLOYMENT_DESCRIPTION || "" })
+  let targetNote = ""
+  let currentIsRollback = deploymentIsRollback({ description: env.DEPLOYMENT_DESCRIPTION || "" })
   let lookupNote = ""
 
+  // The lookup is read-only, so it also runs while rollback is off to show what it would have done.
   const needsLookup =
     version.live &&
+    !superseded &&
     secondGate.rollbackAllowed &&
     !probesOk &&
     !inconclusive &&
-    rollbackEnabled(autoRollback) &&
+    !healthOnlyFailure &&
     !currentIsRollback &&
     token
   if (needsLookup) {
     try {
-      const deployments = await listProductionDeployments({ token, teamId, projectId })
+      const deployments = await deps.listProductionDeployments({ token, teamId, projectId })
       const current = findDeploymentBySha(deployments, expectedSha)
       if (current) currentIsRollback = currentIsRollback || deploymentIsRollback(current)
-      const target = current && !currentIsRollback ? selectRollbackTarget(deployments, current.id) : null
-      rollbackTargetId = target?.id ?? null
-      targetSha = target?.sha ?? null
-      lookupNote = current
-        ? `current ${current.id}; previous READY ${rollbackTargetId || "none"}`
-        : "failed SHA was not in the latest production deployments"
+      if (!current) {
+        targetNote = "failed SHA was not in the latest production deployments"
+        lookupNote = targetNote
+      } else if (!currentIsRollback) {
+        const { target, reason } = selectRollbackTarget(deployments, current.id)
+        rollbackTargetId = target?.id ?? null
+        targetSha = target?.sha ?? null
+        targetNote = reason
+        lookupNote = target
+          ? `current \`${current.id}\`; rollback target ${describeTarget(target)}`
+          : `current \`${current.id}\`; no verified rollback target (${reason})`
+      }
     } catch (error) {
+      targetNote = "deployment lookup failed"
       lookupNote = `deployment lookup failed: ${error instanceof Error ? error.message : String(error)}`
+    }
+    // Last check before acting: only roll back while the SHA this job judged is still live.
+    if (rollbackTargetId && rollbackEnabled(autoRollback) && !(await stillExpected("before rollback"))) {
+      superseded = true
     }
   }
 
@@ -466,28 +567,29 @@ async function main() {
     currentIsRollback,
     tokenPresent: Boolean(token),
     inconclusive,
+    healthOnlyFailure,
+    superseded,
+    targetNote,
   })
 
   lines.push(`- Decision: ${decision.reason}`)
   if (lookupNote) lines.push(`- Vercel: ${lookupNote}`)
 
   let restoredOk = false
+  let rolledBack = false
   if (decision.rollback && rollbackTargetId) {
     try {
-      await rollbackTo({ token, teamId, projectId, deploymentId: rollbackTargetId })
-      lines.push(`- Instant rollback requested for \`${rollbackTargetId}\``)
-      if (!targetSha) {
-        lines.push("- Previous deployment has no git SHA; re-probe skipped")
-      } else {
-        const restored = await waitForSha({ origin: versionOrigin, expectedSha: targetSha, attempts, intervalMs })
-        lines.push(
-          `- Alias after rollback: ${restored.live ? "serving previous SHA" : "previous SHA not observed"} (${restored.sha || "none"})`,
-        )
-        if (restored.live) {
-          const reprobes = await probeJobs(smokeJobs(origins))
-          restoredOk = reprobes.every((probe) => probe.ok)
-          lines.push("", formatProbeAttempt(1, reprobes).replace("### Attempt 1", "### Recheck after rollback"))
-        }
+      await deps.rollbackTo({ token, teamId, projectId, deploymentId: rollbackTargetId })
+      rolledBack = true
+      lines.push(`- Instant rollback requested for \`${rollbackTargetId}\` (sha \`${targetSha}\`)`)
+      const restored = await deps.waitForSha({ origin: versionOrigin, expectedSha: targetSha, attempts, intervalMs })
+      lines.push(
+        `- Alias after rollback: ${restored.live ? "serving previous SHA" : "previous SHA not observed"} (${restored.sha || "none"})`,
+      )
+      if (restored.live) {
+        const reprobes = await deps.probeJobs(smokeJobs(origins))
+        restoredOk = reprobes.every((probe) => probe.ok)
+        lines.push("", formatProbeAttempt(1, reprobes).replace("### Attempt 1", "### Recheck after rollback"))
       }
     } catch (error) {
       lines.push(`- Rollback API failed: ${error instanceof Error ? error.message : String(error)}`)
@@ -499,9 +601,14 @@ async function main() {
     )
   }
 
-  writeSummary(lines.join("\n"))
-  if (decision.fail) {
-    console.error(`::error::${decision.reason}`)
+  return { fail: decision.fail, reason: decision.reason, lines, rolledBack }
+}
+
+async function main() {
+  const result = await runSmoke(process.env)
+  writeSummary(result.lines.join("\n"))
+  if (result.fail) {
+    console.error(`::error::${result.reason}`)
     process.exit(1)
   }
 }

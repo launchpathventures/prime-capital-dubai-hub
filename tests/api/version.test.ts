@@ -26,8 +26,6 @@ describe("GET /api/version", () => {
     expect(response.headers.get("cache-control")).toMatch(/no-store/)
     await expect(response.json()).resolves.toEqual({
       sha: "abc123def4567890",
-      deploymentId: "dpl_test",
-      env: "production",
     })
   })
 
@@ -42,6 +40,6 @@ describe("GET /api/version", () => {
 
     expect(response.status).toBe(200)
     expect(body.sha).toBeNull()
-    expect(body.env).toBe("development")
+    expect(Object.keys(body)).toEqual(["sha"])
   })
 })

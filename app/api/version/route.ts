@@ -3,7 +3,8 @@
  *
  * Returns the Git SHA of the deployment that is serving this request.
  * Post-deploy smoke waits for this to match the new commit before it judges
- * /api/health. It does not call Supabase, so it still answers when health is 503.
+ * /api/health. Only the SHA is returned; that is all the job reads.
+ * It does not call Supabase, so it still answers when health is 503.
  */
 
 import { NextResponse } from "next/server"
@@ -15,8 +16,6 @@ export function GET() {
   return NextResponse.json(
     {
       sha: process.env.VERCEL_GIT_COMMIT_SHA || null,
-      deploymentId: process.env.VERCEL_DEPLOYMENT_ID || null,
-      env: process.env.VERCEL_ENV || "development",
     },
     {
       headers: {

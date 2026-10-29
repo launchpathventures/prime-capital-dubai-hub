@@ -12,6 +12,7 @@ import {
   deploymentIsRollback,
   findDeploymentBySha,
   formatProbeAttempt,
+  isHealthOnlyFailure,
   retryBeforeRollback,
   rollbackEnabled,
   selectRollbackTarget,
@@ -43,20 +44,20 @@ const older = {
 }
 
 describe("rollbackEnabled", () => {
-  it("stays on when the repository variable is unset", () => {
-    expect(rollbackEnabled(undefined)).toBe(true)
-    expect(rollbackEnabled("")).toBe(true)
-    expect(rollbackEnabled("   ")).toBe(true)
+  it("is off by default when the repository variable is unset or blank", () => {
+    expect(rollbackEnabled(undefined)).toBe(false)
+    expect(rollbackEnabled("")).toBe(false)
+    expect(rollbackEnabled("   ")).toBe(false)
   })
 
-  it("accepts the common on values", () => {
-    for (const value of ["true", "TRUE", "1", "yes", "on"]) {
+  it("turns on only for explicit on values", () => {
+    for (const value of ["true", "TRUE", "1", "yes", "on", " enabled "]) {
       expect(rollbackEnabled(value)).toBe(true)
     }
   })
 
-  it("treats the kill switch as off", () => {
-    for (const value of ["false", "0", "off", "no", "disabled", " FALSE "]) {
+  it("stays off for off values and anything unrecognised", () => {
+    for (const value of ["false", "0", "off", "no", "disabled", " FALSE ", "maybe"]) {
       expect(rollbackEnabled(value)).toBe(false)
     }
   })
@@ -73,62 +74,62 @@ describe("shaMatches", () => {
 })
 
 describe("selectRollbackTarget", () => {
+  const pick = (deployments: object[], id = "dpl_new") => selectRollbackTarget(deployments, id)
+
   it("chooses the previous READY production deployment, skipping newer failures", () => {
-    const target = selectRollbackTarget(
-      [
-        current,
-        { ...previous, readyState: "ERROR", created: 250, uid: "dpl_error" },
-        previous,
-        older,
-        { uid: "dpl_preview", created: 290, readyState: "READY", target: "preview", meta: {} },
-      ],
-      "dpl_new",
-    )
+    const { target } = pick([
+      current,
+      { ...previous, readyState: "ERROR", created: 250, uid: "dpl_error" },
+      previous,
+      older,
+      { uid: "dpl_preview", created: 290, readyState: "READY", target: "preview", meta: {} },
+    ])
     expect(target?.id).toBe("dpl_prev")
   })
 
-  it("skips deployments Vercel says are not rollback candidates", () => {
-    const target = selectRollbackTarget(
-      [current, { ...previous, isRollbackCandidate: false }, { ...older, isRollbackCandidate: true }],
-      "dpl_new",
-    )
-    expect(target?.id).toBe("dpl_older")
+  it("refuses when the best candidate is not a rollback candidate, instead of skipping to an older one", () => {
+    const { target, reason } = pick([current, { ...previous, isRollbackCandidate: false }, older])
+    expect(target).toBeNull()
+    expect(reason).toMatch(/not a rollback candidate/)
   })
 
   it("skips a production build that never served the domains", () => {
-    const target = selectRollbackTarget(
-      [current, { ...previous, aliasAssigned: null }, { ...older, aliasAssigned: 150 }],
-      "dpl_new",
-    )
+    const { target } = pick([current, { ...previous, aliasAssigned: null }, { ...older, aliasAssigned: 150 }])
     expect(target?.id).toBe("dpl_older")
   })
 
   it("skips deployments that are themselves rollbacks", () => {
-    const target = selectRollbackTarget(
-      [current, { ...previous, meta: { ...previous.meta, action: "rollback" } }, older],
-      "dpl_new",
-    )
+    const { target } = pick([current, { ...previous, meta: { ...previous.meta, action: "rollback" } }, older])
     expect(target?.id).toBe("dpl_older")
   })
 
-  it("picks the deployment that was serving before this one, not the next one by creation time", () => {
+  it("refuses when serving order and creation order disagree (a deployment may have been rolled away from)", () => {
     // dpl_bad (created 250) was rolled away from; dpl_prev (created 200) was
-    // restored afterwards, so it served most recently before dpl_new.
+    // restored afterwards. Whether Vercel refreshes aliasAssigned on rollback is
+    // undocumented, so the script must not guess between them.
     const bad = { ...previous, uid: "dpl_bad", created: 250, aliasAssigned: 260 }
     const restored = { ...previous, created: 200, aliasAssigned: 280 }
     const newest = { ...current, aliasAssigned: 310 }
-    expect(selectRollbackTarget([newest, bad, restored, older], "dpl_new")?.id).toBe("dpl_prev")
+    const { target, reason } = pick([newest, bad, restored, older])
+    expect(target).toBeNull()
+    expect(reason).toMatch(/ambiguous/)
+  })
+
+  it("refuses when the previous deployment has no git SHA to verify the restore", () => {
+    const { target, reason } = pick([current, { ...previous, meta: {} }, older])
+    expect(target).toBeNull()
+    expect(reason).toMatch(/no git SHA/)
   })
 
   it("ignores deployments that started serving after the current one", () => {
     const newest = { ...current, aliasAssigned: 310 }
-    const later = { ...previous, uid: "dpl_later", aliasAssigned: 400 }
-    expect(selectRollbackTarget([later, newest, older], "dpl_new")?.id).toBe("dpl_older")
+    const later = { ...previous, uid: "dpl_later", created: 400, aliasAssigned: 400 }
+    expect(pick([later, newest, older]).target?.id).toBe("dpl_older")
   })
 
-  it("returns null when the failed deployment is missing or is the oldest READY deploy", () => {
-    expect(selectRollbackTarget([current, previous], "dpl_missing")).toBeNull()
-    expect(selectRollbackTarget([previous], "dpl_prev")).toBeNull()
+  it("returns no target when the failed deployment is missing or is the oldest READY deploy", () => {
+    expect(pick([current, previous], "dpl_missing").target).toBeNull()
+    expect(pick([previous], "dpl_prev").target).toBeNull()
   })
 })
 
@@ -149,13 +150,22 @@ describe("deploymentIsRollback", () => {
     expect(deploymentIsRollback({ meta: { githubCommitSha: "abc" }, description: "Deployment has completed" })).toBe(false)
     expect(deploymentIsRollback(null)).toBe(false)
   })
+
+  it("ignores the commit message, so a message about rollbacks does not switch rollback off", () => {
+    expect(
+      deploymentIsRollback({
+        meta: { githubCommitMessage: "fix: handle rolled back payments (instant rollback of fees)" },
+        description: "Deployment has completed",
+      }),
+    ).toBe(false)
+  })
 })
 
 describe("decideRollback", () => {
   const ready = {
     probesOk: false,
     versionLive: true,
-    autoRollback: undefined,
+    autoRollback: "true",
     rollbackTargetId: "dpl_prev",
     currentIsRollback: false,
     tokenPresent: true,
@@ -169,7 +179,7 @@ describe("decideRollback", () => {
     })
   })
 
-  it("rolls back by default when the new deploy is live and smoke fails", () => {
+  it("rolls back when enabled, the new deploy is live and smoke fails", () => {
     expect(decideRollback(ready)).toEqual({
       rollback: true,
       fail: true,
@@ -184,11 +194,27 @@ describe("decideRollback", () => {
     expect(decision.reason).toMatch(/not live/i)
   })
 
-  it("honours the kill switch", () => {
-    const decision = decideRollback({ ...ready, autoRollback: "false" })
+  it("does not roll back unless AUTO_ROLLBACK is enabled (default off)", () => {
+    for (const autoRollback of [undefined, "", "false"]) {
+      const decision = decideRollback({ ...ready, autoRollback })
+      expect(decision.rollback).toBe(false)
+      expect(decision.fail).toBe(true)
+      expect(decision.reason).toMatch(/AUTO_ROLLBACK/)
+    }
+  })
+
+  it("fails without rolling back when only /api/health failed", () => {
+    const decision = decideRollback({ ...ready, healthOnlyFailure: true })
     expect(decision.rollback).toBe(false)
     expect(decision.fail).toBe(true)
-    expect(decision.reason).toMatch(/AUTO_ROLLBACK/)
+    expect(decision.reason).toMatch(/only \/api\/health failed/)
+  })
+
+  it("fails without rolling back when a different deployment is live now", () => {
+    const decision = decideRollback({ ...ready, superseded: true })
+    expect(decision.rollback).toBe(false)
+    expect(decision.fail).toBe(true)
+    expect(decision.reason).toMatch(/different deployment is live/)
   })
 
   it("fails loudly when the token or a previous READY deployment is missing", () => {
@@ -255,5 +281,17 @@ describe("retryBeforeRollback", () => {
     expect(summary).toContain("PASS https://www.primecapitaldubai.com/ → HTTP 200 1200 bytes")
     expect(summary).toContain("### Attempt 2")
     expect(summary).toContain("PASS https://www.primecapitaldubai.com/api/health → HTTP 200 healthy")
+  })
+})
+
+describe("isHealthOnlyFailure", () => {
+  const probe = (kind: string, ok: boolean) => ({ kind, ok, url: `https://x/${kind}`, status: ok ? 200 : 503, detail: "" })
+
+  it("is true only when health is the sole failure and every page passed", () => {
+    expect(isHealthOnlyFailure([probe("health", false), probe("page", true)])).toBe(true)
+    expect(isHealthOnlyFailure([probe("health", false), probe("page", false)])).toBe(false)
+    expect(isHealthOnlyFailure([probe("health", true), probe("page", false)])).toBe(false)
+    expect(isHealthOnlyFailure([probe("health", true), probe("page", true)])).toBe(false)
+    expect(isHealthOnlyFailure([])).toBe(false)
   })
 })

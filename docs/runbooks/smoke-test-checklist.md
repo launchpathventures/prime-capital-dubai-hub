@@ -181,7 +181,7 @@ After a successful Vercel production deployment, `.github/workflows/post-deploy-
 - `https://primecapitaldubai.com/api/health` (follows the redirect to `www`; a 503 fails that attempt)
 - `/`, `/contact`, `/properties`, `/team`, and `/auth/login` on both `primecapitaldubai.com` and `www.primecapitaldubai.com`
 
-It confirms `/api/version` is serving the new commit before those probes count. A failed check is waited out for 45 seconds and probed once more; rollback happens only if it fails again, unless `AUTO_ROLLBACK` is off. Both attempts are in the job summary. See [Deployment Rollback](./deployment-rollback.md).
+It confirms `/api/version` is serving the new commit before those probes count. A failed check is waited out for 45 seconds and probed once more; rollback happens only if it fails again and `AUTO_ROLLBACK` has been turned on (it is off by default, in which case the job fails and logs the rollback target it would have used). A failure of only `/api/health` with every page passing never rolls back. Both attempts are in the job summary. See [Deployment Rollback](./deployment-rollback.md).
 
 These checks are read-only. Form submission, a real login, the learn dashboard, and admin pages stay on this manual checklist.
 
