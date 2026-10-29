@@ -341,6 +341,57 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
     })
   })
 
+  describe("function attributes (pg_proc)", () => {
+    const attrs = async (signature: string) => {
+      const { rows } = await db.query(
+        `SELECT p.prosecdef AS secdef, p.provolatile AS volatility, p.proconfig AS config,
+                pg_get_userbyid(p.proowner) AS owner,
+                has_function_privilege('supabase_auth_admin', p.oid, 'EXECUTE') AS auth_admin,
+                has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated,
+                has_function_privilege('anon', p.oid, 'EXECUTE') AS anon
+           FROM pg_proc p WHERE p.oid = $1::regprocedure`,
+        [signature]
+      )
+      return rows[0]
+    }
+    const pinned = { secdef: false, config: ['search_path=""'], owner: "postgres" }
+
+    it("allowed_signup_domains: invoker, STABLE, pinned search_path, callable by the auth service", async () => {
+      expect(await attrs("public.allowed_signup_domains()")).toMatchObject({
+        ...pinned,
+        volatility: "s",
+        auth_admin: true,
+      })
+    })
+
+    it("hook_before_user_created: invoker, STABLE, pinned search_path, only supabase_auth_admin may call it", async () => {
+      expect(await attrs("public.hook_before_user_created(jsonb)")).toMatchObject({
+        ...pinned,
+        volatility: "s",
+        auth_admin: true,
+        authenticated: false,
+        anon: false,
+      })
+    })
+
+    it("enforce_signup_email_domain: invoker trigger function with a pinned search_path", async () => {
+      expect(await attrs("public.enforce_signup_email_domain()")).toMatchObject({
+        ...pinned,
+        volatility: "v",
+      })
+    })
+  })
+
+  describe("rollback SQL", () => {
+    it("assigns no admin role anywhere (static check)", () => {
+      for (const sql of [ROLLBACK_SQL, LPV_ROLLBACK_SQL]) {
+        const code = sql.replace(/--.*$/gm, "")
+        expect(code).not.toMatch(/'admin'/i)
+        expect(code).not.toMatch(/user_role/i)
+      }
+    })
+  })
+
   describe("rollback", () => {
     it("the follow-up rollback returns to primecapitaldubai.com only, and the migration re-allows launchpathventures.com", async () => {
       await db.query(LPV_ROLLBACK_SQL)
@@ -356,6 +407,18 @@ describe.skipIf(!ADMIN_URL)("sign-up domain enforcement (serviceos#2011, F3)", (
       await db.query(ROLLBACK_SQL)
       await db.query(ROLLBACK_SQL) // re-runnable
       expect(await signUp("someone@gmail.com")).toBe("created")
+
+      // The rollback must never bring back auto-admin, for any domain
+      for (const email of ["new.person@launchpathventures.com", "new.hire@primecapitaldubai.com"]) {
+        await signUp(email, async (c) => {
+          const { rows } = await c.query(
+            `SELECT p.role FROM public.user_profiles p
+               JOIN auth.users u ON u.id = p.id WHERE u.email = $1`,
+            [email]
+          )
+          expect(rows).toEqual([{ role: "learner" }])
+        })
+      }
 
       await db.query(MIGRATION_SQL)
       expect(await signUp("someone@gmail.com")).toBe("refused")

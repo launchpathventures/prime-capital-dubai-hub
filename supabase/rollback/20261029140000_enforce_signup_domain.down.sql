@@ -3,6 +3,7 @@
 -- Removes the sign-up domain enforcement. Run manually. If the Auth hook was
 -- attached in the dashboard, detach it FIRST (Authentication -> Hooks), otherwise
 -- sign-ups fail while the function is missing. Safe to run more than once.
+-- Never restores auto-admin: new profiles are always role 'learner'.
 -- (The USAGE / EXECUTE grants to supabase_auth_admin are left in place; harmless.)
 
 BEGIN;
@@ -16,24 +17,18 @@ DROP FUNCTION IF EXISTS public.is_allowed_signup_email(text);
 DROP FUNCTION IF EXISTS public.signup_domain_error_message();
 DROP FUNCTION IF EXISTS public.allowed_signup_domains();
 
--- handle_new_user() back to the version from 20260410000000 (case-sensitive match,
--- launchpathventures.com => admin, no pinned search_path)
+-- handle_new_user() back to the shape of 20260410000000 (case-sensitive match, no
+-- pinned search_path) but WITHOUT its "launchpathventures.com => admin" branch:
+-- this rollback must never restore automatic admin for any domain. Every new
+-- profile is a 'learner'; admins are promoted explicitly (lib/actions/users.ts).
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
-DECLARE
-  user_role TEXT;
 BEGIN
   IF NEW.email IS NOT NULL
      AND NEW.email NOT LIKE '%@primecapitaldubai.com'
      AND NEW.email NOT LIKE '%@launchpathventures.com'
   THEN
     RETURN NEW;
-  END IF;
-
-  IF NEW.email LIKE '%@launchpathventures.com' THEN
-    user_role := 'admin';
-  ELSE
-    user_role := 'learner';
   END IF;
 
   BEGIN
@@ -45,7 +40,7 @@ BEGIN
         NEW.raw_user_meta_data->>'name',
         split_part(NEW.email, '@', 1)
       ),
-      user_role,
+      'learner',
       'in_progress'
     )
     ON CONFLICT (id) DO NOTHING;
