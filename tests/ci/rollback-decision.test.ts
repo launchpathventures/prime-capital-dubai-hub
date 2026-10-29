@@ -8,6 +8,7 @@
 
 import { describe, expect, it } from "vitest"
 import {
+  classifySmokeRuns,
   decideRollback,
   deploymentIsRollback,
   findDeploymentBySha,
@@ -121,9 +122,14 @@ describe("selectRollbackTarget", () => {
   })
 
   it("refuses when serving order and creation order disagree (a deployment may have been rolled away from)", () => {
-    // dpl_bad (created 250) was rolled away from; dpl_prev (created 200) was
-    // restored afterwards. Whether Vercel refreshes aliasAssigned on rollback is
-    // undocumented, so the script must not guess between them.
+    // Catches ONLY the case where Vercel DID refresh aliasAssigned on rollback:
+    // dpl_bad (created 250) was rolled away from and dpl_prev (created 200) was
+    // restored afterwards, so serving order (prev) and creation order (bad)
+    // disagree and the target is refused as ambiguous.
+    // It does NOT catch the case where Vercel did not refresh the timestamp
+    // (both orders then say dpl_bad); that is covered by the target's own smoke
+    // run check, see classifySmokeRuns and the "no-update" test in
+    // post-deploy-run.test.ts.
     const bad = { ...previous, uid: "dpl_bad", created: 250, aliasAssigned: 260 }
     const restored = { ...previous, created: 200, aliasAssigned: 280 }
     const newest = { ...current, aliasAssigned: 310 }
@@ -228,6 +234,14 @@ describe("decideRollback", () => {
     expect(decision.reason).toMatch(/only \/api\/health failed/)
   })
 
+  it("fails without rolling back, with its own reason, when the live SHA could not be re-read", () => {
+    const decision = decideRollback({ ...ready, liveShaUnknown: true })
+    expect(decision.rollback).toBe(false)
+    expect(decision.fail).toBe(true)
+    expect(decision.reason).toMatch(/could not re-check the live SHA/)
+    expect(decision.reason).not.toMatch(/different deployment/)
+  })
+
   it("fails without rolling back when a different deployment is live now", () => {
     const decision = decideRollback({ ...ready, superseded: true })
     expect(decision.rollback).toBe(false)
@@ -322,5 +336,33 @@ describe("sanitizeForLog", () => {
     expect(inline).not.toMatch(/[`<>|[\]()*@]/)
     expect(sanitizeForLog("a".repeat(500), 100)).toHaveLength(100)
     expect(sanitizeForLog(null)).toBe("")
+  })
+})
+
+describe("classifySmokeRuns", () => {
+  const run = (conclusion: string | null, created_at: string) => ({ conclusion, created_at })
+
+  it("uses the latest completed pass/fail run and ignores skipped, cancelled and unfinished runs", () => {
+    expect(classifySmokeRuns([run("success", "2026-01-01T00:00:00Z")])).toBe("passed")
+    expect(
+      classifySmokeRuns([run("success", "2026-01-01T00:00:00Z"), run("failure", "2026-01-02T00:00:00Z")]),
+    ).toBe("failed")
+    expect(
+      classifySmokeRuns([run("failure", "2026-01-01T00:00:00Z"), run("success", "2026-01-02T00:00:00Z")]),
+    ).toBe("passed")
+    expect(
+      classifySmokeRuns([
+        run("success", "2026-01-01T00:00:00Z"),
+        run("skipped", "2026-01-03T00:00:00Z"),
+        run("cancelled", "2026-01-04T00:00:00Z"),
+        run(null, "2026-01-05T00:00:00Z"),
+      ]),
+    ).toBe("passed")
+  })
+
+  it("is unknown when there is no completed run, so the rollback is refused", () => {
+    expect(classifySmokeRuns([])).toBe("unknown")
+    expect(classifySmokeRuns(undefined)).toBe("unknown")
+    expect(classifySmokeRuns([run("skipped", "2026-01-01T00:00:00Z")])).toBe("unknown")
   })
 })

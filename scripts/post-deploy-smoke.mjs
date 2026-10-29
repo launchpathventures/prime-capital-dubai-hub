@@ -132,6 +132,28 @@ export function selectRollbackTarget(deployments, currentId) {
   return { target, reason: "" }
 }
 
+/**
+ * Did the target's own post-deploy smoke run pass? Judged from the workflow runs
+ * GitHub recorded for the target's SHA, so it does not depend on how Vercel
+ * orders deployments after a rollback: a deploy that failed smoke and was
+ * rolled away from stays "failed" however Vercel timestamps it.
+ * Only the latest completed pass/fail run counts (skipped preview runs and
+ * cancelled runs are ignored). No such run means "unknown", which also refuses.
+ *
+ * @param {Array<{ conclusion?: string | null, created_at?: string, run_started_at?: string }> | undefined} runs
+ * @returns {"passed" | "failed" | "unknown"}
+ */
+export function classifySmokeRuns(runs) {
+  const decided = (runs || [])
+    .filter((run) => ["success", "failure", "timed_out"].includes(String(run?.conclusion)))
+    .sort(
+      (left, right) =>
+        Date.parse(right.created_at || right.run_started_at || 0) - Date.parse(left.created_at || left.run_started_at || 0),
+    )
+  if (decided.length === 0) return "unknown"
+  return decided[0].conclusion === "success" ? "passed" : "failed"
+}
+
 export function findDeploymentBySha(deployments, sha) {
   const matches = deployments
     .map(normalizeDeployment)
@@ -160,6 +182,7 @@ export function deploymentIsRollback(deployment) {
  * @param {boolean} [input.inconclusive]
  * @param {boolean} [input.healthOnlyFailure] only /api/health failed; every page probe passed
  * @param {boolean} [input.superseded] the live SHA is no longer the one this job is judging
+ * @param {boolean} [input.liveShaUnknown] the live SHA could not be re-read (network error, no SHA reported)
  * @param {string} [input.targetNote] why no target was chosen
  */
 export function decideRollback({
@@ -172,6 +195,7 @@ export function decideRollback({
   inconclusive = false,
   healthOnlyFailure = false,
   superseded = false,
+  liveShaUnknown = false,
   targetNote = "",
 }) {
   if (!versionLive) {
@@ -183,6 +207,13 @@ export function decideRollback({
   }
   if (probesOk) {
     return { rollback: false, fail: false, reason: "production smoke passed" }
+  }
+  if (liveShaUnknown) {
+    return {
+      rollback: false,
+      fail: true,
+      reason: "could not re-check the live SHA (network error or no SHA reported); not rolling back",
+    }
   }
   if (superseded) {
     return {
@@ -402,6 +433,31 @@ async function listProductionDeployments({ token, teamId, projectId }) {
   return json.deployments || []
 }
 
+/** Read-only GitHub call using the job's GITHUB_TOKEN. Any problem is "unknown", never "passed". */
+async function targetSmokeStatus({ sha, env }) {
+  const repository = env.GITHUB_REPOSITORY
+  const githubToken = env.GITHUB_TOKEN
+  if (!repository || !githubToken || !sha) return "unknown"
+  try {
+    const url = new URL(`https://api.github.com/repos/${repository}/actions/workflows/post-deploy-smoke.yml/runs`)
+    url.searchParams.set("head_sha", sha)
+    url.searchParams.set("per_page", "50")
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(20000),
+      headers: {
+        authorization: `Bearer ${githubToken}`,
+        accept: "application/vnd.github+json",
+        "user-agent": USER_AGENT,
+      },
+    })
+    if (!response.ok) return "unknown"
+    const json = await response.json()
+    return classifySmokeRuns(json.workflow_runs)
+  } catch {
+    return "unknown"
+  }
+}
+
 async function rollbackTo({ token, teamId, projectId, deploymentId }) {
   const url = new URL(`https://api.vercel.com/v1/projects/${projectId}/rollback/${deploymentId}`)
   url.searchParams.set("teamId", teamId)
@@ -449,6 +505,7 @@ const defaultDeps = {
   probeJobs,
   listProductionDeployments,
   rollbackTo,
+  targetSmokeStatus,
   sleep,
 }
 
@@ -486,16 +543,23 @@ export async function runSmoke(env, deps = defaultDeps) {
   )
 
   // A newer deploy may go live while this job waits; it must never be rolled back for this job's SHA.
-  const stillExpected = async (when) => {
+  // Returns "same", "superseded" (another SHA answered) or "unknown" (no usable answer).
+  const recheckLiveSha = async (when) => {
     const check = await deps.waitForSha({ origin: versionOrigin, expectedSha, attempts: 1, intervalMs })
-    if (!check.live) {
-      lines.push(`- Live SHA is no longer the expected one ${when} (sha ${check.sha || "none"}, HTTP ${check.status})`)
+    if (check.live) return "same"
+    if (check.sha) {
+      lines.push(`- Live SHA is no longer the expected one ${when} (now ${check.sha})`)
+      return "superseded"
     }
-    return check.live
+    lines.push(
+      `- Could not re-read the live SHA ${when} (HTTP ${check.status}, ${check.detail || "no detail"}); treating it as unknown, not as superseded`,
+    )
+    return "unknown"
   }
 
   let probeResults = []
   let superseded = false
+  let liveShaUnknown = false
   if (version.live) {
     const jobs = smokeJobs(origins)
     const attempt1 = await deps.probeJobs(jobs)
@@ -507,14 +571,16 @@ export async function runSmoke(env, deps = defaultDeps) {
         `- Waiting ${retry.waitMs / 1000}s, then re-probing ${firstFailures.length} failing check(s)`,
       )
       await deps.sleep(retry.waitMs)
-      if (await stillExpected("before attempt 2")) {
+      const live = await recheckLiveSha("before attempt 2")
+      if (live === "same") {
         const attempt2 = await deps.probeJobs(firstFailures.map((probe) => ({ url: probe.url, kind: probe.kind })))
         lines.push("", formatProbeAttempt(2, attempt2))
         const byUrl = new Map(attempt1.map((probe) => [probe.url, probe]))
         for (const probe of attempt2) byUrl.set(probe.url, probe)
         probeResults = jobs.map((job) => byUrl.get(job.url))
       } else {
-        superseded = true
+        superseded = live === "superseded"
+        liveShaUnknown = live === "unknown"
         probeResults = attempt1
       }
     } else {
@@ -541,6 +607,7 @@ export async function runSmoke(env, deps = defaultDeps) {
   const needsLookup =
     version.live &&
     !superseded &&
+    !liveShaUnknown &&
     secondGate.rollbackAllowed &&
     !probesOk &&
     !inconclusive &&
@@ -556,12 +623,23 @@ export async function runSmoke(env, deps = defaultDeps) {
         targetNote = "failed SHA was not in the latest production deployments"
         lookupNote = targetNote
       } else if (!currentIsRollback) {
-        const { target, reason } = selectRollbackTarget(deployments, current.id)
+        let { target, reason } = selectRollbackTarget(deployments, current.id)
+        if (target) {
+          // Second, independent check: the target's own smoke run must have passed.
+          const smoke = await deps.targetSmokeStatus({ sha: target.sha, env })
+          if (smoke !== "passed") {
+            reason =
+              smoke === "failed"
+                ? `previous deployment ${target.id} failed its own post-deploy smoke run`
+                : `previous deployment ${target.id} has no passing post-deploy smoke run on record (none found or GitHub unavailable)`
+            target = null
+          }
+        }
         rollbackTargetId = target?.id ?? null
         targetSha = target?.sha ?? null
         targetNote = reason
         lookupNote = target
-          ? `current \`${current.id}\`; rollback target ${describeTarget(target)}`
+          ? `current \`${current.id}\`; rollback target ${describeTarget(target)}; its own smoke run passed`
           : `current \`${current.id}\`; no verified rollback target (${reason})`
       }
     } catch (error) {
@@ -569,8 +647,10 @@ export async function runSmoke(env, deps = defaultDeps) {
       lookupNote = `deployment lookup failed: ${sanitizeForLog(error instanceof Error ? error.message : error, 200)}`
     }
     // Last check before acting: only roll back while the SHA this job judged is still live.
-    if (rollbackTargetId && rollbackEnabled(autoRollback) && !(await stillExpected("before rollback"))) {
-      superseded = true
+    if (rollbackTargetId && rollbackEnabled(autoRollback)) {
+      const live = await recheckLiveSha("before rollback")
+      superseded = live === "superseded"
+      liveShaUnknown = live === "unknown"
     }
   }
 
@@ -584,6 +664,7 @@ export async function runSmoke(env, deps = defaultDeps) {
     inconclusive,
     healthOnlyFailure,
     superseded,
+    liveShaUnknown,
     targetNote,
   })
 

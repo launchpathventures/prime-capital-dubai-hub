@@ -20,7 +20,7 @@ If any check fails, the job waits 45 seconds, confirms the new SHA is still the 
 
 `POST /v1/projects/{projectId}/rollback/{deploymentId}`
 
-The target is the deployment that was serving production before this one: **READY**, reported by Vercel as a rollback candidate, is not the same commit as the failing deploy, has served the production domains, is not itself a rollback, and has a git SHA. The job summary records the target's id, SHA, and first line of its commit message. Just before calling the API the job checks `/api/version` once more; if the live SHA is no longer the one it judged, it does not roll back.
+The target is the deployment that was serving production before this one: **READY**, reported by Vercel as a rollback candidate, is not the same commit as the failing deploy, has served the production domains, is not itself a rollback, and has a git SHA. Its own post-deploy smoke run (looked up through the GitHub Actions API for its SHA) must also have passed, so a deploy that failed smoke and was rolled away from is never chosen even if Vercel does not refresh its timestamps; no run on record means no rollback. The job summary records the target's id, SHA, and first line of its commit message. Just before calling the API the job checks `/api/version` once more; if the live SHA is no longer the one it judged, it does not roll back.
 
 After the call it waits for `/api/version` to show the previous SHA, probes again, and **fails the job** even when the restore worked.
 
@@ -29,7 +29,7 @@ After the call it waits for `/api/version` to show the previous SHA, probes agai
 The job fails without rolling back when:
 
 - the new SHA never appears on the alias (the previous deployment is still serving; rolling back could move the alias anyway)
-- a different SHA is live by the time it would act (a newer deploy superseded this one)
+- a different SHA is live by the time it would act (a newer deploy superseded this one), or the live SHA cannot be re-read (logged separately as "unknown")
 - the response looks like a bot challenge rather than the app
 - only `/api/health` fails and every page probe passes (usually a dependency outage; rolling back healthy code would not help and stops later deploys going live)
 - the deployment is already a rollback
@@ -39,12 +39,12 @@ The job fails without rolling back when:
 
 | Name | Kind | Required | Purpose |
 |------|------|----------|---------|
-| `VERCEL_TOKEN` | Secret in the GitHub Environment `production` (not a repository secret) | Yes, for rollback | Team-scoped Vercel token with the least access that can list deployments and roll back `prime-capital-dubai-hub` |
+| `VERCEL_TOKEN` | Secret in the GitHub Environment `production-smoke` (not a repository secret) | Yes, for rollback | Team-scoped Vercel token with the least access that can list deployments and roll back `prime-capital-dubai-hub` |
 | `AUTO_ROLLBACK` | Repository variable | No | Opt-in switch. Unset = off |
 | `VERCEL_TEAM_ID` | Repository variable | No | Overrides `team_HshsUsC6U4lidrM07nzJLx1n` |
 | `VERCEL_PROJECT_ID` | Repository variable | No | Overrides `prj_3XrkSo2JCGR2WTC5wcFUAgMBUB9x` |
 
-The workflow runs from the deployed commit, so the `if` on the job is not a security boundary. The token is protected by the Environment `production` being limited to `master`.
+The workflow runs from the deployed commit, so the `if` on the job is not a security boundary. The token is protected by the Environment `production-smoke` being limited to `master`. It is separate from Vercel's own `Production` environment on purpose.
 
 #### After an instant rollback: restoring auto-assignment
 

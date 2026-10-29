@@ -34,6 +34,10 @@ function makeDeps(overrides: {
   liveShas?: string[]
   failing?: (job: Job, call: number) => boolean
   deployments?: object[]
+  /** smoke-run status by SHA; unlisted SHAs are "passed" */
+  smokeBySha?: Record<string, "passed" | "failed" | "unknown">
+  /** replace the answer of specific waitForSha calls (0-based), e.g. a network error */
+  versionOverrides?: Record<number, { live: boolean; status: number; sha: string | null; detail: string }>
 } = {}) {
   const liveShas = overrides.liveShas ?? [NEW_SHA]
   let versionCall = 0
@@ -41,7 +45,10 @@ function makeDeps(overrides: {
   const rollbackTo = vi.fn(async () => {})
   const deps = {
     waitForSha: vi.fn(async ({ expectedSha }: { expectedSha: string }) => {
-      const sha = liveShas[Math.min(versionCall++, liveShas.length - 1)]
+      const index = versionCall++
+      const override = overrides.versionOverrides?.[index]
+      if (override) return { attempts: 1, ...override }
+      const sha = liveShas[Math.min(index, liveShas.length - 1)]
       return { live: sha === expectedSha, attempts: 1, status: 200, sha, detail: "" }
     }),
     probeJobs: vi.fn(async (jobs: Job[]) => {
@@ -50,6 +57,7 @@ function makeDeps(overrides: {
     }),
     listProductionDeployments: vi.fn(async () => overrides.deployments ?? deployments),
     rollbackTo,
+    targetSmokeStatus: vi.fn(async ({ sha }: { sha: string }) => overrides.smokeBySha?.[sha] ?? "passed"),
     sleep: vi.fn(async () => {}),
   }
   return { deps, rollbackTo }
@@ -139,6 +147,60 @@ describe("runSmoke", () => {
     expect(rollbackTo).not.toHaveBeenCalled()
     expect(result.fail).toBe(true)
     expect(result.reason).toMatch(/no verified rollback target/)
+  })
+
+  it("refuses the known-bad deploy B in the A -> B (rolled back to A) -> D scenario when Vercel did not refresh A's alias time", async () => {
+    // A (sha PREV) went live at 100; B (sha OTHER) was served at 150 and failed smoke, then
+    // production was rolled back to A. A's aliasAssigned was NOT updated, so serving order and
+    // creation order both say B, and the ordering check alone would pick B.
+    const noUpdate = [
+      { ...deployments[0], aliasAssigned: 400 },
+      { uid: "dpl_b", created: 250, readyState: "READY", target: "production", isRollbackCandidate: true, aliasAssigned: 260, meta: { githubCommitSha: OTHER_SHA } },
+      { ...deployments[1], aliasAssigned: 100 },
+    ]
+    const { deps, rollbackTo } = makeDeps({
+      failing: pageFails,
+      deployments: noUpdate,
+      smokeBySha: { [OTHER_SHA]: "failed", [PREV_SHA]: "passed" },
+      liveShas: [NEW_SHA],
+    })
+    const result = await runSmoke(env, deps)
+    expect(deps.targetSmokeStatus).toHaveBeenCalledWith(expect.objectContaining({ sha: OTHER_SHA }))
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.fail).toBe(true)
+    expect(result.reason).toMatch(/no verified rollback target/)
+    expect(result.lines.join("\n")).toMatch(/failed its own post-deploy smoke run/)
+  })
+
+  it("fails closed when the target's smoke history cannot be determined", async () => {
+    const { deps, rollbackTo } = makeDeps({ failing: pageFails, smokeBySha: { [PREV_SHA]: "unknown" } })
+    const result = await runSmoke(env, deps)
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.lines.join("\n")).toMatch(/no passing post-deploy smoke run on record/)
+  })
+
+  it("logs a failed live-SHA re-check as unknown, not superseded, and does not roll back", async () => {
+    const { deps, rollbackTo } = makeDeps({
+      failing: pageFails,
+      versionOverrides: { 1: { live: false, status: 0, sha: null, detail: "fetch failed" } },
+    })
+    const result = await runSmoke(env, deps)
+    const summary = result.lines.join("\n")
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.reason).toMatch(/could not re-check the live SHA/)
+    expect(summary).toMatch(/Could not re-read the live SHA before attempt 2/)
+    expect(summary).not.toMatch(/no longer the expected one/)
+  })
+
+  it("treats a network error on the final re-check before rollback as unknown too", async () => {
+    const { deps, rollbackTo } = makeDeps({
+      failing: pageFails,
+      versionOverrides: { 2: { live: false, status: 0, sha: null, detail: "fetch failed" } },
+    })
+    const result = await runSmoke(env, deps)
+    expect(rollbackTo).not.toHaveBeenCalled()
+    expect(result.reason).toMatch(/could not re-check the live SHA/)
+    expect(result.lines.join("\n")).toMatch(/Could not re-read the live SHA before rollback/)
   })
 
   it("passes cleanly without touching Vercel when every probe passes", async () => {

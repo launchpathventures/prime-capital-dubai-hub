@@ -8,8 +8,13 @@
 # Security: deployment_status runs the workflow file from the DEPLOYED commit,
 # so any branch Vercel deploys can run (and edit) this file. The `if` is not a
 # security boundary. VERCEL_TOKEN must therefore live only in the GitHub
-# Environment `production` (restricted to master), never as a repository
-# secret. `environment: production` below is what gates the token.
+# Environment `production-smoke` (restricted to master), never as a repository
+# secret. `environment: production-smoke` below is what gates the token. It is
+# deliberately NOT Vercel's own `Production` GitHub environment, so a branch rule
+# here cannot interfere with Vercel creating its deployment records.
+# Create the environment before merging: GitHub auto-creates a missing one with
+# no rules and no secret. Check the first Production run is not blocked by its
+# branch rule (deployment_status runs carry the deployed commit, not master).
 #
 # A passing run is usually about 1 minute (checkout + version poll + probes).
 # A failed probe waits 45s and retries the failing checks once before rollback.
@@ -21,7 +26,7 @@
 # Rollback is OFF unless the repository variable AUTO_ROLLBACK is true, 1, on,
 # yes, or enabled. While off, the job still probes and logs the rollback target
 # it would have used. Secret for the rollback call: VERCEL_TOKEN (environment
-# `production` only). Optional overrides: repository variables VERCEL_TEAM_ID,
+# `production-smoke` only). Optional overrides: repository variables VERCEL_TEAM_ID,
 # VERCEL_PROJECT_ID.
 
 name: Post-deploy smoke
@@ -29,8 +34,10 @@ name: Post-deploy smoke
 on:
   deployment_status:
 
+# actions: read lets the job check whether a rollback target passed its own smoke run.
 permissions:
   contents: read
+  actions: read
 
 jobs:
   smoke:
@@ -45,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     # Secrets scoped to this environment are readable only by runs that pass its
     # branch rule (master). See the security note at the top of this file.
-    environment: production
+    environment: production-smoke
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -63,6 +70,7 @@ jobs:
           EXPECTED_SHA: ${{ github.event.deployment.sha }}
           DEPLOYMENT_DESCRIPTION: ${{ github.event.deployment_status.description }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} # environment secret
+          GITHUB_TOKEN: ${{ github.token }} # read-only, for the smoke-run history check
           VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
           AUTO_ROLLBACK: ${{ vars.AUTO_ROLLBACK }}
