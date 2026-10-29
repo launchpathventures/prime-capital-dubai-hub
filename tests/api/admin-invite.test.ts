@@ -69,7 +69,7 @@ describe("Admin User Invite API", () => {
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "newuser@example.com")
+      formData.append("email", "newuser@primecapitaldubai.com")
       formData.append("full_name", "New User")
       formData.append("role", "learner")
 
@@ -96,7 +96,7 @@ describe("Admin User Invite API", () => {
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "newuser@example.com")
+      formData.append("email", "newuser@primecapitaldubai.com")
       formData.append("full_name", "New User")
       formData.append("role", "learner")
 
@@ -153,13 +153,13 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "newuser@example.com")
+      formData.append("email", "newuser@primecapitaldubai.com")
       formData.append("full_name", "New User")
       // No role provided - should default to "learner"
 
@@ -201,13 +201,13 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "newuser@example.com")
+      formData.append("email", "newuser@primecapitaldubai.com")
       formData.append("full_name", "New User")
       formData.append("role", "learner")
 
@@ -220,7 +220,7 @@ describe("Admin User Invite API", () => {
 
       expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
-          email: "newuser@example.com",
+          email: "newuser@primecapitaldubai.com",
           email_confirm: true,
           user_metadata: {
             full_name: "New User",
@@ -236,13 +236,13 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: vi.fn().mockResolvedValue({ error: null }),
+        upsert: vi.fn().mockResolvedValue({ error: null }),
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "success@example.com")
+      formData.append("email", "success@primecapitaldubai.com")
       formData.append("full_name", "Success User")
 
       const request = new Request("http://localhost/api/admin/invite-user", {
@@ -267,7 +267,7 @@ describe("Admin User Invite API", () => {
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "existing@example.com")
+      formData.append("email", "existing@primecapitaldubai.com")
       formData.append("full_name", "Existing User")
 
       const request = new Request("http://localhost/api/admin/invite-user", {
@@ -304,13 +304,13 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: mockInsert,
+        upsert: mockInsert,
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "profile@example.com")
+      formData.append("email", "profile@primecapitaldubai.com")
       formData.append("full_name", "Profile User")
       formData.append("role", "admin")
 
@@ -339,13 +339,13 @@ describe("Admin User Invite API", () => {
         error: null,
       })
       mockAdminClient.from.mockReturnValue({
-        insert: mockInsert,
+        upsert: mockInsert,
       })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "profile-fail@example.com")
+      formData.append("email", "profile-fail@primecapitaldubai.com")
       formData.append("full_name", "Profile Fail User")
 
       const request = new Request("http://localhost/api/admin/invite-user", {
@@ -376,29 +376,47 @@ describe("Admin User Invite API", () => {
       })
     })
 
-    it("should return 500 when default password is not configured", async () => {
-      // Remove default password
+    it("should create the user without a password when none is configured", async () => {
+      // The route treats AUTH_DEFAULT_PASSWORD as optional (users sign in via Google / magic link)
       delete process.env.AUTH_DEFAULT_PASSWORD
-
-      // Need to re-import to pick up changed env
       vi.resetModules()
+
+      mockAdminClient.auth.admin.createUser.mockResolvedValue({
+        data: { user: { id: "new-user-id" } },
+        error: null,
+      })
+      mockAdminClient.from.mockReturnValue({
+        upsert: vi.fn().mockResolvedValue({ error: null }),
+      })
 
       const { POST } = await import("@/app/api/admin/invite-user/route")
 
       const formData = new FormData()
-      formData.append("email", "test@example.com")
+      formData.append("email", "test@primecapitaldubai.com")
       formData.append("full_name", "Test User")
 
-      const request = new Request("http://localhost/api/admin/invite-user", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await POST(
+        new Request("http://localhost/api/admin/invite-user", { method: "POST", body: formData })
+      )
+      expect(response.status).toBe(200)
+      expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(
+        expect.not.objectContaining({ password: expect.anything() })
+      )
+    })
 
-      const response = await POST(request)
-      expect(response.status).toBe(500)
+    it("should reject an email outside the signup domain before creating the user (serviceos#2011)", async () => {
+      vi.resetModules()
+      const { POST } = await import("@/app/api/admin/invite-user/route")
 
-      const data = await response.json()
-      expect(data.error).toContain("configuration error")
+      const formData = new FormData()
+      formData.append("email", "someone@gmail.com")
+
+      const response = await POST(
+        new Request("http://localhost/api/admin/invite-user", { method: "POST", body: formData })
+      )
+      expect(response.status).toBe(400)
+      expect((await response.json()).error).toContain("@primecapitaldubai.com")
+      expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled()
     })
   })
 })

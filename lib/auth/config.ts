@@ -20,7 +20,36 @@ import { isSupabaseConfigured } from "@/lib/supabase/config"
 // Domain Restriction
 // -----------------------------------------------------------------------------
 
-/** Domains allowed to sign in */
+/**
+ * Domains allowed to create a NEW account. Mirrors public.allowed_signup_domains()
+ * (supabase/migrations/20261029140000_enforce_signup_domain.sql), which enforces
+ * it in the database; tests/security/signup-domain.test.ts checks they match.
+ * launchpathventures.com is pending a decision (serviceos#2011): adding it is a
+ * one-line change here and in that SQL function.
+ */
+export const SIGNUP_EMAIL_DOMAINS = ["primecapitaldubai.com"]
+
+/**
+ * Same rule as public.is_allowed_signup_email(): printable ASCII only, case
+ * insensitive, non-empty local part with no further "@", domain after the last "@"
+ * on the signup list. Used for early, friendly errors; the DB is the enforcer.
+ */
+export function isAllowedSignupEmail(email: string | null | undefined): boolean {
+  if (!email || /[^ -~]/.test(email)) return false
+  const at = email.lastIndexOf("@")
+  if (at < 1) return false
+  const local = email.slice(0, at)
+  const domain = email.slice(at + 1).toLowerCase()
+  return !local.includes("@") && SIGNUP_EMAIL_DOMAINS.includes(domain)
+}
+
+/** Start of the DB/hook refusal text (public.signup_domain_error_message()). */
+export const SIGNUP_DOMAIN_ERROR_PREFIX = "Sign-up is limited to"
+
+/**
+ * Domains allowed to sign in. Wider than SIGNUP_EMAIL_DOMAINS on purpose: the
+ * existing launchpathventures.com admin keeps access, new ones can't be created.
+ */
 export const ALLOWED_EMAIL_DOMAINS = [
   "primecapitaldubai.com",
   "launchpathventures.com",

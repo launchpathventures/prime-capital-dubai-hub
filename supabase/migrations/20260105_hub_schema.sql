@@ -200,19 +200,23 @@ CREATE TRIGGER update_hub_questions_updated_at
 --   1. Go to Storage in your Supabase dashboard
 --   2. Click "New bucket"
 --   3. Name: "voice-recordings"
---   4. Enable "Public bucket" for public access to recordings
+--   4. Leave "Public bucket" OFF: the bucket must be PRIVATE (serviceos#2011)
 --
 -- Option 2: Supabase CLI
---   supabase storage create voice-recordings --public
+--   supabase storage create voice-recordings   (private; do NOT pass --public)
 --
 -- Option 3: JavaScript API (run once in your app initialization)
 --   const { data, error } = await supabase.storage.createBucket('voice-recordings', {
---     public: true,
+--     public: false, // must be private (serviceos#2011)
 --     allowedMimeTypes: ['audio/webm', 'audio/mp4', 'audio/mpeg'],
 --     fileSizeLimit: 52428800, // 50MB
 --   })
 --
--- After creating the bucket, apply these policies via SQL:
+-- After creating the bucket, apply these policies via SQL.
+-- NOTE (serviceos#2011): the three policies below were SUPERSEDED by
+-- 20261029130000_lock_storage_writes.sql, which drops them and replaces them with
+-- per-user-folder policies (<auth.uid()>/<file>). Do not rely on them as written:
+-- they allow public read and upload to any path.
 -- =============================================================================
 
 -- Policy: Authenticated users can upload voice recordings
@@ -223,7 +227,7 @@ CREATE POLICY "Authenticated users can upload voice recordings"
     auth.role() = 'authenticated'
   );
 
--- Policy: Anyone can read voice recordings (public bucket)
+-- Policy: Anyone can read voice recordings (superseded: bucket is private)
 CREATE POLICY "Anyone can read voice recordings"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'voice-recordings');

@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getAuthConfig, isAllowedEmail } from "@/lib/auth"
+import { SIGNUP_DOMAIN_ERROR_PREFIX } from "@/lib/auth/config"
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -37,9 +38,13 @@ export async function GET(request: NextRequest) {
       return redirectWithToast(origin, "/admin/profile", "email-link-expired")
     }
     // Map Supabase errors to friendly error codes
-    const errorCode = errorDescription?.includes("Database error")
-      ? "database_error"
-      : "auth_callback_error"
+    // A sign-up refused by the before-user-created hook carries its message
+    // (the DB trigger alone surfaces as a generic "Database error").
+    const errorCode = errorDescription?.includes(SIGNUP_DOMAIN_ERROR_PREFIX)
+      ? "invalid_domain"
+      : errorDescription?.includes("Database error")
+        ? "database_error"
+        : "auth_callback_error"
     return NextResponse.redirect(`${origin}/auth/login?error=${errorCode}`)
   }
 
@@ -100,11 +105,12 @@ export async function GET(request: NextRequest) {
       || user.email?.split("@")[0]
       || "User"
 
-    const role = user.email?.endsWith("@launchpathventures.com") ? "admin" : "learner"
+    // Always 'learner': RLS and the guard trigger refuse anything else from a
+    // user session (serviceos#2011). Admins are promoted via lib/actions/users.ts.
     const { error: profileError } = await supabase.from("user_profiles").insert({
       id: user.id,
       full_name: fullName,
-      role,
+      role: "learner",
       certification_status: "in_progress",
     })
     if (profileError) {
