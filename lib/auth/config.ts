@@ -24,10 +24,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/config"
  * Domains allowed to create a NEW account. Mirrors public.allowed_signup_domains()
  * (supabase/migrations/20261029140000_enforce_signup_domain.sql), which enforces
  * it in the database; tests/security/signup-domain.test.ts checks they match.
- * launchpathventures.com is pending a decision (serviceos#2011): adding it is a
- * one-line change here and in that SQL function.
+ * launchpathventures.com added by 20261029160000_allow_launchpathventures_signup.sql;
+ * both get a learner profile, nobody is auto-admin.
  */
-export const SIGNUP_EMAIL_DOMAINS = ["primecapitaldubai.com"]
+export const SIGNUP_EMAIL_DOMAINS = ["primecapitaldubai.com", "launchpathventures.com"]
 
 /**
  * Same rule as public.is_allowed_signup_email(): printable ASCII only, case
@@ -47,8 +47,8 @@ export function isAllowedSignupEmail(email: string | null | undefined): boolean 
 export const SIGNUP_DOMAIN_ERROR_PREFIX = "Sign-up is limited to"
 
 /**
- * Domains allowed to sign in. Wider than SIGNUP_EMAIL_DOMAINS on purpose: the
- * existing launchpathventures.com admin keeps access, new ones can't be created.
+ * Domains allowed to sign in. Currently the same as SIGNUP_EMAIL_DOMAINS; kept
+ * separate so sign-in can stay wider than sign-up (e.g. for legacy accounts).
  */
 export const ALLOWED_EMAIL_DOMAINS = [
   "primecapitaldubai.com",
