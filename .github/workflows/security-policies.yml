@@ -1,0 +1,51 @@
+# CATALYST - Storage policy and sign-up domain tests (serviceos#2011)
+#
+# Runs tests/security against a throwaway local Postgres service. Only touches
+# the CI service container; no Supabase project or secret is involved.
+name: Security policy tests
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - "tests/security/**"
+      - "lib/auth/config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/security-policies.yml"
+  push:
+    branches: [master]
+    paths:
+      - "supabase/**"
+      - "tests/security/**"
+      - "lib/auth/config.ts"
+
+jobs:
+  security-policies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      STORAGE_POLICY_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run tests/security

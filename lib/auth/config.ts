@@ -20,7 +20,19 @@ import { isSupabaseConfigured } from "@/lib/supabase/config"
 // Domain Restriction
 // -----------------------------------------------------------------------------
 
-/** Domains allowed to sign in */
+/**
+ * Domains allowed to create a NEW account. Mirrors public.allowed_signup_domains()
+ * (supabase/migrations/20261029140000_enforce_signup_domain.sql), which enforces
+ * it in the database; tests/security/signup-domain.test.ts checks they match.
+ * launchpathventures.com is pending a decision (serviceos#2011): adding it is a
+ * one-line change here and in that SQL function.
+ */
+export const SIGNUP_EMAIL_DOMAINS = ["primecapitaldubai.com"]
+
+/**
+ * Domains allowed to sign in. Wider than SIGNUP_EMAIL_DOMAINS on purpose: the
+ * existing launchpathventures.com admin keeps access, new ones can't be created.
+ */
 export const ALLOWED_EMAIL_DOMAINS = [
   "primecapitaldubai.com",
   "launchpathventures.com",
