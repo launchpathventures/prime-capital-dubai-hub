@@ -1,0 +1,36 @@
+# CATALYST - After a launch, check that website enquiries still reach the CRM (Tim, 6 Nov 2026)
+#
+# When Vercel reports this site's Production deployment as live, ask TopStreet AI's "Website enquiry delivery
+# check" (launchpathventures/agentcrm, .github/workflows/enquiry-canary.yml) to send one marked test lead through
+# the live form and confirm the CRM received it. The CRM creates nothing for a marked lead and nobody is told unless
+# the check fails. That check also runs once a day on its own.
+#
+# Needs the repository secret AGENTCRM_DISPATCH_TOKEN (a token allowed to start workflows in
+# launchpathventures/agentcrm). Without it this job says so and passes; the daily check still runs.
+
+name: After launch, check enquiries reach the CRM
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  ask:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Start the delivery check for Prime Capital
+        env:
+          GH_TOKEN: ${{ secrets.AGENTCRM_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "AGENTCRM_DISPATCH_TOKEN is not set: the after-launch check was not started (the daily check still runs)." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh api repos/launchpathventures/agentcrm/dispatches \
+            -f event_type=website-deployed \
+            -F 'client_payload[agency]=prime-capital'
+          echo "Asked TopStreet AI to check that enquiries reach the CRM after this launch." | tee -a "$GITHUB_STEP_SUMMARY"
