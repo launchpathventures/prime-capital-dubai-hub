@@ -52,15 +52,15 @@ D) The admin team will add it
 ---
 
 ### Question 3
-**When everything your part needs is in, what happens?**
+**When everything your part needs is in, what do you do?**
 
-A) You press Send to admin  
-B) The file is sent to your admin team by itself  
+A) Nothing, it is sent by itself  
+B) Press Send to the admin team  
 C) Nothing until your manager asks  
 D) The deal is closed  
 
 **Correct Answer:** B  
-**Explanation:** There is no send button. The list says the file has been sent to your admin team.
+**Explanation:** Under "Before you send" the page says what is still to add. When it is all in, you press Send to the admin team.
 
 ---
 
@@ -73,7 +73,7 @@ C) Delete the deal and start again
 D) Wait for the admin team to chase you  
 
 **Correct Answer:** B  
-**Explanation:** Add the new copy using the same row's button. It replaces the old one and the old one is kept in the history.
+**Explanation:** Add the new copy on the same row, then press Send it again. It replaces the old one and the old one is kept in the history.
 
 ---
 

@@ -26,7 +26,7 @@ If you score below 80%, review lesson 6.14 and retake the quiz.
 ## Questions
 
 ### Question 1
-**You ask an agent for a new copy of a document. What must you include?**
+**You reject a document. What must you include?**
 
 A) Nothing  
 B) A short reason the agent can act on  
@@ -68,12 +68,12 @@ D) A copy of the agent's notes
 **When is Approve available?**
 
 A) Always  
-B) When the agent has finished and every required item is accepted  
+B) Once the agent has sent the file  
 C) Only for billing managers  
 D) After the deal moves to Aftercare  
 
 **Correct Answer:** B  
-**Explanation:** Until then the page says what is outstanding and who has to add it.
+**Explanation:** Until then the page says what is outstanding. If something is missing or not reviewed when you approve, it names it and asks you to confirm.
 
 ---
 
