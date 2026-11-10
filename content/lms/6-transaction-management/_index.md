@@ -4,7 +4,7 @@ slug: "transaction-management"
 competencyNumber: 6
 description: "Master the complete lifecycle of Dubai real estate transactions. From off-plan EOI to secondary market transfers, understand every document, process, and regulatory requirement."
 estimatedDuration: "9 hours"
-moduleCount: 12
+moduleCount: 14
 learningObjectives:
   - "Navigate the complete off-plan transaction journey from EOI to title deed"
   - "Execute secondary market transactions from MOU to transfer"

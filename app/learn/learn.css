@@ -10823,6 +10823,11 @@
   box-shadow: 0 4px 12px oklch(from var(--success-600) l c h / 0.3);
 }
 
+.competency-card__meta-item--new {
+  color: var(--primary-600);
+  font-weight: 600;
+}
+
 .competency-card__meta-item--complete {
   color: var(--success-600);
   font-weight: 600;
