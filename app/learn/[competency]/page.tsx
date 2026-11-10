@@ -28,12 +28,15 @@ import { AudioPlayer, type AudioTrack } from "@/components/lms/audio-player"
 // Types
 // =============================================================================
 
+const NEW_MODULE_DAYS = 30
+
 interface Module {
   id: string
   slug: string
   title: string
   duration_minutes: number | null
   display_order: number
+  created_at: string | null
 }
 
 interface Competency {
@@ -95,7 +98,8 @@ async function getAllCompetencies(): Promise<Competency[]> {
         slug,
         title,
         duration_minutes,
-        display_order
+        display_order,
+        created_at
       )
     `)
     .order("display_order", { ascending: true })
@@ -306,6 +310,12 @@ export default async function CompetencyPage({ params }: PageProps) {
         <div className="lms-list">
           {currentCompetency.modules.map((module, index) => {
             const isComplete = completedModuleIds.has(module.id)
+            // Flag a module added in the last 30 days that this learner has not finished,
+            // so people who completed the competency earlier can see something new was added.
+            const isNew =
+              !isComplete &&
+              !!module.created_at &&
+              Date.now() - new Date(module.created_at).getTime() < NEW_MODULE_DAYS * 24 * 60 * 60 * 1000
             return (
               <Link
                 key={module.id}
@@ -322,6 +332,9 @@ export default async function CompetencyPage({ params }: PageProps) {
                       <ClockIcon className="h-3 w-3" />
                       {module.duration_minutes ? `${module.duration_minutes} min` : '5-10 min read'}
                     </span>
+                    {isNew && (
+                      <span className="competency-card__meta-item competency-card__meta-item--new">New</span>
+                    )}
                     {isComplete && (
                       <span className="competency-card__meta-item competency-card__meta-item--complete">
                         Completed
