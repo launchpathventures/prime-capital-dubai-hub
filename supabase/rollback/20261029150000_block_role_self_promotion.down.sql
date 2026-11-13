@@ -1,3 +1,7 @@
+-- DO NOT RUN WITHOUT SECURITY SIGN-OFF.
+-- Running this rollback re-opens role self-promotion: any signed-in user (both allowed domains) could set
+-- user_profiles.role = 'admin' and gain admin/cms write access. Get written Security sign-off first.
+--
 -- CATALYST - Rollback for 20261029150000_block_role_self_promotion.sql (serviceos#2011)
 --
 -- WARNING: this re-opens self-promotion to admin (and therefore cms writes).
