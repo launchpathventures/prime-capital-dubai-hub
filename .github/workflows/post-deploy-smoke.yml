@@ -1,0 +1,124 @@
+# After a successful Vercel production deployment, probe the live alias and
+# instant-rollback to the deployment that was serving before if smoke fails.
+#
+# Trigger is deployment_status, not push. On this repo Vercel sets
+# deployment.environment to "Production" and deployment.ref to the commit SHA
+# (not "master"). Preview deployments are ignored by the `if` below.
+#
+# Security: deployment_status runs the workflow file from the DEPLOYED commit,
+# so any branch Vercel deploys can run (and edit) this file. The `if` is not a
+# security boundary. VERCEL_TOKEN must therefore live only in the GitHub
+# Environment `production-smoke` (restricted to master), never as a repository
+# secret. `environment: production-smoke` below is what gates the token. It is
+# deliberately NOT Vercel's own `Production` GitHub environment, so a branch rule
+# here cannot interfere with Vercel creating its deployment records.
+# Create the environment before merging: GitHub auto-creates a missing one with
+# no rules and no secret. Check the first Production run is not blocked by its
+# branch rule (deployment_status runs carry the deployed commit, not master).
+#
+# A passing run is usually about 1 minute (checkout + version poll + probes).
+# A failed probe waits 45s and retries the failing checks once before rollback.
+# A rollback then waits for the previous SHA and re-probes, up to about 5 minutes.
+# Worst case is about 13 minutes: setup 2, version wait 4, probes and retry 2,
+# Vercel calls 1, post-rollback version wait 4. Job timeout is 20 minutes so a
+# rollback can finish and write its summary. There is no pnpm install.
+#
+# Both brands are one Vercel project: primecapitaldubai.com and tahirmajithia.com
+# (apex redirects to www on each) are probed, and a rollback moves both.
+#
+# When the smoke job fails, the `notify` job opens (or comments on) one GitHub
+# issue and mentions the repository owner. It has issues:write and nothing else,
+# and no environment, so it never sees VERCEL_TOKEN. No new secrets.
+#
+# Rollback is OFF unless the repository variable AUTO_ROLLBACK is true, 1, on,
+# yes, or enabled. While off, the job still probes and logs the rollback target
+# it would have used. Secret for the rollback call: VERCEL_TOKEN (environment
+# `production-smoke` only). Optional overrides: repository variables VERCEL_TEAM_ID,
+# VERCEL_PROJECT_ID.
+
+name: Post-deploy smoke
+
+on:
+  deployment_status:
+
+# actions: read lets the job check whether a rollback target passed its own smoke run.
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  smoke:
+    name: probe production and roll back on failure
+    # Only a Production success shares the serial group. Every other event
+    # (previews, pending/failure states) gets a group of its own, so it can never
+    # replace a queued Production run even if GitHub evaluates concurrency before
+    # `if`. cancel-in-progress is off so a rollback is not aborted by a second
+    # production event.
+    concurrency:
+      group: ${{ (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production') && 'post-deploy-smoke-production' || format('post-deploy-smoke-other-{0}', github.run_id) }}
+      cancel-in-progress: false
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    # Secrets scoped to this environment are readable only by runs that pass its
+    # branch rule (master). See the security note at the top of this file.
+    environment: production-smoke
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Smoke and maybe instant rollback
+        env:
+          EXPECTED_SHA: ${{ github.event.deployment.sha }}
+          DEPLOYMENT_DESCRIPTION: ${{ github.event.deployment_status.description }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} # environment secret
+          GITHUB_TOKEN: ${{ github.token }} # read-only, for the smoke-run history check
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+          AUTO_ROLLBACK: ${{ vars.AUTO_ROLLBACK }}
+          SMOKE_ORIGINS: https://primecapitaldubai.com,https://www.primecapitaldubai.com
+          SMOKE_TAHIR_ORIGINS: https://tahirmajithia.com,https://www.tahirmajithia.com
+        run: node scripts/post-deploy-smoke.mjs
+
+  notify:
+    name: open or update the failure issue
+    needs: smoke
+    # Only a real failure (including timeout). Skipped previews and runs cancelled
+    # by a newer queued deploy do not notify.
+    if: ${{ always() && needs.smoke.result == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # GITHUB_TOKEN scoped to this job: issues only.
+    permissions:
+      issues: write
+    steps:
+      - name: Open or comment on the smoke failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          # Only values GitHub generates go in the body; the failure reason is in the run summary.
+          title="Post-deploy smoke failed on production"
+          body="@${OWNER} the post-deploy smoke check failed for production commit \`${DEPLOY_SHA}\`.
+
+          - Run and summary (probes, decision, rollback target): ${RUN_URL}
+          - Deployment: ${TARGET_URL}
+          - Both primecapitaldubai.com and tahirmajithia.com are served by this deployment.
+          - Runbook: docs/runbooks/deployment-rollback.md"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number,title --jq "[.[] | select(.title == \"$title\")][0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

@@ -3,6 +3,8 @@
  *
  * Returns 200 if the application is healthy, 503 if there are issues.
  * Checks Supabase connectivity to ensure the database is reachable.
+ * The response is public, so it carries status and latency only. Error
+ * details go to server-side tracking, never into the body.
  */
 
 import { NextResponse } from "next/server"
@@ -16,7 +18,6 @@ interface HealthStatus {
     supabase: {
       status: "ok" | "error"
       latency?: number
-      error?: string
     }
   }
 }
@@ -37,7 +38,6 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
     if (error) {
       checks.supabase = {
         status: "error",
-        error: error.message,
         latency: Date.now() - supabaseStart,
       }
       trackApiError(error, "/api/health", { check: "supabase" })
@@ -48,10 +48,8 @@ export async function GET(): Promise<NextResponse<HealthStatus>> {
       }
     }
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error"
     checks.supabase = {
       status: "error",
-      error: errorMessage,
       latency: Date.now() - supabaseStart,
     }
     trackApiError(err, "/api/health", { check: "supabase" })
