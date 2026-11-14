@@ -61,7 +61,9 @@ export const config = {
     tagline: "We move complexity out of sight",
     description:
       "Boutique real estate advisory for discerning international investors seeking quality exposure to Dubai's premium property market.",
-    url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    // No trailing slash: every consumer appends "/path", so a value ending in "/"
+    // (as production's does) would give "https://host//path" (serviceos#2342).
+    url: (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, ""),
   },
 
   /**
