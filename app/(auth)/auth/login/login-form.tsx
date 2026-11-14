@@ -22,6 +22,7 @@ import { toast } from "@/components/ui/toast"
 import type { AuthMode } from "@/lib/auth/config"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getURL } from "@/lib/auth/get-url"
+import { safeNextPath } from "@/lib/auth/safe-next"
 import { ALLOWED_EMAIL_DOMAINS, isAllowedEmail } from "@/lib/auth/config"
 import Link from "next/link"
 
@@ -40,7 +41,9 @@ interface LoginFormProps {
 // Login Form Component
 // -----------------------------------------------------------------------------
 
-export function LoginForm({ mode, redirectTo, showPasswordLogin = false }: LoginFormProps) {
+export function LoginForm({ mode, redirectTo: requestedRedirectTo, showPasswordLogin = false }: LoginFormProps) {
+  // Re-checked here (the page already checks it) so no caller can hand this form an off-site address
+  const redirectTo = safeNextPath(requestedRedirectTo, "/auth/redirect")
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -61,7 +64,7 @@ export function LoginForm({ mode, redirectTo, showPasswordLogin = false }: Login
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${getURL()}api/auth/callback?next=${redirectTo}`,
+        redirectTo: `${getURL()}api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
         // Domain enforcement happens server-side in the auth callback
       },
     })
