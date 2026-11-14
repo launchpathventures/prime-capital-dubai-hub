@@ -12,6 +12,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { safeNextPath } from "@/lib/auth/safe-next"
 import { Stack, Row, Text, Title } from "@/components/core"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -170,8 +171,10 @@ export function QuizPageClient({ quiz, questions, returnTo, showImmediateFeedbac
   const progress = ((currentIndex + 1) / totalQuestions) * 100
   
   // Determine back link
-  const backLink = returnTo || `/learn/${quiz.competency_slug}`
-  const backLabel = returnTo ? "Back to Module" : "Back to Competency"
+  // returnTo comes from the URL, so only a same-site path counts ("" when it is not one)
+  const safeReturnTo = safeNextPath(returnTo, "")
+  const backLink = safeReturnTo || `/learn/${quiz.competency_slug}`
+  const backLabel = safeReturnTo ? "Back to Module" : "Back to Competency"
   
   const handleOptionSelect = (optionIndex: number) => {
     if (state === "showing-feedback") return

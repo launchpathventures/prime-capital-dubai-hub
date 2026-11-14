@@ -10,6 +10,7 @@
 
 import { LoginForm } from "./login-form"
 import { getAuthConfig } from "@/lib/auth"
+import { safeNextOutsideAuth } from "@/lib/auth/safe-next"
 import { Text, Title, Stack } from "@/components/core"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
@@ -39,8 +40,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const host = headersList.get("host") || ""
   const isLocalhost = host.startsWith("localhost") || host.startsWith("127.0.0.1")
 
-  // Use ?next param if provided, otherwise fall back to config
-  const redirectTo = params.next || authConfig.redirectTo
+  // Use ?next param if it is a same-site path, otherwise fall back to config
+  const redirectTo = safeNextOutsideAuth(params.next, authConfig.redirectTo)
   const errorMessage = params.error
     ? (ERROR_MESSAGES[params.error] || "Authentication failed. Please try again.")
     : null

@@ -16,6 +16,7 @@ import { createServerClient } from "@supabase/ssr"
 import type { CookieOptions } from "@supabase/ssr"
 import { getBrand, DEFAULT_BRAND_ID } from "@/lib/brand"
 import { shareTokenResponseHeaders } from "@/lib/crm/token-response-headers"
+import { safeNextPath, safeNextOutsideAuth } from "@/lib/auth/safe-next"
 
 // -----------------------------------------------------------------------------
 // Environment Configuration
@@ -174,8 +175,11 @@ export async function proxy(request: NextRequest) {
     // Redirect authenticated users away from auth pages (except signout)
     if (pathname.startsWith("/auth") && !isAuthExceptionPath(pathname) && isAuthenticated) {
       // Respect ?next parameter if provided, otherwise use default redirect
-      const nextParam = request.nextUrl.searchParams.get("next")
-      const redirectTarget = nextParam || AUTH_REDIRECT_TO
+      // (same-site paths only: ?next= is attacker-controllable)
+      const redirectTarget = safeNextOutsideAuth(
+        request.nextUrl.searchParams.get("next"),
+        AUTH_REDIRECT_TO,
+      )
       return NextResponse.redirect(new URL(redirectTarget, request.url))
     }
   }
@@ -287,8 +291,11 @@ export async function proxy(request: NextRequest) {
     // Redirect authenticated users away from auth pages (except signout)
     if (pathname.startsWith("/auth") && !isAuthExceptionPath(pathname) && user) {
       // Respect ?next parameter if provided, otherwise use default redirect
-      const nextParam = request.nextUrl.searchParams.get("next")
-      const redirectTarget = nextParam || AUTH_REDIRECT_TO
+      // (same-site paths only: ?next= is attacker-controllable)
+      const redirectTarget = safeNextOutsideAuth(
+        request.nextUrl.searchParams.get("next"),
+        AUTH_REDIRECT_TO,
+      )
       return redirectWithCookies(new URL(redirectTarget, request.url))
     }
   }
@@ -317,8 +324,7 @@ export async function proxy(request: NextRequest) {
       // Allow the login page itself (but redirect away if already authed)
       if (pathname === "/docs/login") {
         if (isAuthed) {
-          const redirect = request.nextUrl.searchParams.get("redirect") || "/docs"
-          const safeRedirect = redirect.startsWith("/") ? redirect : "/docs"
+          const safeRedirect = safeNextPath(request.nextUrl.searchParams.get("redirect"), "/docs")
           return NextResponse.redirect(new URL(safeRedirect, request.url))
         }
         return response

@@ -14,15 +14,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getAuthConfig, isAllowedEmail } from "@/lib/auth"
 import { SIGNUP_DOMAIN_ERROR_PREFIX } from "@/lib/auth/config"
+import { safeNextPath } from "@/lib/auth/safe-next"
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const { redirectTo } = getAuthConfig()
 
   const code = searchParams.get("code")
-  // Validate redirect is a relative path to prevent open redirect attacks
-  const nextParam = searchParams.get("next")
-  const next = nextParam?.startsWith("/") ? nextParam : redirectTo
+  // Same-site paths only, to prevent open redirect attacks ("//host" and "/\host" also start with "/")
+  const next = safeNextPath(searchParams.get("next"), redirectTo)
   const type = searchParams.get("type")
   const tokenHash = searchParams.get("token_hash")
   const errorParam = searchParams.get("error")
